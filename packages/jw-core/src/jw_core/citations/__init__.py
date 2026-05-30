@@ -20,7 +20,10 @@ from jw_core.citations.models import (
     DriftStatus,
     ResolveStatus,
 )
-from jw_core.citations.validator import CitationValidator
+try:
+    from jw_core.citations.validator import CitationValidator
+except ImportError:  # built incrementally; full class lands in Task 4
+    CitationValidator = None  # type: ignore[assignment, misc]
 
 __all__ = [
     "CatalogStatus",
