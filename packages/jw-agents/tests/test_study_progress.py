@@ -182,3 +182,27 @@ def test_set_goal_for_student_appends(tmp_path: Path) -> None:
     )
     assert any(g.kind == GoalKind.BAPTISM for g in updated.goals)
     assert updated.baptism_target_iso == "2026-12-31T00:00:00"
+
+
+# --- Task 9: disclosure + first-run detection ----------------------------
+
+from jw_agents.study_progress import build_disclosure_text, looks_like_first_run
+
+
+def test_disclosure_text_in_spanish_mentions_local_only() -> None:
+    text = build_disclosure_text(language="es")
+    assert "local" in text.lower()
+    assert "passphrase" in text.lower() or "frase" in text.lower()
+    assert "ancianos" in text.lower() or "consejero" in text.lower()
+
+
+def test_disclosure_text_english() -> None:
+    text = build_disclosure_text(language="en")
+    assert "local" in text.lower()
+
+
+def test_first_run_detection(tmp_path: Path) -> None:
+    salt = tmp_path / "salt.bin"
+    assert looks_like_first_run(salt) is True
+    salt.write_bytes(b"x" * 16)
+    assert looks_like_first_run(salt) is False

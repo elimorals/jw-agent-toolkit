@@ -267,3 +267,42 @@ def set_goal_for_student(
     row.updated_at_iso = now
     store.upsert(row)
     return row
+
+
+# --- Task 9: disclosure text + first-run detector ------------------------
+
+
+DISCLOSURE = {
+    "es": (
+        "Este comando registra datos personales de personas reales (estudiantes).\n"
+        "• Todo se guarda LOCAL en este disco. No se sube a ningún servidor.\n"
+        "• Necesita elegir una passphrase. Si la olvida, los datos se pierden\n"
+        "  por diseño (no hay recuperación).\n"
+        "• Esto NO sustituye a los ancianos ni a un consejero profesional. Si la\n"
+        "  nota refleja una crisis, contacte a los ancianos o a un profesional.\n"
+        "\n¿Continuar? [y/N]: "
+    ),
+    "en": (
+        "This command stores personal data about real people (students).\n"
+        "• Everything stays LOCAL on this disk. Nothing is uploaded.\n"
+        "• Pick a passphrase. If you lose it the data is irrecoverable by design.\n"
+        "• This does NOT replace elders or a professional counselor. If a note\n"
+        "  reflects a crisis, contact elders or a professional.\n"
+        "\nContinue? [y/N]: "
+    ),
+    "pt": (
+        "Este comando guarda dados pessoais de pessoas reais (estudantes).\n"
+        "• Tudo fica LOCAL neste disco. Nada é enviado para a internet.\n"
+        "• Escolha uma passphrase. Se perdê-la, os dados são irrecuperáveis.\n"
+        "• Isto NÃO substitui os anciãos nem um conselheiro profissional.\n"
+        "\nContinuar? [y/N]: "
+    ),
+}
+
+
+def build_disclosure_text(*, language: str) -> str:
+    return DISCLOSURE.get(language) or DISCLOSURE["en"]
+
+
+def looks_like_first_run(salt_path: Path | None = None) -> bool:
+    return not (salt_path or default_salt_path()).exists()
