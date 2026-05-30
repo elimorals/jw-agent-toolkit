@@ -10,8 +10,11 @@ VISION rule: "No tracker de hermanos sin opt-in". This IS a tracker, so:
 
 from __future__ import annotations
 
+import json
 import os
 import secrets
+import sqlite3
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 
@@ -98,3 +101,130 @@ def derive_encryptor_for_passphrase(
     salt = salt_path.read_bytes()
     key = derive_key_from_password(passphrase, salt=salt)
     return FieldEncryptor(key=key)
+
+
+# --- Task 6: SQLite store with optional encrypted notes ------------------
+
+
+class StudentProgressStore:
+    SCHEMA = """
+    CREATE TABLE IF NOT EXISTS lessons (
+        student_id TEXT NOT NULL,
+        book_pub TEXT NOT NULL,
+        lesson INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'not_started',
+        notes TEXT NOT NULL DEFAULT '',
+        goals_json TEXT NOT NULL DEFAULT '[]',
+        started_at_iso TEXT,
+        completed_at_iso TEXT,
+        attended_meetings_count INTEGER NOT NULL DEFAULT 0,
+        baptism_target_iso TEXT,
+        updated_at_iso TEXT NOT NULL,
+        PRIMARY KEY (student_id, book_pub, lesson)
+    );
+    CREATE INDEX IF NOT EXISTS idx_student ON lessons (student_id);
+    CREATE INDEX IF NOT EXISTS idx_book ON lessons (book_pub);
+    """
+
+    def __init__(
+        self,
+        db_path: Path | str | None = None,
+        *,
+        encryptor: FieldEncryptor | None = None,
+    ) -> None:
+        self.path = Path(db_path).expanduser() if db_path else default_db_path()
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._conn = sqlite3.connect(self.path)
+        self._conn.row_factory = sqlite3.Row
+        self._conn.executescript(self.SCHEMA)
+        self._conn.commit()
+        self._enc = encryptor if encryptor is not None else FieldEncryptor()
+
+    def _encrypt_notes(self, value: str) -> str:
+        if self._enc.enabled and value:
+            return self._enc.encrypt(value)
+        return value
+
+    def _decrypt_notes(self, value: str) -> str:
+        if self._enc.enabled and value:
+            try:
+                return self._enc.decrypt(value)
+            except Exception:
+                return value
+        return value
+
+    def upsert(self, row: LessonRow) -> LessonRow:
+        if not row.updated_at_iso:
+            row.updated_at_iso = datetime.now(timezone.utc).isoformat()
+        encrypted_notes = self._encrypt_notes(row.notes)
+        goals_json = json.dumps([g.model_dump() for g in row.goals])
+        self._conn.execute(
+            """
+            INSERT INTO lessons (student_id, book_pub, lesson, status, notes, goals_json,
+                                 started_at_iso, completed_at_iso, attended_meetings_count,
+                                 baptism_target_iso, updated_at_iso)
+            VALUES (:sid, :pub, :lesson, :status, :notes, :goals,
+                    :started, :completed, :attended, :baptism, :updated)
+            ON CONFLICT(student_id, book_pub, lesson) DO UPDATE SET
+                status=excluded.status,
+                notes=excluded.notes,
+                goals_json=excluded.goals_json,
+                started_at_iso=excluded.started_at_iso,
+                completed_at_iso=excluded.completed_at_iso,
+                attended_meetings_count=excluded.attended_meetings_count,
+                baptism_target_iso=excluded.baptism_target_iso,
+                updated_at_iso=excluded.updated_at_iso
+            """,
+            {
+                "sid": row.student_id, "pub": row.book_pub, "lesson": row.lesson,
+                "status": row.status.value, "notes": encrypted_notes, "goals": goals_json,
+                "started": row.started_at_iso, "completed": row.completed_at_iso,
+                "attended": row.attended_meetings_count,
+                "baptism": row.baptism_target_iso,
+                "updated": row.updated_at_iso,
+            },
+        )
+        self._conn.commit()
+        return row
+
+    def get(self, student_id: str, book_pub: str, lesson: int) -> LessonRow | None:
+        cur = self._conn.execute(
+            "SELECT * FROM lessons WHERE student_id=? AND book_pub=? AND lesson=?",
+            (student_id, book_pub, lesson),
+        )
+        row = cur.fetchone()
+        return self._row_to_model(row) if row else None
+
+    def list_for_student(
+        self, student_id: str, book_pub: str | None = None
+    ) -> list[LessonRow]:
+        if book_pub:
+            cur = self._conn.execute(
+                "SELECT * FROM lessons WHERE student_id=? AND book_pub=? ORDER BY lesson",
+                (student_id, book_pub),
+            )
+        else:
+            cur = self._conn.execute(
+                "SELECT * FROM lessons WHERE student_id=? ORDER BY book_pub, lesson",
+                (student_id,),
+            )
+        return [self._row_to_model(r) for r in cur.fetchall()]
+
+    def _row_to_model(self, row: sqlite3.Row) -> LessonRow:
+        goals_raw = json.loads(row["goals_json"] or "[]")
+        return LessonRow(
+            student_id=row["student_id"],
+            book_pub=row["book_pub"],
+            lesson=row["lesson"],
+            status=LessonStatus(row["status"]),
+            notes=self._decrypt_notes(row["notes"]),
+            goals=[StudentGoal(**g) for g in goals_raw],
+            started_at_iso=row["started_at_iso"],
+            completed_at_iso=row["completed_at_iso"],
+            attended_meetings_count=row["attended_meetings_count"],
+            baptism_target_iso=row["baptism_target_iso"],
+            updated_at_iso=row["updated_at_iso"],
+        )
+
+    def close(self) -> None:
+        self._conn.close()

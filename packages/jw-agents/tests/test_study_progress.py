@@ -95,3 +95,60 @@ def test_derive_encryptor_round_trip(tmp_path: Path) -> None:
     assert enc.enabled
     token = enc.encrypt("nota sensible")
     assert enc.decrypt(token) == "nota sensible"
+
+
+# --- Task 6: StudentProgressStore ----------------------------------------
+
+from jw_agents.study_progress import StudentProgressStore
+
+
+def test_store_round_trip_without_encryption(tmp_path: Path) -> None:
+    store = StudentProgressStore(db_path=tmp_path / "p.db")
+    row = LessonRow(
+        student_id="demo_user",
+        book_pub="lff",
+        lesson=1,
+        status=LessonStatus.IN_PROGRESS,
+        notes="alpha",
+        updated_at_iso="2026-05-30T00:00:00",
+    )
+    store.upsert(row)
+    got = store.get("demo_user", "lff", 1)
+    assert got is not None
+    assert got.status == LessonStatus.IN_PROGRESS
+    assert got.notes == "alpha"
+
+
+def test_store_encrypted_notes_round_trip(tmp_path: Path) -> None:
+    salt_path = tmp_path / "salt.bin"
+    load_or_create_salt(salt_path)
+    enc = derive_encryptor_for_passphrase("hunter2", salt_path=salt_path)
+    store = StudentProgressStore(db_path=tmp_path / "p.db", encryptor=enc)
+    row = LessonRow(
+        student_id="demo_user",
+        book_pub="lff",
+        lesson=2,
+        notes="nota privada con áéíóú",
+        updated_at_iso="2026-05-30T00:00:00",
+    )
+    store.upsert(row)
+    got = store.get("demo_user", "lff", 2)
+    assert got is not None
+    assert got.notes == "nota privada con áéíóú"
+
+    # Sanity: opening DB without key returns ciphertext for notes.
+    plain_store = StudentProgressStore(db_path=tmp_path / "p.db")
+    raw = plain_store.get("demo_user", "lff", 2)
+    assert raw is not None
+    assert raw.notes != "nota privada con áéíóú"
+
+
+def test_store_list_for_student(tmp_path: Path) -> None:
+    store = StudentProgressStore(db_path=tmp_path / "p.db")
+    for n in (1, 2, 3):
+        store.upsert(LessonRow(
+            student_id="demo_user", book_pub="lff", lesson=n,
+            updated_at_iso="2026-05-30T00:00:00",
+        ))
+    rows = store.list_for_student("demo_user")
+    assert [r.lesson for r in rows] == [1, 2, 3]
