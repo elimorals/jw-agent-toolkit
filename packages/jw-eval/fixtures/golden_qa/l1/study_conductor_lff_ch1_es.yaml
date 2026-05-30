@@ -1,0 +1,23 @@
+id: l1_study_conductor_lff_ch1_es
+agent: study_conductor
+layer: l1
+input:
+  pub_code: lff
+  chapter: 1
+  language: es
+expected:
+  min_findings: 1
+  must_have_source: jwpub_chapter
+  must_have_citation: true
+  forbidden_keywords_in_findings:
+    - "supuestamente"
+    - "tal vez"
+    - "talvez"
+metadata:
+  topic: study_book.lff.ch1
+  added_by: elias
+  added_at: 2026-05-30
+  note: |
+    Si la suite corre sin JWPUB local, el agente devuelve source=wol_chapter.
+    En ese caso este caso L1 puede ajustarse a `must_have_source: wol_chapter`
+    en una rama de CI sin red.
