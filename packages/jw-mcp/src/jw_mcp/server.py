@@ -2153,6 +2153,81 @@ def export_jw_library_backup_to_vault(
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Fase 23: Citation integrity validator
+# ────────────────────────────────────────────────────────────────────────
+
+import asyncio as _asyncio
+import os as _os
+from typing import Any as _Any
+
+from jw_core.citations import CitationValidator as _CitationValidator
+from jw_core.integrations.meps_catalog import MepsCatalog as _MepsCatalog
+
+
+@mcp.tool
+def validate_citations(
+    urls: list[str] | None = None,
+    agent_output: dict | None = None,
+    live: bool = False,
+    check_drift: bool = False,
+) -> dict:
+    """Validate that wol.jw.org URLs from an agent resolve and map cleanly.
+
+    Pass exactly one of `urls` or `agent_output`. The latter must be the
+    serialized AgentResult shape ({"findings": [{"metadata": {...}}]}).
+
+    Modes:
+      - default (offline): MEPS docId↔pub_code lookup against the local catalog.
+      - live=True: also HTTP-resolve every URL. Requires env JW_CITATIONS_LIVE=1.
+      - check_drift=True (implies live): compare HTML shape against committed snapshots.
+
+    Returns the CitationReport as a dict.
+    """
+
+    if (urls is None) == (agent_output is None):
+        return {"error": "pass exactly one of urls= or agent_output="}
+
+    if live and _os.environ.get("JW_CITATIONS_LIVE", "").lower() not in {"1", "true", "yes"}:
+        return {
+            "error": "live=True requires env JW_CITATIONS_LIVE=1 to authorize network access"
+        }
+
+    async def _run() -> dict:
+        catalog = _MepsCatalog()
+        kwargs: dict[str, _Any] = {"catalog": catalog}
+
+        client = None
+        if live:
+            import httpx  # local import — keeps cold-start light
+
+            from jw_core.citations.validator import httpx_fetcher
+
+            client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
+            kwargs["fetcher"] = httpx_fetcher(client)
+
+        if check_drift:
+            from pathlib import Path
+
+            snaps = Path("packages/jw-eval/fixtures/wol_snapshots")
+            if snaps.exists():
+                kwargs["snapshots_root"] = snaps
+
+        v = _CitationValidator(**kwargs)
+        try:
+            mode = "live+drift" if (live and check_drift) else ("live" if live else "structural")
+            if urls is not None:
+                report = await v.validate_urls(urls, mode=mode)
+            else:
+                report = await v.validate_agent_output(agent_output, mode=mode)
+            return report.model_dump(mode="json")
+        finally:
+            if client is not None:
+                await client.aclose()
+
+    return _asyncio.run(_run())
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
 
