@@ -13,9 +13,10 @@ from __future__ import annotations
 
 import asyncio
 import re
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Awaitable, Callable, Literal
+from typing import Any, Literal
 
 import httpx
 
@@ -25,13 +26,8 @@ from jw_core.citations.models import (
 )
 from jw_core.integrations.meps_catalog import MepsCatalog
 
-
-_WOL_DOC_RE = re.compile(
-    r"^https?://wol\.jw\.org/(?P<iso>[a-z]{2,3})/wol/d/[^/]+/[^/]+/(?P<doc_id>\d+)/?$"
-)
-_WOL_BIBLE_RE = re.compile(
-    r"^https?://wol\.jw\.org/(?P<iso>[a-z]{2,3})/wol/b/[^/]+/[^/]+/(?P<pub>[^/]+)(?:/[^/]+)+/?$"
-)
+_WOL_DOC_RE = re.compile(r"^https?://wol\.jw\.org/(?P<iso>[a-z]{2,3})/wol/d/[^/]+/[^/]+/(?P<doc_id>\d+)/?$")
+_WOL_BIBLE_RE = re.compile(r"^https?://wol\.jw\.org/(?P<iso>[a-z]{2,3})/wol/b/[^/]+/[^/]+/(?P<pub>[^/]+)(?:/[^/]+)+/?$")
 
 
 def _parse_wol_url(url: str) -> dict[str, Any] | None:
@@ -207,9 +203,7 @@ class CitationValidator:
         doc = docs[0]
         if check.pub_code is not None and check.pub_code != doc.pub_code:
             check.catalog = "mismatch"
-            check.notes.append(
-                f"URL says pub_code={check.pub_code!r} but catalog says {doc.pub_code!r}"
-            )
+            check.notes.append(f"URL says pub_code={check.pub_code!r} but catalog says {doc.pub_code!r}")
         else:
             check.catalog = "ok"
             check.pub_code = check.pub_code or doc.pub_code

@@ -36,11 +36,6 @@ from jw_agents import (
 from jw_agents import (
     workbook_helper as workbook_helper_agent,
 )
-from jw_agents.conversation_assistant import conversation_assistant as conversation_assistant_agent
-from jw_agents.presentation_builder import list_audiences as _list_audiences
-from jw_agents.presentation_builder import presentation_builder as presentation_builder_agent
-from jw_agents.revisit_tracker import Revisit, RevisitStore, plan_next_visit
-from jw_agents.reverse_citation_lookup import reverse_citation_lookup as reverse_citation_lookup_agent
 from jw_agents.audio_helper import (
     read_article_aloud as _read_article_aloud,
 )
@@ -50,14 +45,19 @@ from jw_agents.audio_helper import (
 from jw_agents.audio_helper import (
     search_broadcasting as _search_broadcasting,
 )
+from jw_agents.conversation_assistant import conversation_assistant as conversation_assistant_agent
+from jw_agents.presentation_builder import list_audiences as _list_audiences
+from jw_agents.presentation_builder import presentation_builder as presentation_builder_agent
+from jw_agents.reverse_citation_lookup import reverse_citation_lookup as reverse_citation_lookup_agent
+from jw_agents.revisit_tracker import Revisit, RevisitStore, plan_next_visit
 from jw_core.audio.broadcasting import BroadcastingIndex, index_vtt_file
 from jw_core.audio.tts import list_tts_providers
-from jw_core.data.objections import list_objections
 from jw_core.clients.cdn import CDNClient
 from jw_core.clients.mediator import MediatorClient
 from jw_core.clients.pub_media import PubMediaClient, PubMediaError
 from jw_core.clients.topic_index import TopicIndexClient, TopicIndexError
 from jw_core.clients.wol import WOLClient
+from jw_core.data.objections import list_objections
 from jw_core.integrations.jw_library import (
     JWLibraryError,
     build_bible_url,
@@ -72,21 +72,21 @@ from jw_core.integrations.jw_library_local import (
     inspect_local_jw_library,
     read_macos_userdata,
 )
+from jw_core.integrations.jw_library_sync import sync_backup_to_rag
 from jw_core.integrations.markdown import (
     convert_jw_links_in_text,
     linkify_markdown,
     render_verse_block,
 )
+from jw_core.integrations.meps_catalog import MepsCatalog
 from jw_core.integrations.obsidian_vault import (
     export_backup_to_vault,
     index_vault_to_rag,
 )
-from jw_core.integrations.meps_catalog import MepsCatalog
 from jw_core.languages import get_language
 from jw_core.parsers.article import parse_article
 from jw_core.parsers.daily_text import parse_daily_text
 from jw_core.parsers.epub import parse_epub
-from jw_core.integrations.jw_library_sync import sync_backup_to_rag
 from jw_core.parsers.jw_library_backup import (
     JWLibraryBackupError,
     notes_for_chapter,
@@ -1991,7 +1991,7 @@ def linkify_markdown_text(
     length: str = "medium",
     wtlocale: str = "",
 ) -> dict[str, Any]:
-    """Wrap every Bible reference in `text` as a `jwlibrary://` markdown link.
+    r"""Wrap every Bible reference in `text` as a `jwlibrary://` markdown link.
 
     Skips refs already inside `[…](…)` links, inside `\`inline code\``, and
     inside fenced code blocks. Respects 17 locales (English, Spanish,
@@ -2156,12 +2156,12 @@ def export_jw_library_backup_to_vault(
 # Fase 23: Citation integrity validator
 # ────────────────────────────────────────────────────────────────────────
 
-import asyncio as _asyncio
-import os as _os
-from typing import Any as _Any
+import asyncio as _asyncio  # noqa: E402
+import os as _os  # noqa: E402
+from typing import Any as _Any  # noqa: E402
 
-from jw_core.citations import CitationValidator as _CitationValidator
-from jw_core.integrations.meps_catalog import MepsCatalog as _MepsCatalog
+from jw_core.citations import CitationValidator as _CitationValidator  # noqa: E402
+from jw_core.integrations.meps_catalog import MepsCatalog as _MepsCatalog  # noqa: E402
 
 
 @mcp.tool
@@ -2199,7 +2199,6 @@ def validate_citations(
         client = None
         if live:
             import httpx  # local import — keeps cold-start light
-
             from jw_core.citations.validator import httpx_fetcher
 
             client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)

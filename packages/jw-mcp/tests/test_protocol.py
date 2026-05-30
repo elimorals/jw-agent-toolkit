@@ -104,6 +104,8 @@ _EXPECTED_TOOLS = {
     "get_verse_as_markdown",
     "index_obsidian_vault",
     "export_jw_library_backup_to_vault",
+    # Phase 23 — Citation integrity validator
+    "validate_citations",
 }
 
 

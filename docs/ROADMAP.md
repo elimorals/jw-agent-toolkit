@@ -412,3 +412,29 @@ llamante sintetiza la prosa.
 - ⬜ Modo offline en `get_verse_as_markdown` usando JWPUB local (ya descifrado) en lugar de WOL.
 - ⬜ Publicar el plugin al Obsidian Community Plugins registry.
 - ⬜ Versión del plugin para Logseq / Foam / otros sistemas markdown.
+
+---
+
+## Fase 23 — Citation integrity / link-rot validator ✅
+
+> Tier 1 infraestructura de confianza. Spec: `docs/superpowers/specs/2026-05-30-fase-23-citation-validator-design.md`.
+
+- ✅ Subpaquete `packages/jw-core/src/jw_core/citations/`.
+- ✅ Modelos Pydantic: `CitationCheck`, `CitationReport`, status enums.
+- ✅ `CitationValidator` con tres modos: structural (default offline), live (HTTP opt-in), live+drift (compara HTML shape contra snapshots).
+- ✅ Reutiliza `MepsCatalog` (Fase 19) para docId↔pub_code y `_shape_hash` (Fase 9) para drift.
+- ✅ Fetcher inyectable; adapter `httpx_fetcher` para producción.
+- ✅ Concurrencia bounded (`asyncio.Semaphore(4)` por defecto).
+- ✅ CLI `jw citations check --urls / --agent-output / --live / --drift / --report / --out`.
+- ✅ Tool MCP `validate_citations` con guard `JW_CITATIONS_LIVE=1`.
+- ✅ Smoke integration en `verse_explainer` (modo estructural).
+- ✅ Lee snapshots de `packages/jw-eval/fixtures/wol_snapshots/` (cross-package read, sin import dependency).
+- ✅ Guía `docs/guias/citation-validator.md`.
+
+### Cobertura de tests
+
+- ✅ 25+ tests nuevos en `packages/jw-core/tests/test_citation_validator.py`.
+- ✅ 5 tests en `packages/jw-mcp/tests/test_citations_tool.py`.
+- ✅ 2 tests en `packages/jw-cli/tests/test_citations_cli.py`.
+- ✅ Smoke en `packages/jw-agents/tests/test_agents_e2e.py`.
+- ✅ Suite global sin regresiones.

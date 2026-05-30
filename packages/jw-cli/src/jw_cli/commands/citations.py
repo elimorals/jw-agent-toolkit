@@ -14,10 +14,9 @@ import json
 from pathlib import Path
 
 import typer
-from rich.console import Console
-
 from jw_core.citations import CitationValidator
 from jw_core.integrations.meps_catalog import MepsCatalog
+from rich.console import Console
 
 console = Console()
 citations_app = typer.Typer(
@@ -35,9 +34,7 @@ def _callback() -> None:
 
 @citations_app.command("check")
 def check_cmd(
-    urls_path: Path | None = typer.Option(
-        None, "--urls", help="Path to a text file with one URL per line."
-    ),
+    urls_path: Path | None = typer.Option(None, "--urls", help="Path to a text file with one URL per line."),
     agent_output_path: Path | None = typer.Option(
         None, "--agent-output", help="Path to a serialized AgentResult JSON."
     ),
@@ -50,9 +47,7 @@ def check_cmd(
     ),
     concurrency: int = typer.Option(4, "--concurrency", min=1, max=32),
     report_format: str = typer.Option("md", "--report", help="md | json"),
-    out: Path | None = typer.Option(
-        None, "--out", help="Write report to file instead of stdout."
-    ),
+    out: Path | None = typer.Option(None, "--out", help="Write report to file instead of stdout."),
 ) -> None:
     """Run the citation integrity validator."""
 
@@ -78,7 +73,6 @@ def check_cmd(
         client = None
         if live:
             import httpx
-
             from jw_core.citations.validator import httpx_fetcher
 
             client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
@@ -123,16 +117,11 @@ def _to_markdown(report: dict) -> str:
     lines.append("")
     lines.append(f"- **Mode:** `{report['mode']}`")
     s = report["summary"]
-    lines.append(
-        f"- **Summary:** total={s['total']} · ok={s['ok']} · "
-        f"warning={s['warning']} · failed={s['failed']}"
-    )
+    lines.append(f"- **Summary:** total={s['total']} · ok={s['ok']} · warning={s['warning']} · failed={s['failed']}")
     lines.append("")
     lines.append("| URL | resolve | catalog | drift | notes |")
     lines.append("|---|---|---|---|---|")
     for c in report["checks"]:
         notes = "; ".join(c.get("notes") or []) or "—"
-        lines.append(
-            f"| `{c['url']}` | {c['resolve']} | {c['catalog']} | {c['drift']} | {notes} |"
-        )
+        lines.append(f"| `{c['url']}` | {c['resolve']} | {c['catalog']} | {c['drift']} | {notes} |")
     return "\n".join(lines) + "\n"
