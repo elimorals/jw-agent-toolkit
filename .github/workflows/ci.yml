@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.13"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: uv sync --all-packages
+
+      - name: Ruff lint
+        run: uv run ruff check packages/
+
+      - name: Ruff format check
+        run: uv run ruff format --check packages/
+
+      - name: Mypy type check
+        run: uv run mypy packages/jw-core/src packages/jw-mcp/src
+        continue-on-error: true  # Mypy strict has known false-positives on FastMCP
+
+      - name: Pytest
+        run: uv run pytest packages/ -v --tb=short
+
+      - name: Build wheels (smoke)
+        run: |
+          for pkg in packages/jw-core packages/jw-mcp packages/jw-cli packages/jw-rag packages/jw-agents; do
+            (cd "$pkg" && uv build --wheel) || exit 1
+          done
+
+  security:
+    name: Security scan
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - run: uv run --with bandit bandit -r packages/*/src -ll
+        continue-on-error: true

@@ -1,0 +1,64 @@
+[project]
+name = "jw-agent-toolkit"
+version = "0.1.0"
+description = "Agentic toolkit for jw.org / wol.jw.org — core library + CLI + MCP server + agents + skills"
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [
+    { name = "Elias", email = "elias@cipreholding.com" }
+]
+license = "GPL-3.0-only"
+
+[tool.uv.workspace]
+members = [
+    "packages/jw-core",
+    "packages/jw-cli",
+    "packages/jw-mcp",
+    "packages/jw-rag",
+    "packages/jw-agents",
+]
+
+[tool.uv.sources]
+jw-core = { workspace = true }
+jw-cli = { workspace = true }
+jw-mcp = { workspace = true }
+jw-rag = { workspace = true }
+jw-agents = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=5.0.0",
+    "pytest-recording>=0.13.0",
+    "ruff>=0.7.0",
+    "mypy>=1.13.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = [
+    "packages/jw-core/tests",
+    "packages/jw-mcp/tests",
+    "packages/jw-cli/tests",
+    "packages/jw-rag/tests",
+    "packages/jw-agents/tests",
+    "tests",
+]
+# `importlib` mode avoids namespace collisions when multiple workspace packages
+# each have a tests/ folder (we have jw-core/tests/ and jw-mcp/tests/).
+addopts = "--import-mode=importlib"

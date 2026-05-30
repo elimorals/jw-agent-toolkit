@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+*.egg
+dist/
+build/
+
+# uv
+.uv-cache/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Data (corpus indexado, NO commitear — pesado y/o protegido por copyright)
+data/
+*.jwpub
+*.epub
+*.pdf
+*.mp3
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+
+# Secretos
+.env
+.env.local
+
+# Remember plugin local state (autosave logs, no necesarios en remote)
+.remember/
+
+# macOS
+.DS_Store
+
+# Python bytecode in any subdirectory
+**/__pycache__/
+
+# Cassettes are committed; sample.yaml placeholders from record_cassettes.sh
+# stay around as empty files only locally — uncomment to ignore if needed:
+# packages/jw-core/tests/cassettes/test_cassettes/*.yaml
+
