@@ -369,3 +369,29 @@ async def test_live_drift_requires_snapshots_root(tmp_path) -> None:
     v = CitationValidator(catalog=cat, fetcher=fetcher)
     with pytest.raises(ValueError):
         await v.validate_urls(["x"], mode="live+drift")
+
+
+# ── Task 7: httpx_fetcher adapter ──────────────────────────────────────
+
+import httpx
+
+
+@pytest.mark.asyncio
+async def test_httpx_fetcher_follows_redirect_chain() -> None:
+    from jw_core.citations.validator import httpx_fetcher
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/a":
+            return httpx.Response(301, headers={"Location": "/b"})
+        if request.url.path == "/b":
+            return httpx.Response(200, text="final")
+        return httpx.Response(404)
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport, base_url="https://wol.jw.org") as client:
+        fetcher = httpx_fetcher(client)
+        resp = await fetcher("https://wol.jw.org/a")
+    assert resp.status == 200
+    assert resp.final_url.endswith("/b")
+    assert resp.redirect_chain  # non-empty
+    assert "final" in resp.body

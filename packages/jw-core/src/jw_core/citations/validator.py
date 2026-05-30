@@ -17,6 +17,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Awaitable, Callable, Literal
 
+import httpx
+
 from jw_core.citations.models import (
     CitationCheck,
     CitationReport,
@@ -271,6 +273,26 @@ class CitationValidator:
         else:
             check.drift = "drift"
             check.notes.append(f"shape changed: {snap_shape[:32]}… → {live_shape[:32]}…")
+
+
+def httpx_fetcher(client: httpx.AsyncClient) -> AsyncFetcher:
+    """Build an AsyncFetcher backed by an httpx.AsyncClient.
+
+    The client should have `follow_redirects=True`. Each redirect URL is
+    captured into the response's redirect_chain.
+    """
+
+    async def fetch(url: str) -> FetcherResponse:
+        resp = await client.get(url, follow_redirects=True)
+        chain = [str(h.url) for h in resp.history]
+        return FetcherResponse(
+            final_url=str(resp.url),
+            status=resp.status_code,
+            redirect_chain=chain,
+            body=resp.text,
+        )
+
+    return fetch
 
 
 def _html_shape(html: str) -> str:
