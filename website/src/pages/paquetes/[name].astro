@@ -66,12 +66,12 @@ const gradientClass: Record<typeof pkg.color, string> = {
             >
               Paquete · {pkg.color === "neutral" ? "Plataforma" : "Librería"}
             </p>
-            <h1 class="font-mono text-[clamp(2.6rem,5.5vw,4.2rem)] font-medium leading-[0.95] text-[var(--color-ink-primary)]">
+            <h1 class="break-words font-mono text-[clamp(2rem,6.5vw,4.2rem)] font-medium leading-[1] text-[var(--color-ink-primary)] sm:leading-[0.95]">
               {pkg.name}
             </h1>
             <p
               class:list={[
-                "font-display text-[clamp(1.5rem,2.5vw,2.1rem)] italic leading-tight",
+                "font-display text-[clamp(1.2rem,3vw,2.1rem)] italic leading-tight",
                 accentClass,
               ]}
               style="font-variation-settings: 'opsz' 96, 'SOFT' 60;"

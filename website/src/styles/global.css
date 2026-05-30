@@ -60,6 +60,11 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-feature-settings: "ss01", "cv11";
+  /* Safety net: nothing on this site should ever cause horizontal scroll.
+     Combined with min-width:0 chains on flex/grid children, this prevents
+     wide markdown tables, ASCII art, and code blocks from breaking the
+     page layout on narrow viewports. */
+  overflow-x: hidden;
 }
 
 body {
@@ -72,6 +77,15 @@ body {
     var(--color-surface-base);
   background-attachment: fixed;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Allow flex/grid descendants to shrink below their content's intrinsic
+   width — without this, long monospace strings (ASCII diagrams, URLs)
+   force their parents to grow past the viewport. */
+main,
+main > * {
+  min-width: 0;
 }
 
 /* Display serif for headings, with optical sizing */
@@ -248,6 +262,9 @@ html {
   font-size: 1rem;
   line-height: 1.75;
   max-width: 68ch;
+  min-width: 0;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 .prose h1 {
   color: var(--color-ink-primary);
@@ -310,6 +327,8 @@ html {
   border-radius: 2px;
   padding: 1rem 1.25rem;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
   margin-block: 1.5em;
   font-size: 0.875rem;
   line-height: 1.6;
@@ -320,12 +339,28 @@ html {
   padding: 0;
   color: inherit;
   font-size: inherit;
+  white-space: pre;
 }
+/* Wide tables become horizontally scrollable on narrow screens, instead
+   of forcing the whole page to scroll. */
 .prose table {
+  display: block;
   width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-collapse: collapse;
   margin-block: 1.5em;
   font-size: 0.92rem;
+  white-space: nowrap;
+}
+@media (min-width: 768px) {
+  /* On larger screens, restore real table semantics so cells align nicely. */
+  .prose table {
+    display: table;
+    overflow-x: visible;
+    white-space: normal;
+  }
 }
 .prose th,
 .prose td {
