@@ -7,7 +7,6 @@ fixture is checked into the repo so tests are deterministic and offline.
 from pathlib import Path
 
 import pytest
-
 from jw_core.parsers.study_notes import (
     parse_cross_references,
     parse_study_notes,
@@ -24,6 +23,7 @@ def john3_html() -> str:
 
 
 # ── Verses ──────────────────────────────────────────────────────────────
+
 
 def test_parse_verses_count_matches_john3(john3_html: str) -> None:
     """John 3 has 36 verses."""
@@ -52,6 +52,7 @@ def test_parse_verses_strips_inline_markers(john3_html: str) -> None:
     # The original verse contains '+' markers; they should be gone.
     # Allow whitespace around but no bare '+' surrounded by letters.
     import re
+
     assert not re.search(r"\w\+\w", v1.text)
 
 
@@ -75,6 +76,7 @@ def test_parse_verses_filters_by_book_chapter(john3_html: str) -> None:
 
 
 # ── Study notes ─────────────────────────────────────────────────────────
+
 
 def test_parse_study_notes_returns_many(john3_html: str) -> None:
     notes = parse_study_notes(john3_html, book_num=43, chapter=3)
@@ -135,6 +137,7 @@ def test_study_notes_for_verse_helper(john3_html: str) -> None:
 
 # ── Phase 3.5: 100% match rate on John 3 ───────────────────────────────
 
+
 def test_phase35_all_notes_matched_by_headword(john3_html: str) -> None:
     """After the monotonic + multi-token upgrade, every note in John 3
     should be matched via headword tokens (no positional fallback needed)."""
@@ -182,11 +185,13 @@ def test_phase35_positional_fallback_kept_as_safety_net() -> None:
 def test_phase35_confidence_field_default() -> None:
     """Default confidence is 'headword' (the optimistic case)."""
     from jw_core.models import StudyNote
+
     n = StudyNote(book_num=43, chapter=3, headword="x", body="y")
     assert n.confidence == "headword"
 
 
 # ── Cross-references ────────────────────────────────────────────────────
+
 
 def test_parse_cross_references_returns_some(john3_html: str) -> None:
     refs = parse_cross_references(john3_html, book_num=43, chapter=3)

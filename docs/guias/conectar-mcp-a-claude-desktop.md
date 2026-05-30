@@ -49,7 +49,7 @@ Si ya tenías otros servidores configurados, añade `"jw": {...}` dentro de `mcp
 
 ## Paso 3: variables de entorno opcionales
 
-Si quieres apuntar el store RAG a una ruta personalizada:
+Para apuntar el store RAG, el cache en disco y la telemetría a rutas personalizadas:
 
 ```json
 {
@@ -58,14 +58,24 @@ Si quieres apuntar el store RAG a una ruta personalizada:
       "command": "uv",
       "args": ["--directory", "/path/to/jw-agent-toolkit", "run", "jw-mcp"],
       "env": {
-        "JW_RAG_STORE_PATH": "/Users/elias/jw-rag-store"
+        "JW_RAG_STORE_PATH": "/Users/elias/jw-rag-store",
+        "JW_CACHE_PATH": "/Users/elias/.cache/jw/cache.db",
+        "JW_TELEMETRY_ENABLED": "1",
+        "JW_TELEMETRY_PATH": "/Users/elias/.cache/jw/telemetry.json"
       }
     }
   }
 }
 ```
 
-Default: `~/.jw-agent-toolkit/rag/`.
+| Variable | Default | Para qué |
+|---|---|---|
+| `JW_RAG_STORE_PATH` | `~/.jw-agent-toolkit/rag/` | Path del store RAG (donde se persisten chunks + vectors) |
+| `JW_CACHE_PATH` | `~/.jw-agent-toolkit/cache.db` | Path del DiskCache SQLite leído por `get_cache_stats` |
+| `JW_TELEMETRY_ENABLED` | (no set) | `1`/`true`/`yes` activa el detector de drift de la API |
+| `JW_TELEMETRY_PATH` | `~/.jw-agent-toolkit/telemetry.json` | Path del JSON con baselines + eventos de drift |
+
+> **Importante**: el servidor MCP por defecto **no arranca con cache wired** (cada handler crea su cliente lazy sin throttler/cache/telemetry). Esto mantiene el arranque rápido. `get_cache_stats` solo refleja un cache standalone que otro proceso pudo dejar en `JW_CACHE_PATH` (típicamente vía `factory.build_clients()` en scripts propios). Si quieres caching dentro del MCP, edita `_get_wol()`/`_get_cdn()`/etc. en `packages/jw-mcp/src/jw_mcp/server.py` para inyectar los deps.
 
 ## Paso 4: reiniciar Claude Desktop
 

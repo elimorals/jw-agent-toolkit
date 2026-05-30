@@ -238,6 +238,81 @@ LLM
 ]
 ```
 
+## 6b. GET wrapped con Fase 9 (`politely_get`)
+
+```
+Cliente.search("amor", language="S")
+    │
+    │  url = "https://b.jw-cdn.org/apis/search/results/S/all"
+    │  params = {"q": "amor"}
+    │  await auth.authorized_headers()    ← JWTManager (cached + lock)
+    ▼
+politely_get(http, url, params, headers,
+             throttler=THROTTLER, cache=CACHE, telemetry=TELEMETRY,
+             endpoint_id="cdn.search", cache_ttl_seconds=900,
+             record_json_shape=True)
+    │
+    │  ┌─ Cache check ──────────────────────────┐
+    │  │  cache_key = f"GET {url}?{sorted_params_json}"
+    │  │  hit = cache.get(cache_key)
+    │  │  if hit: return synthetic 200 con body cached
+    │  └─────────────────────────────────────────┘
+    │
+    │  ┌─ Throttle ──────────────────────────────┐
+    │  │  host = urlparse(url).hostname  = "b.jw-cdn.org"
+    │  │  await throttler.acquire(host)  ← TokenBucket espera si no hay token
+    │  └─────────────────────────────────────────┘
+    │
+    │  resp = await http.get(url, params, headers)
+    │
+    │  ┌─ Cache set (status 200) ────────────────┐
+    │  │  cache.set(cache_key, resp.content, ttl_seconds=900)
+    │  └─────────────────────────────────────────┘
+    │
+    │  ┌─ Telemetry (si record_json_shape y JSON) ┐
+    │  │  shape = _shape_hash(resp.json())
+    │  │  drift = telemetry.record("cdn.search", shape)
+    │  │  if drift: WARN "API drift on cdn.search: shape changed"
+    │  └─────────────────────────────────────────┘
+    ▼
+resp → JSON → truncate to limit → devuelve dict
+```
+
+Cuando los 3 deps están `None` (default), todo se degrada a un `http.get()` plano. **El "modo Fase 9" es opt-in**; usar `factory.build_clients()` lo activa de un golpe.
+
+## 6c. Descifrado JWPUB (Fase 5.5)
+
+```
+parse_jwpub("ti_E.jwpub")
+    │
+    │  zipfile.ZipFile(path)
+    │     manifest.json → parse JSON
+    │     contents       → bytes del ZIP interno
+    ▼
+_compute_key_iv(language_index, symbol, year, issue_tag_number)
+    │
+    │  pub_string = "0_ti_1989"             ← ejemplo Trinity brochure
+    │  digest     = SHA256(pub_string)       (32 bytes)
+    │  material   = digest XOR _XOR_KEY     (constante magic 32-byte)
+    │  key = material[:16]    iv = material[16:32]
+    ▼
+ZipFile(contents).read("ti_E.db") → SQLite bytes
+    │
+    │  sqlite3.connect(tmp) → SELECT Content FROM Document
+    ▼
+Para cada row:
+    │  ciphertext = row["Content"]
+    │  padded     = AES-128-CBC(key, iv).decryptor.decrypt(ciphertext)
+    │  text_bytes = zlib.inflate(strip_pkcs7(padded))
+    │  text       = text_bytes.decode("utf-8")
+    │
+    │  paragraphs = BeautifulSoup(text).find_all("p[data-pid]")
+    ▼
+JwpubMetadata(documents=[JwpubDocument(text="<xhtml>...", paragraphs=[...])])
+```
+
+Si una row individual falla (formato variante raro), se salta silenciosamente — `decrypted_text_available` queda True si al menos UNA tuvo éxito.
+
 ## 7. Conexión Claude Desktop → MCP server
 
 ```

@@ -15,12 +15,12 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Language:
-    iso: str                # ISO-639-1 lowercase ("en", "es", "pt")
-    jw_code: str            # JW internal code ("E", "S", "T")
-    lp_tag: str             # wol.jw.org URL tag ("lp-e", "lp-s", "lp-t")
-    display: str            # Human-readable name
-    wol_resource: str       # `r1`/`r4`/etc. token used in wol URLs
-    default_bible: str      # Default Bible publication code for this language
+    iso: str  # ISO-639-1 lowercase ("en", "es", "pt")
+    jw_code: str  # JW internal code ("E", "S", "T")
+    lp_tag: str  # wol.jw.org URL tag ("lp-e", "lp-s", "lp-t")
+    display: str  # Human-readable name
+    wol_resource: str  # `r1`/`r4`/etc. token used in wol URLs
+    default_bible: str  # Default Bible publication code for this language
 
 
 # Reference notes (verified 2026-05):
@@ -30,12 +30,9 @@ class Language:
 # These `r{N}` numbers are per-language resource versions. The Study Edition
 # (`nwtsty`) is currently English-only; other languages use `nwt` or `Rbi8`.
 _REGISTRY: dict[str, Language] = {
-    "en": Language(iso="en", jw_code="E", lp_tag="lp-e", display="English",
-                   wol_resource="r1", default_bible="nwtsty"),
-    "es": Language(iso="es", jw_code="S", lp_tag="lp-s", display="Spanish",
-                   wol_resource="r4", default_bible="nwt"),
-    "pt": Language(iso="pt", jw_code="T", lp_tag="lp-t", display="Portuguese",
-                   wol_resource="r5", default_bible="nwt"),
+    "en": Language(iso="en", jw_code="E", lp_tag="lp-e", display="English", wol_resource="r1", default_bible="nwtsty"),
+    "es": Language(iso="es", jw_code="S", lp_tag="lp-s", display="Spanish", wol_resource="r4", default_bible="nwt"),
+    "pt": Language(iso="pt", jw_code="T", lp_tag="lp-t", display="Portuguese", wol_resource="r5", default_bible="nwt"),
 }
 
 

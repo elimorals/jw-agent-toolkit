@@ -276,6 +276,66 @@ await wol.aclose()      # no cierra shared_http
 await shared_http.aclose()
 ```
 
+## Cliente Weblang (Fase 10 — lista alterna de idiomas)
+
+Endpoint: `www.jw.org/{iso}/languages/`. Devuelve más campos por idioma que mediator (vernacularName, script, altSpellings).
+
+```python
+from jw_core.clients.weblang import WeblangClient, WeblangError
+
+wl = WeblangClient()
+try:
+    langs = await wl.list_languages(in_language_iso="es")
+    for lang in langs:
+        print(f"{lang.code} ({lang.iso}): {lang.name}")
+        if lang.alt_names:
+            print(f"  alt: {lang.alt_names}")
+        if lang.script:
+            print(f"  script: {lang.script}")
+except WeblangError as e:
+    print(f"Error: {e}")
+finally:
+    await wl.aclose()
+```
+
+## Factory para producción (Fase 9)
+
+Para una app real, usa `build_clients()` que arma los 6 clientes con cache + throttler + telemetría compartidos:
+
+```python
+from jw_core.clients.factory import build_clients
+
+clients = build_clients(
+    cache_path="~/.jw-agent-toolkit/cache.db",
+    enable_throttling=True,
+    enable_cache=True,
+    enable_telemetry=None,   # None = lee JW_TELEMETRY_ENABLED
+)
+
+data = await clients.cdn.search("amor")
+url, html = await clients.wol.get_bible_chapter(43, 3, language="es")
+subjects = await clients.topic_index.search_subjects("Trinity")
+# ...
+
+await clients.aclose()
+```
+
+Ver [`docs/guias/infraestructura-fase9.md`](infraestructura-fase9.md) para detalles.
+
+## Métodos nuevos del WOLClient (Fase 10)
+
+```python
+# Daily text para una fecha pasada
+url, html = await wol.get_daily_text_by_date("2025-12-25", language="es")
+
+# Documento WOL por id (artículos sueltos, daily-text anual)
+url, html = await wol.get_document_by_id(1200275936, language="en")
+
+# Página TOC de una publicación
+url, html = await wol.get_publication_page("nwtsty", number=43, language="en")  # Book of John
+url, html = await wol.get_publication_page("w24.04", language="es")             # Watchtower 2024/04
+```
+
 ## Compartir httpx entre clientes
 
 Patrón limpio para apps que usan múltiples clientes:

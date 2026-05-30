@@ -69,6 +69,7 @@ def parse_epub(path: Path | str) -> Epub:
 
 # ── Internals ───────────────────────────────────────────────────────────
 
+
 def _find_opf_path(zf: zipfile.ZipFile) -> str | None:
     """Read META-INF/container.xml and return the OPF rootfile path."""
     try:

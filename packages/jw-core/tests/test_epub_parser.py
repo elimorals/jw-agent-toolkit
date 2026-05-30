@@ -5,14 +5,11 @@ multi-megabyte fixture. The synthetic doc exercises the same code paths
 as a real JW EPUB (container.xml → OPF → spine → XHTML).
 """
 
-import io
 import zipfile
 from pathlib import Path
 
 import pytest
-
 from jw_core.parsers.epub import parse_epub
-
 
 CONTAINER_XML = """\
 <?xml version="1.0" encoding="utf-8"?>
@@ -97,6 +94,7 @@ def synthetic_epub(tmp_path: Path) -> Path:
 
 
 # ── Metadata ────────────────────────────────────────────────────────────
+
 
 def test_parse_epub_extracts_metadata(synthetic_epub: Path) -> None:
     e = parse_epub(synthetic_epub)

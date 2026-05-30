@@ -269,8 +269,5 @@ class BibleRef(BaseModel):
             f"{language.lp_tag}/{publication}/{self.book_num}/{self.chapter}"
         )
         if self.verse_start is not None:
-            base += (
-                f"#study=discover&v={self.book_num}:"
-                f"{self.chapter}:{self.verse_start}"
-            )
+            base += f"#study=discover&v={self.book_num}:{self.chapter}:{self.verse_start}"
         return base

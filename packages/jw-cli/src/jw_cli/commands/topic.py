@@ -5,11 +5,10 @@ from __future__ import annotations
 import asyncio
 
 import typer
+from jw_core.clients.topic_index import TopicIndexClient, TopicIndexError
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-
-from jw_core.clients.topic_index import TopicIndexClient, TopicIndexError
 
 console = Console()
 
@@ -19,20 +18,22 @@ def topic_cmd(
     lang: str = typer.Option("E", "--lang", "-l", help="JW language code (E, S, T)."),
     limit: int = typer.Option(5, "--limit", "-n", help="Max candidate subjects."),
     fetch_top: bool = typer.Option(
-        True, "--fetch/--no-fetch",
+        True,
+        "--fetch/--no-fetch",
         help="Also fetch the top subject's full page and show its subheadings.",
     ),
     max_subheadings: int = typer.Option(
-        12, "--max-sub", help="Limit subheadings shown (0 = all).",
+        12,
+        "--max-sub",
+        help="Limit subheadings shown (0 = all).",
     ),
 ) -> None:
     """Search the WT Publications Index and print top subjects with citations."""
+
     async def run() -> None:
         client = TopicIndexClient()
         try:
-            results = await client.search_subjects(
-                query, language=lang, limit=limit
-            )
+            results = await client.search_subjects(query, language=lang, limit=limit)
             if not results:
                 console.print(f"[yellow]No subjects found for[/yellow] {query!r}")
                 return
@@ -44,7 +45,10 @@ def topic_cmd(
             table.add_column("docid")
             for i, r in enumerate(results, 1):
                 table.add_row(
-                    str(i), f"{r['score']:.0f}", r["title"], r["docid"] or "—",
+                    str(i),
+                    f"{r['score']:.0f}",
+                    r["title"],
+                    r["docid"] or "—",
                 )
             console.print(table)
 
@@ -52,24 +56,24 @@ def topic_cmd(
                 return
 
             top = results[0]
-            console.print(
-                f"\n[cyan]Fetching top subject:[/cyan] {top['title']!r} "
-                f"(docid={top['docid']})\n"
-            )
+            console.print(f"\n[cyan]Fetching top subject:[/cyan] {top['title']!r} (docid={top['docid']})\n")
             try:
                 subject = await client.get_subject_page(top["docid"], language="en")
             except TopicIndexError as e:
                 console.print(f"[red]Could not fetch subject:[/red] {e}")
                 return
 
-            console.print(Panel(
-                f"[bold cyan]{subject.title}[/bold cyan]\n"
-                f"subheadings={len(subject.subheadings)}  "
-                f"citations={subject.total_citations}  "
-                f"style={subject.style}\n"
-                f"[dim]see_also:[/dim] {', '.join(subject.see_also[:5])}",
-                title="Subject", border_style="cyan",
-            ))
+            console.print(
+                Panel(
+                    f"[bold cyan]{subject.title}[/bold cyan]\n"
+                    f"subheadings={len(subject.subheadings)}  "
+                    f"citations={subject.total_citations}  "
+                    f"style={subject.style}\n"
+                    f"[dim]see_also:[/dim] {', '.join(subject.see_also[:5])}",
+                    title="Subject",
+                    border_style="cyan",
+                )
+            )
 
             subheads = subject.subheadings
             if max_subheadings > 0:

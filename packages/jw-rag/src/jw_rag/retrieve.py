@@ -25,10 +25,10 @@ def dedup_by_source(hits: Iterable[SearchHit]) -> list[SearchHit]:
     return out
 
 
-def filter_by_metadata(
-    hits: Iterable[SearchHit], **eq_filters: object
-) -> list[SearchHit]:
+def filter_by_metadata(hits: Iterable[SearchHit], **eq_filters: object) -> list[SearchHit]:
     """Filter hits whose chunk.metadata matches all `eq_filters` exactly."""
+
     def matches(hit: SearchHit) -> bool:
         return all(hit.chunk.metadata.get(k) == v for k, v in eq_filters.items())
+
     return [h for h in hits if matches(h)]

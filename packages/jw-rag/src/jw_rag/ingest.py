@@ -41,9 +41,7 @@ async def ingest_bible_chapter(
         wol = WOLClient()
         owned = True
     try:
-        url, html = await wol.get_bible_chapter(
-            book_num, chapter, language=language, publication=publication
-        )
+        url, html = await wol.get_bible_chapter(book_num, chapter, language=language, publication=publication)
     finally:
         if owned:
             await wol.aclose()
@@ -63,9 +61,7 @@ async def ingest_bible_chapter(
         },
     )
     store.add(chunks)
-    logger.info(
-        f"Ingested Bible {book_num}:{chapter} ({language}) — {len(chunks)} chunks"
-    )
+    logger.info(f"Ingested Bible {book_num}:{chapter} ({language}) — {len(chunks)} chunks")
     return len(chunks)
 
 
@@ -127,9 +123,7 @@ async def ingest_search_topk(
         owned_wol = True
 
     try:
-        data = await cdn.search(
-            query, filter_type=filter_type, language=language, limit=top_n
-        )
+        data = await cdn.search(query, filter_type=filter_type, language=language, limit=top_n)
         urls = _extract_article_urls(data, limit=top_n)
         total = 0
         for url in urls:
@@ -171,6 +165,7 @@ def _wol_url_from(entry: dict[str, Any] | Any) -> str | None:
 
 
 # ── Phase 5: EPUB ingest (the JWPUB-blocker workaround) ────────────────
+
 
 def ingest_epub(
     store: VectorStore,
@@ -217,10 +212,7 @@ def ingest_epub(
         )
         store.add(chunks)
         total += len(chunks)
-    logger.info(
-        f"Ingested EPUB {epub.title!r} ({epub.document_count} docs) "
-        f"→ {total} chunks"
-    )
+    logger.info(f"Ingested EPUB {epub.title!r} ({epub.document_count} docs) → {total} chunks")
     return total
 
 
@@ -277,7 +269,5 @@ def ingest_jwpub(
         )
         store.add(chunks)
         total += len(chunks)
-    logger.info(
-        f"Ingested JWPUB {pub.title!r} ({pub.document_count} docs) → {total} chunks"
-    )
+    logger.info(f"Ingested JWPUB {pub.title!r} ({pub.document_count} docs) → {total} chunks")
     return total

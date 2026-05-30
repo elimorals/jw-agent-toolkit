@@ -66,16 +66,20 @@ class CDNClient:
     ) -> dict[str, Any]:
         """Search jw.org. Returns the raw JSON response."""
         if filter_type not in VALID_FILTERS:
-            raise ValueError(
-                f"filter_type must be one of {sorted(VALID_FILTERS)}, got {filter_type!r}"
-            )
+            raise ValueError(f"filter_type must be one of {sorted(VALID_FILTERS)}, got {filter_type!r}")
         url = f"{SEARCH_BASE}/{language}/{filter_type}"
         headers = await self._auth.authorized_headers()
         try:
             resp = await politely_get(
-                self._http, url, params={"q": query}, headers=headers,
-                throttler=self._throttler, cache=self._cache, telemetry=self._telemetry,
-                endpoint_id="cdn.search", record_json_shape=True,
+                self._http,
+                url,
+                params={"q": query},
+                headers=headers,
+                throttler=self._throttler,
+                cache=self._cache,
+                telemetry=self._telemetry,
+                endpoint_id="cdn.search",
+                record_json_shape=True,
                 cache_ttl_seconds=900.0,  # 15 minutes — same as jw-org-mcp
             )
             if resp.status_code == 401:
@@ -83,9 +87,15 @@ class CDNClient:
                 self._auth.invalidate()
                 headers = await self._auth.authorized_headers(force_refresh=True)
                 resp = await politely_get(
-                    self._http, url, params={"q": query}, headers=headers,
-                    throttler=self._throttler, cache=self._cache, telemetry=self._telemetry,
-                    endpoint_id="cdn.search", record_json_shape=True,
+                    self._http,
+                    url,
+                    params={"q": query},
+                    headers=headers,
+                    throttler=self._throttler,
+                    cache=self._cache,
+                    telemetry=self._telemetry,
+                    endpoint_id="cdn.search",
+                    record_json_shape=True,
                 )
             resp.raise_for_status()
         except httpx.HTTPError as e:

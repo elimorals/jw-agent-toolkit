@@ -39,6 +39,7 @@ class MediatorLanguage(BaseModel):
     Fields are conservatively-typed because the API returns extra keys we
     don't all need; unknown keys are ignored.
     """
+
     code: str = Field(description="JW internal code, e.g. 'E', 'S'")
     locale: str = Field(default="", description="ISO 639-1 lowercase")
     name: str = Field(default="", description="Display name in the request language")
@@ -48,7 +49,7 @@ class MediatorLanguage(BaseModel):
     has_web_content: bool = Field(default=True)
 
     @classmethod
-    def from_api(cls, data: dict[str, Any]) -> "MediatorLanguage":
+    def from_api(cls, data: dict[str, Any]) -> MediatorLanguage:
         return cls(
             code=data.get("symbol", data.get("code", "")),
             locale=data.get("locale", ""),
@@ -85,9 +86,13 @@ class MediatorClient:
         url = f"{MEDIATOR_BASE}/v1/languages/{in_language}/web"
         try:
             resp = await politely_get(
-                self._http, url,
-                throttler=self._throttler, cache=self._cache, telemetry=self._telemetry,
-                endpoint_id="mediator.list_languages", record_json_shape=True,
+                self._http,
+                url,
+                throttler=self._throttler,
+                cache=self._cache,
+                telemetry=self._telemetry,
+                endpoint_id="mediator.list_languages",
+                record_json_shape=True,
                 cache_ttl_seconds=86400.0,  # languages are stable; cache 1 day
             )
             resp.raise_for_status()
@@ -109,9 +114,14 @@ class MediatorClient:
         url = f"{MEDIATOR_BASE}/finder"
         try:
             resp = await politely_get(
-                self._http, url, params={"lang": language, "item": item_code},
-                throttler=self._throttler, cache=self._cache, telemetry=self._telemetry,
-                endpoint_id="mediator.find_item", record_json_shape=True,
+                self._http,
+                url,
+                params={"lang": language, "item": item_code},
+                throttler=self._throttler,
+                cache=self._cache,
+                telemetry=self._telemetry,
+                endpoint_id="mediator.find_item",
+                record_json_shape=True,
             )
             resp.raise_for_status()
             return resp.json()

@@ -64,9 +64,7 @@ async def apologetics(
         topic_client = topic or TopicIndexClient(cdn=cdn, wol=wol)
         try:
             try:
-                subjects = await topic_client.search_subjects(
-                    question, language=language, limit=topic_top_k
-                )
+                subjects = await topic_client.search_subjects(question, language=language, limit=topic_top_k)
             except TopicIndexError as e:
                 result.warnings.append(f"Topic index search failed: {e}")
                 subjects = []
@@ -76,16 +74,18 @@ async def apologetics(
                     # Surface as a low-fidelity finding so the LLM still
                     # knows the topic index returned something.
                     if s.get("wol_url"):
-                        result.findings.append(Finding(
-                            summary=f"Topic candidate (no docid resolved): {s.get('title', '')}",
-                            excerpt=s.get("snippet", ""),
-                            citation=Citation(
-                                url=s["wol_url"],
-                                title=s.get("title", ""),
-                                kind="topic_candidate",
-                            ),
-                            metadata={"source": "topic_index_candidate"},
-                        ))
+                        result.findings.append(
+                            Finding(
+                                summary=f"Topic candidate (no docid resolved): {s.get('title', '')}",
+                                excerpt=s.get("snippet", ""),
+                                citation=Citation(
+                                    url=s["wol_url"],
+                                    title=s.get("title", ""),
+                                    kind="topic_candidate",
+                                ),
+                                metadata={"source": "topic_index_candidate"},
+                            )
+                        )
                     continue
                 try:
                     subject = await topic_client.get_subject_page(docid, language=iso)
@@ -94,39 +94,42 @@ async def apologetics(
                     continue
                 # Add a "subject anchor" finding so the LLM knows this came
                 # from the official index.
-                result.findings.append(Finding(
-                    summary=f"Topic index: {subject.title}",
-                    excerpt=f"Subject from the Watch Tower Publications Index. "
-                            f"{subject.total_citations} citations across "
-                            f"{len(subject.subheadings)} subheadings.",
-                    citation=Citation(
-                        url=subject.source_url, title=subject.title,
-                        kind="topic_subject",
-                        metadata={"docid": subject.docid, "see_also": subject.see_also},
-                    ),
-                    metadata={"source": "topic_index", "docid": subject.docid},
-                ))
+                result.findings.append(
+                    Finding(
+                        summary=f"Topic index: {subject.title}",
+                        excerpt=f"Subject from the Watch Tower Publications Index. "
+                        f"{subject.total_citations} citations across "
+                        f"{len(subject.subheadings)} subheadings.",
+                        citation=Citation(
+                            url=subject.source_url,
+                            title=subject.title,
+                            kind="topic_subject",
+                            metadata={"docid": subject.docid, "see_also": subject.see_also},
+                        ),
+                        metadata={"source": "topic_index", "docid": subject.docid},
+                    )
+                )
                 # Surface the top subheadings as individual findings so the
                 # LLM has both the structure and the citation text.
                 for sh in subject.subheadings[:topic_subheadings_limit]:
-                    citation_summary = "; ".join(
-                        c.text for c in sh.citations[:8]
+                    citation_summary = "; ".join(c.text for c in sh.citations[:8])
+                    result.findings.append(
+                        Finding(
+                            summary=f"{subject.title} — {sh.heading}",
+                            excerpt=citation_summary or "(no citations in entry)",
+                            citation=Citation(
+                                url=subject.source_url,
+                                title=f"{subject.title}: {sh.heading}",
+                                kind="topic_subheading",
+                                metadata={
+                                    "is_top_level": sh.is_top_level,
+                                    "bible_refs": [c.model_dump() for c in sh.citations if c.kind == "bible"],
+                                    "publication_codes": [c.text for c in sh.citations if c.kind == "publication"],
+                                },
+                            ),
+                            metadata={"source": "topic_index_entry"},
+                        )
                     )
-                    result.findings.append(Finding(
-                        summary=f"{subject.title} — {sh.heading}",
-                        excerpt=citation_summary or "(no citations in entry)",
-                        citation=Citation(
-                            url=subject.source_url,
-                            title=f"{subject.title}: {sh.heading}",
-                            kind="topic_subheading",
-                            metadata={
-                                "is_top_level": sh.is_top_level,
-                                "bible_refs": [c.model_dump() for c in sh.citations if c.kind == "bible"],
-                                "publication_codes": [c.text for c in sh.citations if c.kind == "publication"],
-                            },
-                        ),
-                        metadata={"source": "topic_index_entry"},
-                    ))
         finally:
             if owned_topic:
                 await topic_client.aclose()
@@ -149,59 +152,67 @@ async def apologetics(
     for ref in explicit_refs:
         ref_url = ref.wol_url(lang=iso)
         # Always add the bare citation first so it's there even if the fetch fails.
-        result.findings.append(Finding(
-            summary=f"User cited {ref.display()}",
-            excerpt="",
-            citation=Citation(
-                url=ref_url, title=ref.display(), kind="verse",
-                metadata={"book_num": ref.book_num, "chapter": ref.chapter,
-                          "verse_start": ref.verse_start, "verse_end": ref.verse_end},
-            ),
-            metadata={"source": "question_refs"},
-        ))
+        result.findings.append(
+            Finding(
+                summary=f"User cited {ref.display()}",
+                excerpt="",
+                citation=Citation(
+                    url=ref_url,
+                    title=ref.display(),
+                    kind="verse",
+                    metadata={
+                        "book_num": ref.book_num,
+                        "chapter": ref.chapter,
+                        "verse_start": ref.verse_start,
+                        "verse_end": ref.verse_end,
+                    },
+                ),
+                metadata={"source": "question_refs"},
+            )
+        )
         # Try to enrich with actual verse text and study notes.
         try:
-            _, html = await wol.get_bible_chapter(
-                ref.book_num, ref.chapter, language=iso
-            )
+            _, html = await wol.get_bible_chapter(ref.book_num, ref.chapter, language=iso)
         except Exception as e:
             result.warnings.append(f"Could not fetch {ref.display()}: {e}")
             continue
         if ref.has_verse:
             v = get_verse(html, ref.book_num, ref.chapter, ref.verse_start, language=iso)
             if v:
-                result.findings.append(Finding(
-                    summary=f"Verse text: {ref.display()}",
-                    excerpt=v.text,
-                    citation=Citation(
-                        url=v.wol_url(), title=ref.display(), kind="verse",
-                        metadata={"book_num": v.book_num, "chapter": v.chapter,
-                                  "verse": v.verse},
-                    ),
-                    metadata={"source": "verse_text"},
-                ))
+                result.findings.append(
+                    Finding(
+                        summary=f"Verse text: {ref.display()}",
+                        excerpt=v.text,
+                        citation=Citation(
+                            url=v.wol_url(),
+                            title=ref.display(),
+                            kind="verse",
+                            metadata={"book_num": v.book_num, "chapter": v.chapter, "verse": v.verse},
+                        ),
+                        metadata={"source": "verse_text"},
+                    )
+                )
             # Study notes for that verse.
-            notes = parse_study_notes(
-                html, book_num=ref.book_num, chapter=ref.chapter, language=iso
-            )
+            notes = parse_study_notes(html, book_num=ref.book_num, chapter=ref.chapter, language=iso)
             for note in study_notes_for_verse(notes, ref.verse_start):
-                result.findings.append(Finding(
-                    summary=f"Study note: {note.headword}",
-                    excerpt=note.body,
-                    citation=Citation(
-                        url=ref_url, title=note.headword, kind="study_note",
-                        metadata={"verse": note.verse, "headword": note.headword,
-                                  "inline_refs": note.inline_refs},
-                    ),
-                    metadata={"source": "study_note"},
-                ))
+                result.findings.append(
+                    Finding(
+                        summary=f"Study note: {note.headword}",
+                        excerpt=note.body,
+                        citation=Citation(
+                            url=ref_url,
+                            title=note.headword,
+                            kind="study_note",
+                            metadata={"verse": note.verse, "headword": note.headword, "inline_refs": note.inline_refs},
+                        ),
+                        metadata={"source": "study_note"},
+                    )
+                )
 
     # 2. CDN search + article fetch.
     try:
         try:
-            data = await cdn.search(
-                question, filter_type="all", language=language, limit=web_top_k * 2
-            )
+            data = await cdn.search(question, filter_type="all", language=language, limit=web_top_k * 2)
             items = _flatten_search(data, limit=web_top_k)
         except Exception as e:
             result.warnings.append(f"Search failed: {e}")
@@ -217,16 +228,18 @@ async def apologetics(
                 continue
             article = parse_article(html)
             top_para = article.paragraphs[0] if article.paragraphs else ""
-            result.findings.append(Finding(
-                summary=f"Article: {article.title or item.get('title', '')}",
-                excerpt=top_para,
-                citation=Citation(
-                    url=url,
-                    title=article.title or item.get("title", ""),
-                    kind="article",
-                ),
-                metadata={"source": "cdn_search"},
-            ))
+            result.findings.append(
+                Finding(
+                    summary=f"Article: {article.title or item.get('title', '')}",
+                    excerpt=top_para,
+                    citation=Citation(
+                        url=url,
+                        title=article.title or item.get("title", ""),
+                        kind="article",
+                    ),
+                    metadata={"source": "cdn_search"},
+                )
+            )
     finally:
         if owned_cdn:
             await cdn.aclose()
@@ -241,17 +254,19 @@ async def apologetics(
             result.warnings.append(f"RAG search failed: {e}")
             hits = []
         for hit in hits:
-            result.findings.append(Finding(
-                summary=hit.chunk.metadata.get("title", "Local corpus hit"),
-                excerpt=hit.chunk.text,
-                citation=Citation(
-                    url=hit.chunk.metadata.get("source_url", ""),
-                    title=hit.chunk.metadata.get("title", ""),
-                    kind=hit.chunk.metadata.get("kind", "rag_chunk"),
-                    metadata=hit.chunk.metadata,
-                ),
-                metadata={"source": "rag", "rrf_score": hit.score},
-            ))
+            result.findings.append(
+                Finding(
+                    summary=hit.chunk.metadata.get("title", "Local corpus hit"),
+                    excerpt=hit.chunk.text,
+                    citation=Citation(
+                        url=hit.chunk.metadata.get("source_url", ""),
+                        title=hit.chunk.metadata.get("title", ""),
+                        kind=hit.chunk.metadata.get("kind", "rag_chunk"),
+                        metadata=hit.chunk.metadata,
+                    ),
+                    metadata={"source": "rag", "rrf_score": hit.score},
+                )
+            )
 
     return result
 

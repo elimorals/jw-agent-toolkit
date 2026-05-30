@@ -162,6 +162,14 @@ Pipeline síncrono (no hace red): `parse_epub()` → para cada `EpubDocument` co
 
 Metadata por chunk: `{kind: "epub_document", publication, publication_code, language, title, spine_index, epub_href, source_path}`.
 
+### `ingest_jwpub(store, jwpub_path, *, language="en", skip_short_docs=1) -> int`
+
+Fase 5.5. Pipeline síncrono: `parse_jwpub()` → decrypt AES-128-CBC + zlib inflate → para cada `JwpubDocument` con `len(paragraphs) >= skip_short_docs`, chunk + add. Devuelve `0` con warning si la decryption global falla (variante de formato no soportada).
+
+`source_id = f"jwpub:{pub.symbol}:{doc.document_id}"`.
+
+Metadata por chunk: `{kind: "jwpub_document", publication, publication_code (=symbol), publication_type, year, language, title, chapter_number, section_number, first_page, last_page, source_path}`.
+
 ### Helpers internos
 
 - `_extract_article_urls(data, *, limit)` — aplana grupos vs items y extrae `links.wol` o `links.jw.org`.

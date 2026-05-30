@@ -28,7 +28,7 @@ class Citation:
 
     url: str
     title: str = ""
-    kind: str = ""           # 'verse', 'article', 'daily_text', 'chapter'
+    kind: str = ""  # 'verse', 'article', 'daily_text', 'chapter'
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -38,7 +38,7 @@ class Finding:
 
     summary: str
     citation: Citation
-    excerpt: str = ""        # The verbatim text the finding is based on
+    excerpt: str = ""  # The verbatim text the finding is based on
     metadata: dict[str, Any] = field(default_factory=dict)
 
 

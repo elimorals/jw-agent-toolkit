@@ -5,11 +5,10 @@ from __future__ import annotations
 import asyncio
 
 import typer
+from jw_core.clients.cdn import VALID_FILTERS, CDNClient
+from jw_core.languages import get_language
 from rich.console import Console
 from rich.table import Table
-
-from jw_core.clients.cdn import CDNClient, VALID_FILTERS
-from jw_core.languages import get_language
 
 console = Console()
 
@@ -17,7 +16,9 @@ console = Console()
 def search_cmd(
     query: str = typer.Argument(..., help="Search terms"),
     filter_type: str = typer.Option(
-        "all", "--filter", "-f",
+        "all",
+        "--filter",
+        "-f",
         help=f"One of: {', '.join(sorted(VALID_FILTERS))}",
     ),
     lang: str = typer.Option("en", "--lang", "-l", help="ISO code (en/es/pt)"),
@@ -37,9 +38,7 @@ def search_cmd(
     async def run() -> None:
         cdn = CDNClient()
         try:
-            data = await cdn.search(
-                query, filter_type=filter_type, language=language.jw_code, limit=limit
-            )
+            data = await cdn.search(query, filter_type=filter_type, language=language.jw_code, limit=limit)
         finally:
             await cdn.aclose()
 
@@ -48,9 +47,7 @@ def search_cmd(
     asyncio.run(run())
 
 
-def _render_results(
-    data: dict, query: str, filter_type: str, lang: str
-) -> None:
+def _render_results(data: dict, query: str, filter_type: str, lang: str) -> None:
     results = _flatten_results(data.get("results", []))
     if not results:
         console.print(f"[yellow]No results for[/yellow] {query!r}")

@@ -8,15 +8,17 @@ Servidor [Model Context Protocol](https://modelcontextprotocol.io) que expone la
 
 - `resolve_reference(text, language="en")` — Parsea una cita bíblica como "Juan 3:16" → estructura + URL canónica
 - `get_chapter(book_num, chapter, language="en", publication="nwtsty")` — Descarga un capítulo bíblico desde wol.jw.org
-- `get_daily_text(language="en")` — Texto diario de hoy
+- `get_daily_text(language="en", date="")` — Texto diario. Con `date=YYYY-MM-DD` navega a la ruta `/dt/...`; sin `date` usa la homepage `/h/`
 - `search_content(query, filter_type="all", language="en", limit=10)` — Búsqueda en jw.org
 - `get_article(url)` — Descarga y parsea cualquier artículo de wol.jw.org
 
 ### Media (Fase 2)
 
-- `list_languages(in_language="E", only_with_web_content=True)` — Lista de idiomas con códigos JW + ISO
+- `list_languages(in_language="E", only_with_web_content=True)` — Lista de idiomas via mediator
 - `list_publication_files(pub_code, language="E", file_format=None, bible_book=None, issue=None)` — Inventario de archivos descargables
 - `download_publication(pub_code, out_dir, language="E", file_format="EPUB", bible_book=None, issue=None)` — Descarga publicación a disco
+- `get_publication_toc(pub_code, language="en", number=None)` — Página landing/TOC de una publicación vía `/publication/...`
+- `list_weblang_languages(in_language_iso="en")` — Lista alterna desde `www.jw.org/{iso}/languages/` (más campos por idioma)
 
 ### Versículos y notas de estudio (Fase 3)
 
@@ -30,11 +32,16 @@ Servidor [Model Context Protocol](https://modelcontextprotocol.io) que expone la
 - `search_topic_index(query, language="E", limit=10)` — Busca temas en el Índice de Publicaciones Watch Tower
 - `get_topic_articles(docid_or_url, language="en")` — Parsea una página de tema completa
 
-### Texto offline EPUB + metadata JWPUB (Fase 5)
+### Texto offline EPUB (Fase 5)
 
 - `extract_epub_text(epub_path, max_docs=0)` — Parsea un .epub descargado y devuelve su texto completo
-- `inspect_jwpub_metadata(jwpub_path)` — Metadata + TOC de un .jwpub (el contenido cifrado no se decodifica)
 - `ingest_epub(epub_path, publication_code="", language="en")` — Indexa el EPUB en el RAG local
+
+### JWPUB (Fase 5 + 5.5 — descifrado AES)
+
+- `inspect_jwpub_metadata(jwpub_path)` — Metadata + TOC sin desencriptar (barato; útil para inspección)
+- `extract_jwpub_text(jwpub_path, max_docs=0)` — Decrypta y devuelve XHTML + párrafos por documento (Fase 5.5)
+- `ingest_jwpub(jwpub_path, language="en")` — Decrypta + indexa todo el JWPUB en el RAG local
 
 ### RAG (Fase 6)
 
@@ -48,6 +55,12 @@ Servidor [Model Context Protocol](https://modelcontextprotocol.io) que expone la
 - `research_topic(topic, language="E", top_n=5, fetch_top_k=3)` — Investigación multipaso de un tema
 - `meeting_helper(input_text, language="en", max_paragraphs=8)` — Prep de reuniones desde URL o ref bíblica
 - `apologetics(question, language="E", web_top_k=3, use_rag=True, rag_top_k=5)` — Respuesta doctrinal con citas de jw.org
+
+### Infraestructura (Fase 9)
+
+- `get_cache_stats()` — Snapshot del `DiskCache` en disco (path, total, live, expired)
+
+**Total: 29 herramientas.**
 
 ## Ejecutar
 
@@ -76,6 +89,11 @@ El servidor habla MCP sobre stdio (transporte por defecto).
 
 - `JW_RAG_STORE_PATH` — Ruta del directorio donde persiste el store RAG.
   Por defecto: `~/.jw-agent-toolkit/rag/`.
+- `JW_CACHE_PATH` — Ruta del `DiskCache` SQLite leído por `get_cache_stats`.
+  Por defecto: `~/.jw-agent-toolkit/cache.db`.
+- `JW_TELEMETRY_ENABLED=1` — Activa el detector de drift de la API.
+- `JW_TELEMETRY_PATH` — Path del JSON con baselines y eventos de drift.
+  Por defecto: `~/.jw-agent-toolkit/telemetry.json`.
 
 ## Referencia detallada
 

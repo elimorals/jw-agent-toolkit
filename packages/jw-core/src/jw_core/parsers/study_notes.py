@@ -45,9 +45,7 @@ def _normalize(text: str) -> str:
     """Lowercase, strip pronunciation marks + accents, collapse whitespace."""
     text = text.lower().replace("\xa0", " ")
     text = _PRON_MARKS_RE.sub("", text)
-    text = "".join(
-        c for c in unicodedata.normalize("NFD", text) if not unicodedata.combining(c)
-    )
+    text = "".join(c for c in unicodedata.normalize("NFD", text) if not unicodedata.combining(c))
     text = re.sub(r"\s+", " ", text)
     return text.strip()
 
@@ -90,16 +88,12 @@ def parse_study_notes(
     """
     soup = BeautifulSoup(html, "lxml")
 
-    verses = parse_verses(
-        html, book_num=book_num, chapter=chapter, language=language
-    )
+    verses = parse_verses(html, book_num=book_num, chapter=chapter, language=language)
     verse_norm: dict[int, str] = {v.verse: _normalize(v.text) for v in verses}
     verse_numbers = sorted(verse_norm)
     max_verse = verse_numbers[-1] if verse_numbers else 1
 
-    note_elements: list[Tag] = [
-        li for li in soup.find_all("li", class_="studyNote") if isinstance(li, Tag)
-    ]
+    note_elements: list[Tag] = [li for li in soup.find_all("li", class_="studyNote") if isinstance(li, Tag)]
     total_notes = len(note_elements)
 
     notes: list[StudyNote] = []
@@ -110,9 +104,7 @@ def parse_study_notes(
             continue
         headword_raw = head.get_text(" ", strip=True).rstrip(":").strip()
 
-        verse_num = _find_verse_for_headword(
-            headword_raw, verse_norm, min_verse=last_matched_verse + 1
-        )
+        verse_num = _find_verse_for_headword(headword_raw, verse_norm, min_verse=last_matched_verse + 1)
         confidence = "headword" if verse_num is not None else None
 
         if verse_num is None and fallback_to_position and total_notes > 0:
@@ -130,25 +122,23 @@ def parse_study_notes(
 
         body = li.get_text(" ", strip=True)
         if body.lower().startswith(headword_raw.lower()):
-            body = body[len(headword_raw):].lstrip(": ").strip()
+            body = body[len(headword_raw) :].lstrip(": ").strip()
         body = re.sub(r"\s+", " ", body)
 
-        inline_refs = [
-            a.get_text(" ", strip=True)
-            for a in li.find_all("a", class_="b")
-            if a.get_text(strip=True)
-        ]
+        inline_refs = [a.get_text(" ", strip=True) for a in li.find_all("a", class_="b") if a.get_text(strip=True)]
 
-        notes.append(StudyNote(
-            book_num=book_num,
-            chapter=chapter,
-            verse=verse_num,
-            headword=headword_raw,
-            body=body,
-            inline_refs=inline_refs,
-            language=language,
-            confidence=confidence or "unmatched",
-        ))
+        notes.append(
+            StudyNote(
+                book_num=book_num,
+                chapter=chapter,
+                verse=verse_num,
+                headword=headword_raw,
+                body=body,
+                inline_refs=inline_refs,
+                language=language,
+                confidence=confidence or "unmatched",
+            )
+        )
     return notes
 
 
@@ -217,19 +207,19 @@ def parse_cross_references(
             href = a.get("href", "")
             if not href:
                 continue
-            out.append(CrossReference(
-                book_num=b,
-                chapter=c,
-                verse=v,
-                href=href,
-                marker=a.get_text(strip=True) or "+",
-                language=language,
-            ))
+            out.append(
+                CrossReference(
+                    book_num=b,
+                    chapter=c,
+                    verse=v,
+                    href=href,
+                    marker=a.get_text(strip=True) or "+",
+                    language=language,
+                )
+            )
     return out
 
 
-def study_notes_for_verse(
-    notes: list[StudyNote], verse: int
-) -> list[StudyNote]:
+def study_notes_for_verse(notes: list[StudyNote], verse: int) -> list[StudyNote]:
     """Filter a list of study notes to those matched to a specific verse."""
     return [n for n in notes if n.verse == verse]

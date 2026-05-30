@@ -5,10 +5,9 @@ from __future__ import annotations
 import asyncio
 
 import typer
-from rich.console import Console
-
 from jw_core.clients.wol import WOLClient
 from jw_core.parsers.article import parse_article
+from rich.console import Console
 
 console = Console()
 
@@ -28,9 +27,7 @@ def chapter_cmd(
     async def run() -> None:
         wol = WOLClient()
         try:
-            url, html = await wol.get_bible_chapter(
-                book_num, chapter, language=lang, publication=publication
-            )
+            url, html = await wol.get_bible_chapter(book_num, chapter, language=lang, publication=publication)
         finally:
             await wol.aclose()
         article = parse_article(html)

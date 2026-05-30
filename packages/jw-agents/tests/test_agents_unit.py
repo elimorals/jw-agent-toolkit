@@ -4,10 +4,6 @@ We test the structure (AgentResult shape, citation propagation, warnings on
 bad input) and rely on a FakeWOLClient for any agent that needs to fetch.
 """
 
-from dataclasses import dataclass
-
-import pytest
-
 from jw_agents import (
     AgentResult,
     Citation,
@@ -17,8 +13,8 @@ from jw_agents import (
     verse_explainer,
 )
 
-
 # ── Test doubles ────────────────────────────────────────────────────────
+
 
 class FakeWOL:
     """Minimal in-memory WOL client returning canned HTML."""
@@ -87,28 +83,36 @@ _SAMPLE_HTML = """
 </body></html>
 """
 
-_SAMPLE_SEARCH_RESULTS = [{
-    "type": "item",
-    "title": "What the Bible Says About Love",
-    "snippet": "Love is the greatest virtue.",
-    "links": {"wol": "https://wol.jw.org/en/wol/d/r1/lp-e/example-1"},
-}, {
-    "type": "item",
-    "title": "Peace and Security",
-    "snippet": "True peace comes from God.",
-    "links": {"wol": "https://wol.jw.org/en/wol/d/r1/lp-e/example-2"},
-}]
+_SAMPLE_SEARCH_RESULTS = [
+    {
+        "type": "item",
+        "title": "What the Bible Says About Love",
+        "snippet": "Love is the greatest virtue.",
+        "links": {"wol": "https://wol.jw.org/en/wol/d/r1/lp-e/example-1"},
+    },
+    {
+        "type": "item",
+        "title": "Peace and Security",
+        "snippet": "True peace comes from God.",
+        "links": {"wol": "https://wol.jw.org/en/wol/d/r1/lp-e/example-2"},
+    },
+]
 
 
 # ── Base dataclasses ────────────────────────────────────────────────────
 
+
 def test_agent_result_to_dict_structure() -> None:
     r = AgentResult(
-        query="x", agent_name="test",
-        findings=[Finding(
-            summary="s", excerpt="e",
-            citation=Citation(url="http://x", title="t", kind="article"),
-        )],
+        query="x",
+        agent_name="test",
+        findings=[
+            Finding(
+                summary="s",
+                excerpt="e",
+                citation=Citation(url="http://x", title="t", kind="article"),
+            )
+        ],
         warnings=["w1"],
     )
     d = r.to_dict()
@@ -119,6 +123,7 @@ def test_agent_result_to_dict_structure() -> None:
 
 
 # ── verse_explainer ─────────────────────────────────────────────────────
+
 
 async def test_verse_explainer_resolves_and_fetches() -> None:
     wol = FakeWOL()
@@ -148,11 +153,16 @@ async def test_verse_explainer_no_ref_returns_warning() -> None:
 
 # ── research_topic ──────────────────────────────────────────────────────
 
+
 async def test_research_topic_aggregates_excerpts() -> None:
     result = await research_topic(
-        "love", language="E",
-        cdn=FakeCDN(), wol=FakeWOL(),
-        top_n=5, fetch_top_k=2, max_excerpts_per_article=2,
+        "love",
+        language="E",
+        cdn=FakeCDN(),
+        wol=FakeWOL(),
+        top_n=5,
+        fetch_top_k=2,
+        max_excerpts_per_article=2,
     )
     assert result.agent_name == "research_topic"
     assert result.metadata["search_hits"] == 2
@@ -164,13 +174,16 @@ async def test_research_topic_aggregates_excerpts() -> None:
 
 async def test_research_topic_handles_empty_results() -> None:
     result = await research_topic(
-        "nothing", cdn=FakeCDN(results=[]), wol=FakeWOL(),
+        "nothing",
+        cdn=FakeCDN(results=[]),
+        wol=FakeWOL(),
     )
     assert result.warnings
     assert not result.findings
 
 
 # ── meeting_helper ──────────────────────────────────────────────────────
+
 
 async def test_meeting_helper_with_url_input() -> None:
     result = await meeting_helper(
@@ -197,36 +210,45 @@ async def test_meeting_helper_invalid_input_warns() -> None:
 
 # ── apologetics ─────────────────────────────────────────────────────────
 
+
 async def test_apologetics_combines_refs_and_search() -> None:
     from jw_agents.apologetics import apologetics
+
     result = await apologetics(
         "What does Juan 3:16 say about love?",
         language="E",
-        cdn=FakeCDN(), wol=FakeWOL(),
+        cdn=FakeCDN(),
+        wol=FakeWOL(),
         web_top_k=2,
     )
     sources = {f.metadata.get("source") for f in result.findings}
-    assert "question_refs" in sources   # Bible ref in question detected
-    assert "cdn_search" in sources      # search articles included
+    assert "question_refs" in sources  # Bible ref in question detected
+    assert "cdn_search" in sources  # search articles included
 
 
 async def test_apologetics_with_rag_store() -> None:
-    from jw_agents.apologetics import apologetics
-    from jw_rag import Chunk, FakeEmbedder, VectorStore
     from pathlib import Path
 
+    from jw_agents.apologetics import apologetics
+    from jw_rag import Chunk, FakeEmbedder, VectorStore
+
     store = VectorStore(Path("/tmp/nonexistent"), FakeEmbedder(dim=32))
-    store.add([Chunk(
-        id="c1",
-        text="The greatest commandment is love",
-        source_id="local-1",
-        metadata={"title": "On Love", "source_url": "https://wol.jw.org/example",
-                  "kind": "article"},
-    )])
+    store.add(
+        [
+            Chunk(
+                id="c1",
+                text="The greatest commandment is love",
+                source_id="local-1",
+                metadata={"title": "On Love", "source_url": "https://wol.jw.org/example", "kind": "article"},
+            )
+        ]
+    )
     result = await apologetics(
         "What is the greatest commandment?",
-        cdn=FakeCDN(), wol=FakeWOL(),
-        rag_store=store, rag_top_k=3,
+        cdn=FakeCDN(),
+        wol=FakeWOL(),
+        rag_store=store,
+        rag_top_k=3,
     )
     rag_findings = [f for f in result.findings if f.metadata.get("source") == "rag"]
     assert len(rag_findings) >= 1

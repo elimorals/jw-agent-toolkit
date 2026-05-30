@@ -142,3 +142,62 @@ topic = TopicIndexClient(cdn=cdn, wol=wol)
 - Inglés es el lingua franca de Python: librerías de terceros, traceback, mensajes de error.
 - El usuario final del proyecto trabaja en español (esto es del autor).
 - Mezclar identificadores en español rompería el patrón con `httpx`, `pydantic`, `typer`, etc.
+
+## 13. JWPUB se descifra apoyándose en trabajo externo (Fase 5.5)
+
+**Decisión**: en lugar de mantener la fase 5 abierta indefinidamente, integramos el algoritmo de derivación descubierto por [`gokusander/jwpub-toolkit`](https://github.com/gokusander/jwpub-toolkit) (MIT) con crédito explícito en el código y en la documentación.
+
+**Por qué**:
+
+- 4 scripts (`try_jwpub_decrypt[1-4].py`) probaron decenas de combinaciones SHA256/SHA1, AES-128/256, IVs varios, derivaciones por documento. Todas fallaron.
+- La derivación correcta requiere conocer la **constante de XOR de 32 bytes** que solo se obtiene inspeccionando el binario de JW Library — un trabajo serio de reverse engineering que la comunidad ya hizo.
+- Implementar `gokusander`'s solution con crédito conserva la cadena de licencias (MIT-compatible con GPL-3.0-only) y nos desbloquea para fase 6/7.
+
+**Trade-off**: dependencia conceptual de un proyecto externo. Mitigación: el algoritmo es solo 4 líneas (`_compute_key_iv`), está testeado con vectores conocidos y queda blindado en nuestro repo.
+
+## 14. Factory para producción, clientes sueltos para tests
+
+**Decisión**: `jw_core.clients.factory.build_clients()` arma una `ClientSuite` con cache + throttler + telemetry **compartidos**. Para tests, los clientes siguen siendo construibles sin nada de eso.
+
+**Por qué**:
+
+- En tests unitarios, queremos clientes sin estado externo (no SQLite a limpiar, no rate-limiter que afecte timing).
+- En producción, queremos UN cache, UN rate-limiter, UN telemetry — no seis instancias separadas que se pisen.
+- El factory hace la decisión por el usuario; los flags `enable_cache/enable_throttling/enable_telemetry` permiten apagar individualmente.
+
+**Trade-off**: dos APIs en paralelo (constructor directo vs factory). Mitigación: el factory es opt-in y opcional; los constructores siempre funcionan.
+
+## 15. Telemetría opt-in en lugar de opt-out
+
+**Decisión**: `JW_TELEMETRY_ENABLED` debe ser explícitamente `1`/`true`/`yes` para activar. Default: apagada.
+
+**Por qué**:
+
+- Telemetría debe ser predecible. Que un usuario empiece a generar JSONs en disco sin saberlo violaría el principio de menor sorpresa.
+- Los baselines son específicos por instalación. Sin opt-in explícito, un drift event no aporta información útil.
+- Cuando la API cambia, los maintainers (que tienen telemetría activada) reciben los warnings y actualizan los parsers. Los usuarios casuales no necesitan saberlo.
+
+**Trade-off**: la detección de drift solo ayuda a quien la activa. Mitigación: la guía [`infraestructura-fase9.md`](../guias/infraestructura-fase9.md) explica cuándo encenderla.
+
+## 16. CI con uv + Ruff + Mypy + Bandit (Fase 10)
+
+**Decisión**: GitHub Actions workflow con stack moderno (`uv`, `ruff`, `mypy strict`, `pytest`, `bandit`). Mypy y Bandit corren con `continue-on-error: true`.
+
+**Por qué**:
+
+- `uv` da instalación reproducible con cache compartido. `ruff` reemplaza black + flake8 + isort.
+- Mypy strict en FastMCP genera falsos positivos conocidos — preferimos verlos en logs sin romper el build a tener type checking apagado.
+- Bandit es señal de seguridad informativa; los maintainers leen los hallazgos y deciden si actuar.
+- El job `security` corre tras `test` para no gastar minutos si los tests fallan.
+
+## 17. Cassettes pytest-recording para endpoints críticos
+
+**Decisión**: 4 endpoints (mediator, weblang, cdn search, pub_media) tienen tests cassette-backed con YAMLs commiteados al repo.
+
+**Por qué**:
+
+- Los unit tests con fixtures HTML cubren los parsers, pero **no detectan cambios de shape** en la respuesta JSON.
+- Cassettes congelan la shape exacta. Si jw.org cambia un campo, el test cassette puede seguir pasando (replay) pero el cassette en disco **es la documentación** de cómo era antes.
+- Re-grabar (`--record-mode=rewrite`) es un acto consciente: el diff del YAML expone qué cambió.
+
+**Trade-off**: cassettes deben mantenerse. Mitigación: solo grabamos los 4 endpoints más críticos; los demás están cubiertos con fixtures HTML estáticas.

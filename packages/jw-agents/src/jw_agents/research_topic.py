@@ -46,9 +46,7 @@ async def research_topic(
         owned_wol = True
 
     try:
-        data = await cdn.search(
-            topic, filter_type="all", language=language, limit=top_n
-        )
+        data = await cdn.search(topic, filter_type="all", language=language, limit=top_n)
     except Exception as e:
         result.warnings.append(f"CDN search failed: {e}")
         if owned_cdn:
@@ -83,16 +81,18 @@ async def research_topic(
         article = parse_article(html)
         title = article.title or item.get("title", "")
         for i, p in enumerate(article.paragraphs[:max_excerpts_per_article]):
-            result.findings.append(Finding(
-                summary=f"Excerpt from “{title}”",
-                excerpt=p,
-                citation=Citation(
-                    url=url,
-                    title=title,
-                    kind="article",
-                    metadata={"paragraph_index": i + 1},
-                ),
-            ))
+            result.findings.append(
+                Finding(
+                    summary=f"Excerpt from “{title}”",
+                    excerpt=p,
+                    citation=Citation(
+                        url=url,
+                        title=title,
+                        kind="article",
+                        metadata={"paragraph_index": i + 1},
+                    ),
+                )
+            )
         fetched += 1
 
     if owned_cdn:

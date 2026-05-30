@@ -1,8 +1,7 @@
 """Smoke tests for the CLI — no network, just verb routing and parser plumbing."""
 
-from typer.testing import CliRunner
-
 from jw_cli.main import app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

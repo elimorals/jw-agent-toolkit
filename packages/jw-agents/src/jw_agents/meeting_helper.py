@@ -49,13 +49,9 @@ async def meeting_helper(
         else:
             ref = parse_reference(input_text)
             if ref is None:
-                result.warnings.append(
-                    "Input must be a wol.jw.org URL or a Bible reference."
-                )
+                result.warnings.append("Input must be a wol.jw.org URL or a Bible reference.")
                 return result
-            url, html = await wol.get_bible_chapter(
-                ref.book_num, ref.chapter, language=language
-            )
+            url, html = await wol.get_bible_chapter(ref.book_num, ref.chapter, language=language)
             result.metadata["resolved_reference"] = ref.display()
     finally:
         if owned:
@@ -65,17 +61,19 @@ async def meeting_helper(
     result.metadata["title"] = article.title
 
     for i, paragraph in enumerate(article.paragraphs[:max_paragraphs]):
-        result.findings.append(Finding(
-            summary=f"Paragraph {i + 1}",
-            excerpt=paragraph,
-            citation=Citation(
-                url=url,
-                title=article.title,
-                kind="article",
-                metadata={"paragraph_index": i + 1},
-            ),
-            metadata={"suggest_comment": _suggest_comment(paragraph, i)},
-        ))
+        result.findings.append(
+            Finding(
+                summary=f"Paragraph {i + 1}",
+                excerpt=paragraph,
+                citation=Citation(
+                    url=url,
+                    title=article.title,
+                    kind="article",
+                    metadata={"paragraph_index": i + 1},
+                ),
+                metadata={"suggest_comment": _suggest_comment(paragraph, i)},
+            )
+        )
 
     if article.references:
         result.metadata["cross_references"] = article.references[:15]

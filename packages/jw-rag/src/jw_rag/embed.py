@@ -54,9 +54,9 @@ class FakeEmbedder:
         for offset in range((self.dim * 4 + 31) // 32):
             digest = hashlib.sha256(f"{offset}|{text}".encode()).digest()
             for j in range(0, 32, 4):
-                seeds.append(int.from_bytes(digest[j:j+4], "big"))
+                seeds.append(int.from_bytes(digest[j : j + 4], "big"))
         # Map to [-1, 1] floats.
-        arr = np.array(seeds[:self.dim], dtype=np.float64)
+        arr = np.array(seeds[: self.dim], dtype=np.float64)
         arr = (arr / (2**32 - 1)) * 2.0 - 1.0
         # L2 normalize so cosine similarity is just a dot product.
         norm = np.linalg.norm(arr)

@@ -48,9 +48,7 @@ class TokenBucket:
             async with self._lock:
                 now = time.monotonic()
                 elapsed = now - self._last_refill
-                self._tokens = min(
-                    self.capacity, self._tokens + elapsed * self.rate_per_sec
-                )
+                self._tokens = min(self.capacity, self._tokens + elapsed * self.rate_per_sec)
                 self._last_refill = now
                 if self._tokens >= n:
                     self._tokens -= n
@@ -80,9 +78,7 @@ class Throttler:
 
     def bucket_for(self, host: str) -> TokenBucket:
         if host not in self._buckets:
-            rate, cap = self._per_host.get(
-                host, (self.default_rate, self.default_capacity)
-            )
+            rate, cap = self._per_host.get(host, (self.default_rate, self.default_capacity))
             self._buckets[host] = TokenBucket(rate_per_sec=rate, capacity=cap)
         return self._buckets[host]
 
@@ -90,9 +86,7 @@ class Throttler:
         await self.bucket_for(host).acquire(n)
 
 
-def backoff_delay(
-    attempt: int, *, base: float = 0.5, cap: float = 30.0
-) -> float:
+def backoff_delay(attempt: int, *, base: float = 0.5, cap: float = 30.0) -> float:
     """Full-jitter exponential backoff. attempt 0 → returns small delay.
 
     Spec: AWS architecture blog `https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/`.

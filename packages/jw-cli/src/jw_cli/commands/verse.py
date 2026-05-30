@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import typer
+from jw_core.parsers.reference import parse_reference
 from rich.console import Console
 from rich.table import Table
-
-from jw_core.parsers.reference import parse_reference
 
 console = Console()
 

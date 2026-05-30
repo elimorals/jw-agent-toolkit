@@ -8,17 +8,24 @@
 jw_core/
 ├── __init__.py            # Re-exporta BibleRef, parse_reference, parse_all_references
 ├── languages.py           # Registro Language + get_language + all_languages
-├── models.py              # Modelos Pydantic: BibleRef, Verse, StudyNote, ...
+├── models.py              # Modelos Pydantic
+├── auth.py                # JWTManager (extraído de cdn) — Fase 9
+├── cache.py               # DiskCache (SQLite + TTL + WAL) — Fase 9
+├── throttle.py            # TokenBucket + Throttler + backoff_delay — Fase 9
+├── telemetry.py           # Telemetry (opt-in drift detection) — Fase 9
 ├── data/
 │   ├── __init__.py
 │   └── books.py           # BOOKS — 66 libros × 3+ idiomas
 ├── clients/
 │   ├── __init__.py
+│   ├── _polite.py         # politely_get helper — Fase 9
+│   ├── factory.py         # build_clients + ClientSuite — Fase 9
 │   ├── cdn.py             # CDNClient + CDNError + VALID_FILTERS
 │   ├── wol.py             # WOLClient + WOLError
 │   ├── mediator.py        # MediatorClient + MediatorLanguage + MediatorError
 │   ├── pub_media.py       # PubMediaClient + Publication + PubMediaFile + ...
-│   └── topic_index.py     # TopicIndexClient + TopicIndexError
+│   ├── topic_index.py     # TopicIndexClient + TopicIndexError
+│   └── weblang.py         # WeblangClient + WeblangLanguage + WeblangError — Fase 10
 └── parsers/
     ├── __init__.py        # Re-exporta los entry points públicos
     ├── reference.py       # ReferenceParser + parse_reference + parse_all_references
@@ -28,7 +35,7 @@ jw_core/
     ├── study_notes.py     # parse_study_notes + parse_cross_references + study_notes_for_verse
     ├── topic_index.py     # parse_subject_page
     ├── epub.py            # parse_epub
-    └── jwpub.py           # parse_jwpub_metadata + JwpubError
+    └── jwpub.py           # parse_jwpub_metadata + parse_jwpub (decrypt) + JwpubError
 ```
 
 ---
@@ -328,11 +335,34 @@ Abre un `.epub`, lee `META-INF/container.xml` → OPF → manifest + spine, y ex
 
 ### `parse_jwpub_metadata(path: Path | str) -> JwpubMetadata`
 
-Abre un `.jwpub`, lee `manifest.json`, abre el ZIP interno, lee la tabla `Document` del SQLite. **No decodifica el contenido cifrado.**
+Lee `manifest.json` + tabla `Document` sin descifrar el `Content` blob. Barato. `JwpubMetadata.decrypted_text_available` es `False`.
 
-**Excepciones**: `JwpubError` si el archivo no es válido.
+### `parse_jwpub(path: Path | str) -> JwpubMetadata`
+
+Idem + descifra cada blob. Cada `JwpubDocument` resultante tiene `text` (XHTML descifrado) y `paragraphs` (texto plano). Blobs individuales que fallen al decryptarse quedan con `text=""` y se saltan silenciosamente.
+
+### `_compute_key_iv(meps_language_index, symbol, year, issue_tag_number=0) -> tuple[bytes, bytes]`
+
+Función interna (expuesta para tests) que reproduce el algoritmo de derivación:
+
+```
+pub_string = f"{lang}_{symbol}_{year}"  (+ "_{issue}" si non-zero)
+material   = SHA256(pub_string) XOR _XOR_KEY    (XOR contra constante 32-byte)
+key = material[:16]    # AES-128 key
+iv  = material[16:32]  # CBC IV
+```
+
+`_XOR_KEY` es una constante fija (`11cbb5587e32846d4c26790c633da289f66fe5842a3a585ce1bc3a294af5ada7`) descubierta por [`gokusander/jwpub-toolkit`](https://github.com/gokusander/jwpub-toolkit) (MIT) inspeccionando los binarios de JW Library.
+
+### `_decrypt_blob(blob, key, iv) -> str`
+
+AES-128-CBC decrypt + strip PKCS7 padding + zlib inflate + UTF-8 decode. Lanza cualquier excepción al caller (que la atrapa por documento individual).
 
 ### `class JwpubError(RuntimeError)`
+
+### Dependencia adicional
+
+`cryptography` (módulo `cryptography.hazmat.primitives.ciphers`) — usado para AES-128-CBC. Está en `uv.lock` como dep transitiva; añadirlo explícitamente al `pyproject.toml` de jw-core sería más claro.
 
 ---
 
@@ -340,7 +370,6 @@ Abre un `.jwpub`, lee `manifest.json`, abre el ZIP interno, lee la tabla `Docume
 
 ### Constantes
 
-- `TOKEN_URL = "https://b.jw-cdn.org/tokens/jworg.jwt"`
 - `SEARCH_BASE = "https://b.jw-cdn.org/apis/search/results"`
 - `VALID_FILTERS = {"all", "publications", "videos", "audio", "bible", "indexes"}`
 
@@ -348,9 +377,11 @@ Abre un `.jwpub`, lee `manifest.json`, abre el ZIP interno, lee la tabla `Docume
 
 ### `class CDNClient`
 
-**`__init__(http: httpx.AsyncClient | None = None)`** — opcionalmente acepta cliente HTTP compartido.
+**`__init__(http=None, *, throttler=None, cache=None, telemetry=None, auth=None)`** — Fase 9 deps opcionales. `auth` se autoconstruye como `JWTManager(http)` si no se pasa (extraído de cdn.py en Fase 9).
 
-**`async search(query, *, filter_type="all", language="E", limit=10) -> dict`** — búsqueda autenticada con JWT. Si `filter_type` no está en `VALID_FILTERS`, levanta `ValueError`. Refresh automático del token en 401.
+**`async search(query, *, filter_type="all", language="E", limit=10) -> dict`** — búsqueda autenticada con JWT. Si `filter_type` no está en `VALID_FILTERS`, levanta `ValueError`. Refresh automático en 401 vía `auth.invalidate()` + retry.
+
+**`cache_stats() -> dict | None`** — stats del DiskCache si está configurado.
 
 **`async aclose() -> None`** — cierra el HTTP si lo posee.
 
@@ -367,15 +398,23 @@ Abre un `.jwpub`, lee `manifest.json`, abre el ZIP interno, lee la tabla `Docume
 
 ### `class WOLClient`
 
-**`__init__(http=None)`** — opcional, con `User-Agent` y `Accept-Language` por defecto.
+**`__init__(http=None, *, throttler=None, cache=None, telemetry=None)`** — Fase 9 deps opcionales.
 
-**`async fetch(url) -> str`** — GET arbitrario; si `url` no empieza por `http`, prepende `WOL_BASE`.
+**`async fetch(url, *, cache_ttl_seconds=3600.0) -> str`** — GET arbitrario; si `url` no empieza por `http`, prepende `WOL_BASE`. TTL configurable.
 
 **`async get_bible_chapter(book_num, chapter, *, language="en", publication=None) -> tuple[str, str]`** — `publication` defaulta a `Language.default_bible`. Devuelve `(url, html)`.
 
-**`async get_today_homepage(language="en") -> tuple[str, str]`** — homepage del idioma.
+**`async get_today_homepage(language="en") -> tuple[str, str]`** — homepage del idioma `/wol/h/{r}/{lp_tag}`.
+
+**`async get_daily_text_by_date(date, *, language="en") -> tuple[str, str]`** — Fase 10. URL `/wol/dt/{r}/{lp_tag}/{YYYY}/{M}/{D}`. `date` puede ser `str` ISO (`"2025-12-25"`) o `datetime.date`.
+
+**`async get_document_by_id(doc_id, *, language="en") -> tuple[str, str]`** — Fase 10. URL `/wol/d/{r}/{lp_tag}/{docId}`. Útil para artículos arbitrarios o documentos de daily-text por año.
+
+**`async get_publication_page(pub_code, number=None, *, language="en") -> tuple[str, str]`** — Fase 10. URL `/wol/publication/{r}/{lp_tag}/{pub}[/{number}]`. Para Bibles, `number=book_num`; para revistas, `number=issue`; para libros, `number=chapter`.
 
 **`async get_cross_reference_panel(href) -> tuple[str, str]`** — panel señalado por un marcador `+`.
+
+**`cache_stats() -> dict | None`** — stats del DiskCache si está configurado.
 
 **`async aclose() -> None`**
 
@@ -457,6 +496,165 @@ Métodos: `files_by_format(fmt)`, `files_by_language(lang_code)`.
 **`async get_subject_page(docid_or_url, *, language="en") -> TopicSubject`** — acepta tanto docid bare como URL completa.
 
 **`async aclose() -> None`** — cierra solo los clientes que posee.
+
+---
+
+## Módulo `jw_core.clients.weblang` (Fase 10)
+
+Cliente alternativo para `www.jw.org/{iso}/languages/`. Diferencias vs `mediator`:
+- Más campos por idioma (vernacularName, script, direction, isSignLanguage, altSpellings).
+- Actualizado con menor frecuencia (más estable).
+- Disponible cuando mediator está throttled.
+
+### `class WeblangError(RuntimeError)`
+
+### `class WeblangLanguage(BaseModel)`
+
+| Campo | Default | Descripción |
+|---|---|---|
+| `code` | — | JW code (`"E"`, `"S"`) |
+| `iso` | `""` | ISO 639 (3-letter en este endpoint) |
+| `name` | `""` | Nombre en el idioma del request |
+| `vernacular` | `""` | Nombre nativo |
+| `alt_names` | `[]` | Variantes ortográficas |
+| `rtl` | `False` | RTL script |
+| `script` | `""` | `"ROMAN"`, `"CYRILLIC"`, ... |
+| `is_sign_language` | `False` | |
+
+`from_api(data)` mapea las claves del endpoint (`langcode`, `symbol`, `vernacularName`, `altSpellings`, `direction`, `script`, `isSignLanguage`) al modelo.
+
+### `class WeblangClient`
+
+**`__init__(http=None, *, throttler=None, cache=None, telemetry=None)`** — Fase 9 deps opcionales.
+
+**`async list_languages(*, in_language_iso="en") -> list[WeblangLanguage]`** — `in_language_iso` controla el idioma de display. Cachea 1 día (los idiomas son estables).
+
+**`cache_stats() -> dict | None`**
+
+**`async aclose() -> None`**
+
+---
+
+## Módulo `jw_core.auth` (Fase 9)
+
+### `class JWTAuthError(RuntimeError)`
+
+### `class JWTManager`
+
+Holder async-safe del JWT para las APIs de `b.jw-cdn.org`.
+
+**`__init__(http: httpx.AsyncClient, token_url: str = TOKEN_URL)`**.
+
+**`async get_token(*, force_refresh=False) -> str`** — devuelve token cacheado o lo fetcha. Usa `asyncio.Lock` para evitar dos refreshes simultáneos.
+
+**`async authorized_headers(extra=None, *, force_refresh=False) -> dict`** — `{Authorization: Bearer ..., Accept: application/json; charset=utf-8, Referer: https://www.jw.org/}` más cualquier `extra`.
+
+**`invalidate() -> None`** — drop el token cacheado (típicamente tras un 401).
+
+---
+
+## Módulo `jw_core.cache` (Fase 9)
+
+### `class DiskCache`
+
+Cache TTL backed por SQLite con WAL. Esquema: `cache(key TEXT PK, value BLOB, expires_at REAL)`.
+
+**`__init__(path=..., *, default_ttl_seconds=3600.0)`** — crea el archivo si no existe.
+
+**`get(key) -> bytes | None`** — devuelve valor o None si missing/expirado (lazy eviction de la row expirada).
+
+**`set(key, value, *, ttl_seconds=None)`** — INSERT OR REPLACE.
+
+**`delete(key)`**, **`clear()`**.
+
+**`cleanup_expired() -> int`** — borra todas las rows expiradas; devuelve rowcount.
+
+**`stats() -> dict`** — `{"total": int, "live": int, "expired": int}`.
+
+**`close()`** + soporte de context manager (`with DiskCache(...) as c:`).
+
+---
+
+## Módulo `jw_core.throttle` (Fase 9)
+
+### `class TokenBucket` (dataclass)
+
+| Campo | Default | Descripción |
+|---|---|---|
+| `rate_per_sec` | `2.0` | Refill rate |
+| `capacity` | `5.0` | Burst máximo |
+
+**`async acquire(n=1.0) -> None`** — bloquea hasta tener `n` tokens.
+
+### `class Throttler`
+
+**`__init__(default_rate=2.0, default_capacity=5.0)`**.
+
+**`set_limit(host, rate_per_sec, capacity)`** — resetea el bucket de ese host con los nuevos valores.
+
+**`bucket_for(host) -> TokenBucket`** — lazy crea per-host.
+
+**`async acquire(host, n=1.0)`**.
+
+### `backoff_delay(attempt, *, base=0.5, cap=30.0) -> float`
+
+Full-jitter exponential backoff (AWS-style). Devuelve `random.uniform(0, min(cap, base * 2**attempt))`.
+
+---
+
+## Módulo `jw_core.telemetry` (Fase 9)
+
+### `_shape_hash(obj, depth=0, max_depth=6) -> str`
+
+Hashea la SHAPE estructural (claves, tipos, longitudes, sample de listas). Misma shape → mismo hash, independientemente de valores.
+
+### `class Telemetry`
+
+**`__init__(path=None)`** — lee `JW_TELEMETRY_PATH` env var o usa `~/.jw-agent-toolkit/telemetry.json`. Solo está `enabled=True` si `JW_TELEMETRY_ENABLED` ∈ `{"1", "true", "yes"}`.
+
+**`record(endpoint, response) -> bool`** — registra/compara shape. Devuelve True si se detectó drift (no en el primer call que aprende baseline). Persiste a disco automáticamente.
+
+**`report() -> dict`** — `{"enabled", "path", "baselines": {endpoint: shape}, "drift_events": [...]}`.
+
+### `get_telemetry() -> Telemetry`
+
+Singleton de proceso.
+
+---
+
+## Módulo `jw_core.clients._polite` (Fase 9)
+
+### `async politely_get(http, url, *, params=None, headers=None, throttler=None, cache=None, telemetry=None, endpoint_id=None, cache_ttl_seconds=None, record_json_shape=False) -> httpx.Response`
+
+Wrapper compartido por todos los clientes. Aplica:
+
+1. Cache check (clave: `f"GET {url}?{sorted_params_json}"`).
+2. Throttle acquire (host extraído con `urlparse`).
+3. HTTP request.
+4. Cache set en status 200 (TTL = `cache_ttl_seconds` o el default del cache).
+5. Telemetry record si `record_json_shape=True` y content-type es JSON.
+
+Cache hit construye un `httpx.Response(200, content=body)` sintético.
+
+### `_cache_key(url, params) -> str`
+
+Deterministic dada cualquier ordering de params (los sortea internamente).
+
+---
+
+## Módulo `jw_core.clients.factory` (Fase 9)
+
+### `class ClientSuite` (dataclass)
+
+Bundle de los 6 clientes + `throttler` + `cache`. Métodos: `async aclose()` (cierra los 6 clientes + el cache).
+
+### `build_clients(cache_path="~/.jw-agent-toolkit/cache.db", *, enable_throttling=True, enable_cache=True, enable_telemetry=None) -> ClientSuite`
+
+Arma una suite completa con infraestructura compartida. Por default:
+
+- Throttler con rate 2 req/s, burst 5 — pero el CDN se limita a 1 req/s, burst 3 (es el más chatty).
+- DiskCache en `cache_path`.
+- Telemetry vía `get_telemetry()` si `enable_telemetry=None` (respeta env var).
 
 ---
 

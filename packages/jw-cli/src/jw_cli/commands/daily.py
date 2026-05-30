@@ -5,11 +5,10 @@ from __future__ import annotations
 import asyncio
 
 import typer
-from rich.console import Console
-from rich.panel import Panel
-
 from jw_core.clients.wol import WOLClient
 from jw_core.parsers.daily_text import parse_daily_text
+from rich.console import Console
+from rich.panel import Panel
 
 console = Console()
 
@@ -18,6 +17,7 @@ def daily_cmd(
     lang: str = typer.Option("es", "--lang", "-l", help="ISO code (en/es/pt)"),
 ) -> None:
     """Fetch and print today's daily text."""
+
     async def run() -> None:
         wol = WOLClient()
         try:

@@ -29,5 +29,6 @@ def test_resolve_reference_no_match() -> None:
 
 def test_get_chapter_validates_book_num() -> None:
     import asyncio
+
     out = asyncio.run(server.get_chapter(0, 1))
     assert "error" in out

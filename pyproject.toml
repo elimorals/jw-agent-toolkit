@@ -31,16 +31,34 @@ dev = [
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=5.0.0",
     "pytest-recording>=0.13.0",
+    "hypothesis>=6.100.0",
     "ruff>=0.7.0",
     "mypy>=1.13.0",
 ]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
 target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
+ignore = [
+    # E741: short var names like `l` are fine in list comprehensions over
+    # already-clear contexts (e.g. `for l in languages`).
+    "E741",
+    # SIM108: ternary preference. The explicit if/else is often clearer.
+    "SIM108",
+    # B904: raise-from style preference; we already preserve causes where
+    # it matters (CDNError, TopicIndexError, etc.).
+    "B904",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Typer commands declare options via `typer.Option(...)` / `typer.Argument(...)`
+# in defaults — that IS the framework's interface, B008 is a false positive.
+"packages/jw-cli/src/jw_cli/commands/*.py" = ["B008"]
+# Tests intentionally use blind `Exception` assertions for malformed inputs.
+"**/tests/*.py" = ["B017"]
 
 [tool.ruff.format]
 quote-style = "double"

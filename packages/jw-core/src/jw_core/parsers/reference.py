@@ -33,10 +33,7 @@ __all__ = [
 
 def _norm(s: str) -> str:
     """Lowercase + remove combining accents. Preserves spaces, digits, punct."""
-    return "".join(
-        c for c in unicodedata.normalize("NFD", s.lower())
-        if not unicodedata.combining(c)
-    )
+    return "".join(c for c in unicodedata.normalize("NFD", s.lower()) if not unicodedata.combining(c))
 
 
 def _norm_key(s: str) -> str:
@@ -121,15 +118,17 @@ class ReferenceParser:
             book_num, lang, canonical = entry
             verse_start_raw = m.group("verse_start")
             verse_end_raw = m.group("verse_end")
-            refs.append(BibleRef(
-                book_num=book_num,
-                book_canonical=canonical,
-                chapter=int(m.group("chapter")),
-                verse_start=int(verse_start_raw) if verse_start_raw else None,
-                verse_end=int(verse_end_raw) if verse_end_raw else None,
-                detected_language=lang,
-                raw_match=normalized[m.start():m.end()].strip(),
-            ))
+            refs.append(
+                BibleRef(
+                    book_num=book_num,
+                    book_canonical=canonical,
+                    chapter=int(m.group("chapter")),
+                    verse_start=int(verse_start_raw) if verse_start_raw else None,
+                    verse_end=int(verse_end_raw) if verse_end_raw else None,
+                    detected_language=lang,
+                    raw_match=normalized[m.start() : m.end()].strip(),
+                )
+            )
         return refs
 
     def parse_one(self, text: str) -> BibleRef | None:

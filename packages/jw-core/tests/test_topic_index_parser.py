@@ -7,7 +7,6 @@ landing). Fixtures are checked into the repo so tests run offline.
 from pathlib import Path
 
 import pytest
-
 from jw_core.parsers.topic_index import parse_subject_page
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -24,6 +23,7 @@ def research_guide_html() -> str:
 
 
 # ── Trinity subject page ────────────────────────────────────────────────
+
 
 def test_parse_trinity_returns_subject(trinity_html: str) -> None:
     s = parse_subject_page(trinity_html, source_url="https://wol.jw.org/en/wol/d/r1/lp-e/1200275936")
@@ -97,10 +97,7 @@ def test_parse_trinity_first_pub_citation_well_formed(trinity_html: str) -> None
     s = parse_subject_page(trinity_html, source_url="x")
     assert s is not None
     # Find the 'ancient' subheading
-    target = next(
-        sh for sh in s.subheadings
-        if "ancient" in sh.heading.lower() and "religion" in sh.heading.lower()
-    )
+    target = next(sh for sh in s.subheadings if "ancient" in sh.heading.lower() and "religion" in sh.heading.lower())
     pub_cits = [c for c in target.citations if c.kind == "publication"]
     assert pub_cits
     # First publication code should be 'g05 4/22 7' (no trailing semicolon).
@@ -115,9 +112,7 @@ def test_parse_trinity_no_trailing_punctuation_in_citations(trinity_html: str) -
     assert s is not None
     for sh in s.subheadings:
         for c in sh.citations:
-            assert not c.text.endswith((";", ",", ".")), (
-                f"Citation text {c.text!r} has trailing punctuation"
-            )
+            assert not c.text.endswith((";", ",", ".")), f"Citation text {c.text!r} has trailing punctuation"
 
 
 def test_parse_trinity_bible_refs_have_urls(trinity_html: str) -> None:
@@ -138,6 +133,7 @@ def test_parse_total_citations_helper(trinity_html: str) -> None:
 
 
 # ── Phase 4.6: article-title-style subject pages ───────────────────────
+
 
 @pytest.fixture(scope="module")
 def religions_html() -> str:
@@ -175,9 +171,7 @@ def test_article_title_splits_title_from_publication(religions_html: str) -> Non
     )
     assert timgad is not None
     # Heading is the article title (no 'The Watchtower' suffix).
-    assert "watchtower" not in timgad.heading.lower(), (
-        f"Heading should be title only; got: {timgad.heading!r}"
-    )
+    assert "watchtower" not in timgad.heading.lower(), f"Heading should be title only; got: {timgad.heading!r}"
     # Citation text retains the publication reference.
     assert timgad.citations
     cit = timgad.citations[0]
@@ -193,18 +187,18 @@ def test_trinity_page_remains_trinity_style(trinity_html: str) -> None:
 
 # ── Research Guide landing page ─────────────────────────────────────────
 
+
 def test_parse_research_guide_no_crash(research_guide_html: str) -> None:
     """The Research Guide landing is not a subject index per se, but the
     parser should still handle it without crashing — it may have few or no
     subheadings, which is fine."""
-    s = parse_subject_page(
-        research_guide_html, source_url="https://wol.jw.org/en/wol/d/r1/lp-e/1200277232"
-    )
+    s = parse_subject_page(research_guide_html, source_url="https://wol.jw.org/en/wol/d/r1/lp-e/1200277232")
     assert s is not None
     assert s.docid == "1200277232"
 
 
 # ── Edge cases ─────────────────────────────────────────────────────────
+
 
 def test_parse_nonsubject_page_returns_none() -> None:
     """An HTML page without <article id='article'> should return None."""

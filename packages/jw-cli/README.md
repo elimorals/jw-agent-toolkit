@@ -12,6 +12,8 @@ CLI de terminal sobre `jw-core`. Implementado con [Typer](https://typer.tiangolo
 | `jw search "<query>"` | Búsqueda en jw.org vía la API CDN |
 | `jw languages` | Lista los idiomas soportados por jw.org |
 | `jw download <pub_code>` | Descarga una publicación en el formato pedido |
+| `jw jwpub <path>` | Inspecciona un JWPUB local (TOC) o decrypta su texto con `--extract` |
+| `jw topic <query>` | Busca temas en el Índice de Publicaciones Watch Tower y fetcha el top subject |
 
 ## Ejemplos
 
@@ -33,6 +35,18 @@ jw languages --web
 
 # Descargar el folleto "Good News" en EPUB español
 jw download fg --lang S --format EPUB --out ./descargas/
+
+# Inspeccionar la TOC de un JWPUB descargado
+jw jwpub ./descargas/ti_E.jwpub
+
+# Decryptar y mostrar los primeros 3 documentos del JWPUB
+jw jwpub ./descargas/ti_E.jwpub --extract --max 3
+
+# Buscar el tema "Trinity" y mostrar el top subject con sus subheadings
+jw topic "Trinity" --lang E --limit 5 --max-sub 15
+
+# Sólo el ranking de candidatos, sin descargar la página de tema
+jw topic "Trinity" --no-fetch
 ```
 
 ## Instalación local

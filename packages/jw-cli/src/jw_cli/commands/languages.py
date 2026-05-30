@@ -5,26 +5,20 @@ from __future__ import annotations
 import asyncio
 
 import typer
+from jw_core.clients.mediator import MediatorClient
 from rich.console import Console
 from rich.table import Table
-
-from jw_core.clients.mediator import MediatorClient
 
 console = Console()
 
 
 def languages_cmd(
-    in_language: str = typer.Option(
-        "E", "--in", help="JW code of the language to display names in (E, S, T)"
-    ),
-    only_with_content: bool = typer.Option(
-        True, "--web/--all", help="Filter to languages with web content"
-    ),
-    grep: str = typer.Option(
-        "", "--grep", "-g", help="Substring filter on name/vernacular"
-    ),
+    in_language: str = typer.Option("E", "--in", help="JW code of the language to display names in (E, S, T)"),
+    only_with_content: bool = typer.Option(True, "--web/--all", help="Filter to languages with web content"),
+    grep: str = typer.Option("", "--grep", "-g", help="Substring filter on name/vernacular"),
 ) -> None:
     """List jw.org-supported languages with their JW codes and ISO codes."""
+
     async def run() -> None:
         m = MediatorClient()
         try:
@@ -33,7 +27,8 @@ def languages_cmd(
             await m.aclose()
 
         filtered = [
-            lang for lang in langs
+            lang
+            for lang in langs
             if (not only_with_content or lang.has_web_content)
             and (not grep or grep.lower() in lang.name.lower() or grep.lower() in lang.vernacular.lower())
         ]

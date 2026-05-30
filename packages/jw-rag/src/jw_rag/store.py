@@ -117,8 +117,7 @@ class VectorStore:
                     fused[hit.chunk.id] = (contribution, hit.chunk)
         ordered = sorted(fused.values(), key=lambda t: -t[0])
         return [
-            SearchHit(chunk=c, score=float(s), rank=r, source="hybrid")
-            for r, (s, c) in enumerate(ordered[:top_k], 1)
+            SearchHit(chunk=c, score=float(s), rank=r, source="hybrid") for r, (s, c) in enumerate(ordered[:top_k], 1)
         ]
 
     # ── Persistence ────────────────────────────────────────────────────
@@ -127,36 +126,46 @@ class VectorStore:
         self.path.mkdir(parents=True, exist_ok=True)
         with (self.path / "chunks.jsonl").open("w", encoding="utf-8") as f:
             for c in self._chunks:
-                f.write(json.dumps({
-                    "id": c.id,
-                    "text": c.text,
-                    "source_id": c.source_id,
-                    "metadata": c.metadata,
-                }, ensure_ascii=False) + "\n")
+                f.write(
+                    json.dumps(
+                        {
+                            "id": c.id,
+                            "text": c.text,
+                            "source_id": c.source_id,
+                            "metadata": c.metadata,
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
         np.save(self.path / "vectors.npy", self._vectors)
-        (self.path / "meta.json").write_text(json.dumps({
-            "dim": self.embedder.dim,
-            "count": self.count,
-        }))
+        (self.path / "meta.json").write_text(
+            json.dumps(
+                {
+                    "dim": self.embedder.dim,
+                    "count": self.count,
+                }
+            )
+        )
 
     def load(self) -> None:
         if not (self.path / "meta.json").exists():
             return
         meta = json.loads((self.path / "meta.json").read_text())
         if meta["dim"] != self.embedder.dim:
-            raise ValueError(
-                f"Embedder dim mismatch: stored={meta['dim']} embedder={self.embedder.dim}"
-            )
+            raise ValueError(f"Embedder dim mismatch: stored={meta['dim']} embedder={self.embedder.dim}")
         self._chunks = []
         with (self.path / "chunks.jsonl").open("r", encoding="utf-8") as f:
             for line in f:
                 data = json.loads(line)
-                self._chunks.append(Chunk(
-                    id=data["id"],
-                    text=data["text"],
-                    source_id=data.get("source_id", ""),
-                    metadata=data.get("metadata", {}),
-                ))
+                self._chunks.append(
+                    Chunk(
+                        id=data["id"],
+                        text=data["text"],
+                        source_id=data.get("source_id", ""),
+                        metadata=data.get("metadata", {}),
+                    )
+                )
         self._vectors = np.load(self.path / "vectors.npy")
         self._tokenized = [_tokenize(c.text) for c in self._chunks]
         self._bm25 = BM25Okapi(self._tokenized) if self._tokenized else None
@@ -164,7 +173,9 @@ class VectorStore:
 
 # ── Tokenizer ──────────────────────────────────────────────────────────
 
+
 def _tokenize(text: str) -> list[str]:
     """Lowercase + whitespace + strip punctuation. Naive but works for BM25."""
     import re
+
     return [t for t in re.findall(r"\w+", text.lower()) if len(t) > 1]

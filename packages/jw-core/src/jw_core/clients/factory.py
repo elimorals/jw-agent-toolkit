@@ -88,12 +88,20 @@ def build_clients(
     pub_media = PubMediaClient(throttler=throttler, cache=cache, telemetry=telemetry)
     weblang = WeblangClient(throttler=throttler, cache=cache, telemetry=telemetry)
     topic_index = TopicIndexClient(
-        cdn=cdn, wol=wol, throttler=throttler, cache=cache, telemetry=telemetry,
+        cdn=cdn,
+        wol=wol,
+        throttler=throttler,
+        cache=cache,
+        telemetry=telemetry,
     )
 
     return ClientSuite(
-        cdn=cdn, wol=wol, mediator=mediator, pub_media=pub_media,
-        topic_index=topic_index, weblang=weblang,
+        cdn=cdn,
+        wol=wol,
+        mediator=mediator,
+        pub_media=pub_media,
+        topic_index=topic_index,
+        weblang=weblang,
         throttler=throttler or Throttler(),  # never None in the bundle for typing
         cache=cache or DiskCache(cache_path),
     )

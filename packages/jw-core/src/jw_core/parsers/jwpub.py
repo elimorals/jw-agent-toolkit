@@ -43,9 +43,7 @@ from jw_core.models import JwpubDocument, JwpubMetadata
 
 # Fixed XOR constant used by JW to derive per-publication keys. Discovered
 # by `gokusander/jwpub-toolkit` (MIT) by inspecting JW Library binaries.
-_XOR_KEY = bytes.fromhex(
-    "11cbb5587e32846d4c26790c633da289f66fe5842a3a585ce1bc3a294af5ada7"
-)
+_XOR_KEY = bytes.fromhex("11cbb5587e32846d4c26790c633da289f66fe5842a3a585ce1bc3a294af5ada7")
 
 
 class JwpubError(RuntimeError):
@@ -53,6 +51,7 @@ class JwpubError(RuntimeError):
 
 
 # ── Public API ──────────────────────────────────────────────────────────
+
 
 def parse_jwpub_metadata(path: Path | str) -> JwpubMetadata:
     """Return readable metadata + document TOC, WITHOUT decryption.
@@ -77,6 +76,7 @@ def parse_jwpub(path: Path | str) -> JwpubMetadata:
 
 
 # ── Internals ───────────────────────────────────────────────────────────
+
 
 def _parse(path: Path | str, *, decrypt_text: bool) -> JwpubMetadata:
     pub_path = Path(path)
@@ -117,9 +117,7 @@ def _parse(path: Path | str, *, decrypt_text: bool) -> JwpubMetadata:
     )
 
 
-def _compute_key_iv(
-    meps_language_index: int, symbol: str, year: int, issue_tag_number: int = 0
-) -> tuple[bytes, bytes]:
+def _compute_key_iv(meps_language_index: int, symbol: str, year: int, issue_tag_number: int = 0) -> tuple[bytes, bytes]:
     """Derive the AES-128 key + IV for a publication.
 
     Algorithm (credit: gokusander/jwpub-toolkit, MIT):
@@ -132,7 +130,7 @@ def _compute_key_iv(
         parts.append(str(issue_tag_number))
     pub_string = "_".join(parts)
     digest = hashlib.sha256(pub_string.encode("utf-8")).digest()
-    material = bytes(a ^ b for a, b in zip(digest, _XOR_KEY))
+    material = bytes(a ^ b for a, b in zip(digest, _XOR_KEY, strict=True))
     return material[:16], material[16:32]
 
 
@@ -142,8 +140,8 @@ def _decrypt_blob(blob: bytes, key: bytes, iv: bytes) -> str:
     decryptor = cipher.decryptor()
     padded = decryptor.update(blob) + decryptor.finalize()
     # Strip PKCS7 padding.
-    if padded and 1 <= padded[-1] <= 16 and padded[-padded[-1]:] == bytes([padded[-1]]) * padded[-1]:
-        padded = padded[:-padded[-1]]
+    if padded and 1 <= padded[-1] <= 16 and padded[-padded[-1] :] == bytes([padded[-1]]) * padded[-1]:
+        padded = padded[: -padded[-1]]
     inflated = zlib.decompress(padded)
     return inflated.decode("utf-8", errors="replace")
 
@@ -212,20 +210,22 @@ def _read_documents_from_inner(
                     # publication. The metadata side stays intact.
                     text = ""
                     paragraphs = []
-            out.append(JwpubDocument(
-                document_id=r["DocumentId"],
-                meps_document_id=r["MepsDocumentId"],
-                title=r["Title"] or "",
-                toc_title=r["TocTitle"] or "",
-                chapter_number=r["ChapterNumber"],
-                section_number=r["SectionNumber"] or 0,
-                paragraph_count=r["ParagraphCount"] or 0,
-                first_page_number=r["FirstPageNumber"],
-                last_page_number=r["LastPageNumber"],
-                content_length=r["ContentLength"] or 0,
-                text=text,
-                paragraphs=paragraphs,
-            ))
+            out.append(
+                JwpubDocument(
+                    document_id=r["DocumentId"],
+                    meps_document_id=r["MepsDocumentId"],
+                    title=r["Title"] or "",
+                    toc_title=r["TocTitle"] or "",
+                    chapter_number=r["ChapterNumber"],
+                    section_number=r["SectionNumber"] or 0,
+                    paragraph_count=r["ParagraphCount"] or 0,
+                    first_page_number=r["FirstPageNumber"],
+                    last_page_number=r["LastPageNumber"],
+                    content_length=r["ContentLength"] or 0,
+                    text=text,
+                    paragraphs=paragraphs,
+                )
+            )
         conn.close()
         return out, decrypted_any
     finally:

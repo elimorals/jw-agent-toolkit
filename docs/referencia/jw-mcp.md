@@ -1,6 +1,6 @@
 # Referencia: jw-mcp
 
-> Contratos completos de las 24 herramientas MCP. Cada herramienta documenta entrada, salida y errores.
+> Contratos completos de las **29 herramientas MCP**. Cada herramienta documenta entrada, salida y errores.
 
 ## Arranque del servidor
 
@@ -26,6 +26,9 @@ Para evitar abrir múltiples connection pools:
 | Var | Default | Descripción |
 |---|---|---|
 | `JW_RAG_STORE_PATH` | `~/.jw-agent-toolkit/rag` | Path del store RAG |
+| `JW_CACHE_PATH` | `~/.jw-agent-toolkit/cache.db` | Path del DiskCache SQLite leído por `get_cache_stats` |
+| `JW_TELEMETRY_ENABLED` | (no) | `1`/`true`/`yes` activa el detector de drift de la API |
+| `JW_TELEMETRY_PATH` | `~/.jw-agent-toolkit/telemetry.json` | Path del JSON con baselines y eventos de drift |
 
 ---
 
@@ -45,11 +48,11 @@ Descarga y parsea un capítulo bíblico.
 
 **Returns**: `title`, `paragraphs[]`, `references[]`, `source_url`, `language`, `publication`. Si `book_num` ∉ `1..66`: `{"error": "..."}`.
 
-### `get_daily_text(language="en")`
+### `get_daily_text(language="en", date="")`
 
-Texto diario.
+Texto diario. Sin `date`, lee de la homepage `/h/`; con `date="YYYY-MM-DD"`, navega a `/dt/{r}/{lp_tag}/{YYYY}/{M}/{D}` (funciona para cualquier fecha publicada).
 
-**Returns**: `date`, `scripture`, `commentary`, `source_url`, `language`. Si falla el parseo: `{"error": "...", "source_url": "...", "html_length": int}`.
+**Returns**: `date`, `scripture`, `commentary`, `source_url`, `language`, `requested_date` (la fecha pedida o `"today"`). Si falla el parseo: `{"error": "...", "source_url": "...", "html_length": int}`. Si falla el fetch por fecha específica: `{"error": "Could not fetch daily text for {date}: {e}"}`.
 
 ### `search_content(query, filter_type="all", language="en", limit=10)`
 
@@ -86,6 +89,18 @@ Inventario de archivos descargables.
 Descarga a `out_dir`.
 
 **Returns**: `pub_code`, `language`, `file_format`, `saved: [{path, size_bytes}]`, `total_bytes`.
+
+### `get_publication_toc(pub_code, language="en", number=None)`
+
+Fetcha la página landing/TOC de una publicación. URL pattern: `/{iso}/wol/publication/{r}/{lp_tag}/{pub}[/{number}]`. Para Bibles (`pub="nwtsty"`), `number` selecciona book TOC. Para revistas, `number` es issue. Para libros, capítulo.
+
+**Returns**: `pub_code`, `language`, `number`, `title`, `paragraphs[]`, `references[]`, `source_url`. Si falla: `{"error": str(e)}`.
+
+### `list_weblang_languages(in_language_iso="en")`
+
+Lista alterna desde `www.jw.org/{iso}/languages/`. Complementa `list_languages` (mediator): trae más campos por idioma (vernacular, script, altSpellings).
+
+**Returns**: `in_language_iso`, `count`, `languages: [WeblangLanguage.model_dump()]` (campos: code, iso, name, vernacular, alt_names, rtl, script, is_sign_language).
 
 ---
 
@@ -133,7 +148,7 @@ Página de tema completa.
 
 ---
 
-## EPUB / JWPUB (Fase 5)
+## EPUB (Fase 5)
 
 ### `extract_epub_text(epub_path, max_docs=0)`
 
@@ -141,17 +156,33 @@ Parsea un .epub descargado.
 
 **Returns**: `title`, `creator`, `language`, `identifier`, `publisher`, `document_count`, `paragraph_count`, `source_path`, `documents: [EpubDocument.model_dump()]`.
 
-### `inspect_jwpub_metadata(jwpub_path)`
-
-Metadata + TOC del .jwpub. El contenido cifrado no se decodifica (siempre `decrypted_text_available=False`).
-
-**Returns**: `JwpubMetadata.model_dump()` con manifest_hash, schema_version, document_count, documents[] con titles + page ranges + paragraph counts.
-
 ### `ingest_epub(epub_path, publication_code="", language="en")`
 
 Indexa el EPUB en el store RAG.
 
 **Returns**: `epub_path`, `publication_code`, `language`, `chunks_added`, `store_total`.
+
+---
+
+## JWPUB (Fase 5 + 5.5 — descifrado AES-128-CBC)
+
+### `inspect_jwpub_metadata(jwpub_path)`
+
+Metadata + TOC sin desencriptar (barato). El campo `text` de cada documento se excluye explícitamente del response.
+
+**Returns**: `JwpubMetadata.model_dump(exclude={"documents": {"__all__": {"text"}}})` con title, symbol, year, publication_type, manifest_hash, schema_version, document_count, documents[] con chapter_number, paragraph_count, page range, content_length.
+
+### `extract_jwpub_text(jwpub_path, max_docs=0)`
+
+Decrypta y devuelve el texto completo. Usa la derivación de clave `SHA256(f"{lang}_{symbol}_{year}") XOR magic_constant` (crédito `gokusander/jwpub-toolkit`, MIT).
+
+**Returns**: `title`, `symbol`, `year`, `publication_type`, `language_index`, `document_count`, `decrypted_text_available` (True salvo en variantes raras), `source_path`, `documents: [JwpubDocument.model_dump()]` con `text` (XHTML) y `paragraphs` (texto plano).
+
+### `ingest_jwpub(jwpub_path, language="en")`
+
+Decrypta + chunkea + indexa todo el JWPUB en el store RAG local. Si la decryption falla (variante de formato no soportada), devuelve `chunks_added=0` con warning.
+
+**Returns**: `jwpub_path`, `language`, `chunks_added`, `store_total`.
 
 ---
 
@@ -235,6 +266,20 @@ Pipeline completo:
 4. RAG opcional (`source="rag"`).
 
 Cada `Finding.metadata.source` permite al LLM rankear por autoridad.
+
+---
+
+## Infraestructura (Fase 9)
+
+### `get_cache_stats()`
+
+Snapshot del `DiskCache` en disco. Lee `JW_CACHE_PATH` (default `~/.jw-agent-toolkit/cache.db`).
+
+**Returns**:
+- Si no existe el archivo: `{"enabled": False, "path": "...", "reason": "no cache file"}`.
+- Si existe: `{"enabled": True, "path": "...", "total": int, "live": int, "expired": int}`.
+
+Útil para que un operador inspeccione o limpie el cache que comparten los clientes wired vía `factory.build_clients()`. El servidor MCP por defecto NO arranca con cache wired (los clientes lazy se crean sin throttler/cache/telemetry); el `get_cache_stats` solo refleja el cache standalone que pudo dejar otro proceso.
 
 ---
 

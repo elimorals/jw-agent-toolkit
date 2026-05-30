@@ -73,17 +73,14 @@ def _split_article_title(text: str) -> tuple[str, str] | None:
     # Find the latest publication-name marker that has a citation-looking
     # suffix after it (comma + digit, ", lesson", ", chap.", ", Appendix").
     best_idx = -1
-    best_marker = ""
     for marker in _PUB_MARKERS:
         idx = cleaned.rfind(marker)
         if idx <= 0:
             continue
         # Validate: there must be a comma-something suffix within ~80 chars.
-        tail = cleaned[idx + len(marker):]
-        if re.match(r",\s*(\d|lesson|chap\.|Appendix|p\.|Part)", tail):
-            if idx > best_idx:
-                best_idx = idx
-                best_marker = marker
+        tail = cleaned[idx + len(marker) :]
+        if re.match(r",\s*(\d|lesson|chap\.|Appendix|p\.|Part)", tail) and idx > best_idx:
+            best_idx = idx
     if best_idx < 0:
         return None
     title = cleaned[:best_idx].strip(" ​—-")
@@ -155,14 +152,12 @@ def _detect_style(subheadings: list[TopicSubheading]) -> str:
     """
     if not subheadings:
         return "trinity"
-    one_cit = sum(
-        1 for sh in subheadings
-        if len(sh.citations) == 1 and ";" not in sh.heading
-    )
+    one_cit = sum(1 for sh in subheadings if len(sh.citations) == 1 and ";" not in sh.heading)
     return "article_title" if one_cit / len(subheadings) >= 0.6 else "trinity"
 
 
 # ── Internals ───────────────────────────────────────────────────────────
+
 
 def _extract_docid(article: Tag, source_url: str | None) -> str:
     """Pull docid from `pub-docId-NNN` class on <article> or from the URL."""
@@ -213,11 +208,13 @@ def _extract_subheadings(article: Tag) -> list[TopicSubheading]:
             continue
         heading, citations = _parse_entry_paragraph(p)
         if heading or citations:
-            out.append(TopicSubheading(
-                heading=heading,
-                citations=citations,
-                is_top_level=is_top_level,
-            ))
+            out.append(
+                TopicSubheading(
+                    heading=heading,
+                    citations=citations,
+                    is_top_level=is_top_level,
+                )
+            )
     return out
 
 
@@ -251,16 +248,12 @@ def _parse_entry_paragraph(p: Tag) -> tuple[str, list[TopicCitation]]:
     # Article-title-style detection: no colon + a single anchor whose text
     # makes up most of the paragraph.
     article_title_mode = (
-        ":" not in full_text
-        and len(anchors) == 1
-        and anchors[0].get_text(" ", strip=True).strip() == full_text.strip()
+        ":" not in full_text and len(anchors) == 1 and anchors[0].get_text(" ", strip=True).strip() == full_text.strip()
     )
 
     if article_title_mode:
         a = anchors[0]
-        anchor_text = _TRAILING_PUNCT_RE.sub(
-            "", a.get_text(" ", strip=True)
-        ).strip()
+        anchor_text = _TRAILING_PUNCT_RE.sub("", a.get_text(" ", strip=True)).strip()
         split = _split_article_title(anchor_text)
         if split:
             headword, pub_marker = split
@@ -269,11 +262,7 @@ def _parse_entry_paragraph(p: Tag) -> tuple[str, list[TopicCitation]]:
             pub_marker = anchor_text
         href = a.get("href", "")
         kind = _kind_from_href(href)
-        url = (
-            href if href.startswith("http")
-            else f"{_WOL_BASE}{href}" if href
-            else None
-        )
+        url = href if href.startswith("http") else f"{_WOL_BASE}{href}" if href else None
         citations.append(TopicCitation(text=pub_marker, kind=kind, url=url))
         return headword, citations
 
@@ -289,11 +278,7 @@ def _parse_entry_paragraph(p: Tag) -> tuple[str, list[TopicCitation]]:
             continue
         href = a.get("href", "")
         kind = _kind_from_href(href)
-        url = (
-            href if href.startswith("http")
-            else f"{_WOL_BASE}{href}" if href
-            else None
-        )
+        url = href if href.startswith("http") else f"{_WOL_BASE}{href}" if href else None
         citations.append(TopicCitation(text=text, kind=kind, url=url))
 
     return headword, citations

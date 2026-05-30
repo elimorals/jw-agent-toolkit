@@ -50,15 +50,24 @@ El servidor habla MCP sobre stdio. Conéctalo a Claude Desktop:
 }
 ```
 
-Tras reiniciar Claude Desktop verás disponibles 24 herramientas:
+Tras reiniciar Claude Desktop verás disponibles **29 herramientas**:
 
-Núcleo (Fase 1): `resolve_reference`, `get_chapter`, `get_daily_text`, `search_content`, `get_article`.
-Media (Fase 2): `list_languages`, `list_publication_files`, `download_publication`.
+Núcleo (Fase 1): `resolve_reference`, `get_chapter`, `get_daily_text` (acepta `date` opcional), `search_content`, `get_article`.
+Media (Fase 2): `list_languages`, `list_publication_files`, `download_publication`, `get_publication_toc`, `list_weblang_languages`.
 Notas (Fase 3): `get_verse`, `get_study_notes`, `get_cross_references`, `compare_translations`.
 Temas (Fase 4): `search_topic_index`, `get_topic_articles`.
-EPUB/JWPUB (Fase 5): `extract_epub_text`, `inspect_jwpub_metadata`, `ingest_epub`.
+EPUB (Fase 5): `extract_epub_text`, `ingest_epub`.
+JWPUB (Fase 5 / 5.5): `inspect_jwpub_metadata`, `extract_jwpub_text`, `ingest_jwpub`.
 RAG (Fase 6): `semantic_search`, `ingest_bible_chapter`, `ingest_search_topk`.
 Agentes (Fase 7): `research_topic`, `verse_explainer`, `meeting_helper`, `apologetics`.
+Infraestructura (Fase 9): `get_cache_stats`.
+
+Variables de entorno opcionales en `claude_desktop_config.json` (sección `env`):
+
+- `JW_RAG_STORE_PATH` — path del store RAG (default `~/.jw-agent-toolkit/rag`).
+- `JW_CACHE_PATH` — path del DiskCache SQLite (default `~/.jw-agent-toolkit/cache.db`).
+- `JW_TELEMETRY_ENABLED=1` — activa el detector de drift de la API.
+- `JW_TELEMETRY_PATH` — path del JSON de telemetría (default `~/.jw-agent-toolkit/telemetry.json`).
 
 ## Ejecutar las pruebas
 
@@ -66,8 +75,13 @@ Agentes (Fase 7): `research_topic`, `verse_explainer`, `meeting_helper`, `apolog
 uv run pytest packages/ -v
 ```
 
-Esperado: 44 passing (núcleo de Fase 1) + las pruebas adicionales de las
-fases 2-7 (citas, notas de estudio, índice temático, RAG y agentes).
+Esperado: **166 passing + 4 skipped**. Los skipped son tests cassette-backed que necesitan `--record-mode=rewrite` la primera vez (corren sin red en las siguientes pasadas).
+
+Para re-grabar los cassettes contra la API actual de jw.org:
+
+```bash
+uv run pytest packages/jw-core/tests/test_cassettes.py --record-mode=rewrite
+```
 
 ## Probar las herramientas desde Python
 

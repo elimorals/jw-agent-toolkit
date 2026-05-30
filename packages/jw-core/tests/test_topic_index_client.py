@@ -2,7 +2,6 @@
 
 from jw_core.clients.topic_index import _rerank_by_title_match
 
-
 SAMPLE_RAW = [
     {"title": "Hermas", "wol_url": "x", "docid": "111", "original_rank": 0, "score": 0.0},
     {"title": "Minor Reformed Church", "wol_url": "y", "docid": "222", "original_rank": 1, "score": 0.0},

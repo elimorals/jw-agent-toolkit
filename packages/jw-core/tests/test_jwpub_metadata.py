@@ -12,7 +12,6 @@ import zipfile
 from pathlib import Path
 
 import pytest
-
 from jw_core.parsers.jwpub import JwpubError, parse_jwpub_metadata
 
 
@@ -44,19 +43,110 @@ def _build_synthetic_jwpub(dst: Path) -> None:
             """
         )
         rows = [
-            (0, 100, 1, 0, "18", 0, 0, None, "Title Page", None, "Title Page", None,
-             None, None, None, None, None, None, None, None, b"\x01\x02\x03\x04",
-             None, None, None, None, 5, 0, 0, 1, 2, 100, None),
-            (1, 101, 1, 0, "11", 0, 0, 1, "Chapter 1", None, "Chapter 1", None,
-             None, None, None, None, None, None, None, None, b"\x05\x06\x07\x08",
-             None, None, None, None, 20, 0, 0, 3, 10, 500, None),
-            (2, 102, 1, 0, "11", 0, 0, 2, "Chapter 2", None, "Chapter 2", None,
-             None, None, None, None, None, None, None, None, b"\x09\x0a\x0b\x0c",
-             None, None, None, None, 15, 0, 0, 11, 18, 380, None),
+            (
+                0,
+                100,
+                1,
+                0,
+                "18",
+                0,
+                0,
+                None,
+                "Title Page",
+                None,
+                "Title Page",
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                b"\x01\x02\x03\x04",
+                None,
+                None,
+                None,
+                None,
+                5,
+                0,
+                0,
+                1,
+                2,
+                100,
+                None,
+            ),
+            (
+                1,
+                101,
+                1,
+                0,
+                "11",
+                0,
+                0,
+                1,
+                "Chapter 1",
+                None,
+                "Chapter 1",
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                b"\x05\x06\x07\x08",
+                None,
+                None,
+                None,
+                None,
+                20,
+                0,
+                0,
+                3,
+                10,
+                500,
+                None,
+            ),
+            (
+                2,
+                102,
+                1,
+                0,
+                "11",
+                0,
+                0,
+                2,
+                "Chapter 2",
+                None,
+                "Chapter 2",
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                b"\x09\x0a\x0b\x0c",
+                None,
+                None,
+                None,
+                None,
+                15,
+                0,
+                0,
+                11,
+                18,
+                380,
+                None,
+            ),
         ]
-        conn.executemany(
-            "INSERT INTO Document VALUES (" + ",".join("?" * 32) + ")", rows
-        )
+        conn.executemany("INSERT INTO Document VALUES (" + ",".join("?" * 32) + ")", rows)
         conn.commit()
         conn.close()
         db_bytes = db_path.read_bytes()
@@ -122,9 +212,11 @@ def test_parse_jwpub_metadata_reports_no_text(synthetic_jwpub: Path) -> None:
 
 # ── Phase 5.5: decryption (synthetic + live) ────────────────────────────
 
+
 def test_compute_key_iv_known_publication() -> None:
     """Trinity brochure: lang=0, symbol='ti', year=1989 → known key/iv."""
     from jw_core.parsers.jwpub import _compute_key_iv
+
     key, iv = _compute_key_iv(0, "ti", 1989, 0)
     # These were verified against the actual ti_E.jwpub blob during dev.
     assert key.hex() == "84d116c26a45e6bff27bf8c4ae44202d"
@@ -134,6 +226,7 @@ def test_compute_key_iv_known_publication() -> None:
 def test_compute_key_iv_with_issue_number() -> None:
     """When issue_tag_number != 0, it's appended to the pub string."""
     from jw_core.parsers.jwpub import _compute_key_iv
+
     k1, _ = _compute_key_iv(0, "w", 2024, 0)
     k2, _ = _compute_key_iv(0, "w", 2024, 4)
     # Different issue → different key (proves the issue is part of the input)
@@ -143,6 +236,7 @@ def test_compute_key_iv_with_issue_number() -> None:
 def test_parse_jwpub_live_ti_brochure() -> None:
     """End-to-end decryption against the Trinity brochure on disk."""
     from jw_core.parsers.jwpub import parse_jwpub
+
     pub_path = Path("data/jwpub_test/ti_E.jwpub")
     if not pub_path.exists():
         pytest.skip(f"{pub_path} not downloaded; run scripts/download_jwpub.py")

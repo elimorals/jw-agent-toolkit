@@ -14,7 +14,9 @@ jw_cli/
     ├── daily.py
     ├── search.py
     ├── languages.py
-    └── download.py
+    ├── download.py
+    ├── jwpub.py           # Fase 10 — inspect/decrypt JWPUB local
+    └── topic.py           # Fase 10 — search topic index + fetch top subject
 ```
 
 El entry point está en `pyproject.toml`:
@@ -254,6 +256,81 @@ Con `--list`: mismo header + listado, sin descargar.
 
 ---
 
+## Comando `jw jwpub`
+
+Inspecciona o desencripta un archivo `.jwpub` local.
+
+```bash
+jw jwpub <path> [--extract|-x] [--max N]
+```
+
+### Argumentos
+
+| Nombre | Tipo | Descripción |
+|---|---|---|
+| `path` | Path | Ruta al archivo `.jwpub` (debe existir) |
+
+### Opciones
+
+| Flag | Default | Descripción |
+|---|---|---|
+| `--extract`, `-x` | `False` | Decrypta el `Content` blob y muestra los párrafos por documento |
+| `--max` | `0` | Limita a los primeros N documentos (0 = todos) |
+
+### Salida
+
+Panel con metadata (`symbol`, `year`, `publication_type`, `document_count`, `decrypted`).
+
+**Modo default** (sin `--extract`): tabla con `#`, `Chapter`, `Title`, `Paragraphs`, `Pages` por documento.
+
+**Modo `--extract`**: panel verde por documento con los primeros 5 párrafos del texto decryptado.
+
+### Códigos de salida
+
+| Código | Significado |
+|---|---|
+| `0` | OK |
+| `1` | `JwpubError` (archivo inválido) |
+
+---
+
+## Comando `jw topic`
+
+Busca en el Índice de Publicaciones Watch Tower y muestra el top subject con sus subheadings.
+
+```bash
+jw topic <query> [--lang LANG] [--limit N] [--fetch/--no-fetch] [--max-sub N]
+```
+
+### Argumentos
+
+| Nombre | Tipo | Descripción |
+|---|---|---|
+| `query` | str | Tema a buscar (`"Trinity"`, `"soul"`, ...) |
+
+### Opciones
+
+| Flag | Default | Descripción |
+|---|---|---|
+| `--lang`, `-l` | `"E"` | JW code (E, S, T) |
+| `--limit`, `-n` | `5` | Máximo de candidatos en el ranking |
+| `--fetch` / `--no-fetch` | `--fetch` | También descarga la página completa del top subject |
+| `--max-sub` | `12` | Limita los subheadings mostrados (0 = todos) |
+
+### Salida
+
+1. Tabla de candidatos con `#`, `Score` (0-100, ranking por título), `Title`, `docid`.
+2. Con `--fetch` (default): panel con title + counts + see_also del top subject + tabla de subheadings (Level top/sub, Heading, Citations).
+
+### Códigos de salida
+
+| Código | Significado |
+|---|---|
+| `0` | OK (incluso si la query no devuelve resultados — se muestra mensaje y exit 0) |
+| (no falla con código distinto) | Si el fetch del subject falla, se muestra el error y continúa |
+
+---
+
 ## Ejemplos compuestos
 
 ### Listar EPUBs disponibles sin descargar
@@ -284,4 +361,29 @@ jw search amor --filter publications --lang es --limit 5
 
 ```bash
 jw daily --lang en
+```
+
+### Inspeccionar TOC de un JWPUB descargado
+
+```bash
+jw download ti --lang E --format JWPUB --out ./descargas/
+jw jwpub ./descargas/ti_E.jwpub
+```
+
+### Decryptar y leer los 3 primeros documentos
+
+```bash
+jw jwpub ./descargas/ti_E.jwpub --extract --max 3
+```
+
+### Buscar "Trinity" y mostrar 15 subheadings
+
+```bash
+jw topic Trinity --max-sub 15
+```
+
+### Solo ver el ranking de candidatos para "soul"
+
+```bash
+jw topic soul --no-fetch --limit 10
 ```

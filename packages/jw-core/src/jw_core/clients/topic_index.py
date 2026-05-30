@@ -55,10 +55,16 @@ class TopicIndexClient:
     ) -> None:
         # CDN and WOL inherit Phase 9 deps if not pre-wired.
         self._cdn = cdn or CDNClient(
-            http=http, throttler=throttler, cache=cache, telemetry=telemetry,
+            http=http,
+            throttler=throttler,
+            cache=cache,
+            telemetry=telemetry,
         )
         self._wol = wol or WOLClient(
-            http=http, throttler=throttler, cache=cache, telemetry=telemetry,
+            http=http,
+            throttler=throttler,
+            cache=cache,
+            telemetry=telemetry,
         )
         self._owns_cdn = cdn is None
         self._owns_wol = wol is None
@@ -84,9 +90,7 @@ class TopicIndexClient:
         subjects (e.g. 'Hermas') ahead of the actual 'TRINITY' subject.
         """
         try:
-            data = await self._cdn.search(
-                query, filter_type="indexes", language=language, limit=limit
-            )
+            data = await self._cdn.search(query, filter_type="indexes", language=language, limit=limit)
         except Exception as e:
             raise TopicIndexError(f"Subject search failed: {e}") from e
 
@@ -99,15 +103,17 @@ class TopicIndexClient:
                 m = _DOCID_RE.search(url)
                 if m:
                     docid = m.group(1) or m.group(2) or ""
-            out.append({
-                "title": entry.get("title", ""),
-                "snippet": entry.get("snippet", ""),
-                "wol_url": url,
-                "docid": docid,
-                "subtype": entry.get("subtype", ""),
-                "original_rank": original_rank,
-                "score": 0.0,  # filled in below
-            })
+            out.append(
+                {
+                    "title": entry.get("title", ""),
+                    "snippet": entry.get("snippet", ""),
+                    "wol_url": url,
+                    "docid": docid,
+                    "subtype": entry.get("subtype", ""),
+                    "original_rank": original_rank,
+                    "score": 0.0,  # filled in below
+                }
+            )
 
         if rerank_by_title_match:
             out = _rerank_by_title_match(out, query)
@@ -137,10 +143,7 @@ class TopicIndexClient:
             return f"https://wol.jw.org{docid_or_url if docid_or_url.startswith('/') else '/' + docid_or_url}"
         # Plain docid → build URL using the language's resource version.
         lang = get_language(language)
-        return (
-            f"https://wol.jw.org/{lang.iso}/wol/d/{lang.wol_resource}/"
-            f"{lang.lp_tag}/{docid_or_url}"
-        )
+        return f"https://wol.jw.org/{lang.iso}/wol/d/{lang.wol_resource}/{lang.lp_tag}/{docid_or_url}"
 
     async def aclose(self) -> None:
         if self._owns_cdn:
@@ -162,9 +165,7 @@ def _flatten_search_results(data: dict[str, Any]) -> list[dict[str, Any]]:
     return out
 
 
-def _rerank_by_title_match(
-    results: list[dict[str, Any]], query: str
-) -> list[dict[str, Any]]:
+def _rerank_by_title_match(results: list[dict[str, Any]], query: str) -> list[dict[str, Any]]:
     """Score results by title proximity to the query and resort.
 
     Score is a float in [0, 100]:
@@ -183,9 +184,7 @@ def _rerank_by_title_match(
     word_re = re.compile(rf"\b{re.escape(q_lower)}\b") if q_lower else None
     # "startswith as a word": query at position 0 AND followed by a
     # non-word char (or end). Prevents "God" from matching "Goddess".
-    startswith_word_re = (
-        re.compile(rf"^{re.escape(q_lower)}(?:\b|\W|$)") if q_lower else None
-    )
+    startswith_word_re = re.compile(rf"^{re.escape(q_lower)}(?:\b|\W|$)") if q_lower else None
 
     for r in results:
         title = r.get("title", "").lower()

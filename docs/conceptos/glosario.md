@@ -137,15 +137,32 @@ Es la **fuente autoritativa** para investigación doctrinal: el agente `apologet
 
 ## JWPUB
 
-Formato de archivo offline de Watch Tower. Estructura observada (no completamente revertida):
+Formato de archivo offline de Watch Tower. Estructura (revertida en Fase 5.5):
 
 1. Archivo `.jwpub` = ZIP estándar.
-2. Dentro: `manifest.json` con metadata + un ZIP interno.
+2. Dentro: `manifest.json` con metadata + un ZIP interno (entry `"contents"`).
 3. ZIP interno: imágenes + un SQLite `.db` con:
-   - Tabla `Document`: una fila por documento, con columna `Content` comprimida en un formato propietario aún por decodificar.
+   - Tabla `Document`: una fila por documento. Columna `Content` cifrada AES-128-CBC sobre zlib (`contentFormat="z-a"`).
    - Tabla `DocumentParagraph`: párrafos enlazados a documentos.
 
-La Fase 5 implementará el extractor cuando se determine el algoritmo de descompresión.
+**Descifrado (Fase 5.5)**: la clave se deriva de `SHA256(f"{lang}_{symbol}_{year}") XOR magic_32byte_constant`. La constante se descubrió en [`gokusander/jwpub-toolkit`](https://github.com/gokusander/jwpub-toolkit) (MIT) inspeccionando JW Library. Implementado en `jw_core.parsers.jwpub._compute_key_iv`.
+
+API pública: `parse_jwpub_metadata()` (sin decryption) y `parse_jwpub()` (con decryption + paragraphs extraídos del XHTML).
+
+## Fase 9 — Infraestructura
+
+Módulos añadidos en Fase 9 que cualquier cliente HTTP puede opt-in:
+
+| Término | Significado |
+|---|---|
+| **DiskCache** | Cache SQLite con TTL, WAL, lazy eviction. Bytes adentro, bytes afuera. Ver `jw_core.cache.DiskCache`. |
+| **TokenBucket / Throttler** | Rate limit per-host con bucket clásico. Default: 2 req/s, burst 5. Ver `jw_core.throttle`. |
+| **backoff_delay** | Exponential backoff con full jitter (estilo AWS). Para retry loops manuales. |
+| **Telemetry** | Detector opt-in de drift de la API. Opt-in vía `JW_TELEMETRY_ENABLED=1`. Hashea SHAPE de respuestas (no contenido) y compara contra baseline persistente. |
+| **JWTManager** | Holder async-safe del JWT para `b.jw-cdn.org`. Extraído de `CDNClient` en Fase 9. |
+| **politely_get** | Wrapper interno (`jw_core.clients._polite`) que cablea throttler + cache + telemetry en cada GET. |
+| **ClientSuite / build_clients** | Factory (`jw_core.clients.factory`) que arma los 6 clientes con infraestructura compartida. |
+| **WeblangClient** | Cliente alterno (`jw_core.clients.weblang`) para `www.jw.org/{iso}/languages/`. Más campos por idioma que mediator. |
 
 ## Términos cross-reference / "cross-ref"
 

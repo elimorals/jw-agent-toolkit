@@ -1,18 +1,18 @@
 # jw-agent-toolkit
 
-Toolkit agéntico para contenido de jw.org / wol.jw.org. Monorepo Python multi-paquete: librería principal, CLI, servidor MCP, indexador RAG y agentes de alto nivel.
+Toolkit agéntico para contenido de jw.org / wol.jw.org. Monorepo Python multi-paquete: librería principal, CLI, servidor MCP, indexador RAG, agentes de alto nivel y skills para Claude.
 
 ## Paquetes
 
 | Paquete | Propósito |
 |---|---|
-| `jw-core` | Librería principal: clientes API (CDN, mediator, WOL, pub-media, topic-index), parsers (citas bíblicas, artículos, texto diario, notas de estudio, versículos, índice temático), modelos y registro de idiomas. |
-| `jw-cli` | CLI de terminal (`jw verse`, `jw search`, `jw daily`, `jw download`, `jw languages`, `jw chapter`) construida con Typer + Rich. |
-| `jw-mcp` | Servidor [Model Context Protocol](https://modelcontextprotocol.io) — expone ~18 herramientas a Claude Desktop, Claude Code o cualquier cliente MCP. |
-| `jw-rag` | Indexación vectorial + recuperación híbrida (BM25 + cosenos + Reciprocal Rank Fusion) sobre el corpus de Biblia + publicaciones. |
+| `jw-core` | Librería principal: 6 clientes HTTP (CDN, mediator, WOL, pub-media, topic-index, weblang), 9 parsers (citas, artículos, texto diario, versículos, notas de estudio, índice temático, EPUB, JWPUB), modelos Pydantic, registro de idiomas, e infraestructura Fase 9 (cache SQLite, throttle, telemetría opt-in, JWT auth). |
+| `jw-cli` | CLI de terminal con 8 comandos (`jw verse`, `jw search`, `jw daily`, `jw download`, `jw languages`, `jw chapter`, `jw jwpub`, `jw topic`) construida con Typer + Rich. |
+| `jw-mcp` | Servidor [Model Context Protocol](https://modelcontextprotocol.io) — expone **29 herramientas** a Claude Desktop, Claude Code o cualquier cliente MCP. |
+| `jw-rag` | Indexación vectorial + recuperación híbrida (BM25 + cosenos + Reciprocal Rank Fusion) sobre el corpus de Biblia + publicaciones + EPUBs + JWPUBs descifrados. |
 | `jw-agents` | Agentes procedurales multipaso: `verse_explainer`, `research_topic`, `meeting_helper`, `apologetics`. |
 
-Además: `skills/` (skills Markdown para Claude) y `scripts/` (scripts de exploración).
+Además: `skills/` (5 skills Markdown para Claude: jw-verse-lookup, jw-daily-text, jw-research, jw-meeting-prep, jw-apologetics) y `scripts/` (scripts de exploración + reverse engineering JWPUB).
 
 ## Inicio rápido
 
@@ -37,14 +37,21 @@ GPL-3.0-only. Incorpora código derivado de [`jwlib`](https://github.com/allejok
 
 ## Estado
 
-Ver [docs/ROADMAP.md](docs/ROADMAP.md). Fases 0 a 4, 6 y 7 completadas. JWPUB (fase 5) y skills bundle (fase 8) pendientes.
+Ver [docs/ROADMAP.md](docs/ROADMAP.md). **Fases 0-10 completadas**, incluyendo:
+
+- Fase 5.5: descifrado completo de JWPUB (AES-128-CBC con derivación de clave de [`gokusander/jwpub-toolkit`](https://github.com/gokusander/jwpub-toolkit)).
+- Fase 9: infraestructura de producción — cache SQLite con TTL, throttle por host (token bucket), telemetría opt-in para detectar drift de la API, JWT auth aislado, factory unificado de clientes.
+- Fase 10: cierre del 100% del plan original (CI con GitHub Actions, cassettes pytest-recording, weblang client, 3 URL patterns nuevos en WOLClient, 6 tools MCP adicionales).
+
+**166 tests passing + 4 skipped** (corren sin red gracias a cassettes).
 
 ## Documentación
 
 Toda la documentación detallada vive en [`docs/`](docs/):
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Manual de arquitectura: objetivos, capas, inventario de endpoints, decisiones clave.
-- [docs/ROADMAP.md](docs/ROADMAP.md) — Hoja de ruta por fases.
-- [docs/conceptos/](docs/conceptos/) — Glosario JW.org, decisiones de diseño, estrategia multi-idioma, flujos end-to-end.
-- [docs/guias/](docs/guias/) — Guías prácticas por caso de uso (resolver citas, construir un agente, indexar con RAG, conectar el MCP a Claude Desktop, etc.).
+- [docs/ROADMAP.md](docs/ROADMAP.md) — Hoja de ruta operacional por fases (0-10, completadas).
+- [docs/VISION.md](docs/VISION.md) — Roadmap de visión a largo plazo: qué falta para un ecosistema LLM/IA completo para TJ.
+- [docs/conceptos/](docs/conceptos/) — Glosario JW.org, decisiones de diseño, estrategia multi-idioma, inventario de endpoints, flujos end-to-end, CI y testing.
+- [docs/guias/](docs/guias/) — Guías prácticas (resolver citas, usar clientes HTTP, construir agentes, RAG, extender parser, conectar MCP, infraestructura Fase 9, scripts de exploración).
 - [docs/referencia/](docs/referencia/) — Referencia exhaustiva módulo por módulo, clase por clase, función por función.

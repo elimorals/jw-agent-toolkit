@@ -5,12 +5,11 @@ single-chapter books, multiple refs in one string, URL building per language.
 """
 
 import pytest
-
 from jw_core import parse_all_references, parse_reference
 from jw_core.parsers.reference import ReferenceParser
 
-
 # ── English ──────────────────────────────────────────────────────────────
+
 
 def test_parse_english_full_name() -> None:
     ref = parse_reference("John 3:16")
@@ -64,6 +63,7 @@ def test_parse_english_compact_numbered() -> None:
 
 # ── Spanish ──────────────────────────────────────────────────────────────
 
+
 def test_parse_spanish_full_name() -> None:
     ref = parse_reference("Juan 3:16")
     assert ref is not None
@@ -116,6 +116,7 @@ def test_parse_spanish_santiago() -> None:
 
 # ── Portuguese ───────────────────────────────────────────────────────────
 
+
 def test_parse_portuguese_full_name() -> None:
     ref = parse_reference("João 3:16")
     assert ref is not None
@@ -148,6 +149,7 @@ def test_orthographic_collision_pt_es() -> None:
 
 # ── Multiple references ─────────────────────────────────────────────────
 
+
 def test_parse_multiple_refs() -> None:
     refs = parse_all_references("Juan 3:16 y también Romanos 5:8")
     assert len(refs) == 2
@@ -163,6 +165,7 @@ def test_parse_multiple_mixed_languages() -> None:
 
 
 # ── Edge cases ──────────────────────────────────────────────────────────
+
 
 def test_parse_no_match_returns_none() -> None:
     assert parse_reference("hello world") is None
@@ -193,6 +196,7 @@ def test_parse_longest_match_wins() -> None:
 
 
 # ── URL building ────────────────────────────────────────────────────────
+
 
 def test_wol_url_english() -> None:
     ref = parse_reference("John 3:16")
@@ -235,6 +239,7 @@ def test_wol_url_chapter_only_no_verse_anchor() -> None:
 
 # ── Display ─────────────────────────────────────────────────────────────
 
+
 def test_display_with_range() -> None:
     ref = parse_reference("1 Corintios 13:4-7")
     assert ref is not None
@@ -249,8 +254,10 @@ def test_display_chapter_only() -> None:
 
 # ── Parser internals / coverage ─────────────────────────────────────────
 
+
 def test_singleton_returns_same_instance() -> None:
     from jw_core.parsers.reference import _singleton
+
     assert _singleton() is _singleton()
 
 
@@ -260,19 +267,22 @@ def test_all_66_books_indexed() -> None:
     assert book_nums == set(range(1, 67))
 
 
-@pytest.mark.parametrize("ref_str,expected_book", [
-    ("Ge 1:1", 1),
-    ("Ex 20:3", 2),
-    ("Sl 23:1", 19),
-    ("Pr 3:5", 20),
-    ("Mt 24:14", 40),
-    ("Mr 13:32", 41),
-    ("Lu 21:1", 42),
-    ("Ro 12:2", 45),
-    ("Flp 4:13", 50),
-    ("1Te 4:16", 52),
-    ("2Pe 3:13", 61),
-])
+@pytest.mark.parametrize(
+    "ref_str,expected_book",
+    [
+        ("Ge 1:1", 1),
+        ("Ex 20:3", 2),
+        ("Sl 23:1", 19),
+        ("Pr 3:5", 20),
+        ("Mt 24:14", 40),
+        ("Mr 13:32", 41),
+        ("Lu 21:1", 42),
+        ("Ro 12:2", 45),
+        ("Flp 4:13", 50),
+        ("1Te 4:16", 52),
+        ("2Pe 3:13", 61),
+    ],
+)
 def test_spanish_abbreviation_roundtrip(ref_str: str, expected_book: int) -> None:
     ref = parse_reference(ref_str)
     assert ref is not None, f"Failed to parse: {ref_str!r}"

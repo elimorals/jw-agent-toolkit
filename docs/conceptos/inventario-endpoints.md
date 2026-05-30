@@ -4,17 +4,22 @@
 
 ## Resumen
 
-| Host | Endpoint | Auth | Cliente |
-|---|---|---|---|
-| `b.jw-cdn.org` | `/tokens/jworg.jwt` | — | `CDNClient._get_token` |
-| `b.jw-cdn.org` | `/apis/search/results/{lang}/{filter}` | JWT Bearer | `CDNClient.search` |
-| `b.jw-cdn.org` | `/apis/pub-media/GETPUBMEDIALINKS` | — | `PubMediaClient.get_publication` |
-| `data.jw-api.org` | `/mediator/v1/languages/{lang}/web` | — | `MediatorClient.list_languages` |
-| `data.jw-api.org` | `/mediator/finder` | — | `MediatorClient.find_item` |
-| `wol.jw.org` | `/{iso}/wol/b/{res}/{lp}/{pub}/{book}/{ch}` | — | `WOLClient.get_bible_chapter` |
-| `wol.jw.org` | `/{iso}/wol/d/{res}/{lp}/{docid}` | — | `WOLClient.fetch` / `TopicIndexClient.get_subject_page` |
-| `wol.jw.org` | `/{iso}/wol/h/{res}/{lp}` | — | `WOLClient.get_today_homepage` |
-| `wol.jw.org` | `/{iso}/wol/bc/{res}/{lp}/{doc}/{group}/{index}` | — | `WOLClient.get_cross_reference_panel` |
+| Host | Endpoint | Auth | Cliente | TTL cache |
+|---|---|---|---|---|
+| `b.jw-cdn.org` | `/tokens/jworg.jwt` | — | `auth.JWTManager.get_token` | (memoria) |
+| `b.jw-cdn.org` | `/apis/search/results/{lang}/{filter}` | JWT Bearer | `CDNClient.search` | 900s |
+| `b.jw-cdn.org` | `/apis/pub-media/GETPUBMEDIALINKS` | — | `PubMediaClient.get_publication` | 86400s |
+| `data.jw-api.org` | `/mediator/v1/languages/{lang}/web` | — | `MediatorClient.list_languages` | 86400s |
+| `data.jw-api.org` | `/mediator/finder` | — | `MediatorClient.find_item` | (sin TTL específico) |
+| `www.jw.org` | `/{iso}/languages/` | — | `WeblangClient.list_languages` | 86400s |
+| `wol.jw.org` | `/{iso}/wol/b/{res}/{lp}/{pub}/{book}/{ch}` | — | `WOLClient.get_bible_chapter` | 3600s |
+| `wol.jw.org` | `/{iso}/wol/d/{res}/{lp}/{docid}` | — | `WOLClient.fetch` · `get_document_by_id` · `TopicIndexClient.get_subject_page` | 3600s |
+| `wol.jw.org` | `/{iso}/wol/dt/{res}/{lp}/{YYYY}/{M}/{D}` | — | `WOLClient.get_daily_text_by_date` | 3600s |
+| `wol.jw.org` | `/{iso}/wol/h/{res}/{lp}` | — | `WOLClient.get_today_homepage` | 3600s |
+| `wol.jw.org` | `/{iso}/wol/publication/{res}/{lp}/{pub}[/{n}]` | — | `WOLClient.get_publication_page` | 3600s |
+| `wol.jw.org` | `/{iso}/wol/bc/{res}/{lp}/{doc}/{group}/{index}` | — | `WOLClient.get_cross_reference_panel` | 3600s |
+
+> TTL aplicado solo cuando el cliente está wired con `DiskCache` (ver [`docs/guias/infraestructura-fase9.md`](../guias/infraestructura-fase9.md)). Sin cache, cada GET va a la red.
 
 ## 1. Token JWT
 
@@ -139,6 +144,16 @@ GET https://data.jw-api.org/mediator/finder?lang={code}&item={key}
 
 Resuelve un código de contenido (p.ej. `pub-edj_x_VIDEO`) a sus URLs deliverable. Útil para encadenar con `GETPUBMEDIALINKS` o para descubrir streams.
 
+## 5b. www.jw.org: lista alterna de idiomas
+
+```
+GET https://www.jw.org/{iso}/languages/
+```
+
+`{iso}` es el código ISO de la lengua de display (`en`, `es`, ...). Devuelve un JSON con `{"languages": [...]}`. Cada entrada tiene más campos que el endpoint mediator: `vernacularName`, `script`, `direction`, `isSignLanguage`, `altSpellings` (variantes ortográficas).
+
+Útil cuando necesitas el script o variantes alternativas. Actualizado con menor frecuencia que el mediator (más estable, mejor cacheable: TTL 1 día).
+
 ## 6. WOL: capítulo bíblico
 
 ```
@@ -168,13 +183,33 @@ GET https://wol.jw.org/{iso}/wol/d/{res}/{lp}/{docid}
 
 `{docid}` es el WOL document id (entero). Se usa tanto para artículos individuales (revistas, libros) como para páginas de tema del Índice de Publicaciones.
 
-## 8. WOL: homepage del idioma (texto diario)
+## 8. WOL: homepage del idioma (texto diario de hoy)
 
 ```
 GET https://wol.jw.org/{iso}/wol/h/{res}/{lp}
 ```
 
 La página del día contiene el texto diario en `<div class="todayItem">` (o `.dailyText`, varía). Parseado por `parsers.daily_text`.
+
+## 8b. WOL: texto diario por fecha específica (Fase 10)
+
+```
+GET https://wol.jw.org/{iso}/wol/dt/{res}/{lp}/{YYYY}/{M}/{D}
+```
+
+Patrón date-based para textos diarios pasados (típicamente varios años hacia atrás). Mismo parser. Útil para reconstruir histórico o pre-fetchar la semana próxima.
+
+Ejemplo: `https://wol.jw.org/es/wol/dt/r4/lp-s/2025/12/25`.
+
+## 8c. WOL: publication landing / TOC (Fase 10)
+
+```
+GET https://wol.jw.org/{iso}/wol/publication/{res}/{lp}/{pub}[/{number}]
+```
+
+Página landing de cualquier publicación. Para Bibles (`pub="nwtsty"`), `number=book_num` abre la TOC del libro. Para revistas, `number=issue` (yyyymm). Para libros, `number=chapter`. Sin `number`, devuelve el índice general de la publicación.
+
+Útil para descubrir la estructura jerárquica de una publicación antes de profundizar.
 
 ## 9. WOL: panel de referencias cruzadas
 
@@ -194,9 +229,24 @@ El `href` del marcador inline `+` en un versículo apunta a uno de estos paneles
                                     └── images/*
 ```
 
-La tabla `Document` del SQLite tiene una columna `Content` cifrada (AES-CBC sobre zlib, contentFormat `"z-a"` en el manifest). La derivación de clave **no es pública**. Por eso `parsers.jwpub.parse_jwpub_metadata` expone solo metadata estructural y `decrypted_text_available=False`.
+La tabla `Document` del SQLite tiene una columna `Content` cifrada (AES-128-CBC sobre zlib, `contentFormat="z-a"` en el manifest). **Desde Fase 5.5 se decrypta** usando la derivación descubierta por [`gokusander/jwpub-toolkit`](https://github.com/gokusander/jwpub-toolkit) (MIT):
 
-Para texto completo offline, usar **EPUB**: descargar con `download_publication(pub_code, format='EPUB', ...)` y procesar con `parsers.epub.parse_epub`.
+```
+pub_string = f"{meps_language_index}_{symbol}_{year}"   (+ "_{issue}" si non-zero)
+material   = SHA256(pub_string) XOR _XOR_KEY            (constante 32-byte fija)
+key = material[:16]    # AES-128 key
+iv  = material[16:32]  # CBC IV
+plaintext = zlib_inflate(AES-128-CBC-decrypt(content_blob, key, iv))
+```
+
+Implementación en `jw_core.parsers.jwpub._compute_key_iv`. Tests en `test_jwpub_metadata.py` con vectores conocidos (Trinity brochure).
+
+API pública:
+- `parse_jwpub_metadata(path)` — barato, sin decrypt.
+- `parse_jwpub(path)` — decrypt + `text` + `paragraphs` por documento.
+- `ingest_jwpub(store, path)` — pipeline completo a RAG.
+
+EPUB sigue siendo válido como alternativa (estándar abierto, mismo material moderno, sin necesidad de la clave derivada).
 
 ## Headers que usamos
 
@@ -215,4 +265,10 @@ Para texto completo offline, usar **EPUB**: descargar con `download_publication(
 
 ## Notas sobre rate limiting
 
-Hoy **no aplicamos rate limiting** desde el cliente. WOL y CDN aceptan ráfagas razonables (decenas de requests por minuto) sin bloquear. Si vas a hacer ingest masivo (cientos de capítulos), considera meter sleeps entre llamadas hasta que la Fase 9 añada rate limiting + backoff exponencial.
+Desde **Fase 9** existe `jw_core.throttle.Throttler` con token bucket per-host:
+
+- Default: 2 req/s, burst 5.
+- En `factory.build_clients()` el CDN se baja a 1 req/s, burst 3 (es el más chatty).
+- El throttler es **opt-in**: los clientes funcionan sin él. Para activar, pasa `throttler=` en el constructor o usa `build_clients()`.
+
+`jw_core.throttle.backoff_delay(attempt)` ofrece backoff exponencial con full jitter (estilo AWS) para retry loops. Ver [`docs/guias/infraestructura-fase9.md`](../guias/infraestructura-fase9.md).

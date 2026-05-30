@@ -139,6 +139,25 @@ print(f"Indexado libro completo: {total} chunks")
 
 `ingest_epub` es **síncrono** (a diferencia de los demás `ingest_*`): no hace I/O de red, solo desempaqueta el ZIP y parsea XHTML.
 
+### JWPUB completo (Fase 5.5 — con descifrado)
+
+```python
+from jw_rag.ingest import ingest_jwpub
+
+# Descarga primero (CLI o vía PubMediaClient):
+#   jw download ti --lang E --format JWPUB --out ./descargas/
+
+total = ingest_jwpub(
+    store,
+    jwpub_path="./descargas/ti_E.jwpub",
+    language="en",
+    skip_short_docs=1,
+)
+print(f"Indexado JWPUB descifrado: {total} chunks")
+```
+
+Decryption interna: `SHA256(f"{lang}_{symbol}_{year}") XOR magic` → AES-128-CBC → zlib inflate. Si la publicación tiene una variante de formato sin soporte, `total` será 0 y emitirá un warning. Cada chunk lleva `metadata.kind = "jwpub_document"` y `metadata.publication_code = pub.symbol` para filtrar luego.
+
 ## Búsquedas
 
 ### Vectorial (cosenos)

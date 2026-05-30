@@ -14,19 +14,15 @@ from bs4 import BeautifulSoup
 
 @dataclass
 class DailyText:
-    date: str          # Display date as shown on the page
-    scripture: str     # Reference + verse text
-    commentary: str    # Short paragraph following the verse
+    date: str  # Display date as shown on the page
+    scripture: str  # Reference + verse text
+    commentary: str  # Short paragraph following the verse
 
 
 def parse_daily_text(html: str) -> DailyText | None:
     """Parse the daily text from a WOL 'today' homepage."""
     soup = BeautifulSoup(html, "lxml")
-    container = (
-        soup.select_one(".todayItem")
-        or soup.select_one(".dailyText")
-        or soup.select_one("article.dailyText")
-    )
+    container = soup.select_one(".todayItem") or soup.select_one(".dailyText") or soup.select_one("article.dailyText")
     if container is None:
         return None
 

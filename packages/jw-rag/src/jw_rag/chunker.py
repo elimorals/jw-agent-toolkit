@@ -51,12 +51,14 @@ def chunk_paragraphs(
         if buf:
             text = " ".join(buf).strip()
             if text:
-                chunks.append(Chunk(
-                    id=f"{source_id}#{len(chunks)}",
-                    text=text,
-                    source_id=source_id,
-                    metadata={**base_meta, "para_count": len(buf)},
-                ))
+                chunks.append(
+                    Chunk(
+                        id=f"{source_id}#{len(chunks)}",
+                        text=text,
+                        source_id=source_id,
+                        metadata={**base_meta, "para_count": len(buf)},
+                    )
+                )
             buf = []
             buf_len = 0
 
@@ -68,12 +70,14 @@ def chunk_paragraphs(
             flush()
             # Split long paragraphs at sentence ends.
             for piece in _split_long(p, max_chars):
-                chunks.append(Chunk(
-                    id=f"{source_id}#{len(chunks)}",
-                    text=piece,
-                    source_id=source_id,
-                    metadata={**base_meta, "split": True},
-                ))
+                chunks.append(
+                    Chunk(
+                        id=f"{source_id}#{len(chunks)}",
+                        text=piece,
+                        source_id=source_id,
+                        metadata={**base_meta, "split": True},
+                    )
+                )
             continue
         buf.append(p)
         buf_len += len(p)

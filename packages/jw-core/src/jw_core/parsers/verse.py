@@ -79,9 +79,7 @@ def parse_verses(
     ]
 
 
-def get_verse(
-    html: str, book_num: int, chapter: int, verse: int, *, language: str = "en"
-) -> Verse | None:
+def get_verse(html: str, book_num: int, chapter: int, verse: int, *, language: str = "en") -> Verse | None:
     """Convenience: parse and return one specific verse, or None."""
     for v in parse_verses(html, book_num=book_num, chapter=chapter, language=language):
         if v.verse == verse:

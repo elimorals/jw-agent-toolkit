@@ -45,7 +45,7 @@ class WeblangLanguage(BaseModel):
     is_sign_language: bool = Field(default=False)
 
     @classmethod
-    def from_api(cls, data: dict[str, Any]) -> "WeblangLanguage":
+    def from_api(cls, data: dict[str, Any]) -> WeblangLanguage:
         return cls(
             code=data.get("langcode", data.get("code", "")),
             iso=data.get("symbol", data.get("iso", "")),
@@ -79,9 +79,7 @@ class WeblangClient:
         self._cache = cache
         self._telemetry = telemetry
 
-    async def list_languages(
-        self, *, in_language_iso: str = "en"
-    ) -> list[WeblangLanguage]:
+    async def list_languages(self, *, in_language_iso: str = "en") -> list[WeblangLanguage]:
         """Fetch the language list as seen on www.jw.org.
 
         Args:
@@ -92,9 +90,13 @@ class WeblangClient:
         url = f"https://www.jw.org/{in_language_iso}/languages/"
         try:
             resp = await politely_get(
-                self._http, url,
-                throttler=self._throttler, cache=self._cache, telemetry=self._telemetry,
-                endpoint_id="weblang.list_languages", record_json_shape=True,
+                self._http,
+                url,
+                throttler=self._throttler,
+                cache=self._cache,
+                telemetry=self._telemetry,
+                endpoint_id="weblang.list_languages",
+                record_json_shape=True,
                 cache_ttl_seconds=86400.0,  # languages are stable
             )
             resp.raise_for_status()

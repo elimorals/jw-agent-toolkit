@@ -66,9 +66,13 @@ class WOLClient:
             url = f"{WOL_BASE}{url}"
         try:
             resp = await politely_get(
-                self._http, url,
-                throttler=self._throttler, cache=self._cache, telemetry=self._telemetry,
-                endpoint_id="wol.fetch", cache_ttl_seconds=cache_ttl_seconds,
+                self._http,
+                url,
+                throttler=self._throttler,
+                cache=self._cache,
+                telemetry=self._telemetry,
+                endpoint_id="wol.fetch",
+                cache_ttl_seconds=cache_ttl_seconds,
             )
             resp.raise_for_status()
         except httpx.HTTPError as e:
@@ -90,10 +94,7 @@ class WOLClient:
         """
         lang = get_language(language)
         pub = publication or lang.default_bible
-        url = (
-            f"{WOL_BASE}/{lang.iso}/wol/b/{lang.wol_resource}/{lang.lp_tag}/"
-            f"{pub}/{book_num}/{chapter}"
-        )
+        url = f"{WOL_BASE}/{lang.iso}/wol/b/{lang.wol_resource}/{lang.lp_tag}/{pub}/{book_num}/{chapter}"
         return url, await self.fetch(url)
 
     async def get_today_homepage(self, language: str = "en") -> tuple[str, str]:
@@ -121,15 +122,10 @@ class WOLClient:
         if isinstance(date, str):
             date = _dt.date.fromisoformat(date)
         lang = get_language(language)
-        url = (
-            f"{WOL_BASE}/{lang.iso}/wol/dt/{lang.wol_resource}/{lang.lp_tag}/"
-            f"{date.year}/{date.month}/{date.day}"
-        )
+        url = f"{WOL_BASE}/{lang.iso}/wol/dt/{lang.wol_resource}/{lang.lp_tag}/{date.year}/{date.month}/{date.day}"
         return url, await self.fetch(url)
 
-    async def get_document_by_id(
-        self, doc_id: int | str, *, language: str = "en"
-    ) -> tuple[str, str]:
+    async def get_document_by_id(self, doc_id: int | str, *, language: str = "en") -> tuple[str, str]:
         """Fetch a WOL document by its docId (e.g. a daily-text book, article).
 
         URL: /{iso}/wol/d/{r}/{lp_tag}/{docId}.
@@ -155,10 +151,7 @@ class WOLClient:
         Returns (url, html). Pair with `parse_article` for clean text.
         """
         lang = get_language(language)
-        url = (
-            f"{WOL_BASE}/{lang.iso}/wol/publication/{lang.wol_resource}/"
-            f"{lang.lp_tag}/{pub_code}"
-        )
+        url = f"{WOL_BASE}/{lang.iso}/wol/publication/{lang.wol_resource}/{lang.lp_tag}/{pub_code}"
         if number is not None:
             url += f"/{number}"
         return url, await self.fetch(url)

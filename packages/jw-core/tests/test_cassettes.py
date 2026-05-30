@@ -22,14 +22,12 @@ The cassettes themselves are checked into the repo (~10-50KB each).
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import pytest
 
-_CASSETTE_DIR = (
-    Path(__file__).parent / "cassettes" / "test_cassettes"
-)
+_CASSETTE_DIR = Path(__file__).parent / "cassettes" / "test_cassettes"
+
 
 # pytest-recording requires the cassette file present. Mark tests as skip
 # when running outside CI/replay context with no cassette on disk.
@@ -48,6 +46,7 @@ pytestmark = pytest.mark.asyncio
 async def test_mediator_languages_shape() -> None:
     """Replay the mediator language-list response and check our parser."""
     from jw_core.clients.mediator import MediatorClient
+
     client = MediatorClient()
     try:
         langs = await client.list_languages(in_language="E")
@@ -70,6 +69,7 @@ async def test_mediator_languages_shape() -> None:
 async def test_weblang_languages_shape() -> None:
     """Replay the www.jw.org/{iso}/languages response."""
     from jw_core.clients.weblang import WeblangClient
+
     client = WeblangClient()
     try:
         langs = await client.list_languages(in_language_iso="en")
@@ -88,6 +88,7 @@ async def test_weblang_languages_shape() -> None:
 async def test_cdn_search_shape() -> None:
     """Replay a CDN search response and verify result schema."""
     from jw_core.clients.cdn import CDNClient
+
     client = CDNClient()
     try:
         data = await client.search("love", filter_type="bible", language="E", limit=3)
@@ -105,6 +106,7 @@ async def test_cdn_search_shape() -> None:
 async def test_pub_media_catalog_shape() -> None:
     """Replay a GETPUBMEDIALINKS response for the Trinity brochure."""
     from jw_core.clients.pub_media import PubMediaClient
+
     client = PubMediaClient()
     try:
         pub = await client.get_publication("ti", language="E", file_format="EPUB")

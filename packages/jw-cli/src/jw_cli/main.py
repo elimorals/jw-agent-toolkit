@@ -14,7 +14,14 @@ from __future__ import annotations
 import typer
 
 from jw_cli.commands import (
-    chapter, daily, download, jwpub, languages, search, topic, verse,
+    chapter,
+    daily,
+    download,
+    jwpub,
+    languages,
+    search,
+    topic,
+    verse,
 )
 
 app = typer.Typer(

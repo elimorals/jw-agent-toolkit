@@ -107,9 +107,7 @@ def _cache_key(url: str, params: dict[str, Any] | None) -> str:
     return f"GET {url}?{json.dumps(items, sort_keys=True)}"
 
 
-def _synthetic_response(
-    http: httpx.AsyncClient, url: str, body: bytes
-) -> httpx.Response:
+def _synthetic_response(http: httpx.AsyncClient, url: str, body: bytes) -> httpx.Response:
     """Build a 200 response from a cached body so callers see normal API."""
     req = httpx.Request("GET", url)
     return httpx.Response(200, content=body, request=req)

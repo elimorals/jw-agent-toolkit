@@ -3,12 +3,11 @@
 from pathlib import Path
 
 import pytest
-
 from jw_rag import Chunk, FakeEmbedder, VectorStore, chunk_paragraphs
 from jw_rag.retrieve import dedup_by_source, filter_by_metadata
 
-
 # ── FakeEmbedder ────────────────────────────────────────────────────────
+
 
 def test_fake_embedder_deterministic() -> None:
     emb = FakeEmbedder(dim=32)
@@ -29,12 +28,14 @@ def test_fake_embedder_different_inputs_uncorrelated() -> None:
 
 def test_fake_embedder_normalized() -> None:
     import numpy as np
+
     emb = FakeEmbedder(dim=32)
     v = emb.embed(["test"])[0]
     assert abs(np.linalg.norm(v) - 1.0) < 1e-5
 
 
 # ── Chunker ─────────────────────────────────────────────────────────────
+
 
 def test_chunk_paragraphs_basic() -> None:
     paragraphs = [
@@ -50,9 +51,7 @@ def test_chunk_paragraphs_basic() -> None:
 
 
 def test_chunk_paragraphs_metadata_propagates() -> None:
-    chunks = chunk_paragraphs(
-        ["Hello."], "src", metadata={"book_num": 43, "chapter": 3}
-    )
+    chunks = chunk_paragraphs(["Hello."], "src", metadata={"book_num": 43, "chapter": 3})
     assert chunks[0].metadata["book_num"] == 43
     assert chunks[0].metadata["chapter"] == 3
 
@@ -66,20 +65,39 @@ def test_chunk_paragraphs_splits_long_paragraph() -> None:
 
 # ── VectorStore: in-memory ──────────────────────────────────────────────
 
+
 @pytest.fixture
 def populated_store() -> VectorStore:
     emb = FakeEmbedder(dim=32)
     store = VectorStore(Path("/tmp/nonexistent"), emb)
-    store.add([
-        Chunk(id="c1", text="The love of God endures forever",
-              source_id="ps:107", metadata={"book_num": 19, "chapter": 107}),
-        Chunk(id="c2", text="Jesus said God so loved the world",
-              source_id="jn:3", metadata={"book_num": 43, "chapter": 3}),
-        Chunk(id="c3", text="Peace I leave with you my peace I give",
-              source_id="jn:14", metadata={"book_num": 43, "chapter": 14}),
-        Chunk(id="c4", text="A random unrelated sentence about cooking",
-              source_id="cooking:1", metadata={"book_num": 0}),
-    ])
+    store.add(
+        [
+            Chunk(
+                id="c1",
+                text="The love of God endures forever",
+                source_id="ps:107",
+                metadata={"book_num": 19, "chapter": 107},
+            ),
+            Chunk(
+                id="c2",
+                text="Jesus said God so loved the world",
+                source_id="jn:3",
+                metadata={"book_num": 43, "chapter": 3},
+            ),
+            Chunk(
+                id="c3",
+                text="Peace I leave with you my peace I give",
+                source_id="jn:14",
+                metadata={"book_num": 43, "chapter": 14},
+            ),
+            Chunk(
+                id="c4",
+                text="A random unrelated sentence about cooking",
+                source_id="cooking:1",
+                metadata={"book_num": 0},
+            ),
+        ]
+    )
     return store
 
 
@@ -109,13 +127,16 @@ def test_hybrid_search_combines_signals(populated_store: VectorStore) -> None:
 
 # ── Persistence ─────────────────────────────────────────────────────────
 
+
 def test_store_save_and_load_roundtrip(tmp_path: Path) -> None:
     emb = FakeEmbedder(dim=16)
     store1 = VectorStore(tmp_path / "store", emb)
-    store1.add([
-        Chunk(id="x1", text="alpha", source_id="s", metadata={"k": 1}),
-        Chunk(id="x2", text="beta", source_id="s", metadata={"k": 2}),
-    ])
+    store1.add(
+        [
+            Chunk(id="x1", text="alpha", source_id="s", metadata={"k": 1}),
+            Chunk(id="x2", text="beta", source_id="s", metadata={"k": 2}),
+        ]
+    )
     store1.save()
 
     store2 = VectorStore(tmp_path / "store", emb)
@@ -136,11 +157,14 @@ def test_store_load_rejects_dim_mismatch(tmp_path: Path) -> None:
 
 # ── Retrieve helpers ───────────────────────────────────────────────────
 
+
 def test_dedup_by_source(populated_store: VectorStore) -> None:
     # Add another chunk with same source_id to exercise dedup.
-    populated_store.add([
-        Chunk(id="c2b", text="Another John 3 chunk", source_id="jn:3"),
-    ])
+    populated_store.add(
+        [
+            Chunk(id="c2b", text="Another John 3 chunk", source_id="jn:3"),
+        ]
+    )
     hits = populated_store.bm25_search("john", top_k=10)
     deduped = dedup_by_source(hits)
     source_ids = [h.chunk.source_id for h in deduped]

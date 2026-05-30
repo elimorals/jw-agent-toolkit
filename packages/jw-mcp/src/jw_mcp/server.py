@@ -18,7 +18,6 @@ import logging
 from typing import Any
 
 from fastmcp import FastMCP
-
 from jw_agents import (
     apologetics as apologetics_agent,
 )
@@ -39,9 +38,9 @@ from jw_core.clients.wol import WOLClient
 from jw_core.languages import get_language
 from jw_core.parsers.article import parse_article
 from jw_core.parsers.daily_text import parse_daily_text
-from jw_core.parsers.reference import parse_reference
 from jw_core.parsers.epub import parse_epub
 from jw_core.parsers.jwpub import JwpubError, parse_jwpub, parse_jwpub_metadata
+from jw_core.parsers.reference import parse_reference
 from jw_core.parsers.study_notes import (
     parse_cross_references,
     parse_study_notes,
@@ -118,6 +117,7 @@ def _get_rag_store() -> VectorStore:
     """
     import os
     from pathlib import Path
+
     global _rag_store, _rag_path
     if _rag_store is not None:
         return _rag_store
@@ -135,6 +135,7 @@ def _get_rag_store() -> VectorStore:
 # ────────────────────────────────────────────────────────────────────────
 # Tool: resolve_reference
 # ────────────────────────────────────────────────────────────────────────
+
 
 @mcp.tool
 def resolve_reference(text: str, language: str = "en") -> dict[str, Any]:
@@ -172,6 +173,7 @@ def resolve_reference(text: str, language: str = "en") -> dict[str, Any]:
 # Tool: get_chapter
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
 async def get_chapter(
     book_num: int,
@@ -198,9 +200,7 @@ async def get_chapter(
     if not 1 <= book_num <= 66:
         return {"error": f"book_num must be 1..66, got {book_num}"}
     wol = _get_wol()
-    url, html = await wol.get_bible_chapter(
-        book_num, chapter, language=language, publication=publication
-    )
+    url, html = await wol.get_bible_chapter(book_num, chapter, language=language, publication=publication)
     article = parse_article(html)
     payload: dict[str, Any] = {
         "title": article.title,
@@ -211,12 +211,8 @@ async def get_chapter(
         "publication": publication,
     }
     if with_footnotes:
-        notes = parse_study_notes(
-            html, book_num=book_num, chapter=chapter, language=language
-        )
-        xrefs = parse_cross_references(
-            html, book_num=book_num, chapter=chapter, language=language
-        )
+        notes = parse_study_notes(html, book_num=book_num, chapter=chapter, language=language)
+        xrefs = parse_cross_references(html, book_num=book_num, chapter=chapter, language=language)
         payload["study_notes"] = [n.model_dump() for n in notes]
         payload["cross_refs"] = [x.model_dump() for x in xrefs]
     return payload
@@ -226,10 +222,9 @@ async def get_chapter(
 # Tool: get_daily_text
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
-async def get_daily_text(
-    language: str = "en", date: str = ""
-) -> dict[str, Any]:
+async def get_daily_text(language: str = "en", date: str = "") -> dict[str, Any]:
     """Fetch the daily text from wol.jw.org.
 
     Args:
@@ -272,6 +267,7 @@ async def get_daily_text(
 # Tool: search_content
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
 async def search_content(
     query: str,
@@ -295,9 +291,7 @@ async def search_content(
         return {"error": f"Unknown language: {language!r}"}
     cdn = _get_cdn()
     try:
-        data = await cdn.search(
-            query, filter_type=filter_type, language=lang.jw_code, limit=limit
-        )
+        data = await cdn.search(query, filter_type=filter_type, language=lang.jw_code, limit=limit)
     except Exception as e:
         return {"error": str(e)}
     return {
@@ -311,6 +305,7 @@ async def search_content(
 # ────────────────────────────────────────────────────────────────────────
 # Tool: get_article
 # ────────────────────────────────────────────────────────────────────────
+
 
 @mcp.tool
 async def get_article(url: str) -> dict[str, Any]:
@@ -337,6 +332,7 @@ async def get_article(url: str) -> dict[str, Any]:
 # Tool: list_languages (Phase 2)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
 async def list_languages(
     in_language: str = "E",
@@ -357,16 +353,14 @@ async def list_languages(
         langs = await med.list_languages(in_language=in_language)
     except Exception as e:
         return {"error": str(e)}
-    items = [
-        l.model_dump() for l in langs
-        if not only_with_web_content or l.has_web_content
-    ]
+    items = [l.model_dump() for l in langs if not only_with_web_content or l.has_web_content]
     return {"in_language": in_language, "count": len(items), "languages": items}
 
 
 # ────────────────────────────────────────────────────────────────────────
 # Tool: list_publication_files (Phase 2)
 # ────────────────────────────────────────────────────────────────────────
+
 
 @mcp.tool
 async def list_publication_files(
@@ -411,6 +405,7 @@ async def list_publication_files(
 # Tool: download_publication (Phase 2)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
 async def download_publication(
     pub_code: str,
@@ -434,6 +429,7 @@ async def download_publication(
         A list of saved file paths and total bytes downloaded.
     """
     from pathlib import Path
+
     out_path = Path(out_dir).expanduser()
     out_path.mkdir(parents=True, exist_ok=True)
     pub = _get_pub()
@@ -470,6 +466,7 @@ async def download_publication(
 # ────────────────────────────────────────────────────────────────────────
 # Tool: get_verse (Phase 3)
 # ────────────────────────────────────────────────────────────────────────
+
 
 @mcp.tool
 async def get_verse(
@@ -510,6 +507,7 @@ async def get_verse(
 # ────────────────────────────────────────────────────────────────────────
 # Tool: get_study_notes (Phase 3)
 # ────────────────────────────────────────────────────────────────────────
+
 
 @mcp.tool
 async def get_study_notes(
@@ -552,6 +550,7 @@ async def get_study_notes(
 # Tool: get_cross_references (Phase 3)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
 async def get_cross_references(
     book_num: int,
@@ -591,6 +590,7 @@ async def get_cross_references(
                 item["panel_url"] = panel_url
                 # Lightweight: extract just the visible text content.
                 from bs4 import BeautifulSoup
+
                 item["panel_text"] = BeautifulSoup(panel_html, "lxml").get_text(" ", strip=True)[:600]
             except Exception as e:
                 item["panel_error"] = str(e)
@@ -610,6 +610,7 @@ async def get_cross_references(
 # ────────────────────────────────────────────────────────────────────────
 # Tool: compare_translations (Phase 3)
 # ────────────────────────────────────────────────────────────────────────
+
 
 @mcp.tool
 async def compare_translations(
@@ -650,14 +651,15 @@ async def compare_translations(
         "verse": verse,
         "translations": out,
     }
+
+
 # ────────────────────────────────────────────────────────────────────────
 # Tool: search_topic_index (Phase 4)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
-async def search_topic_index(
-    query: str, language: str = "E", limit: int = 10
-) -> dict[str, Any]:
+async def search_topic_index(query: str, language: str = "E", limit: int = 10) -> dict[str, Any]:
     """Find Watch Tower Publications Index subjects matching `query`.
 
     The Publications Index is the official JW topical index that groups
@@ -674,9 +676,7 @@ async def search_topic_index(
         limit: Max candidate subjects.
     """
     try:
-        results = await _get_topic().search_subjects(
-            query, language=language, limit=limit
-        )
+        results = await _get_topic().search_subjects(query, language=language, limit=limit)
     except TopicIndexError as e:
         return {"error": str(e)}
     return {"query": query, "language": language, "count": len(results), "results": results}
@@ -686,10 +686,9 @@ async def search_topic_index(
 # Tool: get_topic_articles (Phase 4)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
-async def get_topic_articles(
-    docid_or_url: str, language: str = "en"
-) -> dict[str, Any]:
+async def get_topic_articles(docid_or_url: str, language: str = "en") -> dict[str, Any]:
     """Fetch and parse a Publications Index subject page.
 
     Args:
@@ -727,6 +726,7 @@ async def get_topic_articles(
 # Tool: semantic_search (Phase 6)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
 def semantic_search(query: str, top_k: int = 5, mode: str = "hybrid") -> dict[str, Any]:
     """Search the local RAG store (Bible chapters + ingested articles).
@@ -743,8 +743,7 @@ def semantic_search(query: str, top_k: int = 5, mode: str = "hybrid") -> dict[st
     store = _get_rag_store()
     if store.is_empty:
         return {
-            "warning": "RAG store is empty. Call ingest_bible_chapter or "
-                       "ingest_search_topk first.",
+            "warning": "RAG store is empty. Call ingest_bible_chapter or ingest_search_topk first.",
             "results": [],
         }
     if mode == "vector":
@@ -757,14 +756,17 @@ def semantic_search(query: str, top_k: int = 5, mode: str = "hybrid") -> dict[st
         "query": query,
         "mode": mode,
         "count": len(hits),
-        "results": [{
-            "rank": h.rank,
-            "score": h.score,
-            "source": h.source,
-            "chunk_id": h.chunk.id,
-            "text": h.chunk.text,
-            "metadata": h.chunk.metadata,
-        } for h in hits],
+        "results": [
+            {
+                "rank": h.rank,
+                "score": h.score,
+                "source": h.source,
+                "chunk_id": h.chunk.id,
+                "text": h.chunk.text,
+                "metadata": h.chunk.metadata,
+            }
+            for h in hits
+        ],
     }
 
 
@@ -772,14 +774,14 @@ def semantic_search(query: str, top_k: int = 5, mode: str = "hybrid") -> dict[st
 # Tool: ingest_bible_chapter (Phase 6)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
-async def ingest_bible_chapter(
-    book_num: int, chapter: int, language: str = "en"
-) -> dict[str, Any]:
+async def ingest_bible_chapter(book_num: int, chapter: int, language: str = "en") -> dict[str, Any]:
     """Fetch a Bible chapter from wol.jw.org and add it to the local RAG store."""
     if not 1 <= book_num <= 66:
         return {"error": f"book_num must be 1..66, got {book_num}"}
     from jw_rag.ingest import ingest_bible_chapter as _ingest
+
     store = _get_rag_store()
     count = await _ingest(store, book_num, chapter, language=language, wol=_get_wol())
     store.save()
@@ -796,6 +798,7 @@ async def ingest_bible_chapter(
 # Tool: ingest_search_topk (Phase 6)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
 async def ingest_search_topk(
     query: str,
@@ -805,10 +808,16 @@ async def ingest_search_topk(
 ) -> dict[str, Any]:
     """Run a jw.org search and ingest the top N article results into RAG."""
     from jw_rag.ingest import ingest_search_topk as _ingest
+
     store = _get_rag_store()
     total = await _ingest(
-        store, query, filter_type=filter_type, language=language, top_n=top_n,
-        cdn=_get_cdn(), wol=_get_wol(),
+        store,
+        query,
+        filter_type=filter_type,
+        language=language,
+        top_n=top_n,
+        cdn=_get_cdn(),
+        wol=_get_wol(),
     )
     store.save()
     return {
@@ -823,6 +832,7 @@ async def ingest_search_topk(
 # Tool: research_topic (Phase 7)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
 async def research_topic(
     topic: str,
@@ -832,9 +842,12 @@ async def research_topic(
 ) -> dict[str, Any]:
     """Multi-step topic research: search jw.org → fetch top articles → return excerpts with citations."""
     result = await research_topic_agent(
-        topic, language=language,
-        top_n=top_n, fetch_top_k=fetch_top_k,
-        cdn=_get_cdn(), wol=_get_wol(),
+        topic,
+        language=language,
+        top_n=top_n,
+        fetch_top_k=fetch_top_k,
+        cdn=_get_cdn(),
+        wol=_get_wol(),
     )
     return result.to_dict()
 
@@ -843,13 +856,15 @@ async def research_topic(
 # Tool: verse_explainer (Phase 7)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
-async def verse_explainer(
-    reference: str, language: str = "en", max_paragraphs: int = 5
-) -> dict[str, Any]:
+async def verse_explainer(reference: str, language: str = "en", max_paragraphs: int = 5) -> dict[str, Any]:
     """Explain a verse with surrounding context + cross-references from wol.jw.org."""
     result = await verse_explainer_agent(
-        reference, language=language, wol=_get_wol(), max_paragraphs=max_paragraphs,
+        reference,
+        language=language,
+        wol=_get_wol(),
+        max_paragraphs=max_paragraphs,
     )
     return result.to_dict()
 
@@ -858,13 +873,15 @@ async def verse_explainer(
 # Tool: meeting_helper (Phase 7)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
-async def meeting_helper(
-    input_text: str, language: str = "en", max_paragraphs: int = 8
-) -> dict[str, Any]:
+async def meeting_helper(input_text: str, language: str = "en", max_paragraphs: int = 8) -> dict[str, Any]:
     """Build meeting-prep findings from a wol.jw.org URL or a Bible reference."""
     result = await meeting_helper_agent(
-        input_text, language=language, max_paragraphs=max_paragraphs, wol=_get_wol(),
+        input_text,
+        language=language,
+        max_paragraphs=max_paragraphs,
+        wol=_get_wol(),
     )
     return result.to_dict()
 
@@ -872,6 +889,7 @@ async def meeting_helper(
 # ────────────────────────────────────────────────────────────────────────
 # Tool: apologetics (Phase 7)
 # ────────────────────────────────────────────────────────────────────────
+
 
 @mcp.tool
 async def apologetics(
@@ -891,9 +909,13 @@ async def apologetics(
         s = _get_rag_store()
         rag_store = s if not s.is_empty else None
     result = await apologetics_agent(
-        question, language=language,
-        cdn=_get_cdn(), wol=_get_wol(),
-        rag_store=rag_store, rag_top_k=rag_top_k, web_top_k=web_top_k,
+        question,
+        language=language,
+        cdn=_get_cdn(),
+        wol=_get_wol(),
+        rag_store=rag_store,
+        rag_top_k=rag_top_k,
+        web_top_k=web_top_k,
     )
     return result.to_dict()
 
@@ -901,6 +923,7 @@ async def apologetics(
 # ────────────────────────────────────────────────────────────────────────
 # Tool: extract_epub_text (Phase 5)
 # ────────────────────────────────────────────────────────────────────────
+
 
 @mcp.tool
 def extract_epub_text(epub_path: str, max_docs: int = 0) -> dict[str, Any]:
@@ -944,6 +967,7 @@ def extract_epub_text(epub_path: str, max_docs: int = 0) -> dict[str, Any]:
 # Tool: inspect_jwpub_metadata (Phase 5)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
 def inspect_jwpub_metadata(jwpub_path: str) -> dict[str, Any]:
     """Parse a JWPUB file's metadata + chapter TOC (no decryption — cheap).
@@ -965,6 +989,7 @@ def inspect_jwpub_metadata(jwpub_path: str) -> dict[str, Any]:
 # ────────────────────────────────────────────────────────────────────────
 # Tool: extract_jwpub_text (Phase 5.5)
 # ────────────────────────────────────────────────────────────────────────
+
 
 @mcp.tool
 def extract_jwpub_text(jwpub_path: str, max_docs: int = 0) -> dict[str, Any]:
@@ -1004,10 +1029,9 @@ def extract_jwpub_text(jwpub_path: str, max_docs: int = 0) -> dict[str, Any]:
 # Tool: ingest_jwpub (Phase 5.5)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
-def ingest_jwpub(
-    jwpub_path: str, language: str = "en"
-) -> dict[str, Any]:
+def ingest_jwpub(jwpub_path: str, language: str = "en") -> dict[str, Any]:
     """Decrypt a JWPUB and ingest every document into the local RAG store.
 
     Args:
@@ -1015,6 +1039,7 @@ def ingest_jwpub(
         language: ISO code attached to every chunk for later filtering.
     """
     from jw_rag.ingest import ingest_jwpub as _ingest_jwpub
+
     store = _get_rag_store()
     try:
         total = _ingest_jwpub(store, jwpub_path, language=language)
@@ -1033,6 +1058,7 @@ def ingest_jwpub(
 # Tool: ingest_epub (Phase 5)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
 def ingest_epub(
     epub_path: str,
@@ -1048,11 +1074,14 @@ def ingest_epub(
         language: ISO code for the publication's language.
     """
     from jw_rag.ingest import ingest_epub as _ingest_epub
+
     store = _get_rag_store()
     try:
         total = _ingest_epub(
-            store, epub_path,
-            publication_code=publication_code, language=language,
+            store,
+            epub_path,
+            publication_code=publication_code,
+            language=language,
         )
     except Exception as e:
         return {"error": str(e)}
@@ -1070,6 +1099,7 @@ def ingest_epub(
 # Tool: get_cache_stats (Phase 9)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
 def get_cache_stats() -> dict[str, Any]:
     """Return cache statistics for the on-disk response cache.
@@ -1078,15 +1108,15 @@ def get_cache_stats() -> dict[str, Any]:
     `enabled=False`. Otherwise reports total/live/expired entries plus the
     file path so the operator can inspect or clean it.
     """
-    from pathlib import Path
     import os
+    from pathlib import Path
+
     from jw_core.cache import DiskCache as _Cache
+
     # The server doesn't wire a persistent cache by default — return a
     # standalone snapshot of the disk store (matching the path the wired
     # clients would use). This avoids forcing every callsite to share state.
-    path = Path(os.getenv(
-        "JW_CACHE_PATH", "~/.jw-agent-toolkit/cache.db"
-    )).expanduser()
+    path = Path(os.getenv("JW_CACHE_PATH", "~/.jw-agent-toolkit/cache.db")).expanduser()
     if not path.exists():
         return {"enabled": False, "path": str(path), "reason": "no cache file"}
     with _Cache(path) as c:
@@ -1097,6 +1127,7 @@ def get_cache_stats() -> dict[str, Any]:
 # ────────────────────────────────────────────────────────────────────────
 # Tool: get_publication_toc (Phase 2 — gap from original plan)
 # ────────────────────────────────────────────────────────────────────────
+
 
 @mcp.tool
 async def get_publication_toc(
@@ -1120,9 +1151,7 @@ async def get_publication_toc(
     """
     wol = _get_wol()
     try:
-        url, html = await wol.get_publication_page(
-            pub_code, number, language=language
-        )
+        url, html = await wol.get_publication_page(pub_code, number, language=language)
     except Exception as e:
         return {"error": str(e)}
     article = parse_article(html)
@@ -1141,6 +1170,7 @@ async def get_publication_toc(
 # Tool: list_weblang_languages (Phase 2 — gap from original plan)
 # ────────────────────────────────────────────────────────────────────────
 
+
 @mcp.tool
 async def list_weblang_languages(
     in_language_iso: str = "en",
@@ -1156,6 +1186,7 @@ async def list_weblang_languages(
             returns English names; 'es' Spanish names.
     """
     from jw_core.clients.weblang import WeblangClient, WeblangError
+
     client = WeblangClient()
     try:
         langs = await client.list_languages(in_language_iso=in_language_iso)
@@ -1173,6 +1204,7 @@ async def list_weblang_languages(
 # ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
+
 
 def main() -> None:
     """Run the MCP server over stdio."""

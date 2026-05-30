@@ -1,41 +1,46 @@
 """Unit tests for pub_media client — no network, pure logic on fixed JSON."""
 
-from jw_core.clients.pub_media import PubMediaClient, PubMediaFile, Publication
-
+from jw_core.clients.pub_media import Publication, PubMediaClient, PubMediaFile
 
 SAMPLE_RESPONSE = {
     "pubName": "Good News From God!",
     "files": {
         "E": {
-            "EPUB": [{
-                "title": "Good News From God! (EPUB)",
-                "filesize": 1234567,
-                "mimetype": "application/epub+zip",
-                "file": {
-                    "url": "https://cdn.example.com/fg_E.epub",
-                    "checksum": "abc123",
-                },
-            }],
-            "PDF": [{
-                "title": "Good News From God! (PDF)",
-                "filesize": 7654321,
-                "mimetype": "application/pdf",
-                "file": {
-                    "url": "https://cdn.example.com/fg_E.pdf",
-                    "checksum": "def456",
-                },
-            }],
+            "EPUB": [
+                {
+                    "title": "Good News From God! (EPUB)",
+                    "filesize": 1234567,
+                    "mimetype": "application/epub+zip",
+                    "file": {
+                        "url": "https://cdn.example.com/fg_E.epub",
+                        "checksum": "abc123",
+                    },
+                }
+            ],
+            "PDF": [
+                {
+                    "title": "Good News From God! (PDF)",
+                    "filesize": 7654321,
+                    "mimetype": "application/pdf",
+                    "file": {
+                        "url": "https://cdn.example.com/fg_E.pdf",
+                        "checksum": "def456",
+                    },
+                }
+            ],
         },
         "S": {
-            "EPUB": [{
-                "title": "Buenas noticias de Dios (EPUB)",
-                "filesize": 1234000,
-                "mimetype": "application/epub+zip",
-                "file": {
-                    "url": "https://cdn.example.com/fg_S.epub",
-                    "checksum": "ghi789",
-                },
-            }],
+            "EPUB": [
+                {
+                    "title": "Buenas noticias de Dios (EPUB)",
+                    "filesize": 1234000,
+                    "mimetype": "application/epub+zip",
+                    "file": {
+                        "url": "https://cdn.example.com/fg_S.epub",
+                        "checksum": "ghi789",
+                    },
+                }
+            ],
         },
     },
 }
@@ -74,7 +79,8 @@ def test_publication_files_by_language() -> None:
 
 def test_pubmediafile_filename_derived_from_url() -> None:
     f = PubMediaFile.from_api(
-        "E", "EPUB",
+        "E",
+        "EPUB",
         {"title": "X", "file": {"url": "https://cdn/foo/bar/fg_E.epub"}},
     )
     assert f.filename == "fg_E.epub"

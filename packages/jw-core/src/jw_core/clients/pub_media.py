@@ -57,7 +57,7 @@ class PubMediaFile(BaseModel):
     mime_type: str = Field(default="")
 
     @classmethod
-    def from_api(cls, language: str, fmt: str, data: dict[str, Any]) -> "PubMediaFile":
+    def from_api(cls, language: str, fmt: str, data: dict[str, Any]) -> PubMediaFile:
         file_meta = data.get("file", {}) or {}
         return cls(
             url=file_meta.get("url", ""),
@@ -120,9 +120,7 @@ class PubMediaClient:
         Raises PubMediaError on 404 (publication not found) or other HTTP errors.
         """
         if file_format and file_format.upper() not in VALID_FORMATS:
-            raise ValueError(
-                f"file_format must be one of {sorted(VALID_FORMATS)} or None"
-            )
+            raise ValueError(f"file_format must be one of {sorted(VALID_FORMATS)} or None")
         params: dict[str, Any] = {
             "output": "json",
             "pub": pub_code,
@@ -141,9 +139,14 @@ class PubMediaClient:
 
         try:
             resp = await politely_get(
-                self._http, PUB_MEDIA_URL, params=params,
-                throttler=self._throttler, cache=self._cache, telemetry=self._telemetry,
-                endpoint_id="pub_media.get_publication", record_json_shape=True,
+                self._http,
+                PUB_MEDIA_URL,
+                params=params,
+                throttler=self._throttler,
+                cache=self._cache,
+                telemetry=self._telemetry,
+                endpoint_id="pub_media.get_publication",
+                record_json_shape=True,
                 cache_ttl_seconds=86400.0,  # publication catalogs change slowly
             )
             if resp.status_code == 404:

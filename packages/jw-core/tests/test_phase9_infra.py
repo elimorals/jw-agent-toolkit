@@ -1,18 +1,15 @@
 """Tests for Phase 9: DiskCache, Throttler, Telemetry."""
 
 import asyncio
-import os
 import time
 from pathlib import Path
 
-import pytest
-
 from jw_core.cache import DiskCache
 from jw_core.telemetry import Telemetry, _shape_hash
-from jw_core.throttle import TokenBucket, Throttler, backoff_delay
-
+from jw_core.throttle import Throttler, TokenBucket, backoff_delay
 
 # ── DiskCache ───────────────────────────────────────────────────────────
+
 
 def test_cache_set_get_roundtrip(tmp_path: Path) -> None:
     with DiskCache(tmp_path / "c.db") as c:
@@ -62,6 +59,7 @@ def test_cache_clear(tmp_path: Path) -> None:
 
 # ── TokenBucket / Throttler ────────────────────────────────────────────
 
+
 async def _consume(bucket: TokenBucket, n: int) -> float:
     """Consume n tokens; return wall-clock time taken."""
     t0 = time.monotonic()
@@ -108,12 +106,14 @@ def test_backoff_delay_bounded() -> None:
 def test_backoff_delay_grows_with_attempt() -> None:
     """The cap window grows with attempt (statistically, mean grows too)."""
     import statistics
+
     early = [backoff_delay(0, base=0.5, cap=60) for _ in range(50)]
     late = [backoff_delay(4, base=0.5, cap=60) for _ in range(50)]
     assert statistics.mean(late) > statistics.mean(early)
 
 
 # ── Telemetry ──────────────────────────────────────────────────────────
+
 
 def test_shape_hash_same_shape_different_values() -> None:
     a = {"x": 1, "y": "hello"}

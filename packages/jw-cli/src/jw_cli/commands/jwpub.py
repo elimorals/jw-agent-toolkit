@@ -5,11 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import typer
+from jw_core.parsers.jwpub import JwpubError, parse_jwpub, parse_jwpub_metadata
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-
-from jw_core.parsers.jwpub import JwpubError, parse_jwpub, parse_jwpub_metadata
 
 console = Console()
 
@@ -17,11 +16,15 @@ console = Console()
 def jwpub_cmd(
     path: Path = typer.Argument(..., exists=True, help="Path to a .jwpub file"),
     extract: bool = typer.Option(
-        False, "--extract", "-x",
+        False,
+        "--extract",
+        "-x",
         help="Decrypt + print the text of each document (slower).",
     ),
     max_docs: int = typer.Option(
-        0, "--max", help="Limit output to the first N documents (0 = all).",
+        0,
+        "--max",
+        help="Limit output to the first N documents (0 = all).",
     ),
 ) -> None:
     """Inspect a JWPUB: metadata + TOC, or decrypt and print text with --extract."""
@@ -54,7 +57,8 @@ def jwpub_cmd(
         for d in docs:
             pages = (
                 f"{d.first_page_number or '?'}-{d.last_page_number or '?'}"
-                if d.first_page_number or d.last_page_number else ""
+                if d.first_page_number or d.last_page_number
+                else ""
             )
             table.add_row(
                 str(d.document_id),
@@ -70,10 +74,11 @@ def jwpub_cmd(
     for d in docs:
         if not d.paragraphs:
             continue
-        console.print(Panel(
-            "\n\n".join(d.paragraphs[:5]) +
-            (f"\n\n[dim]… {len(d.paragraphs) - 5} more paragraphs[/dim]"
-             if len(d.paragraphs) > 5 else ""),
-            title=f"{d.document_id}. {d.title}",
-            border_style="green",
-        ))
+        console.print(
+            Panel(
+                "\n\n".join(d.paragraphs[:5])
+                + (f"\n\n[dim]… {len(d.paragraphs) - 5} more paragraphs[/dim]" if len(d.paragraphs) > 5 else ""),
+                title=f"{d.document_id}. {d.title}",
+                border_style="green",
+            )
+        )

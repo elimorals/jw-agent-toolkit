@@ -41,10 +41,7 @@ def _shape_hash(obj: Any, depth: int = 0, max_depth: int = 6) -> str:
     if depth > max_depth:
         return "depth-cap"
     if isinstance(obj, dict):
-        parts = sorted(
-            f"{k}:{_shape_hash(v, depth + 1, max_depth)}"
-            for k, v in obj.items()
-        )
+        parts = sorted(f"{k}:{_shape_hash(v, depth + 1, max_depth)}" for k, v in obj.items())
         h = hashlib.sha256("|".join(parts).encode()).hexdigest()[:16]
         return f"dict({len(obj)})[{h}]"
     if isinstance(obj, list):
@@ -65,7 +62,9 @@ class Telemetry:
         default = Path("~/.jw-agent-toolkit/telemetry.json").expanduser()
         self.path = Path(path or env_path or default)
         self.enabled = os.environ.get("JW_TELEMETRY_ENABLED", "").lower() in (
-            "1", "true", "yes",
+            "1",
+            "true",
+            "yes",
         )
         self._state: dict[str, Any] = {"baselines": {}, "drift_events": []}
         if self.enabled and self.path.exists():
@@ -90,16 +89,15 @@ class Telemetry:
             baselines[endpoint] = shape
         elif baseline != shape:
             drift = True
-            self._state.setdefault("drift_events", []).append({
-                "endpoint": endpoint,
-                "expected": baseline,
-                "got": shape,
-                "ts": time.time(),
-            })
-            logger.warning(
-                f"API drift detected on {endpoint}: shape changed "
-                f"({baseline} → {shape})"
+            self._state.setdefault("drift_events", []).append(
+                {
+                    "endpoint": endpoint,
+                    "expected": baseline,
+                    "got": shape,
+                    "ts": time.time(),
+                }
             )
+            logger.warning(f"API drift detected on {endpoint}: shape changed ({baseline} → {shape})")
         self._save()
         return drift
 

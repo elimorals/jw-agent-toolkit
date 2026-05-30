@@ -1,5 +1,7 @@
 # Hoja de ruta
 
+> Roadmap **operacional**: cubre las fases ya entregadas (0-10). Para visión de producto a largo plazo (Fases 11+: reunión semanal, ministerio, TTS, multimodalidad, etc.) ver [VISION.md](VISION.md).
+
 Leyenda de estado: ✅ hecho · 🚧 en progreso · ⬜ planeado
 
 ## Fase 0 — Configuración ✅
@@ -7,7 +9,7 @@ Leyenda de estado: ✅ hecho · 🚧 en progreso · ⬜ planeado
 - ✅ Monorepo con `uv workspace`
 - ✅ Andamiaje de paquetes (`jw-core`, `jw-cli`, `jw-mcp`, `jw-rag`, `jw-agents`)
 - ✅ Tooling: ruff, mypy, pytest
-- ⬜ Workflow de CI (`.github/workflows/ci.yml`)
+- ✅ Workflow de CI (`.github/workflows/ci.yml`) — añadido en Fase 10
 
 ## Fase 1 — Núcleo + MVP del MCP ✅
 
@@ -262,6 +264,8 @@ Auditoría detectó 14 gaps respecto al plan original. Todos cerrados.
   `--record-mode=rewrite` re-graba.
 - ✅ **166 tests passing + 4 skipped** (vs 156 al cerrar Fase 9).
 
+---
+
 ## Fase 6 — RAG ✅
 
 - ✅ `jw-rag.embed` — protocolo `Embedder` + `FakeEmbedder` determinista
@@ -293,18 +297,9 @@ llamante sintetiza la prosa.
 - ✅ Herramientas MCP: `verse_explainer`, `research_topic`, `meeting_helper`,
   `apologetics`
 
-## Fase 8 — Bundle de skills ⬜
+---
 
-- ✅ `skills/jw-verse-lookup/SKILL.md` (existe — base)
-- ✅ `skills/jw-research/SKILL.md` (existe — base)
-- ✅ `skills/jw-daily-text/SKILL.md` (existe — base)
-- ⬜ `skills/jw-meeting-prep/SKILL.md`
-- ⬜ `skills/jw-apologetics/SKILL.md`
-
-## Fase 9 — Pulido ⬜
-
-- ⬜ Cache persistente en disco (SQLite) con TTL
-- ⬜ Rate limiting + backoff exponencial
-- ⬜ Logging estructurado
-- ⬜ Telemetría (opt-in) para detectar drift de la API
-- ⬜ Publicar jw-core en PyPI
+> **Nota sobre orden**: las fases 6 y 7 se completaron antes que 4.5-4.7,
+> 5, 5.5 y 9, por eso aparecen al final del documento. El orden lógico de
+> los paquetes sigue siendo: 0 → 1 → 2 → 3 → 3.5 → 4 → 4.5-4.7 → 6 → 7 → 5
+> → 5.5 → 8 → 9 → 10.
