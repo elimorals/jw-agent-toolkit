@@ -22,6 +22,7 @@ from jw_cli.commands import (
     languages,
     ministry,
     search,
+    study,
     topic,
     verse,
     workbook,
@@ -46,6 +47,7 @@ app.command(name="topic")(topic.topic_cmd)
 app.command(name="workbook")(workbook.workbook_command)
 app.add_typer(ministry.ministry_app, name="ministry")
 app.add_typer(citations.citations_app, name="citations")
+app.add_typer(study.study_app, name="study")
 
 
 def main() -> None:
