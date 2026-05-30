@@ -175,3 +175,125 @@ async def test_validate_agent_output_dict(tmp_path) -> None:
     }
     report = await v.validate_agent_output(agent_out, mode="structural")
     assert len(report.checks) == 2
+
+
+# ── Task 5: live mode + redirects + concurrency ────────────────────────
+
+import asyncio
+
+from jw_core.citations.validator import FetcherResponse
+
+
+def _fake_fetcher_factory(table: dict[str, FetcherResponse]):
+    async def fetch(url: str) -> FetcherResponse:
+        if url not in table:
+            raise RuntimeError(f"unexpected URL {url}")
+        return table[url]
+
+    return fetch
+
+
+@pytest.mark.asyncio
+async def test_live_ok(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+    url = "https://wol.jw.org/es/wol/d/r4/lp-s/1"
+    fetcher = _fake_fetcher_factory(
+        {url: FetcherResponse(final_url=url, status=200, redirect_chain=[], body="<p>ok</p>")}
+    )
+    v = CitationValidator(catalog=cat, fetcher=fetcher)
+    report = await v.validate_urls([url], mode="live")
+    assert report.checks[0].resolve == "ok"
+    assert report.checks[0].http_status == 200
+
+
+@pytest.mark.asyncio
+async def test_live_ok_redirect(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+    url = "https://wol.jw.org/es/wol/d/r4/lp-s/1"
+    fetcher = _fake_fetcher_factory(
+        {
+            url: FetcherResponse(
+                final_url="https://wol.jw.org/es/wol/d/r4/lp-s/2",
+                status=200,
+                redirect_chain=["https://wol.jw.org/es/wol/d/r4/lp-s/1"],
+                body="<p>ok</p>",
+            )
+        }
+    )
+    v = CitationValidator(catalog=cat, fetcher=fetcher)
+    report = await v.validate_urls([url], mode="live")
+    check = report.checks[0]
+    assert check.resolve == "ok_redirect"
+    assert check.redirect_chain == ["https://wol.jw.org/es/wol/d/r4/lp-s/1"]
+    assert check.is_ok is True
+    assert report.summary["warning"] >= 1
+
+
+@pytest.mark.asyncio
+async def test_live_404(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+    url = "https://wol.jw.org/es/wol/d/r4/lp-s/9999999"
+    fetcher = _fake_fetcher_factory({url: FetcherResponse(final_url=url, status=404)})
+    v = CitationValidator(catalog=cat, fetcher=fetcher)
+    report = await v.validate_urls([url], mode="live")
+    assert report.checks[0].resolve == "not_found"
+    assert report.checks[0].is_ok is False
+    assert report.summary["failed"] == 1
+
+
+@pytest.mark.asyncio
+async def test_live_redirect_loop(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+    url = "https://wol.jw.org/es/wol/d/r4/lp-s/1"
+    chain = [f"https://wol.jw.org/r/{i}" for i in range(5)]  # 5 > max_redirects 3
+    fetcher = _fake_fetcher_factory(
+        {url: FetcherResponse(final_url=url, status=200, redirect_chain=chain)}
+    )
+    v = CitationValidator(catalog=cat, fetcher=fetcher, max_redirects=3)
+    report = await v.validate_urls([url], mode="live")
+    assert report.checks[0].resolve == "redirect_loop"
+
+
+@pytest.mark.asyncio
+async def test_live_network_error_is_isolated(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+
+    async def fetcher(url: str) -> FetcherResponse:
+        raise TimeoutError("connection timed out")
+
+    v = CitationValidator(catalog=cat, fetcher=fetcher)
+    report = await v.validate_urls(["https://wol.jw.org/es/wol/d/r4/lp-s/1"], mode="live")
+    assert report.checks[0].resolve == "network_error"
+    assert report.checks[0].is_ok is False
+
+
+@pytest.mark.asyncio
+async def test_concurrency_is_bounded(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+
+    live: int = 0
+    peak: int = 0
+    lock = asyncio.Lock()
+
+    async def slow_fetcher(url: str) -> FetcherResponse:
+        nonlocal live, peak
+        async with lock:
+            live += 1
+            peak = max(peak, live)
+        await asyncio.sleep(0.05)
+        async with lock:
+            live -= 1
+        return FetcherResponse(final_url=url, status=200)
+
+    v = CitationValidator(catalog=cat, fetcher=slow_fetcher, concurrency=3)
+    urls = [f"https://wol.jw.org/es/wol/d/r4/lp-s/{i}" for i in range(10)]
+    await v.validate_urls(urls, mode="live")
+    assert peak <= 3, f"peak concurrency {peak} > limit 3"
+
+
+@pytest.mark.asyncio
+async def test_live_requires_fetcher(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+    v = CitationValidator(catalog=cat)
+    with pytest.raises(ValueError):
+        await v.validate_urls(["https://wol.jw.org/x"], mode="live")
