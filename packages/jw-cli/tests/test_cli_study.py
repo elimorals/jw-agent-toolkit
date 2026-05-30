@@ -54,3 +54,46 @@ def test_study_lesson_renders_prep(monkeypatch) -> None:
     assert result.exit_code == 0
     assert "1 Pedro 5:7" in result.stdout
     assert "párrafo 1" in result.stdout
+
+
+def test_study_log_writes_and_reads(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("JW_STUDY_DB", str(tmp_path / "p.db"))
+    monkeypatch.setenv("JW_STUDY_SALT", str(tmp_path / "salt.bin"))
+    monkeypatch.setenv("JW_STUDY_PASSPHRASE", "hunter2")
+    # Pre-create salt so consent prompt is skipped.
+    from jw_agents.study_progress import load_or_create_salt
+    load_or_create_salt(tmp_path / "salt.bin")
+
+    result = runner.invoke(app, [
+        "study", "log", "demo_user", "lff", "1",
+        "--status", "in_progress",
+        "--note", "buena receptividad",
+        "--goal", "attend_meetings",
+    ])
+    assert result.exit_code == 0, result.stdout
+    assert "demo_user" in result.stdout
+    assert "in_progress" in result.stdout
+
+
+def test_study_log_rejects_bad_student_id(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("JW_STUDY_DB", str(tmp_path / "p.db"))
+    monkeypatch.setenv("JW_STUDY_SALT", str(tmp_path / "salt.bin"))
+    monkeypatch.setenv("JW_STUDY_PASSPHRASE", "hunter2")
+    from jw_agents.study_progress import load_or_create_salt
+    load_or_create_salt(tmp_path / "salt.bin")
+    result = runner.invoke(app, ["study", "log", "Amelia García", "lff", "1"])
+    assert result.exit_code != 0
+
+
+def test_study_log_warns_on_crisis_keyword(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("JW_STUDY_DB", str(tmp_path / "p.db"))
+    monkeypatch.setenv("JW_STUDY_SALT", str(tmp_path / "salt.bin"))
+    monkeypatch.setenv("JW_STUDY_PASSPHRASE", "hunter2")
+    from jw_agents.study_progress import load_or_create_salt
+    load_or_create_salt(tmp_path / "salt.bin")
+    result = runner.invoke(app, [
+        "study", "log", "demo_user", "lff", "1",
+        "--note", "Mencionó suicidio en la visita",
+    ])
+    assert result.exit_code == 0
+    assert "crisis" in result.stdout.lower() or "anciano" in result.stdout.lower()
