@@ -122,3 +122,17 @@ def test_study_lessons_lists_chapter_titles() -> None:
     assert result.exit_code == 0
     assert "Disfruta" in result.stdout
     assert "60" in result.stdout  # total chapters
+
+
+def test_study_directory_set_and_clear(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("JW_STUDY_DIRECTORY", str(tmp_path / "directory.json"))
+
+    r1 = runner.invoke(app, ["study", "directory", "set", "demo_user", "Demo García"])
+    assert r1.exit_code == 0
+
+    r2 = runner.invoke(app, ["study", "directory", "show"])
+    assert r2.exit_code == 0
+    assert "Demo García" in r2.stdout
+
+    r3 = runner.invoke(app, ["study", "directory", "clear", "--yes"])
+    assert r3.exit_code == 0

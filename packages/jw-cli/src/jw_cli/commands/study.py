@@ -10,8 +10,10 @@ Subcommands:
 
 from __future__ import annotations
 
+import json
 import os
 from datetime import datetime, timezone
+from pathlib import Path
 
 import typer
 from pydantic import ValidationError
@@ -221,3 +223,53 @@ def progress_cmd(
             r.updated_at_iso[:10],
         )
     console.print(table)
+
+
+# --- Task 14: directory subcommand --------------------------------------
+
+
+def _directory_path() -> Path:
+    raw = os.getenv("JW_STUDY_DIRECTORY", "~/.jw-agent-toolkit/study_directory.json")
+    return Path(raw).expanduser()
+
+
+directory_app = typer.Typer(name="directory", help="Alias→nombre opcional (opt-in).")
+study_app.add_typer(directory_app, name="directory")
+
+
+@directory_app.command("set")
+def directory_set(alias: str, display_name: str) -> None:
+    path = _directory_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data: dict[str, str] = {}
+    if path.exists():
+        data = json.loads(path.read_text(encoding="utf-8"))
+    data[alias] = display_name
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    console.print(f"[green]✓[/green] {alias} → {display_name}")
+
+
+@directory_app.command("show")
+def directory_show() -> None:
+    path = _directory_path()
+    if not path.exists():
+        console.print("[yellow]Sin directorio.[/yellow]")
+        return
+    data = json.loads(path.read_text(encoding="utf-8"))
+    table = Table(title="Directorio (alias → nombre)")
+    table.add_column("alias")
+    table.add_column("nombre")
+    for k, v in sorted(data.items()):
+        table.add_row(k, v)
+    console.print(table)
+
+
+@directory_app.command("clear")
+def directory_clear(yes: bool = typer.Option(False, "--yes")) -> None:
+    if not yes:
+        console.print("[yellow]Use --yes para confirmar.[/yellow]")
+        raise typer.Exit(code=1)
+    path = _directory_path()
+    if path.exists():
+        path.unlink()
+    console.print("[green]✓[/green] Directorio eliminado.")
