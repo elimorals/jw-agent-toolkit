@@ -271,6 +271,26 @@ async def test_verse_explainer_no_ref_emits_warning() -> None:
     assert not result.findings
 
 
+# ── Fase 23 smoke: citation validator over verse_explainer output ──────
+
+
+@pytest.mark.asyncio
+async def test_verse_explainer_citations_pass_structural_validator() -> None:
+    """Every citation emitted by verse_explainer must pass structural validation.
+
+    Fase 23 smoke — the AgentResult format produced by verse_explainer should
+    pipe cleanly into CitationValidator in default (offline) mode.
+    """
+    from jw_core.citations import CitationValidator
+
+    wol = FakeWOL()
+    result = await verse_explainer("John 3:16", language="en", wol=wol)
+
+    v = CitationValidator()  # no catalog, no fetcher → everything skipped/unknown
+    report = await v.validate_agent_output(result, mode="structural")
+    assert report.summary["failed"] == 0, report.checks
+
+
 # ── apologetics e2e — source priority is the central contract ─────────
 
 
