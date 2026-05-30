@@ -1,0 +1,350 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Design tokens. Inspired by jw.org's sober dark sensibility but with a
+   distinct "editorial-technical" voice: serif display, plex sans body,
+   mono accents, and a cyan-teal accent instead of jw.org's institutional
+   navy. Nothing here imitates jw.org's branding.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* Surfaces — cool deep dark, not pure black */
+  --color-surface-base: #0a0d12;
+  --color-surface-1: #11161d;
+  --color-surface-2: #161c25;
+  --color-surface-3: #1d242f;
+  --color-surface-elevated: #232a37;
+
+  /* Borders & dividers */
+  --color-line-subtle: #1e2530;
+  --color-line: #2a3240;
+  --color-line-strong: #3a4456;
+
+  /* Text */
+  --color-ink-primary: #e7ecf3;
+  --color-ink-secondary: #a4afc1;
+  --color-ink-tertiary: #6e7a8c;
+  --color-ink-disabled: #4a5566;
+
+  /* Accents */
+  --color-accent: #5fc7dd;          /* cyan-teal — distinct from jw.org navy */
+  --color-accent-hover: #7ed3e5;
+  --color-accent-dim: #2f6b78;
+  --color-warm: #d99964;            /* warm contrast for disclaimers / chips */
+  --color-warm-dim: #6b4d33;
+  --color-success: #6fc99e;
+  --color-danger: #d97373;
+
+  /* Typography */
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo,
+    monospace;
+
+  /* Radii — restrained, mostly sharp */
+  --radius-card: 2px;
+  --radius-chip: 999px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Self-host critical fonts via Google Fonts CDN (loaded in BaseLayout head).
+   This keeps the build static and offline-friendly for the docs. */
+
+html {
+  background-color: var(--color-surface-base);
+  color: var(--color-ink-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv11";
+}
+
+body {
+  background:
+    radial-gradient(
+      ellipse 80% 50% at 50% -20%,
+      rgba(95, 199, 221, 0.08),
+      transparent 60%
+    ),
+    var(--color-surface-base);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Display serif for headings, with optical sizing */
+.font-display,
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.02em;
+  font-weight: 480;
+}
+
+h1 { font-variation-settings: "opsz" 144, "SOFT" 30; }
+h2 { font-variation-settings: "opsz" 96, "SOFT" 40; }
+h3 { font-variation-settings: "opsz" 48, "SOFT" 50; }
+
+/* Tabular numbers everywhere — feels engineered */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Mono accents — for package names, file paths, inline code */
+code,
+kbd,
+.font-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "ss02", "cv01";
+}
+
+/* Inline code in prose — subtle chip */
+.prose code:not(pre code) {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-line-subtle);
+  padding: 0.1em 0.4em;
+  border-radius: 3px;
+  font-size: 0.875em;
+  color: var(--color-accent);
+}
+
+/* Selection */
+::selection {
+  background: rgba(95, 199, 221, 0.25);
+  color: var(--color-ink-primary);
+}
+
+/* Focus rings — only on keyboard nav */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Page-level patterns
+   ───────────────────────────────────────────────────────────────────────── */
+
+.grid-noise {
+  position: relative;
+  isolation: isolate;
+}
+.grid-noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--color-line-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line-subtle) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(
+    ellipse 60% 80% at 50% 20%,
+    black 0%,
+    transparent 70%
+  );
+  opacity: 0.4;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Hover lift utility */
+.card-hover {
+  transition:
+    transform 350ms var(--ease-out),
+    border-color 350ms var(--ease-out),
+    background 350ms var(--ease-out);
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-line-strong);
+  background: var(--color-surface-2);
+}
+
+/* Underline accent for in-prose links */
+.prose a:not(.no-underline) {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent-dim);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-color 200ms;
+}
+.prose a:not(.no-underline):hover {
+  text-decoration-color: var(--color-accent);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Hero — staggered entry animation
+   ───────────────────────────────────────────────────────────────────────── */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise {
+  animation: rise 800ms var(--ease-out) both;
+}
+.rise-1 { animation-delay: 60ms; }
+.rise-2 { animation-delay: 180ms; }
+.rise-3 { animation-delay: 320ms; }
+.rise-4 { animation-delay: 480ms; }
+.rise-5 { animation-delay: 640ms; }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+.cursor::after {
+  content: "▍";
+  margin-left: 0.15em;
+  color: var(--color-accent);
+  animation: blink 1.2s steps(2) infinite;
+  font-weight: 100;
+}
+
+/* Scroll reveal — children of [data-reveal-group] get .reveal from JS,
+   then .in-view when they enter the viewport. Stagger via inline
+   --reveal-delay set by the same script. */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 700ms var(--ease-out),
+    transform 700ms var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Anchor-link smooth scroll matched with sticky header offset */
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .rise { animation: none !important; opacity: 1; transform: none; }
+  .cursor::after { animation: none; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Prose styles for docs (MDX-rendered content)
+   ───────────────────────────────────────────────────────────────────────── */
+
+.prose {
+  color: var(--color-ink-secondary);
+  font-size: 1rem;
+  line-height: 1.75;
+  max-width: 68ch;
+}
+.prose h1 {
+  color: var(--color-ink-primary);
+  font-size: 2.4rem;
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  letter-spacing: -0.025em;
+}
+.prose h2 {
+  color: var(--color-ink-primary);
+  font-size: 1.75rem;
+  margin-top: 2.5em;
+  margin-bottom: 0.6em;
+  padding-top: 1.4em;
+  border-top: 1px solid var(--color-line-subtle);
+  letter-spacing: -0.02em;
+}
+.prose h3 {
+  color: var(--color-ink-primary);
+  font-size: 1.25rem;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+}
+.prose p,
+.prose ul,
+.prose ol {
+  margin-block: 1em;
+}
+.prose ul {
+  list-style: none;
+  padding: 0;
+}
+.prose ul > li {
+  position: relative;
+  padding-left: 1.5em;
+}
+.prose ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0.25em;
+  top: 0.7em;
+  width: 0.5em;
+  height: 1px;
+  background: var(--color-accent-dim);
+}
+.prose ol {
+  list-style: decimal;
+  padding-left: 1.5em;
+}
+.prose blockquote {
+  border-left: 2px solid var(--color-accent);
+  padding-left: 1.25em;
+  font-style: italic;
+  color: var(--color-ink-secondary);
+  margin-block: 1.5em;
+}
+.prose pre {
+  background: var(--color-surface-1) !important;
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  margin-block: 1.5em;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.prose pre code {
+  background: transparent !important;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-block: 1.5em;
+  font-size: 0.92rem;
+}
+.prose th,
+.prose td {
+  border-bottom: 1px solid var(--color-line-subtle);
+  padding: 0.6em 0.8em;
+  text-align: left;
+}
+.prose th {
+  color: var(--color-ink-primary);
+  font-weight: 600;
+  border-bottom-color: var(--color-line);
+}
+.prose hr {
+  border: none;
+  height: 1px;
+  background: var(--color-line);
+  margin-block: 3em;
+}
+.prose img {
+  border-radius: 2px;
+  margin-block: 1.5em;
+}

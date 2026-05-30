@@ -1,0 +1,99 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  description: string;
+  href: string;
+  accent?: "cyan" | "warm" | "neutral";
+}
+
+const { eyebrow, title, description, href, accent = "cyan" } = Astro.props;
+
+const ribbon = {
+  cyan: "bg-gradient-to-br from-[#163b48] via-[#0f2a35] to-[#0b1d25]",
+  warm: "bg-gradient-to-br from-[#3d2818] via-[#2b1c10] to-[#1a1108]",
+  neutral: "bg-gradient-to-br from-[#1c2330] via-[#141a24] to-[#0d121a]",
+}[accent];
+
+const ringColor = {
+  cyan: "text-[var(--color-accent)]",
+  warm: "text-[var(--color-warm)]",
+  neutral: "text-[var(--color-ink-secondary)]",
+}[accent];
+---
+
+<a
+  href={href}
+  class="group card-hover flex flex-col gap-0 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] no-underline"
+>
+  <div
+    class:list={[
+      "relative aspect-[16/10] overflow-hidden border-b border-[var(--color-line-subtle)]",
+      ribbon,
+    ]}
+  >
+    <!-- Decorative SVG pattern -->
+    <svg
+      viewBox="0 0 320 200"
+      class={"absolute inset-0 size-full opacity-50 " + ringColor}
+      aria-hidden="true"
+    >
+      <defs>
+        <pattern
+          id={"grid-" + Math.random().toString(36).slice(2, 9)}
+          width="32"
+          height="32"
+          patternUnits="userSpaceOnUse"
+        >
+          <path
+            d="M 32 0 L 0 0 0 32"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="0.5"
+          />
+        </pattern>
+      </defs>
+      <rect width="320" height="200" fill="currentColor" fill-opacity="0.04" />
+      <g stroke="currentColor" stroke-width="1" fill="none" opacity="0.6">
+        <circle cx="80" cy="100" r="38" />
+        <circle cx="80" cy="100" r="60" stroke-opacity="0.4" />
+        <circle cx="80" cy="100" r="80" stroke-opacity="0.2" />
+        <line x1="80" y1="100" x2="240" y2="100" stroke-dasharray="3 4" />
+        <line x1="240" y1="100" x2="240" y2="60" />
+        <line x1="240" y1="100" x2="240" y2="140" />
+        <rect x="220" y="50" width="40" height="20" rx="1" />
+        <rect x="220" y="130" width="40" height="20" rx="1" />
+      </g>
+      <text
+        x="80"
+        y="105"
+        text-anchor="middle"
+        font-family="JetBrains Mono"
+        font-size="10"
+        fill="currentColor"
+        opacity="0.7"
+      >
+        {eyebrow.slice(0, 6).toUpperCase()}
+      </text>
+    </svg>
+  </div>
+
+  <div class="flex flex-col gap-2 p-5">
+    <span
+      class:list={[
+        "font-mono text-[10px] uppercase tracking-[0.2em]",
+        ringColor,
+      ]}
+    >
+      {eyebrow}
+    </span>
+    <h3
+      class="font-display text-[20px] leading-tight text-[var(--color-ink-primary)] transition-colors group-hover:text-[var(--color-accent-hover)]"
+    >
+      {title}
+    </h3>
+    <p class="text-[13px] leading-relaxed text-[var(--color-ink-secondary)]">
+      {description}
+    </p>
+  </div>
+</a>

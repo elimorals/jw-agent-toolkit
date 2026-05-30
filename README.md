@@ -30,7 +30,7 @@ uv run jw daily
 uv run jw search "amor"
 ```
 
-Si estás en macOS y tu carpeta `~/Documents` está sincronizada con iCloud, ve la nota sobre `chflags nohidden` en [QUICKSTART.md](QUICKSTART.md).
+> **macOS bajo `~/Documents` o `~/Desktop`:** sigue la receta de [`docs/guias/setup-macos.md`](docs/guias/setup-macos.md) *antes* del `uv sync`. macOS marca los `.venv/` como `UF_HIDDEN` automáticamente en esas rutas, lo que rompe los imports editables con `ModuleNotFoundError` silencioso. La guía explica el porqué y deja un fix permanente con `venv/` + symlink.
 
 ## Licencia
 

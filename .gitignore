@@ -30,6 +30,7 @@ htmlcov/
 
 # Data (corpus indexado, NO commitear — pesado y/o protegido por copyright)
 data/
+!website/src/data/
 *.jwpub
 *.epub
 *.pdf
@@ -58,3 +59,10 @@ data/
 # stay around as empty files only locally — uncomment to ignore if needed:
 # packages/jw-core/tests/cassettes/test_cassettes/*.yaml
 
+.vercel
+
+# Python venv variants created by macOS / iCloud (e.g. ".venv 2", ".venv 3")
+.venv*
+
+# jw-finetune runtime workspace (logs, events, intermediate datasets)
+jw-finetune-workspace/

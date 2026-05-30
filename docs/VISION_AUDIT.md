@@ -201,9 +201,10 @@ Items de VISION.md que conscientemente quedan como next iteration:
 
 ```bash
 # 1. Instalar (todas las dependencias workspace)
+# Nota macOS bajo ~/Documents: aplicar primero la receta de docs/guias/setup-macos.md
+# (venv/ + symlink .venv) para evitar el quirk UF_HIDDEN sobre los .pth editables.
 uv sync
 uv pip install -e packages/jw-core -e packages/jw-rag -e packages/jw-agents -e packages/jw-cli -e packages/jw-mcp
-chflags nohidden .venv/lib/python3.13/site-packages/editable_impl_jw_*.pth  # Mac + Python 3.13 quirk
 
 # 2. Correr la suite
 .venv/bin/python -m pytest

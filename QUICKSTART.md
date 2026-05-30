@@ -5,14 +5,17 @@
 ```bash
 cd jw-agent-toolkit
 uv sync --all-packages
-
-# Aviso para macOS: la carpeta ~/Documents sincronizada con iCloud
-# a veces asigna el flag UF_HIDDEN a los archivos que uv crea en .venv/.
-# Python 3.13+ ignora los archivos .pth ocultos, lo que rompe silenciosamente
-# los imports editables de jw-core / jw-mcp. Ejecuta esto una vez después
-# de cada `uv sync` hasta que uv lance una corrección:
-chflags nohidden .venv/lib/python3.13/site-packages/*.pth 2>/dev/null || true
 ```
+
+> **macOS bajo `~/Documents` o `~/Desktop`:** macOS marca automáticamente `.venv/` como `UF_HIDDEN`, lo que rompe los imports editables con `ModuleNotFoundError` silencioso aunque `uv pip show` diga que el paquete está instalado. Antes del primer `uv sync`, ejecuta:
+>
+> ```bash
+> uv venv venv --python 3.13
+> ln -s venv .venv
+> uv sync --all-packages
+> ```
+>
+> Explicación completa, causa raíz y verificación en [`docs/guias/setup-macos.md`](docs/guias/setup-macos.md).
 
 ## Probar el parser
 

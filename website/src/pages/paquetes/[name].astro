@@ -1,0 +1,383 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { packages, packageBySlug, otherPackages } from "../../data/packages";
+
+export function getStaticPaths() {
+  return packages.map((p) => ({
+    params: { name: p.slug },
+    props: { pkg: p },
+  }));
+}
+
+const { pkg } = Astro.props;
+const others = otherPackages(pkg.slug);
+
+const colorClass: Record<typeof pkg.color, string> = {
+  cyan: "text-[#5fc7dd]",
+  warm: "text-[#d99964]",
+  neutral: "text-[#a4afc1]",
+  violet: "text-[#9b7cd9]",
+  amber: "text-[#e5b66e]",
+  green: "text-[#7dc99e]",
+};
+const accentClass = colorClass[pkg.color];
+
+const gradientClass: Record<typeof pkg.color, string> = {
+  cyan: "from-[#163b48] via-[#0f2a35] to-transparent",
+  warm: "from-[#3d2818] via-[#2b1c10] to-transparent",
+  neutral: "from-[#1c2330] via-[#141a24] to-transparent",
+  violet: "from-[#2a1f3d] via-[#1c142b] to-transparent",
+  amber: "from-[#3d2f15] via-[#2a200e] to-transparent",
+  green: "from-[#173a26] via-[#102818] to-transparent",
+};
+---
+
+<BaseLayout
+  title={`${pkg.name} — ${pkg.tagline}`}
+  description={pkg.short}
+>
+  <!-- Hero ──────────────────────────────────────────────────────────── -->
+  <section
+    class:list={[
+      "relative overflow-hidden border-b border-[var(--color-line-subtle)] bg-gradient-to-br",
+      gradientClass[pkg.color],
+    ]}
+  >
+    <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
+      <nav
+        class="rise rise-1 mb-8 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink-tertiary)]"
+      >
+        <a href="/" class="hover:text-[var(--color-ink-secondary)] no-underline">Inicio</a>
+        <span aria-hidden="true">/</span>
+        <a href="/#paquetes" class="hover:text-[var(--color-ink-secondary)] no-underline"
+          >Paquetes</a>
+        <span aria-hidden="true">/</span>
+        <span class:list={[accentClass]}>{pkg.name}</span>
+      </nav>
+
+      <div class="grid items-start gap-12 lg:grid-cols-[1.4fr_1fr]">
+        <div class="space-y-7">
+          <div class="rise rise-2 space-y-3">
+            <p
+              class:list={[
+                "font-mono text-[11px] uppercase tracking-[0.22em]",
+                accentClass,
+              ]}
+            >
+              Paquete · {pkg.color === "neutral" ? "Plataforma" : "Librería"}
+            </p>
+            <h1 class="font-mono text-[clamp(2.6rem,5.5vw,4.2rem)] font-medium leading-[0.95] text-[var(--color-ink-primary)]">
+              {pkg.name}
+            </h1>
+            <p
+              class:list={[
+                "font-display text-[clamp(1.5rem,2.5vw,2.1rem)] italic leading-tight",
+                accentClass,
+              ]}
+              style="font-variation-settings: 'opsz' 96, 'SOFT' 60;"
+            >
+              {pkg.tagline}
+            </p>
+          </div>
+
+          <p
+            class="rise rise-3 max-w-2xl text-[17px] leading-relaxed text-[var(--color-ink-secondary)]"
+          >
+            {pkg.about}
+          </p>
+
+          <div class="rise rise-4 flex flex-wrap gap-3 pt-2">
+            <a
+              href={pkg.referenceHref}
+              class="inline-flex items-center gap-2 rounded-[2px] border border-[var(--color-line-strong)] bg-[var(--color-surface-1)] px-5 py-3 font-mono text-[13px] text-[var(--color-ink-primary)] transition hover:border-[var(--color-line-strong)] hover:bg-[var(--color-surface-2)] no-underline"
+            >
+              Referencia exhaustiva
+              <span aria-hidden="true">→</span>
+            </a>
+            {
+              pkg.guideHref && (
+                <a
+                  href={pkg.guideHref}
+                  class="inline-flex items-center gap-2 rounded-[2px] px-5 py-3 font-mono text-[13px] text-[var(--color-ink-secondary)] transition hover:text-[var(--color-ink-primary)] no-underline"
+                >
+                  Guía práctica
+                </a>
+              )
+            }
+          </div>
+        </div>
+
+        <!-- Install card -->
+        <aside
+          class="rise rise-5 rounded-[2px] border border-[var(--color-line)] bg-[var(--color-surface-1)]"
+        >
+          <div
+            class="border-b border-[var(--color-line-subtle)] px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink-tertiary)]"
+          >
+            $ instalación
+          </div>
+          <pre class="overflow-x-auto px-4 py-3.5 font-mono text-[12.5px] text-[var(--color-ink-primary)]"><code>{pkg.install}</code></pre>
+
+          <div
+            class="border-y border-[var(--color-line-subtle)] px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink-tertiary)]"
+          >
+            Depende de
+          </div>
+          <div class="flex flex-wrap gap-1.5 px-4 py-3.5">
+            {
+              pkg.dependsOn.length === 0 ? (
+                <span class="font-mono text-[12.5px] text-[var(--color-ink-tertiary)]">
+                  — nada del workspace
+                </span>
+              ) : (
+                pkg.dependsOn.map((dep) => (
+                  <a
+                    href={`/paquetes/${dep}`}
+                    class:list={[
+                      "rounded-[var(--radius-chip)] border border-[var(--color-line)] px-2.5 py-1 font-mono text-[11px] no-underline transition hover:bg-[var(--color-surface-2)]",
+                      accentClass,
+                    ]}
+                  >
+                    {dep}
+                  </a>
+                ))
+              )
+            }
+          </div>
+
+          <div
+            class="border-t border-[var(--color-line-subtle)] px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink-tertiary)]"
+          >
+            Highlights
+          </div>
+          <ul class="space-y-1.5 px-4 py-3.5">
+            {
+              pkg.highlights.map((h) => (
+                <li class="flex items-start gap-2 font-mono text-[11.5px] text-[var(--color-ink-secondary)]">
+                  <span class:list={["mt-1.5 inline-block size-1 shrink-0 rounded-full", accentClass.replace("text", "bg")]} />
+                  {h}
+                </li>
+              ))
+            }
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features ─────────────────────────────────────────────────────── -->
+  <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24">
+    <header class="mb-10">
+      <p
+        class:list={[
+          "mb-3 font-mono text-[11px] uppercase tracking-[0.22em]",
+          accentClass,
+        ]}
+      >
+        Funcionalidades
+      </p>
+      <h2 class="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] leading-tight text-[var(--color-ink-primary)]">
+        Lo que hace, en detalle.
+      </h2>
+    </header>
+
+    <div
+      class="grid gap-px overflow-hidden rounded-[2px] border border-[var(--color-line-subtle)] bg-[var(--color-line-subtle)] md:grid-cols-2"
+      data-reveal-group
+    >
+      {
+        pkg.features.map((f, i) => (
+          <div class="flex flex-col gap-3 bg-[var(--color-surface-1)] p-6 sm:p-8">
+            <div class="flex items-baseline gap-3">
+              <span class:list={["font-mono text-[11px]", accentClass]}>
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 class="font-display text-[20px] leading-tight text-[var(--color-ink-primary)]">
+                {f.title}
+              </h3>
+            </div>
+            <p class="text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+              {f.body}
+            </p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Usage code ───────────────────────────────────────────────────── -->
+  <section class="border-y border-[var(--color-line-subtle)] bg-[var(--color-surface-1)]/40">
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24">
+      <div class="grid gap-12 lg:grid-cols-[1fr_1.5fr]">
+        <div class="space-y-4">
+          <p
+            class:list={[
+              "font-mono text-[11px] uppercase tracking-[0.22em]",
+              accentClass,
+            ]}
+          >
+            En la práctica
+          </p>
+          <h2 class="font-display text-[clamp(1.8rem,3.5vw,2.4rem)] leading-tight text-[var(--color-ink-primary)]">
+            Cuatro líneas.
+            <br />
+            <span
+              class="italic text-[var(--color-ink-secondary)]"
+              style="font-variation-settings: 'opsz' 96, 'SOFT' 50;"
+            >
+              Resultado verificable.
+            </span>
+          </h2>
+          {
+            pkg.usage.caption && (
+              <p class="text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+                {pkg.usage.caption}
+              </p>
+            )
+          }
+        </div>
+
+        <div
+          class="overflow-hidden rounded-[2px] border border-[var(--color-line)] bg-[var(--color-surface-base)]"
+        >
+          <div
+            class="flex items-center gap-2 border-b border-[var(--color-line-subtle)] bg-[var(--color-surface-2)] px-4 py-2"
+          >
+            <span class="size-2.5 rounded-full bg-[var(--color-danger)]/60"></span>
+            <span class="size-2.5 rounded-full bg-[var(--color-warm)]/60"></span>
+            <span class="size-2.5 rounded-full bg-[var(--color-success)]/60"></span>
+            <span
+              class="ml-2 font-mono text-[11px] text-[var(--color-ink-tertiary)]"
+            >
+              {pkg.usage.language} · {pkg.name}
+            </span>
+          </div>
+          <pre class="overflow-x-auto p-5 font-mono text-[13px] leading-[1.7] text-[var(--color-ink-primary)]"><code>{pkg.usage.code}</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Exports ──────────────────────────────────────────────────────── -->
+  <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24">
+    <div class="grid gap-12 md:grid-cols-[1fr_2fr]">
+      <div>
+        <p
+          class:list={[
+            "mb-3 font-mono text-[11px] uppercase tracking-[0.22em]",
+            accentClass,
+          ]}
+        >
+          API pública
+        </p>
+        <h2 class="font-display text-[clamp(1.6rem,3vw,2.2rem)] leading-tight text-[var(--color-ink-primary)]">
+          Qué exporta el módulo.
+        </h2>
+        <p class="mt-4 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+          Resumen de los símbolos principales. La{" "}
+          <a href={pkg.referenceHref} class="text-[var(--color-accent)] no-underline hover:underline">
+            referencia exhaustiva
+          </a>{" "}
+          cubre cada uno con signature, parámetros y ejemplos.
+        </p>
+      </div>
+      <ul
+        class="grid gap-px overflow-hidden rounded-[2px] border border-[var(--color-line-subtle)] bg-[var(--color-line-subtle)] sm:grid-cols-2"
+        data-reveal-group
+      >
+        {
+          pkg.exports.map((exp) => (
+            <li class="flex items-start gap-3 bg-[var(--color-surface-1)] px-5 py-3.5 font-mono text-[12.5px] text-[var(--color-ink-secondary)]">
+              <span class:list={["mt-2 inline-block size-1 shrink-0 rounded-full", accentClass.replace("text", "bg")]} />
+              {exp}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Other packages ───────────────────────────────────────────────── -->
+  <section class="border-t border-[var(--color-line-subtle)] bg-[var(--color-surface-1)]/30">
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <p
+        class="mb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]"
+      >
+        Otros paquetes
+      </p>
+      <h2 class="mb-10 font-display text-[clamp(1.6rem,3vw,2.2rem)] leading-tight text-[var(--color-ink-primary)]">
+        Explora el resto del monorepo.
+      </h2>
+      <div
+        class="grid gap-px overflow-hidden rounded-[2px] border border-[var(--color-line-subtle)] bg-[var(--color-line-subtle)] sm:grid-cols-2 lg:grid-cols-3"
+        data-reveal-group
+      >
+        {
+          others.map((o) => (
+            <a
+              href={`/paquetes/${o.slug}`}
+              class="group flex items-start gap-4 bg-[var(--color-surface-1)] p-5 transition-colors hover:bg-[var(--color-surface-2)] no-underline"
+            >
+              <div class="min-w-0 flex-1 space-y-1">
+                <p class="font-mono text-[14px] text-[var(--color-ink-primary)] group-hover:text-[var(--color-accent-hover)]">
+                  {o.name}
+                </p>
+                <p
+                  class="font-display text-[14px] italic text-[var(--color-ink-tertiary)]"
+                  style="font-variation-settings: 'opsz' 48;"
+                >
+                  {o.tagline}
+                </p>
+              </div>
+              <span
+                class="mt-1 text-[var(--color-ink-tertiary)] transition-colors group-hover:text-[var(--color-accent)]"
+                aria-hidden="true"
+              >
+                →
+              </span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  /* Re-use the scroll-reveal pattern from the homepage. Each page
+     ships its own copy because Astro bundles per-route. */
+  (function () {
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const groups = document.querySelectorAll<HTMLElement>("[data-reveal-group]");
+    if (groups.length === 0) return;
+    if (reduced) {
+      groups.forEach((g) =>
+        Array.from(g.children).forEach((c) => c.classList.add("in-view")),
+      );
+      return;
+    }
+    groups.forEach((g) =>
+      Array.from(g.children).forEach((c, i) => {
+        const el = c as HTMLElement;
+        el.classList.add("reveal");
+        el.style.setProperty("--reveal-delay", `${i * 80}ms`);
+      }),
+    );
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            Array.from((e.target as HTMLElement).children).forEach((c) =>
+              c.classList.add("in-view"),
+            );
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -6% 0px" },
+    );
+    groups.forEach((g) => io.observe(g));
+  })();
+</script>

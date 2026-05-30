@@ -1,0 +1,117 @@
+---
+const cols = [
+  {
+    title: "Proyecto",
+    links: [
+      { href: "/paquetes", label: "Paquetes" },
+      { href: "/arquitectura", label: "Arquitectura" },
+      { href: "/vision", label: "Visión" },
+      {
+        href: "https://github.com/elimorals/jw-agent-toolkit/blob/main/docs/ROADMAP.md",
+        label: "Hoja de ruta",
+      },
+    ],
+  },
+  {
+    title: "Documentación",
+    links: [
+      { href: "/docs#guias", label: "Guías" },
+      { href: "/docs#conceptos", label: "Conceptos" },
+      { href: "/docs#referencia", label: "Referencia" },
+      { href: "/docs#superpowers", label: "Specs y planes" },
+    ],
+  },
+  {
+    title: "Comunidad",
+    links: [
+      {
+        href: "https://github.com/elimorals/jw-agent-toolkit",
+        label: "Código fuente",
+      },
+      {
+        href: "https://github.com/elimorals/jw-agent-toolkit/issues",
+        label: "Issues",
+      },
+      {
+        href: "https://github.com/elimorals/jw-agent-toolkit/discussions",
+        label: "Discusiones",
+      },
+      {
+        href: "https://github.com/elimorals/jw-agent-toolkit/blob/main/LICENSE",
+        label: "Licencia GPL-3.0",
+      },
+    ],
+  },
+];
+---
+
+<footer
+  class="mt-32 border-t border-[var(--color-line-subtle)] bg-[var(--color-surface-1)]"
+>
+  <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+    <div class="grid gap-10 md:grid-cols-[2fr_1fr_1fr_1fr]">
+      <div class="space-y-4">
+        <div class="flex items-center gap-2.5">
+          <span
+            class="grid size-9 place-items-center rounded-[3px] bg-[var(--color-accent)] font-mono text-[13px] font-medium leading-none text-[var(--color-surface-base)]"
+            aria-hidden="true">⌘</span
+          >
+          <span
+            class="font-mono text-[14px] font-medium text-[var(--color-ink-primary)]"
+          >
+            jw-agent-toolkit
+          </span>
+        </div>
+        <p class="max-w-sm text-sm leading-relaxed text-[var(--color-ink-tertiary)]">
+          Toolkit técnico de código abierto para acceso programático a contenido
+          público de jw.org y wol.jw.org. Diseñado para construir agentes,
+          servidores MCP y pipelines RAG sobre material bíblico y publicaciones
+          de los Testigos de Jehová.
+        </p>
+        <p
+          class="max-w-sm rounded-[2px] border-l-2 border-[var(--color-warm)] bg-[var(--color-warm-dim)]/10 px-3 py-2 text-xs leading-relaxed text-[var(--color-ink-tertiary)]"
+        >
+          <strong class="font-medium text-[var(--color-warm)]">
+            Proyecto independiente.
+          </strong>{" "}
+          No está afiliado, patrocinado ni avalado por la Watch Tower Bible and
+          Tract Society o Jehovah&#39;s Witnesses. Todas las marcas son
+          propiedad de sus respectivos dueños.
+        </p>
+      </div>
+
+      {
+        cols.map((col) => (
+          <div>
+            <h4 class="mb-4 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink-tertiary)]">
+              {col.title}
+            </h4>
+            <ul class="space-y-2.5 text-sm">
+              {col.links.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    class="text-[var(--color-ink-secondary)] transition-colors hover:text-[var(--color-accent)] no-underline"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    <div
+      class="mt-16 flex flex-col items-start justify-between gap-4 border-t border-[var(--color-line-subtle)] pt-8 text-xs text-[var(--color-ink-tertiary)] sm:flex-row sm:items-center"
+    >
+      <p class="font-mono">
+        © 2026 contribuidores de jw-agent-toolkit · GPL-3.0-only
+      </p>
+      <p class="font-mono">
+        Construido con Astro · Hospedado en GitHub
+      </p>
+    </div>
+  </div>
+</footer>

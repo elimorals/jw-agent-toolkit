@@ -1,0 +1,87 @@
+---
+import "../styles/global.css";
+import DisclaimerBar from "../components/DisclaimerBar.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  showHeader?: boolean;
+  ogImageKey?: string;
+}
+
+const {
+  title = "jw-agent-toolkit",
+  description = "Toolkit técnico independiente para acceso programático a contenido público de jw.org. Monorepo Python con CLI, MCP, RAG y agentes.",
+  showHeader = true,
+  ogImageKey,
+} = Astro.props;
+
+const fullTitle =
+  title === "jw-agent-toolkit"
+    ? "jw-agent-toolkit — Toolkit agéntico para contenido de jw.org"
+    : `${title} · jw-agent-toolkit`;
+
+/**
+ * Derive the OG image key from the URL when the page doesn't pass one
+ * explicitly. Pages with their own /og/{key}.png are: home, docs,
+ * vision, arquitectura, and each package (paquetes-{slug}).
+ * Everything else falls back to the home OG image.
+ */
+function deriveOgKey(pathname: string): string {
+  const p = pathname.replace(/\/$/, "") || "/";
+  if (p === "/") return "home";
+  if (p === "/docs") return "docs";
+  if (p.startsWith("/docs/vision")) return "vision";
+  if (p.startsWith("/docs/architecture")) return "arquitectura";
+  if (p.startsWith("/docs")) return "docs";
+  const m = p.match(/^\/paquetes\/([^/]+)$/);
+  if (m) return `paquetes-${m[1]}`;
+  return "home";
+}
+
+const ogKey = ogImageKey ?? deriveOgKey(Astro.url.pathname);
+const ogImageUrl = new URL(`/og/${ogKey}.png`, Astro.site ?? Astro.url).href;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta name="robots" content="index, follow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={Astro.url.href} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,30..100&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+
+    <title>{fullTitle}</title>
+  </head>
+  <body>
+    <DisclaimerBar />
+    {showHeader && <Header />}
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

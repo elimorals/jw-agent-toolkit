@@ -1,0 +1,31 @@
+## Files NOT uploaded to Vercel build sandbox. Keep upload small.
+## The website only needs docs/ + website/ to build.
+
+# Heavy Python virtual envs (may not be in .gitignore but are large)
+.venv/
+.venv 2/
+venv/
+
+# Python packages — not needed for the website build
+packages/
+
+# Skills, scripts, workspace — not needed for the website build
+skills/
+scripts/
+jw-finetune-workspace/
+.remember/
+.claude/
+
+# Cache and build artifacts
+.uv-cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Already covered by .gitignore but make explicit
+node_modules/
+website/dist/
+website/.astro/
+website/node_modules/

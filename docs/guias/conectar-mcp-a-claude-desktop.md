@@ -119,15 +119,9 @@ which uv
 
 ### "ModuleNotFoundError: No module named 'jw_core'" en los logs del MCP
 
-**Causa típica en macOS con iCloud**: la carpeta `~/Documents` sincronizada con iCloud a veces marca como ocultos los archivos `.pth` que `uv` crea en `.venv/`. Python 3.13+ ignora archivos `.pth` ocultos.
+**Causa típica en macOS bajo `~/Documents`**: macOS marca `.venv/` con el flag `UF_HIDDEN` automáticamente cuando vive bajo una carpeta indexada por Spotlight, y CPython 3.8+ filtra los `.pth` ocultos. El resultado es que los imports editables de `jw-core`/`jw-mcp` fallan en silencio.
 
-**Fix**:
-
-```bash
-chflags nohidden /path/to/jw-agent-toolkit/.venv/lib/python3.13/site-packages/*.pth
-```
-
-Hazlo cada vez que ejecutes `uv sync` hasta que `uv` lance un fix oficial.
+**Fix permanente**: usa `venv/` físico con symlink `.venv → venv`. Receta y causa raíz en [`docs/guias/setup-macos.md`](setup-macos.md).
 
 ### "Address already in use" o "Server connection lost"
 

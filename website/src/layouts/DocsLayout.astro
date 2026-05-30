@@ -1,0 +1,110 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+  section?: string;
+  sourcePath?: string;
+}
+
+const { title, description, section, sourcePath } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="mx-auto max-w-7xl px-4 pb-24 pt-10 sm:px-6">
+    <div class="grid gap-12 lg:grid-cols-[260px_1fr]">
+      <aside class="hidden lg:block">
+        <div class="sticky top-24 space-y-6 text-sm">
+          <div>
+            <p
+              class="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]"
+            >
+              Navegación
+            </p>
+            <ul class="space-y-1.5">
+              <li>
+                <a
+                  href="/docs/architecture"
+                  class="text-[var(--color-ink-secondary)] hover:text-[var(--color-accent)] no-underline"
+                  >Arquitectura</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/docs/vision"
+                  class="text-[var(--color-ink-secondary)] hover:text-[var(--color-accent)] no-underline"
+                  >Visión</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/docs/roadmap"
+                  class="text-[var(--color-ink-secondary)] hover:text-[var(--color-accent)] no-underline"
+                  >Hoja de ruta</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p
+              class="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]"
+            >
+              Secciones
+            </p>
+            <ul class="space-y-1.5">
+              <li>
+                <a
+                  href="/docs/conceptos"
+                  class="text-[var(--color-ink-secondary)] hover:text-[var(--color-accent)] no-underline"
+                  >Conceptos</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/docs/guias"
+                  class="text-[var(--color-ink-secondary)] hover:text-[var(--color-accent)] no-underline"
+                  >Guías</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/docs/referencia"
+                  class="text-[var(--color-ink-secondary)] hover:text-[var(--color-accent)] no-underline"
+                  >Referencia</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+
+      <article class="min-w-0">
+        {
+          section && (
+            <p class="mb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
+              {section}
+            </p>
+          )
+        }
+        <div class="prose">
+          <slot />
+        </div>
+
+        {
+          sourcePath && (
+            <p class="mt-16 border-t border-[var(--color-line-subtle)] pt-6 font-mono text-[11px] text-[var(--color-ink-tertiary)]">
+              Editar esta página en{" "}
+              <a
+                href={`https://github.com/elimorals/jw-agent-toolkit/edit/main/docs/${sourcePath}.md`}
+                class="text-[var(--color-accent)] no-underline hover:text-[var(--color-accent-hover)]"
+              >
+                docs/{sourcePath}.md
+              </a>
+            </p>
+          )
+        }
+      </article>
+    </div>
+  </div>
+</BaseLayout>
