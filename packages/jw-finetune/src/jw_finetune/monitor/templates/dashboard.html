@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>jw-finetune monitor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+    Local-first dashboard: no external scripts loaded. Charting is a small
+    canvas helper bundled inline below. This keeps the page functional
+    offline and removes any CDN/SRI risk.
+  -->
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --ok: #3fb950;
+      --warn: #d29922;
+      --err: #f85149;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+    }
+    h1 { margin: 0 0 1rem; font-size: 1.25rem; font-weight: 600; }
+    .grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+    }
+    .panel h2 {
+      margin: 0 0 0.75rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+    .stat { display: flex; justify-content: space-between; padding: 0.25rem 0; font-size: 0.9rem; }
+    .stat .key { color: var(--muted); }
+    .stat .val { font-family: SF Mono, Menlo, monospace; }
+    .chart-wrap { height: 240px; position: relative; }
+    canvas { width: 100%; height: 100%; display: block; }
+    #log {
+      max-height: 280px; overflow-y: auto;
+      font-family: SF Mono, Menlo, monospace; font-size: 0.75rem;
+      background: #0d1117; border: 1px solid var(--border); border-radius: 4px; padding: 0.5rem;
+    }
+    .ev { margin-bottom: 0.25rem; white-space: nowrap; }
+    .ev.train_begin { color: var(--accent); }
+    .ev.train_end { color: var(--ok); }
+    .ev.evaluate { color: var(--warn); }
+    .status-dot {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--muted); margin-right: 0.5rem;
+    }
+    .status-dot.connected { background: var(--ok); }
+    .status-dot.error { background: var(--err); }
+  </style>
+</head>
+<body>
+  <h1>
+    <span class="status-dot" id="status-dot"></span>
+    jw-finetune monitor — <span id="status-text">connecting…</span>
+  </h1>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>Training loss</h2>
+      <div class="chart-wrap"><canvas id="loss-chart"></canvas></div>
+    </div>
+
+    <div class="panel">
+      <h2>System</h2>
+      <div id="sys"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Latest step</h2>
+      <div id="latest"></div>
+    </div>
+
+    <div class="panel" style="grid-column: 1 / -1;">
+      <h2>Event log</h2>
+      <div id="log"></div>
+    </div>
+  </div>
+
+  <script>
+    // All dynamic content is inserted via createElement + textContent.
+    // No innerHTML with user/training-supplied data — prevents XSS even
+    // though this is a local-only dashboard.
+
+    const dot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+    const log = document.getElementById('log');
+    const sys = document.getElementById('sys');
+    const latest = document.getElementById('latest');
+    const canvas = document.getElementById('loss-chart');
+    const ctx = canvas.getContext('2d');
+
+    // --- Tiny line chart (Canvas, no dependencies) -----------------------
+    const series = { x: [], y: [], max: 500 };
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      drawChart();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function drawChart() {
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width, h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+      const pad = { l: 40, r: 10, t: 10, b: 22 };
+      const cw = Math.max(1, w - pad.l - pad.r);
+      const ch = Math.max(1, h - pad.t - pad.b);
+
+      // Background grid
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = pad.t + (ch * i / 4);
+        ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + cw, y); ctx.stroke();
+      }
+
+      if (series.y.length < 2) {
+        ctx.fillStyle = '#8b949e';
+        ctx.font = '12px SF Mono, Menlo, monospace';
+        ctx.fillText('waiting for training events…', pad.l + 10, pad.t + 20);
+        return;
+      }
+
+      const yMin = Math.min(...series.y);
+      const yMax = Math.max(...series.y);
+      const yRange = (yMax - yMin) || 1;
+
+      // Axis labels
+      ctx.fillStyle = '#8b949e';
+      ctx.font = '10px SF Mono, Menlo, monospace';
+      for (let i = 0; i <= 4; i++) {
+        const v = yMax - (yRange * i / 4);
+        const y = pad.t + (ch * i / 4);
+        ctx.fillText(v.toFixed(3), 2, y + 3);
+      }
+      // x labels (first / last)
+      ctx.fillText(String(series.x[0]), pad.l, h - 6);
+      const lastLbl = String(series.x[series.x.length - 1]);
+      const lastW = ctx.measureText(lastLbl).width;
+      ctx.fillText(lastLbl, pad.l + cw - lastW, h - 6);
+
+      // Line
+      ctx.strokeStyle = '#58a6ff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let i = 0; i < series.y.length; i++) {
+        const px = pad.l + (cw * i / (series.y.length - 1));
+        const py = pad.t + ch - ((series.y[i] - yMin) / yRange) * ch;
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+    }
+
+    function pushPoint(x, y) {
+      series.x.push(x);
+      series.y.push(y);
+      if (series.x.length > series.max) {
+        series.x.shift();
+        series.y.shift();
+      }
+      drawChart();
+    }
+
+    // --- DOM helpers (safe; no innerHTML) -------------------------------
+    function clearChildren(el) {
+      while (el.firstChild) el.removeChild(el.firstChild);
+    }
+
+    function statRow(parent, key, value) {
+      const row = document.createElement('div');
+      row.className = 'stat';
+      const k = document.createElement('span');
+      k.className = 'key';
+      k.textContent = key;
+      const v = document.createElement('span');
+      v.className = 'val';
+      v.textContent = value;
+      row.appendChild(k);
+      row.appendChild(v);
+      parent.appendChild(row);
+    }
+
+    // --- Event handling -------------------------------------------------
+    function appendEvent(ev) {
+      const line = document.createElement('div');
+      const kind = String(ev && ev.kind || '?');
+      line.className = 'ev ' + kind.replace(/[^a-zA-Z0-9_-]/g, '');
+      const t = new Date((ev.ts || Date.now() / 1000) * 1000).toLocaleTimeString();
+      // textContent is XSS-safe; even if a value contains </script> it cannot escape.
+      line.textContent = '[' + t + '] ' + kind + ' ' + JSON.stringify(ev);
+      log.appendChild(line);
+      while (log.children.length > 200) log.removeChild(log.firstChild);
+      log.scrollTop = log.scrollHeight;
+
+      if (kind === 'step' || kind === 'log') {
+        if (typeof ev.loss === 'number' && !Number.isNaN(ev.loss)) {
+          const xLabel = ev.step != null ? ev.step : series.x.length;
+          pushPoint(xLabel, ev.loss);
+        }
+        clearChildren(latest);
+        for (const [k, v] of Object.entries(ev)) {
+          if (['kind', 'ts', 'elapsed'].includes(k)) continue;
+          const display = (typeof v === 'number') ? Number(v).toFixed(4) : String(v);
+          statRow(latest, k, display);
+        }
+      }
+    }
+
+    async function refreshMetrics() {
+      try {
+        const r = await fetch('/api/metrics');
+        const m = await r.json();
+        clearChildren(sys);
+        const rows = [
+          ['CPU', m.cpu_percent != null ? m.cpu_percent.toFixed(1) + ' %' : 'n/a'],
+          ['RAM', m.ram_used_mb != null ? Math.round(m.ram_used_mb) + ' / ' + Math.round(m.ram_total_mb) + ' MB' : 'n/a'],
+          ['GPU', m.gpu_name || 'n/a'],
+          ['GPU util', m.gpu_util_percent != null ? m.gpu_util_percent.toFixed(0) + ' %' : 'n/a'],
+          ['VRAM', m.gpu_mem_used_mb != null ? Math.round(m.gpu_mem_used_mb) + ' / ' + Math.round(m.gpu_mem_total_mb) + ' MB' : 'n/a'],
+        ];
+        for (const [k, v] of rows) statRow(sys, k, v);
+      } catch (e) {
+        // ignore transient errors; UI shows the last good values
+      }
+    }
+
+    function connectWS() {
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const ws = new WebSocket(proto + '//' + location.host + '/ws/events');
+      ws.onopen = () => { dot.className = 'status-dot connected'; statusText.textContent = 'live'; };
+      ws.onerror = () => { dot.className = 'status-dot error'; statusText.textContent = 'error'; };
+      ws.onclose = () => { dot.className = 'status-dot'; statusText.textContent = 'reconnecting…'; setTimeout(connectWS, 2000); };
+      ws.onmessage = (msg) => {
+        try {
+          const data = JSON.parse(msg.data);
+          if (data && typeof data === 'object') appendEvent(data);
+        } catch (e) { /* malformed event, skip */ }
+      };
+    }
+
+    // boot
+    resizeCanvas();
+    refreshMetrics();
+    setInterval(refreshMetrics, 2000);
+    connectWS();
+  </script>
+</body>
+</html>

@@ -11,6 +11,7 @@
 - **[ARCHITECTURE](ARCHITECTURE.md)** — Manual de arquitectura: capas, endpoints, decisiones clave.
 - **[ROADMAP](ROADMAP.md)** — Hoja de ruta operacional por fases (0-10, completadas).
 - **[VISION](VISION.md)** — Roadmap de visión a largo plazo: qué falta para un ecosistema LLM/IA completo para TJ (reunión semanal, ministerio, audio, multilenguaje, multimodalidad, etc.).
+- **[VISION_AUDIT](VISION_AUDIT.md)** — Verificación 1:1 de cada ítem de VISION contra los 12 módulos entregados en Fases 11-18.
 
 ### Manual conceptual — entender el porqué
 
@@ -21,6 +22,8 @@ Para colaboradores nuevos y para tomar decisiones de diseño con criterio.
 - [Estrategia multi-idioma](conceptos/estrategia-multi-idioma.md) — Niveles de soporte, registro `Language`, colisiones ortográficas.
 - [Inventario de endpoints](conceptos/inventario-endpoints.md) — Cada endpoint externo (incluyendo weblang y los 3 patrones WOL nuevos): método, auth, payload, TTL de cache, ejemplos.
 - [Flujos end-to-end](conceptos/flujos-end-to-end.md) — Diagramas de secuencia de los flujos más comunes (incluyendo politely_get y JWPUB decryption).
+- [Integración con JW Library](conceptos/integracion-jw-library.md) — Fase 19: cómo y por qué conectamos con la app oficial (deep links, backups, sync incremental, catálogo MEPS, Full Disk Access en macOS).
+- [Integración con Obsidian](conceptos/integracion-obsidian.md) — Fase 20: portar utilidades del plugin `obsidian-library-linker`, sync bidireccional vault ↔ toolkit, plugin Obsidian propio, 17 locales de nombres de libros.
 - [CI y testing](conceptos/ci-y-testing.md) — GitHub Actions workflow, suite de pruebas, sistema de cassettes pytest-recording.
 
 ### Guías por tema — hacer algo concreto
@@ -34,7 +37,24 @@ Orientadas a casos de uso. Cada una es autocontenida con código de ejemplo.
 - [Indexar y buscar con RAG](guias/indexar-y-buscar-con-rag.md) — Ingest (incluyendo JWPUB descifrado), persistencia, búsqueda híbrida, RRF, embedders.
 - [Extender el parser de referencias](guias/extender-el-parser.md) — Añadir un idioma, añadir abreviaturas, manejar casos especiales.
 - [Conectar el MCP a Claude Desktop](guias/conectar-mcp-a-claude-desktop.md) — Configuración paso a paso, troubleshooting.
+- [Integración con JW Library](guias/integracion-jw-library.md) — Deep links `jwlibrary://`, parser de backups `.jwlibrary`, sync incremental, catálogo MEPS docid↔pub_code, inspector local (Windows publications.db + macOS userData.db con Full Disk Access).
+- [Usar con Obsidian (second brain)](guias/usar-con-obsidian.md) — Setup paso a paso del plugin Obsidian: linkify, insertar versos con quote callouts, importar notas de JW Library al vault, indexar al RAG, agente LLM con vista total.
 - [Scripts de exploración](guias/scripts-de-exploracion.md) — Los 20 scripts en `scripts/`: discovery de fixtures, exploración de HTML, reverse engineering JWPUB, live tests end-to-end.
+- [Fine-tuning local](guias/fine-tuning-local.md) — Entrena tu propio modelo JW personal con `jw-finetune` (Unsloth + JWPUB/EPUB locales).
+
+### Guías de los módulos Fase 11-18 (VISION.md)
+
+- [Asistente de ministerio](guias/asistente-de-ministerio.md) — Módulo 2: objeciones, presentaciones, revisitas, búsqueda inversa.
+- [Audio y voz](guias/audio-y-voz.md) — Módulo 3: TTS pluggable, transcripción Whisper, índice JW Broadcasting.
+- [Estudio personal](guias/estudio-personal.md) — Módulo 4: planes lectura, notas personales, flashcards SM-2, Strong's.
+- [Familia y niños](guias/familia-y-ninos.md) — Módulo 5: lecciones, adoración familiar, quiz por edad.
+- [Calendario y eventos](guias/calendario-y-eventos.md) — Módulo 6: Memorial, asambleas, visita superintendente.
+- [Multimodalidad visual](guias/multimodalidad-visual.md) — Módulo 7: OCR, mapas bíblicos, generador de slides.
+- [Idiomas expandidos](guias/idiomas-expandidos.md) — Módulo 8: Tier 1 10 idiomas, sign languages, traducción preservando refs.
+- [Apologética avanzada](guias/apologetica-avanzada.md) — Módulo 9: fact_checker, detector de apócrifa.
+- [Infraestructura operacional](guias/infraestructura-operacional.md) — Módulo 10: logging estructurado, REST API, bots.
+- [Privacidad local-first](guias/privacidad-local-first.md) — Módulo 11: cifrado, Ollama, audit telemetría.
+- [Personalización y accesibilidad](guias/personalizacion-y-accesibilidad.md) — Módulo 12: profile, memoria, tono, easy-read.
 
 ### Referencia exhaustiva — cada función documentada
 
@@ -45,6 +65,7 @@ Documentación módulo a módulo, clase a clase, función a función. Incluye fi
 - [jw-mcp](referencia/jw-mcp.md) — Las **29 herramientas MCP** con contratos completos.
 - [jw-rag](referencia/jw-rag.md) — `VectorStore`, `Embedder`, chunker, ingest (incluyendo `ingest_jwpub` y `ingest_epub`), retrieve.
 - [jw-agents](referencia/jw-agents.md) — `verse_explainer`, `research_topic`, `meeting_helper`, `apologetics`.
+- [integraciones](referencia/integraciones.md) — Fase 19: capa `jw_core.integrations` (deep links, sync incremental, catálogo MEPS, inspector local + FDA macOS) y parser `.jwlibrary`.
 
 ## Convenciones
 

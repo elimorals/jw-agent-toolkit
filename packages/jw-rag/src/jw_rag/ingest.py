@@ -18,6 +18,10 @@ from jw_core.clients.cdn import CDNClient
 from jw_core.clients.wol import WOLClient
 from jw_core.parsers.article import parse_article
 from jw_core.parsers.epub import parse_epub
+from jw_core.parsers.jw_library_backup import (
+    BackupContents,
+    parse_jw_library_backup,
+)
 from jw_core.parsers.jwpub import parse_jwpub
 
 from jw_rag.chunker import chunk_paragraphs
@@ -270,4 +274,163 @@ def ingest_jwpub(
         store.add(chunks)
         total += len(chunks)
     logger.info(f"Ingested JWPUB {pub.title!r} ({pub.document_count} docs) → {total} chunks")
+    return total
+
+
+# ── JW Library backup (Phase 19 — integrations) ────────────────────────
+
+
+def ingest_jw_library_backup(
+    store: VectorStore,
+    backup_path: Path | str,
+    *,
+    include_titles: bool = True,
+    include_bookmarks: bool = True,
+    include_input_fields: bool = True,
+    min_chars: int = 8,
+) -> int:
+    """Ingest the *user-authored* text of a `.jwlibrary` backup into RAG.
+
+    Each note (and optionally bookmark snippet / input-field answer) becomes
+    one chunk tagged with `kind="user_note"|"user_bookmark"|"user_input"`
+    and the addressing fields (book/chapter/key_symbol/document_id). This
+    lets the agent surface "what the user already studied" alongside the
+    public corpus when answering questions.
+
+    Args:
+        store: open VectorStore.
+        backup_path: path to a `.jwlibrary` archive.
+        include_titles: prepend the note title to its content (cheap signal).
+        include_bookmarks: also ingest bookmark snippets.
+        include_input_fields: also ingest meeting-workbook answers etc.
+        min_chars: drop entries shorter than this (empty notes, single-char).
+
+    Returns:
+        Total chunks added.
+    """
+    backup = parse_jw_library_backup(backup_path)
+    total = 0
+    total += _ingest_backup_notes(
+        store,
+        backup,
+        include_titles=include_titles,
+        min_chars=min_chars,
+    )
+    if include_bookmarks:
+        total += _ingest_backup_bookmarks(store, backup, min_chars=min_chars)
+    if include_input_fields:
+        total += _ingest_backup_input_fields(store, backup, min_chars=min_chars)
+    logger.info(
+        "Ingested JW Library backup %r → %d chunks",
+        backup.manifest.name or str(backup_path),
+        total,
+    )
+    return total
+
+
+def _ingest_backup_notes(
+    store: VectorStore,
+    backup: BackupContents,
+    *,
+    include_titles: bool,
+    min_chars: int,
+) -> int:
+    total = 0
+    for note in backup.notes:
+        body_parts: list[str] = []
+        if include_titles and note.title:
+            body_parts.append(note.title)
+        if note.content:
+            body_parts.append(note.content)
+        body = "\n".join(body_parts).strip()
+        if len(body) < min_chars:
+            continue
+        chunks = chunk_paragraphs(
+            [body],
+            source_id=f"jwlib:note:{note.note_id}",
+            metadata=_note_metadata(backup, note),
+        )
+        store.add(chunks)
+        total += len(chunks)
+    return total
+
+
+def _note_metadata(backup: BackupContents, note: object) -> dict[str, Any]:
+    md: dict[str, Any] = {
+        "kind": "user_note",
+        "note_id": getattr(note, "note_id", None),
+        "guid": getattr(note, "guid", ""),
+        "created": getattr(note, "created", ""),
+        "last_modified": getattr(note, "last_modified", ""),
+        "tags": list(getattr(note, "tags", []) or []),
+        "source_backup": backup.manifest.name or backup.source_path,
+    }
+    loc = getattr(note, "location", None)
+    if loc is not None:
+        md.update(
+            {
+                "book_num": loc.book_number,
+                "chapter": loc.chapter_number,
+                "key_symbol": loc.key_symbol,
+                "document_id": loc.document_id,
+                "meps_language": loc.meps_language,
+            }
+        )
+    return md
+
+
+def _ingest_backup_bookmarks(
+    store: VectorStore,
+    backup: BackupContents,
+    *,
+    min_chars: int,
+) -> int:
+    total = 0
+    for bm in backup.bookmarks:
+        body = "\n".join(p for p in (bm.title, bm.snippet) if p).strip()
+        if len(body) < min_chars:
+            continue
+        chunks = chunk_paragraphs(
+            [body],
+            source_id=f"jwlib:bookmark:{bm.bookmark_id}",
+            metadata={
+                "kind": "user_bookmark",
+                "bookmark_id": bm.bookmark_id,
+                "slot": bm.slot,
+                "book_num": bm.location.book_number,
+                "chapter": bm.location.chapter_number,
+                "key_symbol": bm.location.key_symbol,
+                "document_id": bm.location.document_id,
+                "source_backup": backup.manifest.name or backup.source_path,
+            },
+        )
+        store.add(chunks)
+        total += len(chunks)
+    return total
+
+
+def _ingest_backup_input_fields(
+    store: VectorStore,
+    backup: BackupContents,
+    *,
+    min_chars: int,
+) -> int:
+    total = 0
+    for f in backup.input_fields:
+        if len(f.value or "") < min_chars:
+            continue
+        chunks = chunk_paragraphs(
+            [f.value],
+            source_id=f"jwlib:input:{f.location_id}:{f.text_tag}",
+            metadata={
+                "kind": "user_input",
+                "location_id": f.location_id,
+                "text_tag": f.text_tag,
+                "key_symbol": getattr(f.location, "key_symbol", "") if f.location else "",
+                "document_id": getattr(f.location, "document_id", None) if f.location else None,
+                "source_backup": backup.manifest.name or backup.source_path,
+            },
+        )
+        store.add(chunks)
+        total += len(chunks)
     return total

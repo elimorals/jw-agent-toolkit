@@ -1,6 +1,6 @@
 # Referencia: jw-mcp
 
-> Contratos completos de las **29 herramientas MCP**. Cada herramienta documenta entrada, salida y errores.
+> Contratos completos de las herramientas MCP. Cada herramienta documenta entrada, salida y errores. La Fase 19 añadió 11 tools de integración con la app oficial JW Library — ver sección dedicada al final del documento y la referencia [`integraciones.md`](integraciones.md).
 
 ## Arranque del servidor
 
@@ -293,3 +293,56 @@ Snapshot del `DiskCache` en disco. Lee `JW_CACHE_PATH` (default `~/.jw-agent-too
 | `CDNError` / `WOLError` / `MediatorError` / `PubMediaError` / `TopicIndexError` / `JwpubError` | `{"error": str(e)}` (capturado dentro del handler) |
 
 El servidor **nunca** levanta excepciones por encima de la capa MCP; eso mantendría la sesión viva ante fallos transitorios.
+
+---
+
+## Fase 19 — Integraciones con JW Library
+
+Las 11 herramientas siguientes operan con la app oficial JW Library y los formatos `.jwlibrary` / `.jwpub`. Contratos completos viven en [`referencia/integraciones.md`](integraciones.md); aquí va el inventario navegable.
+
+| Tool | Capa | One-liner |
+|---|---|---|
+| `open_in_jw_library` | 1 | Build/dispatch `jwlibrary://?bible=…` o `?docid=…`. Acepta texto natural (`"Juan 3:16"`), forma numérica o `docid`. `dry_run=True` por defecto. |
+| `import_jw_library_backup` | 2 | Lee un `.jwlibrary` y reporta manifest + counts por categoría. |
+| `list_user_notes` | 2 | Proyecta notas con filtros `book_num`+`chapter`, `tag`, `limit`. |
+| `ingest_user_notes` | 2 | Indexa notas/marcadores/input fields en el RAG (full re-ingest). |
+| `sync_jw_library_backup` | 2 | Sync incremental con sidecar JSON. Diff por `content_hash`+`last_modified`. `dry_run=True` muestra plan. |
+| `register_jwpub_in_catalog` | 2 | Upsert metadata de un `.jwpub` al catálogo MEPS local. |
+| `find_publication_in_catalog` | 2 | Query catálogo por `pub_code`, `document_id`, `meps_document_id`, `language_index`, `chapter_number`. |
+| `open_publication_by_symbol` | 1+cat | Resuelve `pub_code` → `document_id` vía catálogo + dispara deep link. |
+| `inspect_local_jw_library_tool` | 3 | Reporta plataforma, app detectada, `publications.db` (Windows), `userData.db` (mac con FDA). Opt-in con env `JW_LIBRARY_LOCAL_READ=1`. |
+| `check_jw_library_full_disk_access` | 3 | Probe macOS: ¿este proceso puede leer `~/Library/Containers/org.jw.jwlibrary/`? |
+| `read_jw_library_live_userdata` | 3 | Lee `userData.db` live del sandbox macOS (necesita FDA). Falla con `needs_full_disk_access: True` si TCC bloquea. |
+
+### Variables de entorno relevantes a Fase 19
+
+| Var | Default | Tool afectado |
+|---|---|---|
+| `JW_LIBRARY_LOCAL_READ` | — | `inspect_local_jw_library_tool` (opt-in). |
+| `JW_MEPS_CATALOG_PATH` | `~/.jw-agent-toolkit/meps_catalog.db` | `register_jwpub_in_catalog`, `find_publication_in_catalog`, `open_publication_by_symbol`. |
+| Sidecar sync | `<rag-store>/jw_library_sync.json` | `sync_jw_library_backup` (override por parámetro `state_path`). |
+
+---
+
+## Fase 20 — Obsidian bridge
+
+Las 5 herramientas siguientes habilitan el flujo "second brain": ver [`conceptos/integracion-obsidian.md`](../conceptos/integracion-obsidian.md) para el "por qué" y [`guias/usar-con-obsidian.md`](../guias/usar-con-obsidian.md) para el "cómo".
+
+| Tool | Capa | One-liner |
+|---|---|---|
+| `linkify_markdown_text` | markdown | Wrap cada Bible ref como `[label](jwlibrary://…)`. Skip de links/code existentes. 17 locales. |
+| `convert_jw_links_in_markdown` | markdown | Rewrite `jwpub://b/...` y `jwpub://p/...` legacy a `jwlibrary://`. Filtro `kind=bible|publication|all`. |
+| `get_verse_as_markdown` | markdown + WOL | Fetch verse + render como markdown (5 templates: plain/link/blockquote/callout/callout-collapsed). |
+| `index_obsidian_vault` | vault sync | Incremental sync de un vault al RAG. Filtros: `require_tag`, `glob`, `min_chars`. Sidecar `vault_sync.json`. |
+| `export_jw_library_backup_to_vault` | vault sync | Escribe `.md` por cada `UserNote` con frontmatter + deep-link callout. Default `overwrite=False`. |
+
+Endpoints REST equivalentes:
+
+| HTTP | Equivalente MCP |
+|---|---|
+| `POST /api/v1/linkify` | `linkify_markdown_text` |
+| `POST /api/v1/convert_links` | `convert_jw_links_in_markdown` |
+| `POST /api/v1/verse_markdown` | `get_verse_as_markdown` |
+| `POST /api/v1/vault/index` | `index_obsidian_vault` |
+| `POST /api/v1/vault/export` | `export_jw_library_backup_to_vault` |
+| `GET /healthz` | (sin equivalente MCP — para health checks) |

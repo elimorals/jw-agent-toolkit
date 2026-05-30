@@ -50,6 +50,21 @@ Adicionalmente, cada idioma tiene una versión de recurso `wol_resource`:
 
 El número `r{N}` es la versión del bundle de recursos que sirve WOL para ese idioma. Cambia con el tiempo y entre idiomas; debe mantenerse al día en `jw_core.languages._REGISTRY`.
 
+## App oficial JW Library (Fase 19)
+
+| Término | Descripción |
+|---|---|
+| **JW Library** | App nativa oficial. Windows: UWP (Microsoft Store). macOS: app de iPad ejecutándose en Mac App Store sandbox. iOS/Android nativas. No tiene versión web. |
+| **`jwlibrary://`** | Esquema URL registrado por la app. Sintaxis: `?bible=BBCCCVVV` o `?docid=N&par=P`. Es la única vía cross-plataforma de control externo oficial. |
+| **`.jwlibrary`** | Backup que la app exporta (User Data Backup). ZIP con `manifest.json` + `userData.db` (SQLite). Sólo contiene datos del usuario, NO el corpus público. |
+| **`userData.db`** | SQLite del usuario (notas, marcadores, resaltados, respuestas a campos). Schema oficial v16 al cierre de Fase 19. Tablas: `Location`, `UserMark`, `BlockRange`, `Note`, `Bookmark`, `Tag`, `TagMap`, `InputField`, `PlaylistItem*`. |
+| **`publications.db`** | SQLite del catálogo de publicaciones instaladas por la app (Windows). Tabla `Publication`. Vive en `%LOCALAPPDATA%\Packages\…JWLibrary…\LocalState\`. |
+| **`document_id`** | Identificador MEPS de un documento dentro de una publicación. Es el `N` en `jwlibrary://?docid=N`. El catálogo local (`meps_catalog.db`) mapea `pub_code → document_id`. |
+| **`meps_document_id`** | Variante con el ID MEPS canónico cross-edición. Útil para encontrar la misma publicación en otra edición/idioma. |
+| **MEPS catalog** | SQLite local en `~/.jw-agent-toolkit/meps_catalog.db` que el toolkit construye al indexar `.jwpub` ya descifrados. Pobla `publication` + `document`. |
+| **TCC** | Transparency, Consent & Control. Subsistema de macOS que controla el acceso a directorios protegidos como Application Support, Documents y Containers. Bloquea la lectura del container de JW Library por defecto. |
+| **Full Disk Access (FDA)** | Permiso TCC que, una vez concedido a un proceso, le permite leer el container de la app. Configurable en System Settings → Privacy & Security → Full Disk Access. |
+
 ## Estructura de URLs en wol.jw.org
 
 ```

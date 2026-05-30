@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>jw-finetune Studio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #0d1117; --panel: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+      --ok: #3fb950; --warn: #d29922; --err: #f85149;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+           background: var(--bg); color: var(--text); margin: 0; padding: 0; }
+    nav { background: var(--panel); border-bottom: 1px solid var(--border);
+          padding: 0.75rem 1.25rem; display: flex; gap: 1rem; align-items: center; }
+    nav .brand { font-weight: 600; color: var(--accent); }
+    nav button {
+      background: transparent; color: var(--text); border: 1px solid var(--border);
+      padding: 0.35rem 0.75rem; border-radius: 4px; cursor: pointer; font: inherit;
+    }
+    nav button.active { background: var(--accent); color: #000; border-color: var(--accent); }
+    main { padding: 1.25rem; }
+    section { display: none; }
+    section.active { display: block; }
+    h2 { font-size: 1rem; margin: 0 0 0.75rem; color: var(--muted);
+         text-transform: uppercase; letter-spacing: 0.04em; }
+    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 6px; padding: 1rem;
+    }
+    .card h3 { margin: 0 0 0.5rem; font-size: 0.95rem; color: var(--accent); }
+    .meta { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
+    pre { background: #0d1117; border: 1px solid var(--border); border-radius: 4px;
+          padding: 0.75rem; overflow-x: auto; font-size: 0.78rem; max-height: 360px; }
+    .row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+    textarea, input, select {
+      background: #0d1117; color: var(--text); border: 1px solid var(--border);
+      border-radius: 4px; padding: 0.4rem 0.6rem; font: inherit; min-width: 180px;
+    }
+    button.primary {
+      background: var(--accent); color: #000; border: 0; padding: 0.4rem 0.85rem;
+      border-radius: 4px; cursor: pointer; font: inherit; font-weight: 600;
+    }
+    .tag {
+      display: inline-block; padding: 0.1rem 0.45rem; margin-right: 0.25rem;
+      border-radius: 4px; font-size: 0.72rem; background: rgba(88,166,255,0.12);
+      color: var(--accent); border: 1px solid rgba(88,166,255,0.3);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 500; }
+    .empty { color: var(--muted); font-style: italic; }
+  </style>
+</head>
+<body>
+  <nav>
+    <span class="brand">jw-finetune Studio</span>
+    <button data-tab="runs" class="active">Runs</button>
+    <button data-tab="presets">Presets</button>
+    <button data-tab="models">Models</button>
+    <button data-tab="chat">Playground</button>
+    <a href="/" style="color: var(--muted); text-decoration: none; margin-left: auto;">→ live monitor</a>
+  </nav>
+
+  <main>
+    <section id="tab-runs" class="active">
+      <h2>Runs</h2>
+      <div id="runs-list"></div>
+    </section>
+
+    <section id="tab-presets">
+      <h2>Recipe presets</h2>
+      <div id="presets-list" class="grid"></div>
+    </section>
+
+    <section id="tab-models">
+      <h2>Model catalog</h2>
+      <div id="models-list" class="grid"></div>
+    </section>
+
+    <section id="tab-chat">
+      <h2>Playground — chat con un checkpoint</h2>
+      <div class="card">
+        <div class="row">
+          <label>Run:</label>
+          <select id="chat-run"></select>
+          <label>Language:</label>
+          <select id="chat-lang">
+            <option value="es">es</option>
+            <option value="en">en</option>
+          </select>
+        </div>
+        <textarea id="chat-prompt" rows="3" style="width:100%;" placeholder="Escribe una pregunta..."></textarea>
+        <div class="row" style="margin-top: 0.5rem;">
+          <button class="primary" id="chat-send">Enviar</button>
+          <span id="chat-status" class="meta"></span>
+        </div>
+        <pre id="chat-output" class="empty">la respuesta aparecerá aquí…</pre>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // All dynamic content uses textContent/createElement (XSS-safe).
+
+    const tabs = document.querySelectorAll('nav button[data-tab]');
+    const sections = document.querySelectorAll('main section');
+    tabs.forEach(btn => btn.addEventListener('click', () => {
+      tabs.forEach(b => b.classList.remove('active'));
+      sections.forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      if (btn.dataset.tab === 'presets') loadPresets();
+      if (btn.dataset.tab === 'models') loadModels();
+      if (btn.dataset.tab === 'chat') refreshChatRuns();
+    }));
+
+    function el(tag, props = {}, children = []) {
+      const e = document.createElement(tag);
+      for (const [k, v] of Object.entries(props)) {
+        if (k === 'class') e.className = v;
+        else if (k === 'text') e.textContent = v;
+        else e.setAttribute(k, v);
+      }
+      for (const c of children) e.appendChild(c);
+      return e;
+    }
+
+    async function fetchJSON(url, opts) {
+      const r = await fetch(url, opts);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return await r.json();
+    }
+
+    // ---------- Runs ------------------------------------------------------
+    async function loadRuns() {
+      const wrap = document.getElementById('runs-list');
+      wrap.replaceChildren();
+      try {
+        const data = await fetchJSON('/api/runs');
+        if (!data.runs.length) {
+          wrap.appendChild(el('p', { class: 'empty', text: 'No hay runs todavía. Ejecuta `jw-finetune prepare` primero.' }));
+          return;
+        }
+        const table = el('table');
+        const thead = el('tr');
+        ['Run', 'Task', 'Dataset', 'Checkpoints', 'Events'].forEach(h => thead.appendChild(el('th', { text: h })));
+        table.appendChild(el('thead', {}, [thead]));
+        const tbody = el('tbody');
+        for (const r of data.runs) {
+          const tr = el('tr');
+          tr.appendChild(el('td', { text: r.run_id }));
+          tr.appendChild(el('td', { text: r.task }));
+          tr.appendChild(el('td', { text: r.dataset_path || '—' }));
+          tr.appendChild(el('td', { text: r.checkpoints.join(', ') || '—' }));
+          tr.appendChild(el('td', { text: (r.events_size_bytes / 1024).toFixed(1) + ' KB' }));
+          tr.style.cursor = 'pointer';
+          tr.addEventListener('click', () => showRunDetail(r.run_id));
+          tbody.appendChild(tr);
+        }
+        table.appendChild(tbody);
+        wrap.appendChild(table);
+      } catch (e) {
+        wrap.appendChild(el('p', { class: 'empty', text: 'Error: ' + e.message }));
+      }
+    }
+
+    async function showRunDetail(runId) {
+      const wrap = document.getElementById('runs-list');
+      wrap.replaceChildren();
+      const back = el('button', { class: '', text: '← volver' });
+      back.addEventListener('click', loadRuns);
+      wrap.appendChild(back);
+      try {
+        const data = await fetchJSON('/api/run/' + encodeURIComponent(runId));
+        const card = el('div', { class: 'card' });
+        card.appendChild(el('h3', { text: runId }));
+        const recipePre = el('pre');
+        recipePre.textContent = JSON.stringify(data.recipe, null, 2);
+        card.appendChild(el('div', { class: 'meta', text: 'Recipe' }));
+        card.appendChild(recipePre);
+        card.appendChild(el('div', { class: 'meta', text: 'Dataset preview (' + (data.dataset.count || 0) + ' rows shown)' }));
+        const dsPre = el('pre');
+        dsPre.textContent = JSON.stringify(data.dataset.rows, null, 2);
+        card.appendChild(dsPre);
+        wrap.appendChild(card);
+      } catch (e) {
+        wrap.appendChild(el('p', { class: 'empty', text: 'Error: ' + e.message }));
+      }
+    }
+
+    // ---------- Presets ---------------------------------------------------
+    async function loadPresets() {
+      const wrap = document.getElementById('presets-list');
+      wrap.replaceChildren();
+      try {
+        const data = await fetchJSON('/api/presets');
+        for (const p of data.presets) {
+          const card = el('div', { class: 'card' });
+          card.appendChild(el('h3', { text: p.name }));
+          card.appendChild(el('div', { class: 'meta', text: p.task.toUpperCase() + ' · ' + p.languages.join(',') }));
+          const tags = el('div');
+          (p.publication_kinds || []).forEach(k => tags.appendChild(el('span', { class: 'tag', text: k })));
+          card.appendChild(tags);
+          const meta = el('div', { class: 'meta' });
+          meta.style.marginTop = '0.5rem';
+          meta.textContent = 'base: ' + p.base_model + ' · epochs: ' + p.epochs + ' · lora_rank: ' + p.lora_rank;
+          card.appendChild(meta);
+          if (p.qa_style) {
+            card.appendChild(el('div', { class: 'meta', text: 'qa_style: ' + p.qa_style }));
+          }
+          wrap.appendChild(card);
+        }
+      } catch (e) {
+        wrap.appendChild(el('p', { class: 'empty', text: 'Error: ' + e.message }));
+      }
+    }
+
+    // ---------- Models ---------------------------------------------------
+    async function loadModels() {
+      const wrap = document.getElementById('models-list');
+      wrap.replaceChildren();
+      try {
+        const data = await fetchJSON('/api/models');
+        for (const m of data.models) {
+          const card = el('div', { class: 'card' });
+          card.appendChild(el('h3', { text: m.id }));
+          card.appendChild(el('div', { class: 'meta', text: m.size + ' · ctx ' + m.context + ' · min VRAM ' + m.min_vram_gb + ' GB' }));
+          const tags = el('div');
+          (m.tags || []).forEach(t => tags.appendChild(el('span', { class: 'tag', text: t })));
+          card.appendChild(tags);
+          wrap.appendChild(card);
+        }
+      } catch (e) {
+        wrap.appendChild(el('p', { class: 'empty', text: 'Error: ' + e.message }));
+      }
+    }
+
+    // ---------- Chat playground ------------------------------------------
+    async function refreshChatRuns() {
+      const select = document.getElementById('chat-run');
+      select.replaceChildren();
+      try {
+        const data = await fetchJSON('/api/runs');
+        for (const r of data.runs) {
+          if (r.checkpoints && r.checkpoints.includes('final')) {
+            const opt = el('option', { value: r.run_id, text: r.run_id });
+            select.appendChild(opt);
+          }
+        }
+        if (!select.children.length) {
+          select.appendChild(el('option', { value: '', text: '— no runs con checkpoint final —' }));
+        }
+      } catch (e) {
+        select.appendChild(el('option', { value: '', text: 'Error: ' + e.message }));
+      }
+    }
+
+    document.getElementById('chat-send').addEventListener('click', async () => {
+      const runId = document.getElementById('chat-run').value;
+      const prompt = document.getElementById('chat-prompt').value.trim();
+      const lang = document.getElementById('chat-lang').value;
+      const status = document.getElementById('chat-status');
+      const out = document.getElementById('chat-output');
+      out.className = 'empty';
+      out.textContent = 'generando…';
+      status.textContent = '';
+      if (!runId || !prompt) {
+        out.textContent = 'Elige un run y escribe un prompt.';
+        return;
+      }
+      try {
+        const r = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ run_id: runId, prompt, language: lang }),
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          out.textContent = 'Error: ' + (data.detail || r.status);
+          return;
+        }
+        out.className = '';
+        out.textContent = data.answer || '(respuesta vacía)';
+        status.textContent =
+          'cite: ' + (data.citation_accuracy * 100).toFixed(0) + '% · '
+          + 'term: ' + (data.terminology_score * 100).toFixed(0) + '%';
+      } catch (e) {
+        out.textContent = 'Error: ' + e.message;
+      }
+    });
+
+    loadRuns();
+  </script>
+</body>
+</html>

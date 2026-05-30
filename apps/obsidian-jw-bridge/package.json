@@ -1,0 +1,19 @@
+{
+  "name": "obsidian-jw-bridge",
+  "version": "0.1.0",
+  "description": "Obsidian plugin that drives the local jw-agent-toolkit REST API.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production",
+    "lint": "tsc --noEmit"
+  },
+  "license": "GPL-3.0-only",
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "builtin-modules": "^4.0.0",
+    "esbuild": "^0.24.2",
+    "obsidian": "^1.7.2",
+    "typescript": "^5.7.2"
+  }
+}

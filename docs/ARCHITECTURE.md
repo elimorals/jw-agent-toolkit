@@ -32,7 +32,16 @@
 │        ├─ parsers/    reference.py · article.py · daily_text.py      │
 │        │              verse.py · study_notes.py · topic_index.py     │
 │        │              epub.py · jwpub.py (decrypt AES-128-CBC)       │
-│        ├─ data/       books.py (66 libros × 3 idiomas)               │
+│        │              jw_library_backup.py (Fase 19, .jwlibrary)     │
+│        ├─ integrations/ (Fase 19 — JW Library app, Fase 20 — Obsidian)│
+│        │              jw_library.py (deep links jwlibrary://)        │
+│        │              jw_library_sync.py (sync incremental)          │
+│        │              jw_library_local.py (inspector + FDA macOS)    │
+│        │              meps_catalog.py (docid ↔ pub_code SQLite)      │
+│        │              markdown.py (linkify + convert + render md)    │
+│        │              obsidian_vault.py (vault → RAG + backup → md)  │
+│        ├─ data/bible_books/ (Fase 20 — 17 locales JSON)              │
+│        ├─ data/       books.py (66 libros × 3 idiomas) · objections  │
 │        ├─ models.py   BibleRef · Verse · StudyNote · CrossReference  │
 │        │              TopicSubject/Subheading/Citation               │
 │        │              Epub · EpubDocument · JwpubMetadata · ...      │
@@ -140,8 +149,10 @@ El agente `apologetics` aplica este ranking implícitamente al orden en que aña
 | 6 — RAG | `semantic_search`, `ingest_bible_chapter`, `ingest_search_topk` |
 | 7 — Agentes | `verse_explainer`, `research_topic`, `meeting_helper`, `apologetics` |
 | 9 — Infra | `get_cache_stats` |
+| 19 — Integraciones JW Library | `open_in_jw_library`, `import_jw_library_backup`, `list_user_notes`, `ingest_user_notes`, `sync_jw_library_backup`, `register_jwpub_in_catalog`, `find_publication_in_catalog`, `open_publication_by_symbol`, `inspect_local_jw_library_tool`, `check_jw_library_full_disk_access`, `read_jw_library_live_userdata` |
+| 20 — Obsidian bridge | `linkify_markdown_text`, `convert_jw_links_in_markdown`, `get_verse_as_markdown`, `index_obsidian_vault`, `export_jw_library_backup_to_vault` |
 
-Total: **29 herramientas**. Contratos completos en [`docs/referencia/jw-mcp.md`](referencia/jw-mcp.md).
+Total con Fase 20: **~60 herramientas**. Contratos completos en [`docs/referencia/jw-mcp.md`](referencia/jw-mcp.md) y [`docs/referencia/integraciones.md`](referencia/integraciones.md).
 
 ## Manejo de errores
 
@@ -152,6 +163,12 @@ Cada cliente HTTP tiene su propia excepción base:
 - `MediatorError` (clients.mediator)
 - `PubMediaError` (clients.pub_media)
 - `TopicIndexError` (clients.topic_index)
+
+La capa de integraciones (Fase 19) añade sus propias excepciones:
+
+- `JWLibraryError` (integrations.jw_library) — URL build / dispatch
+- `JWLibraryBackupError` (parsers.jw_library_backup) — archivo `.jwlibrary` inválido
+- `MacOSFullDiskAccessError` (integrations.jw_library_local) — TCC bloqueó la lectura del container
 
 Todas heredan de `RuntimeError` y se elevan en lugar de devolver `None` para errores HTTP. Las herramientas MCP capturan estas excepciones y devuelven un dict `{"error": "..."}` en lugar de propagar — esto mantiene la sesión MCP viva ante fallos transitorios.
 

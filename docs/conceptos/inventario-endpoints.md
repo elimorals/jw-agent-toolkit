@@ -21,6 +21,25 @@
 
 > TTL aplicado solo cuando el cliente está wired con `DiskCache` (ver [`docs/guias/infraestructura-fase9.md`](../guias/infraestructura-fase9.md)). Sin cache, cada GET va a la red.
 
+## Esquemas de URL locales (Fase 19)
+
+Estos no son endpoints HTTP — son URLs registradas por la app oficial JW Library en el sistema operativo. El toolkit los **construye** y los **despacha** al handler local.
+
+| Esquema | Form | Builder | Resuelve a |
+|---|---|---|---|
+| `jwlibrary://` | `?bible=BBCCCVVV[-BBCCCVVV][&wtlocale=LL]` | `integrations.jw_library.build_bible_url` | La app abre el versículo/rango en la edición Biblia del usuario |
+| `jwlibrary://` | `?wtlocale=LL&docid=N[&par=P]` | `integrations.jw_library.build_publication_url` | La app abre el documento MEPS `N`, opcionalmente saltando al párrafo `P` |
+
+Argv por plataforma (dispatcher `integrations.jw_library.open_jw_library`):
+
+| Plataforma | Argv | Notas |
+|---|---|---|
+| `darwin` | `["open", url]` | Requiere `/usr/bin/open` (estándar macOS). |
+| `win32` | `["cmd", "/c", "start", "", url]` | Empty window title evita interpretación errónea. |
+| `linux` | `["xdg-open", url]` | Sólo funciona si la app está instalada vía wine + handler registrado. |
+
+Validación pre-dispatch: rechazo de URLs que no empiezan con `jwlibrary://` o contienen caracteres de control (defense-in-depth).
+
 ## 1. Token JWT
 
 ```

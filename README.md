@@ -11,6 +11,7 @@ Toolkit agéntico para contenido de jw.org / wol.jw.org. Monorepo Python multi-p
 | `jw-mcp` | Servidor [Model Context Protocol](https://modelcontextprotocol.io) — expone **29 herramientas** a Claude Desktop, Claude Code o cualquier cliente MCP. |
 | `jw-rag` | Indexación vectorial + recuperación híbrida (BM25 + cosenos + Reciprocal Rank Fusion) sobre el corpus de Biblia + publicaciones + EPUBs + JWPUBs descifrados. |
 | `jw-agents` | Agentes procedurales multipaso: `verse_explainer`, `research_topic`, `meeting_helper`, `apologetics`. |
+| `jw-finetune` | Plataforma local de fine-tuning estilo Unsloth Studio: extrae JWPUB/EPUB → genera Q&A sintéticos → entrena LoRA → exporta GGUF/MLX. Cada usuario entrena su propio modelo con sus publicaciones; los pesos nunca se distribuyen. Ver [guía](docs/guias/fine-tuning-local.md). |
 
 Además: `skills/` (5 skills Markdown para Claude: jw-verse-lookup, jw-daily-text, jw-research, jw-meeting-prep, jw-apologetics) y `scripts/` (scripts de exploración + reverse engineering JWPUB).
 

@@ -19,9 +19,11 @@ from jw_cli.commands import (
     download,
     jwpub,
     languages,
+    ministry,
     search,
     topic,
     verse,
+    workbook,
 )
 
 app = typer.Typer(
@@ -40,6 +42,8 @@ app.command(name="download")(download.download_cmd)
 app.command(name="chapter")(chapter.chapter_cmd)
 app.command(name="jwpub")(jwpub.jwpub_cmd)
 app.command(name="topic")(topic.topic_cmd)
+app.command(name="workbook")(workbook.workbook_command)
+app.add_typer(ministry.ministry_app, name="ministry")
 
 
 def main() -> None:

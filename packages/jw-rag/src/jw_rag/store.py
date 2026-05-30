@@ -66,6 +66,32 @@ class VectorStore:
         self._tokenized = [_tokenize(c.text) for c in self._chunks]
         self._bm25 = BM25Okapi(self._tokenized) if self._tokenized else None
 
+    def delete_by_source_ids(self, source_ids: list[str]) -> int:
+        """Remove every chunk whose `source_id` is in `source_ids`.
+
+        Returns the number of chunks removed. Re-indexes vectors and BM25
+        afterwards if anything changed. No-op when `source_ids` is empty.
+        Used by the incremental sync pipeline to evict notes the user
+        deleted or modified.
+        """
+        if not source_ids:
+            return 0
+        targets = set(source_ids)
+        keep_mask = [c.source_id not in targets for c in self._chunks]
+        removed = self.count - sum(keep_mask)
+        if removed == 0:
+            return 0
+        self._chunks = [c for c, keep in zip(self._chunks, keep_mask) if keep]
+        if self._vectors.size:
+            self._vectors = self._vectors[np.array(keep_mask, dtype=bool)]
+        self._tokenized = [_tokenize(c.text) for c in self._chunks]
+        self._bm25 = BM25Okapi(self._tokenized) if self._tokenized else None
+        return removed
+
+    def source_ids(self) -> set[str]:
+        """Return the unique `source_id` values currently indexed."""
+        return {c.source_id for c in self._chunks if c.source_id}
+
     # ── Search ─────────────────────────────────────────────────────────
 
     def vector_search(self, query: str, top_k: int = 10) -> list[SearchHit]:

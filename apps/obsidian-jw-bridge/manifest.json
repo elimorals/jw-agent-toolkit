@@ -1,0 +1,10 @@
+{
+  "id": "jw-agent-toolkit-bridge",
+  "name": "JW Agent Toolkit Bridge",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Connects an Obsidian vault to the local jw-agent-toolkit MCP/REST server: linkify Bible references, convert legacy jwpub:// links, insert verses, and sync JW Library backups into your vault.",
+  "author": "jw-agent-toolkit contributors",
+  "authorUrl": "https://github.com/jw-agent-toolkit",
+  "isDesktopOnly": false
+}

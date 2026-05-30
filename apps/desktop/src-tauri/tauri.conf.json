@@ -1,0 +1,32 @@
+{
+  "productName": "jw-agent-toolkit",
+  "version": "0.1.0",
+  "identifier": "io.github.eliascipre.jw-toolkit",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "jw-agent-toolkit",
+        "width": 1100,
+        "height": 760,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app", "deb", "msi"],
+    "category": "Education",
+    "shortDescription": "Verifiable JW research assistant"
+  }
+}

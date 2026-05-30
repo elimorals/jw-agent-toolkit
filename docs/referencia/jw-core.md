@@ -677,3 +677,29 @@ from jw_core.parsers import (
     parse_subject_page,
 )
 ```
+
+Desde `jw_core.integrations` (Fase 19):
+
+```python
+from jw_core.integrations import (
+    JWLibraryError, VerseRange,
+    build_bible_url, build_bible_urls, build_publication_url, build_url_for_ref,
+    detect_platform, open_jw_library,
+    inspect_local_jw_library, check_macos_full_disk_access, read_macos_userdata,
+    sync_backup_to_rag, MepsCatalog,
+)
+```
+
+Desde `jw_core.parsers.jw_library_backup`:
+
+```python
+from jw_core.parsers.jw_library_backup import (
+    parse_jw_library_backup,   # archivo .jwlibrary
+    parse_user_data_db,        # SQLite standalone (caso macOS FDA)
+    notes_for_chapter,
+    BackupContents, BackupManifest,
+    Location, UserNote, UserHighlight, Bookmark, Tag, InputField,
+)
+```
+
+Contratos completos de la capa de integraciones: [`integraciones.md`](integraciones.md).

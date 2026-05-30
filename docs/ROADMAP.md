@@ -303,3 +303,112 @@ llamante sintetiza la prosa.
 > 5, 5.5 y 9, por eso aparecen al final del documento. El orden lógico de
 > los paquetes sigue siendo: 0 → 1 → 2 → 3 → 3.5 → 4 → 4.5-4.7 → 6 → 7 → 5
 > → 5.5 → 8 → 9 → 10.
+
+---
+
+## Fase 19 — Integración con la app oficial JW Library ✅
+
+> Objetivo: que el toolkit pueda **operar con la app instalada del usuario** (abrir versículos en ella, leer sus notas, mantener el RAG al día con backups incrementales) sin violar ToS ni la sandbox de la app. Conceptos en [`conceptos/integracion-jw-library.md`](conceptos/integracion-jw-library.md), referencia en [`referencia/integraciones.md`](referencia/integraciones.md).
+
+### Capa 1 — Deep linking (`jwlibrary://`)
+
+- ✅ `jw_core.integrations.jw_library.build_bible_url` — Biblia, ranges, multi-chapter, multi-book.
+- ✅ `build_bible_urls` — versos disjuntos → lista de URLs.
+- ✅ `build_publication_url` — `?docid=N&par=P&wtlocale=LL`.
+- ✅ `build_url_for_ref` — atajo desde `BibleRef`.
+- ✅ `open_jw_library` — dispatcher cross-plataforma con `dry_run`, defensa contra URLs no-`jwlibrary://`.
+- ✅ Tool MCP `open_in_jw_library`.
+
+### Capa 2 — Backup `.jwlibrary` + sync incremental + catálogo MEPS
+
+- ✅ `jw_core.parsers.jw_library_backup` — parser ZIP defensivo (schema v16 al cierre, soporta v9-v16+).
+- ✅ Modelos Pydantic: `BackupContents`, `BackupManifest`, `Location`, `UserNote`, `UserHighlight`, `Bookmark`, `Tag`, `InputField`.
+- ✅ `parse_user_data_db` — para leer un `userData.db` standalone (caso macOS FDA).
+- ✅ `jw_core.integrations.jw_library_sync` — `SyncState` + `SyncStateStore` + `compute_sync_plan` + `sync_backup_to_rag` con diff por `content_hash` + `last_modified`. Detecta new / updated / deleted. Cleanup de chunks viejos vía nuevo `VectorStore.delete_by_source_ids`.
+- ✅ `jw_core.integrations.meps_catalog` — SQLite con `publication` + `document`, `MepsCatalog.resolve_docid` con preferencia de inglés cuando no se especifica idioma.
+- ✅ Tools MCP: `import_jw_library_backup`, `list_user_notes`, `ingest_user_notes`, `sync_jw_library_backup`, `register_jwpub_in_catalog`, `find_publication_in_catalog`, `open_publication_by_symbol`.
+
+### Capa 3 — Inspector local
+
+- ✅ `jw_core.integrations.jw_library_local` — opt-in con `JW_LIBRARY_LOCAL_READ=1`.
+- ✅ Windows: lectura de `publications.db` en `%LOCALAPPDATA%\Packages\WatchtowerBibleandTractSocietyofNewYorkInc.JWLibrary_*\LocalState\` con PRAGMA-projected select.
+- ✅ macOS Full Disk Access: `check_macos_full_disk_access` (probe con `os.scandir`), `read_macos_userdata` (copia `userData.db` a tempfile y parsea como backup), instrucciones paso a paso cuando TCC bloquea.
+- ✅ Tools MCP: `inspect_local_jw_library_tool`, `check_jw_library_full_disk_access`, `read_jw_library_live_userdata`.
+
+### Capa 4 — Coexistencia documentada con otros MCPs
+
+- ✅ Doc en `guias/integracion-jw-library.md` con `claude_desktop_config.json` ejemplo apuntando a `jw-agent-toolkit` + `advenimus/jw-mcp` simultáneamente.
+
+### Tests y cobertura
+
+- ✅ 87 tests nuevos en `packages/jw-core/tests/test_jw_library_{integration,backup,local,sync}.py` y `test_meps_catalog.py`.
+- ✅ Suite global: **488 passed, 4 skipped, 0 failed** post-Fase 19.
+- ✅ Validación end-to-end real: `open_in_jw_library(reference="Juan 3:16")` despachado contra `/Applications/JW Library.app` con `returncode=0`.
+
+### Próximos pasos posibles (no scopados a esta fase)
+
+- ⬜ UI Automation Windows para casos no cubiertos por el deep link.
+- ⬜ AXUIElement macOS para igualar la cobertura de Windows.
+- ⬜ Sync inverso (toolkit → app): escribir notas mientras la app no corre. Implica invalidar el sync con cuenta JW.
+- ⬜ Parser de `PlaylistItem*` (medios anclados a notas).
+- ⬜ Catálogo MEPS pre-poblado: shipping un seed con los pub_codes más comunes para no exigir indexing manual de `.jwpub`.
+
+---
+
+## Fase 20 — Integración con Obsidian (second brain) ✅
+
+> Objetivo: portar las utilidades de manipulación de markdown del plugin `msakowski/obsidian-library-linker` (MIT) como funciones Python puras + REST + plugin Obsidian propio, cerrando el ciclo agente ↔ vault. Conceptos en [`conceptos/integracion-obsidian.md`](conceptos/integracion-obsidian.md), guía paso a paso en [`guias/usar-con-obsidian.md`](guias/usar-con-obsidian.md).
+
+### Capa 1 — Utilidades markdown (linkify + convert + render)
+
+- ✅ `jw_core.integrations.markdown.parse_jwlibrary_url` — URL → `BibleRef` (inverso de `build_bible_url`).
+- ✅ `convert_jwpub_bible_url`, `convert_jwpub_publication_url` — `jwpub://b/...` y `jwpub://p/...` → `jwlibrary://`.
+- ✅ `convert_jw_links_in_text` — rewrite de markdown completo con counters.
+- ✅ `render_markdown_link` — `BibleRef` → `[label](jwlibrary://…)`.
+- ✅ `linkify_markdown` con offset-map para preservar acentos, skip de `[…](…)` existentes, fenced code y inline code.
+- ✅ `render_verse_block` — 5 templates: `plain`, `link`, `blockquote`, `callout`, `callout-collapsed`.
+- ✅ Tools MCP: `linkify_markdown_text`, `convert_jw_links_in_markdown`, `get_verse_as_markdown`.
+
+### Capa 2 — Sign language → spoken base
+
+- ✅ `data.book_locales.SIGN_LANGUAGE_BASE_MAP` (47 lenguas de signos).
+- ✅ `languages.get_book_language` resuelve LSM → S, ASL → E, DGS → X, etc.
+- ✅ Integrado en el render de labels y en la resolución de URLs.
+
+### Capa 3 — 17 locales de nombres de libros
+
+- ✅ Portados desde `obsidian-library-linker/locale/bibleBooks/` (yamls → JSON).
+- ✅ `data/bible_books/{E,S,TPO,F,X,I,U,J,KO,B,C,D,O,FI,TG,VT,CW}.json` — 1122 entries.
+- ✅ `data.book_locales.merge_into_books` con prioridad por idioma y `_alias_key` espejo del parser para detectar colisiones (ej. "Ap" → es:Apocalipsis vs vi:Áp-đia).
+- ✅ El parser de referencias reconoce ahora 17 idiomas con short/medium/long + aliases comunidad.
+
+### Capa 4 — Sync bidireccional vault ↔ toolkit
+
+- ✅ `jw_core.integrations.obsidian_vault.index_vault_to_rag` — incremental, con sidecar `vault_sync.json`, frontmatter parser mínimo (sin PyYAML), filtros por tag, evict de notas borradas.
+- ✅ `export_backup_to_vault` — escribe `.md` por cada `UserNote`, organizados por libro/capítulo o publicación, con frontmatter y deep-link callouts.
+- ✅ `VectorStore.delete_by_source_ids` ya disponible (Fase 19).
+- ✅ Tools MCP: `index_obsidian_vault`, `export_jw_library_backup_to_vault`.
+
+### Capa 5 — REST API expansion
+
+- ✅ `jw_mcp.rest_api` con 5 endpoints nuevos: `POST /api/v1/linkify`, `/convert_links`, `/verse_markdown`, `/vault/index`, `/vault/export`.
+- ✅ CORS permisivo (ya estaba) — preparado para el plugin Obsidian que llama desde Electron/localhost.
+
+### Capa 6 — Plugin Obsidian nativo
+
+- ✅ `apps/obsidian-jw-bridge/` con manifest, package.json, esbuild config, tsconfig, README.
+- ✅ `src/main.ts` con 8 comandos (linkify selection/note/vault, convert jwpub, insert verse modal, export backup modal, index vault, health check), settings tab completo, soporte mobile (`requestUrl`).
+- ✅ `src/toolkitClient.ts` — thin wrapper REST sin lógica de negocio.
+
+### Tests y cobertura
+
+- ✅ 57 tests nuevos: `test_markdown_utils.py` (40) + `test_obsidian_vault.py` (17).
+- ✅ Suite global: **551 passed, 4 skipped, 0 failed** post-Fase 20.
+
+### Próximos pasos posibles (no scopados a esta fase)
+
+- ⬜ Auto-completion in-editor en el plugin (suggester de Obsidian completo).
+- ⬜ Templates custom configurables por el usuario.
+- ⬜ Modo offline en `get_verse_as_markdown` usando JWPUB local (ya descifrado) en lugar de WOL.
+- ⬜ Publicar el plugin al Obsidian Community Plugins registry.
+- ⬜ Versión del plugin para Logseq / Foam / otros sistemas markdown.

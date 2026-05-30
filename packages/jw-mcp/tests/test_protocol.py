@@ -7,7 +7,7 @@ Code, etc.) would see when it connects to `jw-mcp`. Running in-process
 
 What this proves:
 
-  1. The server registers exactly the tools we expect (29 as of v1.0).
+  1. The server registers exactly the tools we expect (29 in v1.0, 47 after Modules 1-3).
   2. Every tool has a non-empty description (LLM consumes them).
   3. Every tool exposes an input schema (parameter discovery works).
   4. A pure tool (`resolve_reference`) round-trips: parameter → JSON
@@ -66,11 +66,49 @@ _EXPECTED_TOOLS = {
     "get_cache_stats",
     "get_publication_toc",
     "list_weblang_languages",
+    # Module 1 — workbook + WT study
+    "workbook_helper",
+    "public_talk_outline",
+    # Module 2 — ministry
+    "conversation_assistant",
+    "list_known_objections",
+    "presentation_builder",
+    "list_audiences",
+    "reverse_citation_lookup",
+    "revisit_upsert",
+    "revisit_list",
+    "revisit_plan",
+    "revisit_due",
+    "revisit_delete",
+    # Module 3 — audio
+    "list_tts_engines",
+    "read_verse_aloud",
+    "read_article_aloud",
+    "search_broadcasting",
+    "index_broadcasting_vtt",
+    # Phase 19 — JW Library integrations
+    "open_in_jw_library",
+    "import_jw_library_backup",
+    "list_user_notes",
+    "ingest_user_notes",
+    "inspect_local_jw_library_tool",
+    "sync_jw_library_backup",
+    "register_jwpub_in_catalog",
+    "find_publication_in_catalog",
+    "open_publication_by_symbol",
+    "check_jw_library_full_disk_access",
+    "read_jw_library_live_userdata",
+    # Phase 20 — Obsidian bridge
+    "linkify_markdown_text",
+    "convert_jw_links_in_markdown",
+    "get_verse_as_markdown",
+    "index_obsidian_vault",
+    "export_jw_library_backup_to_vault",
 }
 
 
 @pytest.mark.asyncio
-async def test_mcp_lists_all_29_expected_tools() -> None:
+async def test_mcp_lists_all_expected_tools() -> None:
     async with Client(mcp) as client:
         tools = await client.list_tools()
     names = {t.name for t in tools}
@@ -78,7 +116,7 @@ async def test_mcp_lists_all_29_expected_tools() -> None:
     extra = names - _EXPECTED_TOOLS
     assert not missing, f"Tools missing from server: {missing}"
     assert not extra, f"Tools present but not in EXPECTED set: {extra}"
-    assert len(tools) == 29
+    assert len(tools) == len(_EXPECTED_TOOLS)
 
 
 @pytest.mark.asyncio

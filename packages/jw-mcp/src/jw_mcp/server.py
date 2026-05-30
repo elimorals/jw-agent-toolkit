@@ -25,20 +25,73 @@ from jw_agents import (
     meeting_helper as meeting_helper_agent,
 )
 from jw_agents import (
+    public_talk_outline as public_talk_outline_agent,
+)
+from jw_agents import (
     research_topic as research_topic_agent,
 )
 from jw_agents import (
     verse_explainer as verse_explainer_agent,
 )
+from jw_agents import (
+    workbook_helper as workbook_helper_agent,
+)
+from jw_agents.conversation_assistant import conversation_assistant as conversation_assistant_agent
+from jw_agents.presentation_builder import list_audiences as _list_audiences
+from jw_agents.presentation_builder import presentation_builder as presentation_builder_agent
+from jw_agents.revisit_tracker import Revisit, RevisitStore, plan_next_visit
+from jw_agents.reverse_citation_lookup import reverse_citation_lookup as reverse_citation_lookup_agent
+from jw_agents.audio_helper import (
+    read_article_aloud as _read_article_aloud,
+)
+from jw_agents.audio_helper import (
+    read_verse_aloud as _read_verse_aloud,
+)
+from jw_agents.audio_helper import (
+    search_broadcasting as _search_broadcasting,
+)
+from jw_core.audio.broadcasting import BroadcastingIndex, index_vtt_file
+from jw_core.audio.tts import list_tts_providers
+from jw_core.data.objections import list_objections
 from jw_core.clients.cdn import CDNClient
 from jw_core.clients.mediator import MediatorClient
 from jw_core.clients.pub_media import PubMediaClient, PubMediaError
 from jw_core.clients.topic_index import TopicIndexClient, TopicIndexError
 from jw_core.clients.wol import WOLClient
+from jw_core.integrations.jw_library import (
+    JWLibraryError,
+    build_bible_url,
+    build_publication_url,
+    build_url_for_ref,
+    detect_platform,
+    open_jw_library,
+)
+from jw_core.integrations.jw_library_local import (
+    MacOSFullDiskAccessError,
+    check_macos_full_disk_access,
+    inspect_local_jw_library,
+    read_macos_userdata,
+)
+from jw_core.integrations.markdown import (
+    convert_jw_links_in_text,
+    linkify_markdown,
+    render_verse_block,
+)
+from jw_core.integrations.obsidian_vault import (
+    export_backup_to_vault,
+    index_vault_to_rag,
+)
+from jw_core.integrations.meps_catalog import MepsCatalog
 from jw_core.languages import get_language
 from jw_core.parsers.article import parse_article
 from jw_core.parsers.daily_text import parse_daily_text
 from jw_core.parsers.epub import parse_epub
+from jw_core.integrations.jw_library_sync import sync_backup_to_rag
+from jw_core.parsers.jw_library_backup import (
+    JWLibraryBackupError,
+    notes_for_chapter,
+    parse_jw_library_backup,
+)
 from jw_core.parsers.jwpub import JwpubError, parse_jwpub, parse_jwpub_metadata
 from jw_core.parsers.reference import parse_reference
 from jw_core.parsers.study_notes import (
@@ -1199,6 +1252,904 @@ async def list_weblang_languages(
         "count": len(langs),
         "languages": [lang.model_dump() for lang in langs],
     }
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tool: workbook_helper (Phase 11 — weekly meeting)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def workbook_helper(
+    target_date: str = "",
+    language: str = "en",
+    include_watchtower: bool = True,
+    include_comments: bool = True,
+    comments_per_paragraph: int = 1,
+) -> dict[str, Any]:
+    """Discover the meeting workbook + Watchtower study for a given week.
+
+    Args:
+        target_date: ISO `YYYY-MM-DD` (empty = today).
+        language: ISO code (en/es/pt).
+        include_watchtower: Also pull the WT Study article (paragraphs +
+            questions + scripture refs).
+        include_comments: Synthesise short comment scripts per paragraph.
+        comments_per_paragraph: 1..3 angles per paragraph.
+
+    Returns the agent envelope with workbook assignments and (optionally)
+    WT study paragraphs + comment suggestions.
+    """
+    result = await workbook_helper_agent(
+        target_date or None,
+        language=language,
+        include_watchtower=include_watchtower,
+        include_comments=include_comments,
+        comments_per_paragraph=comments_per_paragraph,
+        wol=_get_wol(),
+    )
+    return result.to_dict()
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tool: public_talk_outline (Phase 11)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def public_talk_outline(
+    theme: str,
+    language: str = "E",
+    duration_minutes: int = 30,
+    main_points: int = 3,
+    illustration_top_k: int = 4,
+) -> dict[str, Any]:
+    """Build a public-discourse outline for a theme phrase or theme scripture.
+
+    Uses topic_index + CDN search to harvest doctrinal anchors + recent
+    publications' illustrations. The outline skeleton is rendered in the
+    target language; every finding carries a wol.jw.org citation.
+    """
+    result = await public_talk_outline_agent(
+        theme,
+        language=language,
+        duration_minutes=duration_minutes,
+        main_points=main_points,
+        illustration_top_k=illustration_top_k,
+        topic=_get_topic(),
+        cdn=_get_cdn(),
+        wol=_get_wol(),
+    )
+    return result.to_dict()
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tool: conversation_assistant (Phase 12 — ministry)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def conversation_assistant(
+    text: str,
+    language: str = "E",
+    max_subheadings: int = 6,
+) -> dict[str, Any]:
+    """Match text against common objections and return authoritative answers.
+
+    Uses the objection catalog (Trinity, hell, soul, blood, etc.) + topic
+    index + scripture anchors. The result is a structured envelope the
+    LLM can synthesise into a respectful, sourced reply.
+    """
+    result = await conversation_assistant_agent(
+        text,
+        language=language,
+        topic=_get_topic(),
+        cdn=_get_cdn(),
+        wol=_get_wol(),
+        max_subheadings=max_subheadings,
+    )
+    return result.to_dict()
+
+
+@mcp.tool
+def list_known_objections(language: str = "en") -> dict[str, Any]:
+    """Return the catalog of common objections recognized by the assistant."""
+    return {"count": len(list_objections(language)), "objections": list_objections(language)}
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tool: presentation_builder (Phase 12)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def presentation_builder(
+    audience: str,
+    language: str = "E",
+    topic_overrides: list[str] | None = None,
+) -> dict[str, Any]:
+    """Scaffold a witnessing presentation for an audience profile.
+
+    Supported audience keys: catholic, evangelical, atheist, muslim, young,
+    struggling_grief. The result includes opening questions, common ground,
+    anchor scriptures + topic-index anchors, and tone notes.
+    """
+    result = await presentation_builder_agent(
+        audience,
+        language=language,
+        topic_overrides=topic_overrides,
+        topic=_get_topic(),
+    )
+    return result.to_dict()
+
+
+@mcp.tool
+def list_audiences(language: str = "en") -> dict[str, Any]:
+    """List supported audience profiles for `presentation_builder`."""
+    return {"count": len(_list_audiences(language)), "audiences": _list_audiences(language)}
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tool: reverse_citation_lookup (Phase 12)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def reverse_citation_lookup(
+    quote: str,
+    language: str = "E",
+    top_n: int = 8,
+    min_confidence: float = 0.4,
+) -> dict[str, Any]:
+    """Given a quote, find the JW publication it came from.
+
+    Evaluates the top N CDN search hits and keeps matches whose
+    bigram overlap exceeds `min_confidence`.
+    """
+    result = await reverse_citation_lookup_agent(
+        quote,
+        language=language,
+        top_n=top_n,
+        min_confidence=min_confidence,
+        cdn=_get_cdn(),
+        wol=_get_wol(),
+    )
+    return result.to_dict()
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tools: revisit tracker (Phase 12 — local only, never synced)
+# ────────────────────────────────────────────────────────────────────────
+
+
+def _get_revisit_store() -> RevisitStore:
+    return RevisitStore()
+
+
+@mcp.tool
+def revisit_upsert(
+    interest_id: str,
+    name_alias: str = "(anonymous)",
+    location_hint: str = "",
+    language: str = "en",
+    last_topic: str = "",
+    notes: str = "",
+    next_visit_iso: str = "",
+    tags: list[str] | None = None,
+) -> dict[str, Any]:
+    """Create or update a revisit note in the local SQLite store.
+
+    PRIVACY: data lives on this device only (~/.jw-agent-toolkit/ministry.db).
+    Override via `JW_MINISTRY_DB`. No network calls.
+    """
+    rev = Revisit(
+        interest_id=interest_id,
+        name_alias=name_alias,
+        location_hint=location_hint,
+        language=language,
+        last_topic=last_topic,
+        notes=notes,
+        next_visit_iso=next_visit_iso,
+        tags=tags or [],
+    )
+    with _get_revisit_store() as store:
+        saved = store.upsert(rev)
+    return {"interest_id": saved.interest_id, "updated_at_unix": saved.updated_at_unix}
+
+
+@mcp.tool
+def revisit_list(language: str = "") -> dict[str, Any]:
+    """List all revisits (optionally filtered by language)."""
+    with _get_revisit_store() as store:
+        items = store.list_all(language=language or None)
+    return {"count": len(items), "revisits": [i.to_row() for i in items]}
+
+
+@mcp.tool
+def revisit_plan(interest_id: str, language: str = "en") -> dict[str, Any]:
+    """Build a checklist for the next visit to `interest_id`."""
+    with _get_revisit_store() as store:
+        rev = store.get(interest_id)
+    if rev is None:
+        return {"error": f"No revisit with id {interest_id!r}"}
+    return plan_next_visit(rev, language=language)
+
+
+@mcp.tool
+def revisit_due(on_or_before: str) -> dict[str, Any]:
+    """Return revisits whose `next_visit_iso` is on or before `on_or_before` (YYYY-MM-DD)."""
+    with _get_revisit_store() as store:
+        items = store.due(on_or_before=on_or_before)
+    return {"count": len(items), "revisits": [i.to_row() for i in items]}
+
+
+@mcp.tool
+def revisit_delete(interest_id: str) -> dict[str, Any]:
+    """Delete a stored revisit note by `interest_id`. Returns the deletion status."""
+    with _get_revisit_store() as store:
+        ok = store.delete(interest_id)
+    return {"interest_id": interest_id, "deleted": ok}
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tools: audio (Phase 13)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+def list_tts_engines() -> dict[str, Any]:
+    """List available TTS providers on this machine (system/edge/piper)."""
+    items = list_tts_providers()
+    return {"count": len(items), "providers": items}
+
+
+@mcp.tool
+async def read_verse_aloud(
+    book_num: int,
+    chapter: int,
+    verse: int,
+    output_path: str,
+    language: str = "en",
+    provider: str = "",
+    voice: str = "",
+) -> dict[str, Any]:
+    """Synthesise a Bible verse to an audio file using the chosen TTS provider.
+
+    The file is written to `output_path`. Returns the path + verse metadata.
+    """
+    result = await _read_verse_aloud(
+        book_num,
+        chapter,
+        verse,
+        language=language,
+        output_path=output_path,
+        provider=provider or None,
+        voice=voice or None,
+        wol=_get_wol(),
+    )
+    return result.to_dict()
+
+
+@mcp.tool
+async def read_article_aloud(
+    url: str,
+    output_path: str,
+    language: str = "en",
+    max_paragraphs: int = 5,
+    provider: str = "",
+    voice: str = "",
+) -> dict[str, Any]:
+    """Synthesise the first N paragraphs of an article to an audio file."""
+    result = await _read_article_aloud(
+        url,
+        output_path=output_path,
+        language=language,
+        max_paragraphs=max_paragraphs,
+        provider=provider or None,
+        voice=voice or None,
+        wol=_get_wol(),
+    )
+    return result.to_dict()
+
+
+@mcp.tool
+def search_broadcasting(query: str, language: str = "", top_k: int = 10) -> dict[str, Any]:
+    """Full-text search over the local JW Broadcasting subtitle index."""
+    result = _search_broadcasting(query, language=language or None, top_k=top_k)
+    return result.to_dict()
+
+
+@mcp.tool
+def index_broadcasting_vtt(
+    vtt_path: str,
+    video_id: str,
+    title: str = "",
+    language: str = "en",
+    source_url: str = "",
+) -> dict[str, Any]:
+    """Add a single WebVTT subtitle file to the local broadcasting index."""
+    with BroadcastingIndex() as idx:
+        n = index_vtt_file(
+            idx,
+            vtt_path,
+            video_id=video_id,
+            title=title,
+            language=language,
+            source_url=source_url,
+        )
+        stats = idx.stats()
+    return {"video_id": video_id, "segments_added": n, "index_stats": stats}
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tools: JW Library backup parsing (Phase 19 — integrations)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+def import_jw_library_backup(backup_path: str) -> dict[str, Any]:
+    """Read a `.jwlibrary` archive (User Data Backup) and report a summary.
+
+    Returns the manifest (creation date, device name, schema version) and
+    counts per category. To project the actual notes, call
+    `list_user_notes`. To index them into RAG, call `ingest_user_notes`.
+
+    The archive is read in memory; the live JW Library DB is never touched.
+    """
+    try:
+        backup = parse_jw_library_backup(backup_path)
+    except JWLibraryBackupError as e:
+        return {"error": str(e)}
+    return {
+        "source_path": backup.source_path,
+        "manifest": backup.manifest.model_dump(),
+        "counts": backup.counts,
+    }
+
+
+@mcp.tool
+def list_user_notes(
+    backup_path: str,
+    book_num: int | None = None,
+    chapter: int | None = None,
+    tag: str = "",
+    limit: int = 50,
+) -> dict[str, Any]:
+    """Project user notes from a `.jwlibrary` backup, optionally filtered.
+
+    Args:
+        backup_path: Path to the `.jwlibrary` archive.
+        book_num: When set together with `chapter`, restrict to notes
+            addressing that Bible chapter.
+        chapter: Required if `book_num` is set.
+        tag: Filter to notes that carry this tag name (e.g. 'Favorite').
+        limit: Cap the result count. 0 = unlimited.
+    """
+    try:
+        backup = parse_jw_library_backup(backup_path)
+    except JWLibraryBackupError as e:
+        return {"error": str(e)}
+    items = backup.notes
+    if book_num is not None and chapter is not None:
+        items = notes_for_chapter(backup, book_num=book_num, chapter=chapter)
+    if tag:
+        items = [n for n in items if tag in n.tags]
+    if limit and limit > 0:
+        items = items[:limit]
+    return {
+        "source_path": backup.source_path,
+        "filters": {
+            "book_num": book_num,
+            "chapter": chapter,
+            "tag": tag or None,
+            "limit": limit,
+        },
+        "count": len(items),
+        "notes": [n.model_dump() for n in items],
+    }
+
+
+@mcp.tool
+def sync_jw_library_backup(
+    backup_path: str,
+    state_path: str = "",
+    include_bookmarks: bool = True,
+    include_input_fields: bool = True,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Incremental sync of a `.jwlibrary` backup into the local RAG store.
+
+    Diffs the backup against a sidecar state file and applies only the
+    delta: new notes are added, modified notes get their old chunks
+    evicted and re-indexed, deleted notes are removed from the store.
+    A second call against the same backup is a no-op.
+
+    The state file holds entries keyed by `manifest.hash` so the same
+    sidecar can track multiple backups (e.g. iPhone + iPad). Default
+    location: `<rag-store>/jw_library_sync.json`.
+
+    Args:
+        backup_path: Path to the `.jwlibrary` archive.
+        state_path: Where to keep the sidecar JSON. Empty = default.
+        include_bookmarks: Sync bookmark snippets too.
+        include_input_fields: Sync meeting workbook answers too.
+        dry_run: Compute the plan without mutating anything.
+    """
+    store = _get_rag_store()
+    try:
+        report = sync_backup_to_rag(
+            backup_path,
+            store,
+            state_path=state_path or None,
+            include_bookmarks=include_bookmarks,
+            include_input_fields=include_input_fields,
+            dry_run=dry_run,
+        )
+    except JWLibraryBackupError as e:
+        return {"error": str(e)}
+    if not dry_run:
+        store.save()
+    return report.to_dict()
+
+
+@mcp.tool
+def ingest_user_notes(
+    backup_path: str,
+    include_bookmarks: bool = True,
+    include_input_fields: bool = True,
+) -> dict[str, Any]:
+    """Ingest notes / bookmarks / input-field answers from a backup into RAG.
+
+    After this call, `semantic_search` can surface the user's own writing
+    alongside the public corpus. Chunks are tagged with `kind='user_note'`,
+    `'user_bookmark'`, or `'user_input'` so callers can filter.
+    """
+    from jw_rag.ingest import ingest_jw_library_backup as _ingest_backup
+
+    store = _get_rag_store()
+    try:
+        total = _ingest_backup(
+            store,
+            backup_path,
+            include_bookmarks=include_bookmarks,
+            include_input_fields=include_input_fields,
+        )
+    except JWLibraryBackupError as e:
+        return {"error": str(e)}
+    store.save()
+    return {
+        "backup_path": backup_path,
+        "include_bookmarks": include_bookmarks,
+        "include_input_fields": include_input_fields,
+        "chunks_added": total,
+        "store_total": store.count,
+    }
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tools: JW Library deep linking (Phase 19 — integrations)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+def open_in_jw_library(
+    reference: str = "",
+    book_num: int | None = None,
+    chapter: int | None = None,
+    verse_start: int | None = None,
+    verse_end: int | None = None,
+    end_chapter: int | None = None,
+    docid: int | None = None,
+    paragraph: int | None = None,
+    language: str = "",
+    dry_run: bool = True,
+) -> dict[str, Any]:
+    """Build a `jwlibrary://` deep link and (optionally) open it in the app.
+
+    Two modes:
+
+      1. **Bible reference** — pass `reference` (e.g. "Juan 3:16-18") OR the
+         numeric form `book_num` + `chapter` + `verse_start` (+ `verse_end`
+         + `end_chapter` for ranges).
+      2. **Publication** — pass `docid` (and optionally `paragraph`). Derive
+         `docid` from a downloaded `.jwpub` via `inspect_jwpub_metadata`.
+
+    `dry_run=True` (default) is safe for chat: it returns the URL without
+    launching anything. Set `dry_run=False` to spawn the OS URL handler
+    (`open` on macOS, `cmd /c start` on Windows, `xdg-open` on Linux).
+    `language` accepts ISO ('en', 'es', 'pt') or JW codes ('E', 'S', 'T').
+    """
+    try:
+        if docid is not None:
+            url = build_publication_url(
+                docid,
+                paragraph=paragraph,
+                wtlocale=language or None,
+            )
+        elif book_num is not None and chapter is not None:
+            url = build_bible_url(
+                book_num,
+                chapter,
+                verse_start,
+                verse_end=verse_end,
+                end_chapter=end_chapter,
+                wtlocale=language or None,
+            )
+        elif reference:
+            ref = parse_reference(reference)
+            if ref is None:
+                return {"error": f"No Bible reference detected in: {reference!r}"}
+            url = build_url_for_ref(ref, wtlocale=language or None)
+        else:
+            return {"error": "Pass either `reference`, `book_num`+`chapter`, or `docid`."}
+        result = open_jw_library(url, dry_run=dry_run)
+    except JWLibraryError as e:
+        return {"error": str(e)}
+    return {**result, "platform_detected": detect_platform()}
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tools: MEPS docid catalog (Phase 19 — integrations)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+def register_jwpub_in_catalog(jwpub_path: str, catalog_db: str = "") -> dict[str, Any]:
+    """Index a `.jwpub` file's metadata into the local MEPS docid catalog.
+
+    Parses the publication's manifest (no decryption — cheap) and upserts
+    every Document row so future deep links can resolve a publication
+    symbol (`bh`, `w24`, `lff`) into a MEPS `docid`.
+
+    Args:
+        jwpub_path: Path to a downloaded `.jwpub`.
+        catalog_db: Override the catalog DB path. Empty = default
+            (~/.jw-agent-toolkit/meps_catalog.db).
+    """
+    try:
+        with MepsCatalog(db_path=catalog_db or None) as cat:
+            result = cat.index_jwpub(jwpub_path)
+            result["stats"] = cat.stats()
+        return result
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@mcp.tool
+def find_publication_in_catalog(
+    pub_code: str = "",
+    document_id: int | None = None,
+    meps_document_id: int | None = None,
+    language_index: int | None = None,
+    chapter_number: int | None = None,
+    limit: int = 25,
+    catalog_db: str = "",
+) -> dict[str, Any]:
+    """Query the MEPS catalog by any combination of pub_code/docid/chapter.
+
+    Returns matching publications + documents. Useful for the LLM to
+    discover which publication contains a given chapter or which docid
+    corresponds to a publication symbol before building a deep link.
+    """
+    try:
+        with MepsCatalog(db_path=catalog_db or None) as cat:
+            docs = cat.find_documents(
+                pub_code=pub_code or None,
+                document_id=document_id,
+                meps_document_id=meps_document_id,
+                language_index=language_index,
+                chapter_number=chapter_number,
+                limit=limit,
+            )
+            pubs = cat.list_publications(
+                pub_code=pub_code or None,
+                language_index=language_index,
+            )
+            return {
+                "publications": [p.to_dict() for p in pubs],
+                "documents": [d.to_dict() for d in docs],
+                "stats": cat.stats(),
+            }
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@mcp.tool
+def open_publication_by_symbol(
+    pub_code: str,
+    chapter_number: int | None = None,
+    paragraph: int | None = None,
+    language_index: int | None = None,
+    language: str = "",
+    dry_run: bool = True,
+    catalog_db: str = "",
+) -> dict[str, Any]:
+    """Build (and optionally dispatch) a `jwlibrary://` deep link by symbol.
+
+    Resolves `pub_code` (+ optional `chapter_number`) via the local MEPS
+    catalog, then builds `jwlibrary:///finder?docid=N&par=P`. Run
+    `register_jwpub_in_catalog` on each `.jwpub` you want addressable by
+    symbol before calling this.
+
+    Args:
+        pub_code: Publication symbol (e.g. "bh", "lff", "w24").
+        chapter_number: Optional — restrict to a specific chapter.
+        paragraph: Optional — paragraph anchor inside the document.
+        language_index: MEPS language index (0 = English). When omitted,
+            falls back to English if available.
+        language: ISO/JW locale tag for the `wtlocale=` parameter.
+        dry_run: True (default) returns the URL without opening anything.
+        catalog_db: Override catalog DB path.
+    """
+    try:
+        with MepsCatalog(db_path=catalog_db or None) as cat:
+            doc = cat.resolve_docid(
+                pub_code,
+                chapter_number=chapter_number,
+                language_index=language_index,
+            )
+        if doc is None:
+            return {
+                "error": (
+                    f"No document found for pub_code={pub_code!r} "
+                    f"(chapter={chapter_number}, language_index={language_index}). "
+                    "Register the matching .jwpub via register_jwpub_in_catalog first."
+                )
+            }
+        url = build_publication_url(
+            doc.document_id,
+            paragraph=paragraph,
+            wtlocale=language or None,
+        )
+        result = open_jw_library(url, dry_run=dry_run)
+    except JWLibraryError as e:
+        return {"error": str(e)}
+    return {
+        "resolved": doc.to_dict(),
+        "platform_detected": detect_platform(),
+        **result,
+    }
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tool: inspect_local_jw_library (Phase 19 — integrations)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+def check_jw_library_full_disk_access() -> dict[str, Any]:
+    """Check whether this process can read the macOS JW Library sandbox.
+
+    macOS apps under the Mac App Store sandbox are unreadable by third-
+    party processes unless the host (terminal / Claude Desktop / VS Code)
+    has been granted Full Disk Access in System Settings. This tool
+    probes the container path with `os.scandir` and reports the outcome
+    plus actionable instructions.
+    """
+    return check_macos_full_disk_access()
+
+
+@mcp.tool
+def read_jw_library_live_userdata(book_num: int | None = None, chapter: int | None = None, limit: int = 50) -> dict[str, Any]:
+    """Load notes from the live macOS sandbox container (requires FDA).
+
+    Same shape as `list_user_notes`, but reads the **live** `userData.db`
+    inside the container — no backup export needed. Fails fast with a
+    clear instruction if Full Disk Access has not been granted.
+    """
+    try:
+        backup = read_macos_userdata()
+    except MacOSFullDiskAccessError as e:
+        return {"error": str(e), "needs_full_disk_access": True}
+    notes = backup.notes
+    if book_num is not None and chapter is not None:
+        from jw_core.parsers.jw_library_backup import notes_for_chapter as _filter
+
+        notes = _filter(backup, book_num=book_num, chapter=chapter)
+    if limit and limit > 0:
+        notes = notes[:limit]
+    return {
+        "source_path": backup.source_path,
+        "manifest": backup.manifest.model_dump(),
+        "counts": backup.counts,
+        "filters": {"book_num": book_num, "chapter": chapter, "limit": limit},
+        "notes": [n.model_dump() for n in notes],
+    }
+
+
+@mcp.tool
+def inspect_local_jw_library_tool(force: bool = False) -> dict[str, Any]:
+    """Inspect the JW Library app installed on this machine (read-only).
+
+    Returns the platform, whether the app was detected, the publication
+    catalog (Windows only — the UWP package's `publications.db`), and
+    actionable reasons / suggestions when something is unsupported.
+
+    Opt-in: by default the inspector refuses unless `JW_LIBRARY_LOCAL_READ=1`
+    is set in the environment. Pass `force=True` to bypass that check.
+
+    Platform behavior:
+      - Windows: reads `publications.db` from LocalAppData and reports the
+        userData.db path if present.
+      - macOS: app runs in the App Store sandbox; we never open its files.
+        The tool reports the install path and asks for a `.jwlibrary`
+        backup instead.
+      - Linux: not supported (no native build).
+    """
+    return inspect_local_jw_library(force=force).to_dict()
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tools: Markdown utilities (Phase 20 — Obsidian bridge)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+def linkify_markdown_text(
+    text: str,
+    language: str = "en",
+    length: str = "medium",
+    wtlocale: str = "",
+) -> dict[str, Any]:
+    """Wrap every Bible reference in `text` as a `jwlibrary://` markdown link.
+
+    Skips refs already inside `[…](…)` links, inside `\`inline code\``, and
+    inside fenced code blocks. Respects 17 locales (English, Spanish,
+    Portuguese, French, German, Italian, Russian, Japanese, Korean,
+    Czech, Croatian, Danish, Dutch, Finnish, Tagalog, Vietnamese,
+    Cibemba) so the user can write in any of them.
+
+    Args:
+        text: Source markdown.
+        language: ISO code that drives the rendered label.
+        length: 'short' / 'medium' / 'long'.
+        wtlocale: Optional override for the `wtlocale=` URL parameter.
+            Empty string means "match `language`".
+    """
+    result = linkify_markdown(
+        text,
+        language=language,
+        length=length,  # type: ignore[arg-type]
+        wtlocale=wtlocale or None,
+    )
+    return result.to_dict()
+
+
+@mcp.tool
+def convert_jw_links_in_markdown(
+    text: str,
+    kind: str = "all",
+    wtlocale: str = "",
+) -> dict[str, Any]:
+    """Rewrite legacy `jwpub://b/...` / `jwpub://p/...` URLs to `jwlibrary://`.
+
+    Useful for refreshing old notes that still contain the legacy
+    Watchtower Library / Logos scheme. `kind` filters which subset to
+    touch ('bible', 'publication', 'all').
+    """
+    stats = convert_jw_links_in_text(
+        text,
+        kind=kind,  # type: ignore[arg-type]
+        wtlocale=wtlocale or None,
+    )
+    return stats.to_dict()
+
+
+@mcp.tool
+async def get_verse_as_markdown(
+    reference: str,
+    language: str = "en",
+    template: str = "callout",
+    length: str = "medium",
+    publication: str = "nwtsty",
+    include_text: bool = True,
+) -> dict[str, Any]:
+    """Fetch a verse from wol.jw.org and render it as ready-to-paste markdown.
+
+    Templates: 'plain' / 'link' / 'blockquote' / 'callout' /
+    'callout-collapsed'. The 'callout' templates use Obsidian's `[!quote]`
+    callout syntax.
+    """
+    ref = parse_reference(reference)
+    if ref is None:
+        return {"error": f"No Bible reference detected in: {reference!r}"}
+    verse_text = ""
+    source_url = ""
+    if include_text and ref.verse_start is not None:
+        wol = _get_wol()
+        url, html = await wol.get_bible_chapter(
+            ref.book_num,
+            ref.chapter,
+            language=language,
+            publication=publication,
+        )
+        v = _get_verse_from_html(html, ref.book_num, ref.chapter, ref.verse_start, language=language)
+        verse_text = v.text if v else ""
+        source_url = url
+    md = render_verse_block(
+        ref,
+        verse_text,
+        template=template,  # type: ignore[arg-type]
+        length=length,  # type: ignore[arg-type]
+        language=language,
+    )
+    return {
+        "markdown": md,
+        "reference": ref.display(),
+        "language": language,
+        "source_url": source_url,
+    }
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tools: Obsidian vault sync (Phase 20)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+def index_obsidian_vault(
+    vault_root: str,
+    state_path: str = "",
+    require_tag: str = "",
+    glob: str = "**/*.md",
+    min_chars: int = 16,
+) -> dict[str, Any]:
+    """Incremental sync an Obsidian vault into the local RAG store.
+
+    First call indexes every `.md`. Subsequent calls re-use the sidecar
+    state to only process new / modified / deleted files (mtime +
+    content_hash). The store ends up holding `vault_note` chunks
+    alongside any JW.org content already indexed.
+
+    `require_tag` filters to notes whose frontmatter `tags` list
+    contains the given value (e.g. 'ministry').
+    """
+    store = _get_rag_store()
+    try:
+        report = index_vault_to_rag(
+            vault_root,
+            store,
+            state_path=state_path or None,
+            glob=glob,
+            require_tag=require_tag or None,
+            min_chars=min_chars,
+        )
+    except FileNotFoundError as e:
+        return {"error": str(e)}
+    store.save()
+    return report.to_dict()
+
+
+@mcp.tool
+def export_jw_library_backup_to_vault(
+    backup_path: str,
+    vault_dir: str,
+    template: str = "callout",
+    length: str = "medium",
+    language: str = "en",
+    subdir: str = "JW Library",
+    overwrite: bool = False,
+) -> dict[str, Any]:
+    """Write one `.md` per JW Library note into an Obsidian vault directory.
+
+    Bible-anchored notes go under `<vault>/<subdir>/bible/BB/chapter-CCC/`.
+    Publication-anchored notes go under `<vault>/<subdir>/publications/<key>/`.
+    Each file has Obsidian-friendly frontmatter (book, chapter, tags,
+    created, last_modified) plus a deep-link callout to JW Library.
+    """
+    try:
+        report = export_backup_to_vault(
+            backup_path,
+            vault_dir,
+            template=template,  # type: ignore[arg-type]
+            length=length,  # type: ignore[arg-type]
+            language=language,
+            subdir=subdir,
+            overwrite=overwrite,
+        )
+    except Exception as e:
+        return {"error": str(e)}
+    return report.to_dict()
 
 
 # ────────────────────────────────────────────────────────────────────────

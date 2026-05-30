@@ -31,6 +31,27 @@ _NS = {
 }
 
 
+def read_document_xhtml(epub_path: Path | str, item_id: str) -> str:
+    """Return the raw XHTML for one document inside the EPUB.
+
+    Useful when the caller wants to traverse the DOM with their own
+    selectors (e.g. extract section headings + paragraphs in order).
+    """
+    p = Path(epub_path)
+    with zipfile.ZipFile(p) as z:
+        opf_path = _find_opf_path(z)
+        if not opf_path:
+            raise ValueError(f"{p}: no OPF file")
+        opf_xml = z.read(opf_path).decode("utf-8")
+        _, manifest, _ = _parse_opf(opf_xml)
+        href = manifest.get(item_id)
+        if not href:
+            raise KeyError(f"item_id {item_id!r} not in manifest")
+        opf_dir = "/".join(opf_path.split("/")[:-1])
+        full_path = f"{opf_dir}/{href}" if opf_dir else href
+        return z.read(full_path).decode("utf-8", errors="replace")
+
+
 def parse_epub(path: Path | str) -> Epub:
     """Open an EPUB file and parse its manifest + spine + content."""
     epub_path = Path(path)

@@ -16,6 +16,7 @@ members = [
     "packages/jw-mcp",
     "packages/jw-rag",
     "packages/jw-agents",
+    "packages/jw-finetune",
 ]
 
 [tool.uv.sources]
@@ -24,6 +25,7 @@ jw-cli = { workspace = true }
 jw-mcp = { workspace = true }
 jw-rag = { workspace = true }
 jw-agents = { workspace = true }
+jw-finetune = { workspace = true }
 
 [dependency-groups]
 dev = [
