@@ -297,3 +297,75 @@ async def test_live_requires_fetcher(tmp_path) -> None:
     v = CitationValidator(catalog=cat)
     with pytest.raises(ValueError):
         await v.validate_urls(["https://wol.jw.org/x"], mode="live")
+
+
+# ── Task 6: drift mode ─────────────────────────────────────────────────
+
+import hashlib
+
+
+@pytest.mark.asyncio
+async def test_drift_no_snapshot_is_warning(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+    snaps = tmp_path / "snaps"
+    snaps.mkdir()
+    url = "https://wol.jw.org/es/wol/d/r4/lp-s/1"
+    fetcher = _fake_fetcher_factory(
+        {url: FetcherResponse(final_url=url, status=200, body="<html>hi</html>")}
+    )
+    v = CitationValidator(catalog=cat, fetcher=fetcher, snapshots_root=snaps)
+    report = await v.validate_urls([url], mode="live+drift")
+    check = report.checks[0]
+    assert check.drift == "no_snapshot"
+    assert check.is_ok is True  # is_ok lenient — but summary counts as warning
+    assert report.summary["warning"] >= 1
+
+
+@pytest.mark.asyncio
+async def test_drift_ok_when_snapshot_present_and_resolves(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+    snaps = tmp_path / "snaps"
+    snaps.mkdir()
+    url = "https://wol.jw.org/es/wol/d/r4/lp-s/1"
+    digest = hashlib.sha256(url.encode()).hexdigest()
+    (snaps / f"{digest}.html").write_text("<html>known content</html>", encoding="utf-8")
+    fetcher = _fake_fetcher_factory(
+        {url: FetcherResponse(final_url=url, status=200, body="<html>known content</html>")}
+    )
+    v = CitationValidator(catalog=cat, fetcher=fetcher, snapshots_root=snaps)
+    report = await v.validate_urls([url], mode="live+drift")
+    assert report.checks[0].drift == "ok"
+
+
+@pytest.mark.asyncio
+async def test_drift_detected_when_shape_changes(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+    snaps = tmp_path / "snaps"
+    snaps.mkdir()
+    url = "https://wol.jw.org/es/wol/d/r4/lp-s/1"
+    digest = hashlib.sha256(url.encode()).hexdigest()
+    (snaps / f"{digest}.html").write_text(
+        "<html><body><p>old</p></body></html>", encoding="utf-8"
+    )
+    # Live body is structurally different (extra div changes the shape).
+    fetcher = _fake_fetcher_factory(
+        {
+            url: FetcherResponse(
+                final_url=url,
+                status=200,
+                body="<html><body><div><p>new</p><span>x</span></div></body></html>",
+            )
+        }
+    )
+    v = CitationValidator(catalog=cat, fetcher=fetcher, snapshots_root=snaps)
+    report = await v.validate_urls([url], mode="live+drift")
+    assert report.checks[0].drift == "drift"
+
+
+@pytest.mark.asyncio
+async def test_live_drift_requires_snapshots_root(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+    fetcher = _fake_fetcher_factory({})
+    v = CitationValidator(catalog=cat, fetcher=fetcher)
+    with pytest.raises(ValueError):
+        await v.validate_urls(["x"], mode="live+drift")

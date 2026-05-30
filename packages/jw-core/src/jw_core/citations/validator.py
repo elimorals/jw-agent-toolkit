@@ -174,11 +174,12 @@ class CitationValidator:
 
         await self._populate_catalog(check)
 
+        live_body: str | None = None
         if mode in {"live", "live+drift"}:
-            await self._populate_live(check)
+            live_body = await self._populate_live(check)
 
         if mode == "live+drift":
-            self._populate_drift(check)
+            self._populate_drift(check, live_body=live_body)
 
         return check
 
@@ -211,7 +212,7 @@ class CitationValidator:
             check.catalog = "ok"
             check.pub_code = check.pub_code or doc.pub_code
 
-    async def _populate_live(self, check: CitationCheck) -> None:
+    async def _populate_live(self, check: CitationCheck) -> str | None:
         assert self.fetcher is not None
         async with self._get_sem():
             try:
@@ -219,7 +220,7 @@ class CitationValidator:
             except Exception as exc:  # noqa: BLE001 — fetcher contract is wide
                 check.resolve = "network_error"
                 check.notes.append(f"fetch failed: {exc!r}")
-                return
+                return None
 
         check.http_status = resp.status
         check.resolved_url = resp.final_url
@@ -228,7 +229,7 @@ class CitationValidator:
         if len(resp.redirect_chain) > self.max_redirects:
             check.resolve = "redirect_loop"
             check.notes.append(f"redirect chain {len(resp.redirect_chain)} > {self.max_redirects}")
-            return
+            return resp.body or None
         if resp.status == 404:
             check.resolve = "not_found"
         elif resp.status == 410:
@@ -240,8 +241,9 @@ class CitationValidator:
         else:
             check.resolve = "network_error"
             check.notes.append(f"unexpected HTTP {resp.status}")
+        return resp.body or None
 
-    def _populate_drift(self, check: CitationCheck) -> None:
+    def _populate_drift(self, check: CitationCheck, *, live_body: str | None) -> None:
         if self.snapshots_root is None:
             check.drift = "skipped"
             return
@@ -252,16 +254,33 @@ class CitationValidator:
         if not snap.exists():
             check.drift = "no_snapshot"
             return
-        # We need the live body; if structural-only fetcher returned empty,
-        # treat as no_snapshot (we have nothing to compare to).
-        # The body has been stored on the check via _populate_live? — actually
-        # we discarded body. For drift comparison we re-derive from notes the
-        # fact that we DID fetch; the body comparison is left to a future
-        # iteration. For now we mark `ok` if snapshot exists AND resolve was
-        # ok / ok_redirect, else `drift`.
         check.snapshot_path = str(snap)
-        if check.resolve in {"ok", "ok_redirect"}:
+        if check.resolve not in {"ok", "ok_redirect"} or live_body is None:
+            check.drift = "drift"
+            check.notes.append("could not compare: live fetch was not 2xx")
+            return
+
+        snap_body = snap.read_text(encoding="utf-8")
+        # `_shape_hash` was built for JSON, so we project HTML through a tiny
+        # tree model: tag counts + nesting. Cheap and stable across the
+        # minor-content changes wol.jw.org makes routinely.
+        live_shape = _html_shape(live_body)
+        snap_shape = _html_shape(snap_body)
+        if live_shape == snap_shape:
             check.drift = "ok"
         else:
             check.drift = "drift"
-            check.notes.append(f"resolve={check.resolve!r} so live differs from snapshot")
+            check.notes.append(f"shape changed: {snap_shape[:32]}… → {live_shape[:32]}…")
+
+
+def _html_shape(html: str) -> str:
+    """Tiny HTML-structure hash. Counts opening tags; ignores whitespace + text.
+
+    Same skeleton ⇒ same hash. Adding/removing a tag changes the hash.
+    Robust to minor content edits, language changes, image swaps.
+    """
+    import hashlib
+
+    tags = re.findall(r"<\s*([a-zA-Z0-9]+)", html)
+    canon = ",".join(sorted(t.lower() for t in tags))
+    return f"html({len(tags)})[{hashlib.sha256(canon.encode()).hexdigest()[:16]}]"
