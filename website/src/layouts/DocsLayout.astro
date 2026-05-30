@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
+import { getLangFromUrl } from "../i18n/utils";
 
 interface Props {
   title: string;
@@ -9,6 +10,10 @@ interface Props {
 }
 
 const { title, description, section, sourcePath } = Astro.props;
+
+const lang = getLangFromUrl(Astro.url);
+const isEn = lang === "en";
+const prefix = isEn ? "/en" : "";
 ---
 
 <BaseLayout title={title} description={description}>
@@ -20,28 +25,28 @@ const { title, description, section, sourcePath } = Astro.props;
             <p
               class="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]"
             >
-              Navegación
+              {isEn ? "Navigation" : "Navegación"}
             </p>
             <ul class="space-y-1.5">
               <li>
                 <a
-                  href="/docs/architecture"
+                  href={`${prefix}/docs/architecture`}
                   class="text-[var(--color-ink-secondary)] hover:text-[var(--color-accent)] no-underline"
-                  >Arquitectura</a
+                  >{isEn ? "Architecture" : "Arquitectura"}</a
                 >
               </li>
               <li>
                 <a
-                  href="/docs/vision"
+                  href={`${prefix}/docs/vision`}
                   class="text-[var(--color-ink-secondary)] hover:text-[var(--color-accent)] no-underline"
-                  >Visión</a
+                  >{isEn ? "Vision" : "Visión"}</a
                 >
               </li>
               <li>
                 <a
-                  href="/docs/roadmap"
+                  href={`${prefix}/docs/roadmap`}
                   class="text-[var(--color-ink-secondary)] hover:text-[var(--color-accent)] no-underline"
-                  >Hoja de ruta</a
+                  >{isEn ? "Roadmap" : "Hoja de ruta"}</a
                 >
               </li>
             </ul>
@@ -50,28 +55,28 @@ const { title, description, section, sourcePath } = Astro.props;
             <p
               class="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]"
             >
-              Secciones
+              {isEn ? "Sections" : "Secciones"}
             </p>
             <ul class="space-y-1.5">
               <li>
                 <a
-                  href="/docs/conceptos"
+                  href={`${prefix}/docs#conceptos`}
                   class="text-[var(--color-ink-secondary)] hover:text-[var(--color-accent)] no-underline"
-                  >Conceptos</a
+                  >{isEn ? "Concepts" : "Conceptos"}</a
                 >
               </li>
               <li>
                 <a
-                  href="/docs/guias"
+                  href={`${prefix}/docs#guias`}
                   class="text-[var(--color-ink-secondary)] hover:text-[var(--color-accent)] no-underline"
-                  >Guías</a
+                  >{isEn ? "Guides" : "Guías"}</a
                 >
               </li>
               <li>
                 <a
-                  href="/docs/referencia"
+                  href={`${prefix}/docs#referencia`}
                   class="text-[var(--color-ink-secondary)] hover:text-[var(--color-accent)] no-underline"
-                  >Referencia</a
+                  >{isEn ? "Reference" : "Referencia"}</a
                 >
               </li>
             </ul>
@@ -94,7 +99,7 @@ const { title, description, section, sourcePath } = Astro.props;
         {
           sourcePath && (
             <p class="mt-16 border-t border-[var(--color-line-subtle)] pt-6 font-mono text-[11px] text-[var(--color-ink-tertiary)]">
-              Editar esta página en{" "}
+              {isEn ? "Edit this page on" : "Editar esta página en"}{" "}
               <a
                 href={`https://github.com/elimorals/jw-agent-toolkit/edit/main/docs/${sourcePath}.md`}
                 class="text-[var(--color-accent)] no-underline hover:text-[var(--color-accent-hover)]"

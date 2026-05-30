@@ -1,0 +1,145 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+const entries = await getCollection("docs");
+
+// Group entries by top-level directory (or "raíz" for files directly in /docs)
+type Group = { entries: typeof entries; label: string; description: string };
+const groupMeta: Record<string, { label: string; description: string }> = {
+  conceptos: {
+    label: "Concepts",
+    description:
+      "Glossary, design decisions, multi-language strategy, endpoints inventory and end-to-end flows.",
+  },
+  guias: {
+    label: "Guides",
+    description:
+      "Practical step-by-step recipes: resolving citations, RAG indexing, MCP connection, local fine-tuning, integrations.",
+  },
+  referencia: {
+    label: "Reference",
+    description:
+      "Exhaustive module-by-module documentation of each package: jw-core, jw-cli, jw-mcp, jw-rag, jw-agents.",
+  },
+  superpowers: {
+    label: "Specs & Plans",
+    description:
+      "Superpower specs, technical implementation plans, and research notes.",
+  },
+  __root__: {
+    label: "Manuals",
+    description:
+      "Architecture, long-term vision, and project roadmap.",
+  },
+};
+
+const groups: Record<string, Group> = {};
+for (const entry of entries) {
+  const parts = entry.id.split("/");
+  const key = parts.length > 1 ? parts[0]! : "__root__";
+  if (!groups[key]) {
+    groups[key] = { entries: [], ...groupMeta[key]! };
+  }
+  groups[key].entries.push(entry);
+}
+
+// Sort entries within each group by their id
+for (const key of Object.keys(groups)) {
+  groups[key]!.entries.sort((a, b) => a.id.localeCompare(b.id));
+}
+
+const orderedKeys = ["__root__", "guias", "conceptos", "referencia", "superpowers"];
+const titleFor = (id: string) => {
+  const last = id.split("/").pop() ?? id;
+  return last
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+};
+---
+
+<BaseLayout
+  title="Documentation"
+  description="All jw-agent-toolkit documentation: concepts, guides, exhaustive reference, specs and plans."
+>
+  <div class="mx-auto max-w-7xl px-4 pb-24 sm:px-6">
+    <header class="border-b border-[var(--color-line-subtle)] py-16 sm:py-24">
+      <p
+        class="mb-4 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]"
+      >
+        Documentation
+      </p>
+      <h1
+        class="max-w-3xl text-balance font-display text-[clamp(2.4rem,5vw,4.2rem)] leading-[1.02] text-[var(--color-ink-primary)]"
+      >
+        Everything you need to build
+        <span
+          class="italic text-[var(--color-accent)]"
+          style="font-variation-settings: 'opsz' 144, 'SOFT' 80;">agents</span
+        > over public content from jw.org.
+      </h1>
+      <p class="mt-6 max-w-2xl text-[16px] leading-relaxed text-[var(--color-ink-secondary)]">
+        This documentation is rendered directly from the repository's{" "}
+        <code class="font-mono text-[14px] text-[var(--color-accent)]">docs/**/*.md</code>{" "}
+        files. Four sections, {entries.length} documents.
+      </p>
+    </header>
+
+    <div class="grid gap-16 py-20">
+      {
+        orderedKeys
+          .filter((k) => groups[k])
+          .map((key) => {
+            const g = groups[key]!;
+            return (
+              <section id={key === "__root__" ? "manuales" : key} class="scroll-mt-24">
+                <div class="mb-8 flex flex-col gap-2 border-b border-[var(--color-line-subtle)] pb-5">
+                  <div class="flex items-baseline gap-4">
+                    <span class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+                      {String(orderedKeys.indexOf(key) + 1).padStart(2, "0")}
+                    </span>
+                    <h2 class="font-display text-[clamp(1.6rem,3vw,2.4rem)] leading-tight text-[var(--color-ink-primary)]">
+                      {g.label}
+                    </h2>
+                    <span class="ml-auto font-mono text-[12px] text-[var(--color-ink-tertiary)]">
+                      {g.entries.length} docs
+                    </span>
+                  </div>
+                  <p class="max-w-3xl text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+                    {g.description}
+                  </p>
+                </div>
+
+                <ul class="grid gap-px overflow-hidden rounded-[2px] border border-[var(--color-line-subtle)] bg-[var(--color-line-subtle)] sm:grid-cols-2">
+                  {g.entries.map((entry) => (
+                    <li class="bg-[var(--color-surface-1)]">
+                      <a
+                        href={`/en/docs/${entry.id}`}
+                        class="group flex items-start gap-4 px-5 py-4 transition-colors hover:bg-[var(--color-surface-2)] no-underline"
+                      >
+                        <span class="mt-1.5 size-1.5 shrink-0 rounded-full bg-[var(--color-accent-dim)] transition-colors group-hover:bg-[var(--color-accent)]" />
+                        <div class="min-w-0 flex-1">
+                          <p class="truncate font-mono text-[13px] text-[var(--color-ink-primary)] group-hover:text-[var(--color-accent-hover)]">
+                            {titleFor(entry.id)}
+                          </p>
+                          <p class="mt-0.5 truncate font-mono text-[10.5px] text-[var(--color-ink-tertiary)]">
+                            docs/{entry.id}.md
+                          </p>
+                        </div>
+                        <span
+                          class="mt-0.5 text-[var(--color-ink-tertiary)] transition-colors group-hover:text-[var(--color-accent)]"
+                          aria-hidden="true"
+                        >
+                          →
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            );
+          })
+      }
+    </div>
+  </div>
+</BaseLayout>

@@ -1,32 +1,39 @@
 ---
+import { getLangFromUrl } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const isEn = lang === 'en';
+
+const prefix = isEn ? '/en' : '';
+
 const cols = [
   {
-    title: "Proyecto",
+    title: isEn ? "Project" : "Proyecto",
     links: [
-      { href: "/paquetes", label: "Paquetes" },
-      { href: "/arquitectura", label: "Arquitectura" },
-      { href: "/vision", label: "Visión" },
+      { href: `${prefix}/paquetes`, label: isEn ? "Packages" : "Paquetes" },
+      { href: `${prefix}/arquitectura`, label: isEn ? "Architecture" : "Arquitectura" },
+      { href: `${prefix}/vision`, label: isEn ? "Vision" : "Visión" },
       {
         href: "https://github.com/elimorals/jw-agent-toolkit/blob/main/docs/ROADMAP.md",
-        label: "Hoja de ruta",
+        label: isEn ? "Roadmap" : "Hoja de ruta",
       },
     ],
   },
   {
-    title: "Documentación",
+    title: isEn ? "Documentation" : "Documentación",
     links: [
-      { href: "/docs#guias", label: "Guías" },
-      { href: "/docs#conceptos", label: "Conceptos" },
-      { href: "/docs#referencia", label: "Referencia" },
-      { href: "/docs#superpowers", label: "Specs y planes" },
+      { href: `${prefix}/docs#guias`, label: isEn ? "Guides" : "Guías" },
+      { href: `${prefix}/docs#conceptos`, label: isEn ? "Concepts" : "Conceptos" },
+      { href: `${prefix}/docs#referencia`, label: isEn ? "Reference" : "Referencia" },
+      { href: `${prefix}/docs#superpowers`, label: isEn ? "Specs and plans" : "Specs y planes" },
     ],
   },
   {
-    title: "Comunidad",
+    title: isEn ? "Community" : "Comunidad",
     links: [
       {
         href: "https://github.com/elimorals/jw-agent-toolkit",
-        label: "Código fuente",
+        label: isEn ? "Source Code" : "Código fuente",
       },
       {
         href: "https://github.com/elimorals/jw-agent-toolkit/issues",
@@ -34,11 +41,11 @@ const cols = [
       },
       {
         href: "https://github.com/elimorals/jw-agent-toolkit/discussions",
-        label: "Discusiones",
+        label: isEn ? "Discussions" : "Discusiones",
       },
       {
         href: "https://github.com/elimorals/jw-agent-toolkit/blob/main/LICENSE",
-        label: "Licencia GPL-3.0",
+        label: isEn ? "GPL-3.0 License" : "Licencia GPL-3.0",
       },
     ],
   },
@@ -63,20 +70,21 @@ const cols = [
           </span>
         </div>
         <p class="max-w-sm text-sm leading-relaxed text-[var(--color-ink-tertiary)]">
-          Toolkit técnico de código abierto para acceso programático a contenido
-          público de jw.org y wol.jw.org. Diseñado para construir agentes,
-          servidores MCP y pipelines RAG sobre material bíblico y publicaciones
-          de los Testigos de Jehová.
+          {isEn
+            ? "Open source technical toolkit for programmatic access to public content from jw.org and wol.jw.org. Designed for building agents, MCP servers, and RAG pipelines over biblical material and publications of Jehovah's Witnesses."
+            : "Toolkit técnico de código abierto para acceso programático a contenido público de jw.org y wol.jw.org. Diseñado para construir agentes, servidores MCP y pipelines RAG sobre material bíblico y publicaciones de los Testigos de Jehová."
+          }
         </p>
         <p
           class="max-w-sm rounded-[2px] border-l-2 border-[var(--color-warm)] bg-[var(--color-warm-dim)]/10 px-3 py-2 text-xs leading-relaxed text-[var(--color-ink-tertiary)]"
         >
           <strong class="font-medium text-[var(--color-warm)]">
-            Proyecto independiente.
+            {isEn ? "Independent project." : "Proyecto independiente."}
           </strong>{" "}
-          No está afiliado, patrocinado ni avalado por la Watch Tower Bible and
-          Tract Society o Jehovah&#39;s Witnesses. Todas las marcas son
-          propiedad de sus respectivos dueños.
+          {isEn 
+            ? "Not affiliated with, sponsored by, or endorsed by the Watch Tower Bible and Tract Society or Jehovah's Witnesses. All trademarks are the property of their respective owners."
+            : "No está afiliado, patrocinado ni avalado por la Watch Tower Bible and Tract Society o Jehovah's Witnesses. Todas las marcas son propiedad de sus respectivos dueños."
+          }
         </p>
       </div>
 
@@ -107,10 +115,10 @@ const cols = [
       class="mt-16 flex flex-col items-start justify-between gap-4 border-t border-[var(--color-line-subtle)] pt-8 text-xs text-[var(--color-ink-tertiary)] sm:flex-row sm:items-center"
     >
       <p class="font-mono">
-        © 2026 contribuidores de jw-agent-toolkit · GPL-3.0-only
+        © 2026 {isEn ? "jw-agent-toolkit contributors" : "contribuidores de jw-agent-toolkit"} · GPL-3.0-only
       </p>
       <p class="font-mono">
-        Construido con Astro · Hospedado en GitHub
+        {isEn ? "Built with Astro · Hosted on GitHub" : "Construido con Astro · Hospedado en GitHub"}
       </p>
     </div>
   </div>

@@ -1,0 +1,21 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+
+const pathname = Astro.url.pathname;
+const currentLocale = Astro.currentLocale || "es";
+const targetLocale = currentLocale === "es" ? "en" : "es";
+
+// Remove the current locale prefix if any, so we can generate the relative url properly
+const pathWithoutLocale = currentLocale === "en" ? pathname.replace(/^\/en/, "") || "/" : pathname;
+
+// Generate the URL for the other locale
+const targetUrl = getRelativeLocaleUrl(targetLocale, pathWithoutLocale);
+---
+
+<a
+  href={targetUrl}
+  class="inline-flex items-center justify-center rounded-sm border border-[var(--color-line)] px-2 py-1 text-[11px] font-mono font-medium text-[var(--color-ink-secondary)] transition hover:border-[var(--color-line-strong)] hover:text-[var(--color-ink-primary)] no-underline"
+  aria-label={`Cambiar idioma a ${targetLocale.toUpperCase()}`}
+>
+  {targetLocale.toUpperCase()}
+</a>

@@ -1,19 +1,25 @@
 ---
 import Search from "./Search.astro";
+import LanguageSelector from "./LanguageSelector.astro";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
 
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 const path = Astro.url.pathname;
+
 const nav = [
-  { href: "/", label: "Inicio", match: "/" },
-  { href: "/#paquetes", label: "Paquetes", match: "/#paquetes" },
-  { href: "/#arquitectura", label: "Arquitectura", match: "/#arquitectura" },
-  { href: "/docs", label: "Documentación", match: "/docs" },
-  { href: "/docs/vision", label: "Visión", match: "/docs/vision" },
+  { href: lang === 'es' ? "/" : "/en", label: t("nav.home"), match: lang === 'es' ? "/" : "/en" },
+  { href: lang === 'es' ? "/#paquetes" : "/en/#paquetes", label: t("nav.packages"), match: "/#paquetes" },
+  { href: lang === 'es' ? "/#arquitectura" : "/en/#arquitectura", label: t("nav.architecture"), match: "/#arquitectura" },
+  { href: lang === 'es' ? "/docs" : "/en/docs", label: t("nav.docs"), match: "/docs" },
+  { href: lang === 'es' ? "/docs/vision" : "/en/docs/vision", label: t("nav.vision"), match: "/docs/vision" },
 ];
 
 const isActive = (href: string) => {
-  if (href === "/") return path === "/";
-  if (href.startsWith("/docs")) return path.startsWith("/docs");
-  return false;
+  const normalizedPath = path.replace(/\/$/, "");
+  const normalizedHref = href.replace(/\/$/, "");
+  if (normalizedHref === "" || normalizedHref === "/en") return normalizedPath === "" || normalizedPath === "/en";
+  return path.includes(normalizedHref.split('#')[0]);
 };
 ---
 
@@ -67,6 +73,7 @@ const isActive = (href: string) => {
     </nav>
 
     <div class="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 md:ml-0">
+      <LanguageSelector />
       <Search />
       <a
         href="https://github.com/elimorals/jw-agent-toolkit"

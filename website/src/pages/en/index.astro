@@ -1,0 +1,563 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PackageCard from "../../components/PackageCard.astro";
+import RecommendedCard from "../../components/RecommendedCard.astro";
+import { packages as packageData } from "../../data/packages";
+
+const packages = packageData.map((p) => ({
+  name: p.name,
+  tagline: p.tagline,
+  description: p.short,
+  highlights: p.highlights.slice(0, 3),
+  href: `/paquetes/${p.slug}`,
+}));
+
+const recommended = [
+  {
+    eyebrow: "Guide · Start",
+    title: "Resolve any biblical citation in 4 lines of Python",
+    description:
+      "From the string 'John 3:16' to a canonical wol.jw.org URL in any supported language. No LLM, no network in tests, 100% verifiable.",
+    href: "/en/docs/guias/resolver-citas-biblicas",
+    accent: "cyan" as const,
+  },
+  {
+    eyebrow: "Concept · Architecture",
+    title: "Why there is no LLM on the critical path",
+    description:
+      "Deterministic parsers, always verifiable citations, decoupled layers. AI synthesis is optional and lives in Claude Desktop, not in the toolkit.",
+    href: "/en/arquitectura",
+    accent: "neutral" as const,
+  },
+  {
+    eyebrow: "Guide · Advanced",
+    title: "Train your own local model with your publications",
+    description:
+      "Complete 5-phase pipeline: JWPUB extraction → dedup → synthetic Q&A → LoRA → GGUF export. Unsloth stack on local GPU, sending nothing to the cloud.",
+    href: "/en/docs/guias/fine-tuning-local",
+    accent: "warm" as const,
+  },
+];
+
+const stats = [
+  { value: "6", label: "Python Packages", suffix: "" },
+  { value: "551", label: "Tests passing", suffix: "+" },
+  { value: "40", label: "MCP Tools", suffix: "+" },
+  { value: "17", label: "Supported locales", suffix: "" },
+];
+---
+
+<BaseLayout>
+  <!-- ───────────────────────────── Hero ───────────────────────────── -->
+
+  <section class="grid-noise relative overflow-hidden">
+    <div
+      class="mx-auto max-w-7xl px-4 pb-20 pt-20 sm:px-6 sm:pb-28 sm:pt-28 lg:pb-32 lg:pt-32"
+    >
+      <div class="grid items-end gap-12 lg:grid-cols-[1.2fr_1fr]">
+        <div class="space-y-7">
+          <p
+            class="rise rise-1 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]"
+          >
+            <span class="h-px w-8 bg-[var(--color-accent)]"></span>
+            Agentic Toolkit · Open source · Python 3.13+
+          </p>
+
+          <h1
+            id="hero-headline"
+            class="rise rise-2 max-w-3xl text-balance font-display text-[clamp(1.85rem,7vw,4.6rem)] leading-[1.02] sm:leading-[0.98]"
+            data-typewriter
+          >
+            <span class="text-[var(--color-ink-primary)]" data-tw>A technical</span>
+            <span
+              class="italic text-[var(--color-accent)]"
+              style="font-variation-settings: 'opsz' 144, 'SOFT' 80;"
+              data-tw>library</span
+            >
+            <span class="text-[var(--color-ink-primary)]" data-tw> for the public content of</span>
+            <span class="font-mono text-[0.7em] text-[var(--color-ink-secondary)]" data-tw
+              >jw.org</span
+            >
+            <span class="cursor"></span>
+          </h1>
+
+          <p
+            class="rise rise-3 max-w-2xl text-[17px] leading-relaxed text-[var(--color-ink-secondary)]"
+          >
+            A Python monorepo with HTTP clients, deterministic parsers,
+            MCP server, hybrid RAG, procedural agents, and local fine-tuning.
+            Built so any developer can{" "}
+            <em class="text-[var(--color-ink-primary)]">
+              talk with biblical content
+            </em>{" "}
+            without duct-taping HTML.
+          </p>
+
+          <div
+            class="rise rise-4 flex flex-wrap items-center gap-3 pt-2"
+          >
+            <a
+              href="/en/docs/guias/resolver-citas-biblicas"
+              class="group inline-flex items-center gap-2 rounded-[2px] bg-[var(--color-accent)] px-5 py-3 font-mono text-[13px] font-medium text-[var(--color-surface-base)] transition hover:bg-[var(--color-accent-hover)] no-underline"
+            >
+              Start in 4 lines
+              <svg
+                viewBox="0 0 24 24"
+                class="size-3.5 transition-transform group-hover:translate-x-0.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 12h14M13 5l7 7-7 7" />
+              </svg>
+            </a>
+            <a
+              href="/en/arquitectura"
+              class="inline-flex items-center gap-2 rounded-[2px] border border-[var(--color-line)] px-5 py-3 font-mono text-[13px] text-[var(--color-ink-secondary)] transition hover:border-[var(--color-line-strong)] hover:text-[var(--color-ink-primary)] no-underline"
+            >
+              View architecture
+            </a>
+            <a
+              href="https://github.com/elimorals/jw-agent-toolkit"
+              class="inline-flex items-center gap-1.5 rounded-[2px] px-3 py-3 font-mono text-[13px] text-[var(--color-ink-tertiary)] transition hover:text-[var(--color-ink-primary)] no-underline"
+            >
+              ⌘ git clone
+            </a>
+          </div>
+        </div>
+
+        <!-- Terminal preview -->
+        <div class="rise rise-5">
+          <div
+            class="overflow-hidden rounded-[2px] border border-[var(--color-line)] bg-[var(--color-surface-1)] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)]"
+          >
+            <div
+              class="flex items-center gap-2 border-b border-[var(--color-line-subtle)] bg-[var(--color-surface-2)] px-3 py-2"
+            >
+              <span class="size-2.5 rounded-full bg-[var(--color-danger)]/70"></span>
+              <span class="size-2.5 rounded-full bg-[var(--color-warm)]/70"></span>
+              <span class="size-2.5 rounded-full bg-[var(--color-success)]/70"></span>
+              <span
+                class="ml-2 font-mono text-[11px] text-[var(--color-ink-tertiary)]"
+              >
+                python — jw-core
+              </span>
+            </div>
+            <pre
+              class="overflow-x-auto p-5 font-mono text-[12.5px] leading-[1.7]"><code><span class="text-[var(--color-ink-tertiary)]">{'>>>'}</span> <span class="text-[var(--color-ink-secondary)]">from</span> <span class="text-[var(--color-accent)]">jw_core</span> <span class="text-[var(--color-ink-secondary)]">import</span> parse_reference
+<span class="text-[var(--color-ink-tertiary)]">{'>>>'}</span> ref = parse_reference(<span class="text-[var(--color-warm)]">"Juan 3:16"</span>)
+<span class="text-[var(--color-ink-tertiary)]">{'>>>'}</span> ref.display()
+<span class="text-[var(--color-success)]">'John 3:16'</span>
+<span class="text-[var(--color-ink-tertiary)]">{'>>>'}</span> ref.wol_url(lang=<span class="text-[var(--color-warm)]">"es"</span>)
+<span class="text-[var(--color-success)]">'https://wol.jw.org/es/wol/b/r4/lp-s/nwt/43/3#study=discover&v=43:3:16'</span>
+<span class="text-[var(--color-ink-tertiary)]">{'>>>'}</span> ref.book.code, ref.chapter, ref.verses
+(<span class="text-[var(--color-warm)]">'JHN'</span>, <span class="text-[var(--color-accent)]">3</span>, [<span class="text-[var(--color-accent)]">16</span>])
+
+<span class="text-[var(--color-ink-tertiary)]"># Determinístico. Sin LLM. Sin red (cassetes pytest).</span>
+<span class="text-[var(--color-ink-tertiary)]"># Cita verificable en wol.jw.org · 7 idiomas tier-1.</span>
+</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────── Stats strip ─────────────────────────── -->
+
+  <section class="border-y border-[var(--color-line-subtle)] bg-[var(--color-surface-1)]/40">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+      <dl class="grid grid-cols-2 divide-x divide-[var(--color-line-subtle)] sm:grid-cols-4">
+        {
+          stats.map((s) => (
+            <div class="flex flex-col items-start gap-1 py-8 pl-6 first:pl-0 sm:pl-8">
+              <dt class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">
+                {s.label}
+              </dt>
+              <dd class="tabular flex items-baseline gap-1 font-display text-[44px] leading-none text-[var(--color-ink-primary)]">
+                {s.value}
+                <span class="text-[20px] text-[var(--color-accent)]">{s.suffix}</span>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- ──────────────────────── Recomendados (jw.org style) ───────────────── -->
+
+  <section id="recomendados" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
+    <div class="mb-8 flex items-end justify-between gap-4">
+      <div>
+        <p
+          class="mb-2 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]"
+        >
+          Recommended
+        </p>
+        <h2 class="text-balance font-display text-[clamp(1.8rem,3.5vw,2.8rem)] leading-tight text-[var(--color-ink-primary)]">
+          Three ways to start
+        </h2>
+      </div>
+      <a
+        href="/en/docs/guias"
+        class="hidden shrink-0 font-mono text-[13px] text-[var(--color-ink-secondary)] hover:text-[var(--color-accent)] sm:inline-flex no-underline"
+      >
+        View all guides →
+      </a>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-3" data-reveal-group>
+      {recommended.map((r) => <RecommendedCard {...r} />)}
+    </div>
+  </section>
+
+  <!-- ───────────────────────────── Packages grid ──────────────────────── -->
+
+  <section id="paquetes" class="scroll-mt-20 border-t border-[var(--color-line-subtle)] bg-[var(--color-surface-1)]/30">
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
+      <div class="mb-12 grid gap-8 md:grid-cols-[1fr_auto]">
+        <div class="max-w-2xl space-y-4">
+          <p
+            class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]"
+          >
+            Monorepo · uv workspace
+          </p>
+          <h2
+            class="text-balance font-display text-[clamp(1.8rem,3.5vw,2.8rem)] leading-tight text-[var(--color-ink-primary)]"
+          >
+            Six packages, a single dependency: <span
+              class="italic text-[var(--color-accent)]"
+              style="font-variation-settings: 'opsz' 96, 'SOFT' 60;"
+              >jw-core</span
+            >.
+          </h2>
+          <p class="text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">
+            Dependencies flow downwards: every package depends on{" "}
+            <code class="font-mono">jw-core</code>, nothing else. This allows using
+            the CLI, MCP, RAG or agents independently or composed.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3" data-reveal-group>
+        {
+          packages.map((p, i) => (
+            <PackageCard {...p} index={i + 1} />
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────── Architecture preview ──────────────────── -->
+
+  <section id="arquitectura" class="scroll-mt-20 mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
+    <div class="grid gap-10 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
+      <div class="space-y-5">
+        <p
+          class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]"
+        >
+          Architecture
+        </p>
+        <h2 class="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] leading-tight text-[var(--color-ink-primary)]">
+          Strict layers. <br />
+          <span
+            class="italic text-[var(--color-ink-secondary)]"
+            style="font-variation-settings: 'opsz' 96, 'SOFT' 50;"
+            >Verifiable citations.</span
+          >
+        </h2>
+        <ul class="space-y-3 text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">
+          <li class="flex gap-3">
+            <span
+              class="mt-2 inline-block size-1.5 shrink-0 rounded-full bg-[var(--color-accent)]"
+            ></span>
+            <span>
+              <strong class="text-[var(--color-ink-primary)]">jw-core</strong>{" "}
+              imports nothing from the workspace — it is the clean foundation.
+            </span>
+          </li>
+          <li class="flex gap-3">
+            <span
+              class="mt-2 inline-block size-1.5 shrink-0 rounded-full bg-[var(--color-accent)]"
+            ></span>
+            <span>
+              <strong class="text-[var(--color-ink-primary)]">jw-mcp</strong>{" "}
+              is the only coupling point that binds the global RAG.
+            </span>
+          </li>
+          <li class="flex gap-3">
+            <span
+              class="mt-2 inline-block size-1.5 shrink-0 rounded-full bg-[var(--color-accent)]"
+            ></span>
+            <span>
+              Every response from any agent includes a{" "}
+              <strong class="text-[var(--color-ink-primary)]">canonical URL to wol.jw.org</strong>.
+            </span>
+          </li>
+          <li class="flex gap-3">
+            <span
+              class="mt-2 inline-block size-1.5 shrink-0 rounded-full bg-[var(--color-accent)]"
+            ></span>
+            <span>
+              Parsers are deterministic. AI synthesis happens{" "}
+              <strong class="text-[var(--color-ink-primary)]">outside</strong>{" "}
+              the toolkit.
+            </span>
+          </li>
+        </ul>
+        <div class="pt-2">
+          <a
+            href="/en/arquitectura"
+            class="inline-flex items-center gap-2 font-mono text-[13px] text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] no-underline"
+          >
+            Read the architecture manual
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+
+      <div
+        class="overflow-hidden rounded-[2px] border border-[var(--color-line)] bg-[var(--color-surface-1)] p-5 sm:p-7"
+      >
+        <pre
+          class="overflow-x-auto font-mono text-[11px] leading-[1.55] text-[var(--color-ink-secondary)] sm:text-[12px]"><code><span class="text-[var(--color-ink-tertiary)]">┌──────────────────────────────────────────────────────────────┐</span>
+<span class="text-[var(--color-ink-tertiary)]">│</span>  <span class="text-[var(--color-accent)]">Skills (Markdown)</span>      <span class="text-[var(--color-accent)]">Agentes</span> (orquestación)         <span class="text-[var(--color-ink-tertiary)]">│</span>
+<span class="text-[var(--color-ink-tertiary)]">│</span>  skills/jw-*/SKILL.md   packages/jw-agents/             <span class="text-[var(--color-ink-tertiary)]">│</span>
+<span class="text-[var(--color-ink-tertiary)]">└──────────────────────────────┬───────────────────────────────┘</span>
+                               <span class="text-[var(--color-ink-tertiary)]">│</span>
+<span class="text-[var(--color-ink-tertiary)]">┌──────────────────────────────▼───────────────────────────────┐</span>
+<span class="text-[var(--color-ink-tertiary)]">│</span>  <span class="text-[var(--color-warm)]">Superficies</span>                                              <span class="text-[var(--color-ink-tertiary)]">│</span>
+<span class="text-[var(--color-ink-tertiary)]">│</span>  • <span class="text-[var(--color-ink-primary)]">CLI</span>          packages/jw-cli/   (Typer + Rich)      <span class="text-[var(--color-ink-tertiary)]">│</span>
+<span class="text-[var(--color-ink-tertiary)]">│</span>  • <span class="text-[var(--color-ink-primary)]">Servidor MCP</span> packages/jw-mcp/   (FastMCP)            <span class="text-[var(--color-ink-tertiary)]">│</span>
+<span class="text-[var(--color-ink-tertiary)]">│</span>  • <span class="text-[var(--color-ink-primary)]">RAG</span>          packages/jw-rag/   (BM25 + vec + RRF)   <span class="text-[var(--color-ink-tertiary)]">│</span>
+<span class="text-[var(--color-ink-tertiary)]">└──────────────────────────────┬───────────────────────────────┘</span>
+                               <span class="text-[var(--color-ink-tertiary)]">│</span>
+<span class="text-[var(--color-ink-tertiary)]">┌──────────────────────────────▼───────────────────────────────┐</span>
+<span class="text-[var(--color-ink-tertiary)]">│</span>  <span class="text-[var(--color-success)]">jw-core</span>                                                   <span class="text-[var(--color-ink-tertiary)]">│</span>
+<span class="text-[var(--color-ink-tertiary)]">│</span>  ├─ clients/    cdn · mediator · wol · pub-media · ...   <span class="text-[var(--color-ink-tertiary)]">│</span>
+<span class="text-[var(--color-ink-tertiary)]">│</span>  ├─ parsers/    reference · article · daily-text · ...   <span class="text-[var(--color-ink-tertiary)]">│</span>
+<span class="text-[var(--color-ink-tertiary)]">│</span>  ├─ integrations/ jw-library · obsidian · meps           <span class="text-[var(--color-ink-tertiary)]">│</span>
+<span class="text-[var(--color-ink-tertiary)]">│</span>  ├─ cache · throttle · telemetry · auth · models         <span class="text-[var(--color-ink-tertiary)]">│</span>
+<span class="text-[var(--color-ink-tertiary)]">└──────────────────────────────┬───────────────────────────────┘</span>
+                               <span class="text-[var(--color-ink-tertiary)]">│</span>
+              <span class="text-[var(--color-accent-dim)]">jw.org · wol.jw.org · b.jw-cdn.org · data.jw-api.org</span>
+</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────── Vision teaser ───────────────────────── -->
+
+  <section id="vision" class="scroll-mt-20 border-t border-[var(--color-line-subtle)] bg-[var(--color-surface-1)]/30">
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
+      <div class="grid gap-12 md:grid-cols-[1fr_2fr]">
+        <div>
+          <p
+            class="mb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]"
+          >
+            Long-term vision
+          </p>
+          <h2 class="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] leading-tight text-[var(--color-ink-primary)]">
+            Towards a complete local AI ecosystem.
+          </h2>
+          <p class="mt-4 text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">
+            Phases 0-21 already delivered the fundamentals. Next are 13
+            categories of gaps: weekly meeting, ministry, audio, multimodal,
+            languages, local-first privacy, E2E sync.
+          </p>
+          <a
+            href="/en/vision"
+            class="mt-6 inline-flex items-center gap-2 font-mono text-[13px] text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] no-underline"
+          >
+            Read the full vision
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3" data-reveal-group>
+          {
+            [
+              "Weekly meeting",
+              "Ministry",
+              "Audio · TTS",
+              "Multimodal · OCR",
+              "Languages · ASL",
+              "Apologetics",
+              "Infrastructure Op",
+              "Local privacy",
+              "Memory · profile",
+              "Family · kids",
+              "Calendar",
+              "Accessibility",
+              "Personalization",
+            ].map((cat, i) => (
+              <div
+                class="rounded-[2px] border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-3"
+              >
+                <span class="font-mono text-[10px] text-[var(--color-ink-tertiary)]">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <p class="mt-1 text-[13px] font-medium text-[var(--color-ink-primary)]">
+                  {cat}
+                </p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────────────────────── Final CTA ─────────────────────────── -->
+
+  <section class="mx-auto max-w-5xl px-4 py-24 sm:px-6 sm:py-32">
+    <div class="space-y-8 text-center">
+      <p
+        class="font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--color-ink-tertiary)]"
+      >
+        Open source · GPL-3.0
+      </p>
+      <h2 class="text-balance font-display text-[clamp(2rem,5vw,3.6rem)] leading-[1.05] text-[var(--color-ink-primary)]">
+        If you build something with AI and public content from jw.org,
+        <span
+          class="italic text-[var(--color-accent)]"
+          style="font-variation-settings: 'opsz' 144, 'SOFT' 80;"
+          >this is your starting point.</span
+        >
+      </h2>
+      <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+        <a
+          href="https://github.com/elimorals/jw-agent-toolkit"
+          class="inline-flex items-center gap-2 rounded-[2px] bg-[var(--color-ink-primary)] px-6 py-3.5 font-mono text-[13px] font-medium text-[var(--color-surface-base)] transition hover:bg-[var(--color-accent-hover)] no-underline"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            class="size-4"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-1.94c-3.2.7-3.88-1.54-3.88-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.05 11.05 0 0 1 5.78 0c2.21-1.49 3.18-1.18 3.18-1.18.62 1.59.23 2.76.11 3.05.74.81 1.18 1.84 1.18 3.1 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .3.21.66.8.55C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5Z"
+            ></path>
+          </svg>
+          View source code
+        </a>
+        <a
+          href="/en/docs/guias"
+          class="inline-flex items-center gap-2 rounded-[2px] border border-[var(--color-line-strong)] px-6 py-3.5 font-mono text-[13px] text-[var(--color-ink-primary)] transition hover:bg-[var(--color-surface-1)] no-underline"
+        >
+          Read the guides
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  /* ─────────────────────────────────────────────────────────────────────
+     Typewriter — types the hero headline character by character across
+     multiple styled spans. Preserves their individual styling (italic,
+     mono, color) because we modify textContent, not innerHTML.
+     Respects prefers-reduced-motion. Falls back to plain text if JS
+     fails to load (the spans ship with their real content in the HTML).
+     ───────────────────────────────────────────────────────────────────── */
+  (function () {
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const headline = document.getElementById("hero-headline");
+    if (!headline || reduced) return;
+
+    const spans = Array.from(
+      headline.querySelectorAll<HTMLSpanElement>("[data-tw]"),
+    );
+    if (spans.length === 0) return;
+
+    // Snapshot original text per span, then clear.
+    const texts = spans.map((s) => s.textContent ?? "");
+    spans.forEach((s) => (s.textContent = ""));
+
+    let seg = 0;
+    let pos = 0;
+    const minDelay = 28;
+    const jitter = 24;
+    const segPause = 90;
+
+    const tick = () => {
+      if (seg >= spans.length) {
+        // Done — keep cursor blinking via CSS, no further action.
+        headline.dataset.typewriterDone = "true";
+        return;
+      }
+      const target = texts[seg];
+      pos++;
+      spans[seg].textContent = target.slice(0, pos);
+      if (pos >= target.length) {
+        seg++;
+        pos = 0;
+        window.setTimeout(tick, segPause);
+      } else {
+        // Slight pause on punctuation; faster on spaces.
+        const ch = target[pos - 1];
+        const extra =
+          ch === " " ? -10 : ch === "." || ch === "," ? 120 : Math.random() * jitter;
+        window.setTimeout(tick, minDelay + extra);
+      }
+    };
+
+    // Start after rise-2 has finished fading in the empty h1 (~700ms).
+    window.setTimeout(tick, 700);
+  })();
+
+  /* ─────────────────────────────────────────────────────────────────────
+     Scroll reveal — Intersection Observer adds `in-view` to direct
+     children of [data-reveal-group] when their group enters the
+     viewport, with a staggered delay per child.
+     ───────────────────────────────────────────────────────────────────── */
+  (function () {
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const groups = document.querySelectorAll<HTMLElement>(
+      "[data-reveal-group]",
+    );
+    if (groups.length === 0) return;
+
+    if (reduced) {
+      groups.forEach((g) =>
+        Array.from(g.children).forEach((c) =>
+          c.classList.add("in-view"),
+        ),
+      );
+      return;
+    }
+
+    // Pre-mark children with .reveal so CSS hides them.
+    groups.forEach((g) => {
+      Array.from(g.children).forEach((c, i) => {
+        const el = c as HTMLElement;
+        el.classList.add("reveal");
+        el.style.setProperty("--reveal-delay", `${i * 90}ms`);
+      });
+    });
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const group = entry.target as HTMLElement;
+            Array.from(group.children).forEach((c) =>
+              c.classList.add("in-view"),
+            );
+            io.unobserve(group);
+          }
+        }
+      },
+      { threshold: 0.18, rootMargin: "0px 0px -8% 0px" },
+    );
+    groups.forEach((g) => io.observe(g));
+  })();
+</script>

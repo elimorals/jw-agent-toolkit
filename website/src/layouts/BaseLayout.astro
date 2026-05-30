@@ -43,10 +43,13 @@ function deriveOgKey(pathname: string): string {
 
 const ogKey = ogImageKey ?? deriveOgKey(Astro.url.pathname);
 const ogImageUrl = new URL(`/og/${ogKey}.png`, Astro.site ?? Astro.url).href;
+
+import { getLangFromUrl } from "../i18n/utils";
+const lang = getLangFromUrl(Astro.url);
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

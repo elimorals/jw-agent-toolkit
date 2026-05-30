@@ -1,0 +1,38 @@
+---
+import { getCollection, render } from "astro:content";
+import DocsLayout from "../../../layouts/DocsLayout.astro";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("docs");
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+
+// Extract the first H1 from the markdown body as fallback title
+const firstHeading = headings.find((h) => h.depth === 1)?.text;
+const title = entry.data.title ?? firstHeading ?? entry.id;
+
+// Derive section label from top-level directory
+const sectionMap: Record<string, string> = {
+  conceptos: "Concept",
+  guias: "Guide",
+  referencia: "Reference",
+  superpowers: "Specs & Plans",
+};
+const topDir = entry.id.split("/")[0];
+const section = sectionMap[topDir];
+---
+
+<DocsLayout
+  title={title}
+  description={entry.data.description}
+  section={section}
+  sourcePath={entry.id}
+>
+  <Content />
+</DocsLayout>

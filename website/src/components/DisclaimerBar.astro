@@ -2,6 +2,10 @@
 // Persistent disclaimer. By design it is the very first thing on the page,
 // not buried in a footer modal — that's how we honor the "no es oficial"
 // commitment without making the rest of the UI apologetic.
+import { getLangFromUrl } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const isEn = lang === 'en';
 ---
 
 <div
@@ -29,11 +33,12 @@
           d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
         />
       </svg>
-      Proyecto independiente
+      {isEn ? "Independent Project" : "Proyecto independiente"}
     </span>
     <span class="font-body">
-      No afiliado, patrocinado ni avalado por la Watch Tower Bible and Tract
-      Society o Jehovah&#39;s Witnesses.
+      {isEn 
+        ? "Not affiliated with, sponsored by, or endorsed by the Watch Tower Bible and Tract Society or Jehovah's Witnesses."
+        : "No afiliado, patrocinado ni avalado por la Watch Tower Bible and Tract Society o Jehovah's Witnesses."}
     </span>
   </div>
 </div>
