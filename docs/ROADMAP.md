@@ -438,3 +438,18 @@ llamante sintetiza la prosa.
 - ✅ 2 tests en `packages/jw-cli/tests/test_citations_cli.py`.
 - ✅ Smoke en `packages/jw-agents/tests/test_agents_e2e.py`.
 - ✅ Suite global sin regresiones.
+
+---
+
+## Fase 24 — `study_conductor` + `StudentProgress` (Tier 2) ✅
+
+**Entregado**: agente procedural `study_conductor.prepare_lesson` (no LLM),
+store local cifrable `StudentProgressStore`, comandos `jw study {lesson,
+log, progress, lessons, goals, directory}`, 4 tools MCP, golden cases L1+L3
+en `jw-eval`, guía `docs/guias/conductor-de-estudio.md`.
+
+**Cubre**: VISION.md item #1 («Conductor de Disfruta de la vida para
+siempre»).
+
+**No cubre** (post-fase): recordatorios temporales (Fase 25-adjacent),
+gráficas (export JSON ya lo habilita externamente), modo familia.

@@ -106,6 +106,11 @@ _EXPECTED_TOOLS = {
     "export_jw_library_backup_to_vault",
     # Phase 23 — Citation integrity validator
     "validate_citations",
+    # Phase 24 — Study conductor + student progress
+    "prepare_lesson",
+    "log_student_progress",
+    "list_student_lessons",
+    "set_student_goal",
 }
 
 
