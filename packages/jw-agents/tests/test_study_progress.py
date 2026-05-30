@@ -152,3 +152,33 @@ def test_store_list_for_student(tmp_path: Path) -> None:
         ))
     rows = store.list_for_student("demo_user")
     assert [r.lesson for r in rows] == [1, 2, 3]
+
+
+# --- Task 7: crisis scanner integration + set_goal helper ----------------
+
+from jw_agents.study_progress import scan_lesson_for_crisis, set_goal_for_student
+
+
+def test_scan_lesson_for_crisis_hits() -> None:
+    row = LessonRow(
+        student_id="demo_user", book_pub="lff", lesson=1,
+        notes="Mencionó suicidio en la última visita",
+        updated_at_iso="2026-05-30T00:00:00",
+    )
+    hits = scan_lesson_for_crisis(row, language="es")
+    assert "suicidio" in hits
+
+
+def test_set_goal_for_student_appends(tmp_path: Path) -> None:
+    store = StudentProgressStore(db_path=tmp_path / "p.db")
+    row = LessonRow(
+        student_id="demo_user", book_pub="lff", lesson=1,
+        updated_at_iso="2026-05-30T00:00:00",
+    )
+    store.upsert(row)
+    updated = set_goal_for_student(
+        store, "demo_user", "lff", 1,
+        kind=GoalKind.BAPTISM, target_iso="2026-12-31T00:00:00",
+    )
+    assert any(g.kind == GoalKind.BAPTISM for g in updated.goals)
+    assert updated.baptism_target_iso == "2026-12-31T00:00:00"

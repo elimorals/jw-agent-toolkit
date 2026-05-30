@@ -228,3 +228,42 @@ class StudentProgressStore:
 
     def close(self) -> None:
         self._conn.close()
+
+
+# --- Task 7: crisis scanner + set_goal helper ----------------------------
+
+from jw_core.data.study_prompts import scan_for_crisis
+
+
+def scan_lesson_for_crisis(row: LessonRow, *, language: str) -> list[str]:
+    return scan_for_crisis(row.notes, language=language)
+
+
+def set_goal_for_student(
+    store: "StudentProgressStore",
+    student_id: str,
+    book_pub: str,
+    lesson: int,
+    *,
+    kind: GoalKind,
+    target_iso: str | None = None,
+    note: str = "",
+) -> LessonRow:
+    """Append (or upsert) a goal on a student's lesson row."""
+
+    row = store.get(student_id, book_pub, lesson)
+    if row is None:
+        row = LessonRow(
+            student_id=student_id, book_pub=book_pub, lesson=lesson,
+            updated_at_iso=datetime.now(timezone.utc).isoformat(),
+        )
+    now = datetime.now(timezone.utc).isoformat()
+    # Replace existing goal of same kind; otherwise append.
+    goals = [g for g in row.goals if g.kind != kind]
+    goals.append(StudentGoal(kind=kind, set_at_iso=now, target_iso=target_iso, note=note))
+    row.goals = goals
+    if kind == GoalKind.BAPTISM and target_iso:
+        row.baptism_target_iso = target_iso
+    row.updated_at_iso = now
+    store.upsert(row)
+    return row
