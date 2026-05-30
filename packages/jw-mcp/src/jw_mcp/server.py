@@ -50,6 +50,7 @@ from jw_agents.presentation_builder import list_audiences as _list_audiences
 from jw_agents.presentation_builder import presentation_builder as presentation_builder_agent
 from jw_agents.reverse_citation_lookup import reverse_citation_lookup as reverse_citation_lookup_agent
 from jw_agents.revisit_tracker import Revisit, RevisitStore, plan_next_visit
+from jw_agents.study_conductor import prepare_lesson as prepare_lesson_agent
 from jw_core.audio.broadcasting import BroadcastingIndex, index_vtt_file
 from jw_core.audio.tts import list_tts_providers
 from jw_core.clients.cdn import CDNClient
@@ -2224,6 +2225,32 @@ def validate_citations(
                 await client.aclose()
 
     return _asyncio.run(_run())
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Study conductor tools (Fase 24)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+def prepare_lesson(
+    pub_code: str,
+    chapter: int,
+    language: str = "es",
+) -> dict[str, Any]:
+    """Prepare a study-book lesson: anticipation questions + key verses + topics.
+
+    Args:
+        pub_code: Publication code (e.g. "lff" for Enjoy Life Forever!).
+        chapter: 1-based chapter number.
+        language: ISO code (es/en/pt/…). Falls back to English for unknown.
+    """
+
+    try:
+        result = prepare_lesson_agent(pub_code, chapter=chapter, language=language)
+    except Exception as e:  # noqa: BLE001
+        return {"error": str(e)}
+    return result.to_dict()
 
 
 # ────────────────────────────────────────────────────────────────────────
