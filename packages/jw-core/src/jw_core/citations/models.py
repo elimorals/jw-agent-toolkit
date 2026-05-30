@@ -64,9 +64,12 @@ class CitationCheck(BaseModel):
 
     @property
     def is_ok(self) -> bool:
+        # Lenient: a 3xx→200 redirect, a missing-from-catalog (just not indexed
+        # locally), and a no-snapshot drift case all count as ok-with-warning,
+        # not failures. The report-level `summarize` re-buckets them as warnings.
         return (
             self.resolve in {"ok", "ok_redirect", "skipped"}
-            and self.catalog in {"ok", "unknown", "skipped"}
+            and self.catalog in {"ok", "missing", "unknown", "skipped"}
             and self.drift in {"ok", "no_snapshot", "skipped"}
         )
 

@@ -101,3 +101,77 @@ def test_extract_urls_from_object_agent_output() -> None:
 
     urls = _extract_urls(_Result())
     assert urls == ["https://wol.jw.org/z"]
+
+
+from jw_core.citations import CitationValidator
+from jw_core.integrations.meps_catalog import MepsCatalog
+
+
+@pytest.mark.asyncio
+async def test_structural_with_empty_catalog_returns_unknown(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+    v = CitationValidator(catalog=cat)
+    report = await v.validate_urls(
+        ["https://wol.jw.org/es/wol/d/r4/lp-s/1101989140"],
+        mode="structural",
+    )
+    assert report.mode == "structural"
+    assert len(report.checks) == 1
+    check = report.checks[0]
+    assert check.doc_id == 1101989140
+    assert check.catalog == "missing"  # catalog empty - docId not found
+    assert check.resolve == "skipped"
+    assert check.is_ok is True
+
+
+@pytest.mark.asyncio
+async def test_structural_with_populated_catalog_ok(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+    # Hand-craft a publication+document row to avoid needing a real .jwpub.
+    conn = cat._open()  # noqa: SLF001 — test-only access
+    conn.execute(
+        "INSERT INTO publication (pub_code, language_index, title) VALUES ('w24', 0, 'Watchtower')"
+    )
+    conn.execute(
+        """INSERT INTO document
+           (document_id, meps_document_id, pub_code, language_index, title)
+           VALUES (1, 1101989140, 'w24', 0, 'Trinity?')"""
+    )
+    conn.commit()
+
+    v = CitationValidator(catalog=cat)
+    report = await v.validate_urls(
+        ["https://wol.jw.org/es/wol/d/r4/lp-s/1101989140"],
+        mode="structural",
+    )
+    check = report.checks[0]
+    assert check.catalog == "ok"
+    assert check.pub_code == "w24"
+
+
+@pytest.mark.asyncio
+async def test_structural_url_without_docid_is_unknown(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+    v = CitationValidator(catalog=cat)
+    report = await v.validate_urls(
+        ["https://wol.jw.org/es/wol/b/r4/lp-s/nwt/E/2024/43/3"],
+        mode="structural",
+    )
+    check = report.checks[0]
+    # Bible-chapter URLs carry pub_code but no doc_id — catalog can't disambiguate
+    assert check.pub_code == "nwt"
+    assert check.catalog == "unknown"
+
+
+@pytest.mark.asyncio
+async def test_validate_agent_output_dict(tmp_path) -> None:
+    cat = MepsCatalog(db_path=tmp_path / "meps.db")
+    v = CitationValidator(catalog=cat)
+    agent_out = {
+        "findings": [
+            {"metadata": {"citation_url": "https://wol.jw.org/es/wol/d/r4/lp-s/1"}},
+            {"metadata": {"citation_url": "https://wol.jw.org/es/wol/d/r4/lp-s/2"}},
+        ]
+    }
+    report = await v.validate_agent_output(agent_out, mode="structural")
+    assert len(report.checks) == 2
