@@ -60,3 +60,38 @@ def test_student_goal_minimal() -> None:
     g = StudentGoal(kind=GoalKind.BAPTISM, set_at_iso="2026-05-30T00:00:00")
     assert g.kind == GoalKind.BAPTISM
     assert g.achieved_at_iso is None
+
+
+# --- Task 5: salt + passphrase --------------------------------------------
+
+from pathlib import Path
+
+from jw_agents.study_progress import (
+    PrivacyState,
+    derive_encryptor_for_passphrase,
+    load_or_create_salt,
+)
+
+
+def test_load_or_create_salt_creates_when_missing(tmp_path: Path) -> None:
+    target = tmp_path / "salt.bin"
+    state = load_or_create_salt(target)
+    assert state == PrivacyState.CREATED
+    assert target.exists()
+    assert len(target.read_bytes()) == 16
+
+
+def test_load_or_create_salt_returns_existing(tmp_path: Path) -> None:
+    target = tmp_path / "salt.bin"
+    load_or_create_salt(target)
+    state2 = load_or_create_salt(target)
+    assert state2 == PrivacyState.LOADED
+
+
+def test_derive_encryptor_round_trip(tmp_path: Path) -> None:
+    salt_path = tmp_path / "salt.bin"
+    load_or_create_salt(salt_path)
+    enc = derive_encryptor_for_passphrase("hunter2", salt_path=salt_path)
+    assert enc.enabled
+    token = enc.encrypt("nota sensible")
+    assert enc.decrypt(token) == "nota sensible"
