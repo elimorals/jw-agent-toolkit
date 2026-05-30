@@ -15,6 +15,7 @@ import typer
 
 from jw_cli.commands import (
     chapter,
+    citations,
     daily,
     download,
     jwpub,
@@ -44,6 +45,7 @@ app.command(name="jwpub")(jwpub.jwpub_cmd)
 app.command(name="topic")(topic.topic_cmd)
 app.command(name="workbook")(workbook.workbook_command)
 app.add_typer(ministry.ministry_app, name="ministry")
+app.add_typer(citations.citations_app, name="citations")
 
 
 def main() -> None:
