@@ -183,9 +183,7 @@ def test_disk_cache_handles_batch_writes_then_reads(tmp_path: Path, keys_values:
     n_concurrent=st.integers(min_value=1, max_value=10),
 )
 @settings(max_examples=20, deadline=None)
-def test_token_bucket_never_goes_negative_under_concurrency(
-    rate: float, capacity: float, n_concurrent: int
-) -> None:
+def test_token_bucket_never_goes_negative_under_concurrency(rate: float, capacity: float, n_concurrent: int) -> None:
     """For ANY rate + capacity, after N concurrent acquires, _tokens >= 0.
 
     The invariant we're fuzzing is the lock + accounting correctness — NOT
