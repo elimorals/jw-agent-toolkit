@@ -31,6 +31,7 @@ from jw_agents.study_progress import (
     looks_like_first_run,
     scan_lesson_for_crisis,
 )
+from jw_core.data.study_books import get_book
 
 study_app = typer.Typer(
     name="study",
@@ -172,3 +173,51 @@ def log_cmd(
     store = _get_store(language=lang)
     saved = store.upsert(row)
     console.print(f"[green]✓[/green] {saved.student_id} · {saved.book_pub} ch.{saved.lesson} → {saved.status.value}")
+
+
+@study_app.command("lessons")
+def lessons_cmd(
+    pub_code: str = typer.Argument(...),
+    lang: str = typer.Option("es", "--lang", "-l"),
+) -> None:
+    """Muestra el inventario de capítulos de un libro de estudio."""
+
+    try:
+        book = get_book(pub_code)
+    except KeyError:
+        console.print(f"[red]Libro desconocido:[/red] {pub_code}")
+        raise typer.Exit(code=2)
+    console.print(
+        f"[bold]{book.title_by_lang.get(lang, book.pub_code)}[/bold] — "
+        f"{book.total_chapters} capítulos"
+    )
+    console.print(f"Idiomas soportados: {', '.join(book.languages)}")
+
+
+@study_app.command("progress")
+def progress_cmd(
+    student_id: str = typer.Argument(...),
+    pub_code: str = typer.Option(None, "--pub", help="Filtrar por publicación"),
+    lang: str = typer.Option("es", "--lang", "-l"),
+) -> None:
+    """Muestra el ciclo de vida de un estudiante (todas sus lecciones)."""
+
+    store = _get_store(language=lang)
+    rows = store.list_for_student(student_id, book_pub=pub_code)
+    if not rows:
+        console.print(f"[yellow]Sin registros para {student_id}.[/yellow]")
+        raise typer.Exit(code=0)
+
+    table = Table(title=f"Progreso de {student_id}")
+    table.add_column("pub")
+    table.add_column("ch")
+    table.add_column("status")
+    table.add_column("metas")
+    table.add_column("actualizado")
+    for r in rows:
+        table.add_row(
+            r.book_pub, str(r.lesson), r.status.value,
+            ", ".join(g.kind.value for g in r.goals) or "—",
+            r.updated_at_iso[:10],
+        )
+    console.print(table)

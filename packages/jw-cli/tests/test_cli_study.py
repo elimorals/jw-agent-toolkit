@@ -97,3 +97,28 @@ def test_study_log_warns_on_crisis_keyword(monkeypatch, tmp_path) -> None:
     ])
     assert result.exit_code == 0
     assert "crisis" in result.stdout.lower() or "anciano" in result.stdout.lower()
+
+
+def test_study_progress_shows_lifecycle(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("JW_STUDY_DB", str(tmp_path / "p.db"))
+    monkeypatch.setenv("JW_STUDY_SALT", str(tmp_path / "salt.bin"))
+    monkeypatch.setenv("JW_STUDY_PASSPHRASE", "hunter2")
+    from jw_agents.study_progress import load_or_create_salt
+    load_or_create_salt(tmp_path / "salt.bin")
+
+    # Seed two lessons
+    runner.invoke(app, ["study", "log", "demo_user", "lff", "1", "--status", "completed"])
+    runner.invoke(app, ["study", "log", "demo_user", "lff", "2", "--status", "in_progress"])
+
+    result = runner.invoke(app, ["study", "progress", "demo_user"])
+    assert result.exit_code == 0
+    assert "1" in result.stdout and "2" in result.stdout
+    assert "completed" in result.stdout
+    assert "in_progress" in result.stdout
+
+
+def test_study_lessons_lists_chapter_titles() -> None:
+    result = runner.invoke(app, ["study", "lessons", "lff", "--lang", "es"])
+    assert result.exit_code == 0
+    assert "Disfruta" in result.stdout
+    assert "60" in result.stdout  # total chapters
