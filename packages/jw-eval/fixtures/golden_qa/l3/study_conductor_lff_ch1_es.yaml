@@ -1,0 +1,34 @@
+id: l3_study_conductor_lff_ch1_es
+agent: study_conductor
+layer: l3
+input:
+  pub_code: lff
+  chapter: 1
+  language: es
+expected_citations:
+  - https://wol.jw.org/es/wol/publication/r4/lp-s/lff/1
+expected_keywords_any:
+  - "Jehová"
+  - "Padre amoroso"
+  - "se preocupa"
+expected_keywords_none:
+  - "doctrina inalcanzable"
+  - "pasajes oscuros"
+golden_answer: |
+  La lección 1 enseña que Jehová Dios es un Padre amoroso que se preocupa por
+  cada uno de nosotros como personas. La invitación a "echar todas nuestras
+  ansiedades sobre él" (1 Pedro 5:7) muestra que él está cerca y disponible, y
+  que su carácter se revela en las Escrituras como un Dios accesible, no
+  distante. La preparación personal del conductor debería resaltar (a) la
+  identidad de Jehová como Padre, (b) la evidencia bíblica de su preocupación
+  por cada persona, y (c) preguntas que ayuden al estudiante a anclar este
+  punto en su propia experiencia.
+judge:
+  primary: embeddings
+  threshold_pass: 0.78
+  threshold_review_min: 0.55
+  threshold_review_max: 0.78
+metadata:
+  topic: study_book.lff.ch1
+  added_by: elias
+  added_at: 2026-05-30
