@@ -2253,6 +2253,107 @@ def prepare_lesson(
     return result.to_dict()
 
 
+# Student progress (encrypted-at-rest) tools ------------------------------
+
+import os as _os_study
+from datetime import datetime as _dt_study, timezone as _tz_study
+
+from jw_agents.study_progress import (
+    GoalKind as _GoalKind,
+    LessonRow as _LessonRow,
+    LessonStatus as _LessonStatus,
+    StudentGoal as _StudentGoal,
+    StudentProgressStore as _StudentProgressStore,
+    default_salt_path as _default_salt_path,
+    derive_encryptor_for_passphrase as _derive_enc,
+    set_goal_for_student as _set_goal_for_student,
+)
+
+
+def _study_store() -> _StudentProgressStore | dict[str, str]:
+    passphrase = _os_study.getenv("JW_STUDY_PASSPHRASE")
+    if not passphrase:
+        return {"error": "JW_STUDY_PASSPHRASE not set"}
+    enc = _derive_enc(passphrase, salt_path=_default_salt_path())
+    return _StudentProgressStore(encryptor=enc)
+
+
+@mcp.tool
+def log_student_progress(
+    student_id: str,
+    book_pub: str,
+    lesson: int,
+    status: str = "in_progress",
+    note: str = "",
+    goals: list[str] | None = None,
+    target_iso: str | None = None,
+) -> dict[str, Any]:
+    """Record progress for (student, book, lesson). Notes encrypted at rest."""
+
+    store_or_err = _study_store()
+    if isinstance(store_or_err, dict):
+        return store_or_err
+    store = store_or_err
+
+    try:
+        now = _dt_study.now(_tz_study.utc).isoformat()
+        row = _LessonRow(
+            student_id=student_id, book_pub=book_pub, lesson=lesson,
+            status=_LessonStatus(status), notes=note,
+            updated_at_iso=now,
+            started_at_iso=now if status == "in_progress" else None,
+            completed_at_iso=now if status == "completed" else None,
+            goals=[
+                _StudentGoal(kind=_GoalKind(g), set_at_iso=now,
+                              target_iso=(target_iso if g == "baptism" else None))
+                for g in (goals or [])
+            ],
+            baptism_target_iso=(target_iso if goals and "baptism" in goals else None),
+        )
+        saved = store.upsert(row)
+        return {"row": saved.model_dump(mode="json")}
+    except Exception as e:  # noqa: BLE001
+        return {"error": str(e)}
+
+
+@mcp.tool
+def list_student_lessons(
+    student_id: str, book_pub: str | None = None,
+) -> dict[str, Any]:
+    """List a student's lessons (decrypted notes in-memory)."""
+
+    store_or_err = _study_store()
+    if isinstance(store_or_err, dict):
+        return store_or_err
+    store = store_or_err
+    rows = store.list_for_student(student_id, book_pub=book_pub)
+    return {"count": len(rows), "rows": [r.model_dump(mode="json") for r in rows]}
+
+
+@mcp.tool
+def set_student_goal(
+    student_id: str,
+    kind: str,
+    book_pub: str = "lff",
+    lesson: int = 1,
+    target_iso: str | None = None,
+    note: str = "",
+) -> dict[str, Any]:
+    """Append or replace a goal on a (student, book, lesson) row."""
+
+    store_or_err = _study_store()
+    if isinstance(store_or_err, dict):
+        return store_or_err
+    try:
+        row = _set_goal_for_student(
+            store_or_err, student_id, book_pub, lesson,
+            kind=_GoalKind(kind), target_iso=target_iso, note=note,
+        )
+        return {"row": row.model_dump(mode="json")}
+    except Exception as e:  # noqa: BLE001
+        return {"error": str(e)}
+
+
 # ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
