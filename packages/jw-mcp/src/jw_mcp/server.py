@@ -2622,6 +2622,64 @@ def lookup_song(number: int, language: str = "en") -> dict[str, Any]:
     }
 
 
+@mcp.tool
+async def songs_for_week(
+    date: str | None = None,
+    language: str = "en",
+) -> dict[str, Any]:
+    """Resolve the workbook for the meeting week containing `date` (ISO,
+    default today) and return the three kingdom-song metadata entries
+    (opening / middle / closing) for that week.
+
+    Output shape:
+        {
+          "week_of": "2026-06-08",
+          "language": "es",
+          "songs": [
+             {"slot": "opening", "number": 5, "title": "...", "theme": "...",
+              "scriptures": [...], "canonical_url": "..."},
+             ...
+          ],
+          "warnings": [...]
+        }
+    """
+
+    # Indirection through the module-level alias allows test patching.
+    import jw_mcp.server as _self
+
+    try:
+        result = await _self._workbook_helper_agent(
+            date, language=language, include_comments=False
+        )
+    except Exception as exc:  # noqa: BLE001
+        return {"error": f"workbook_helper failed: {exc!r}"}
+
+    _enrich_with_songs(result, language=language)
+
+    songs: list[dict[str, Any]] = []
+    for f in result.findings:
+        if f.metadata.get("source") != "kingdom_song":
+            continue
+        meta = f.citation.metadata
+        songs.append(
+            {
+                "slot": meta.get("slot"),
+                "number": meta.get("number"),
+                "title": f.citation.title,
+                "theme": f.excerpt,
+                "scriptures": meta.get("scriptures") or [],
+                "canonical_url": f.citation.url,
+            }
+        )
+
+    return {
+        "week_of": result.metadata.get("week_of", ""),
+        "language": language,
+        "songs": songs,
+        "warnings": list(result.warnings),
+    }
+
+
 # ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
