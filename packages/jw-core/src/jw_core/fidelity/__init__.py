@@ -18,13 +18,14 @@ Spec: docs/superpowers/specs/2026-05-31-fase-39-nli-runtime-design.md
 from __future__ import annotations
 
 from jw_core.fidelity.nli import NLIProvider, Target, evaluate_entailment
-from jw_core.fidelity.verdicts import NLIVerdict, Verdict
+from jw_core.fidelity.verdicts import NLIVerdict, Verdict, ensure_verdict
 
 __all__ = [
     "NLIProvider",
     "NLIVerdict",
     "Target",
     "Verdict",
+    "ensure_verdict",
     "evaluate_entailment",
     "get_default_nli_provider",
     "list_available_nli_providers",
