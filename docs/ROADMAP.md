@@ -562,3 +562,34 @@ gráficas (export JSON ya lo habilita externamente), modo familia.
 - ✅ Tool MCP `export_study_sheet`.
 - ✅ Tests: 45 nuevos (IR · markdown · templates · pdf · docx · anki · CLI · MCP).
 - ✅ Guía `docs/guias/exportador-hoja-de-estudio.md`.
+
+---
+
+## Fase 32 — Asistente informativo de temas de vida ✅
+
+> Tier 4 capa UX / nicho. Spec: `docs/superpowers/specs/2026-05-30-fase-32-life-topics-design.md`.
+
+- ✅ Registry de 9 temas (anxiety, grief, marriage_conflict, depression_signs, addictions, doubts_in_faith, parenting, loneliness, conflict_with_brother) con aliases en `en/es/pt`.
+- ✅ Disclaimer bilingüe + elders_redirect (sin mencionar profesionales médicos por nombre — boundary deliberada).
+- ✅ Agente `life_topics` con disclaimer obligatorio + redirect en temas sensibles.
+- ✅ Pipeline: Topic Index → CDN `filter='publications'` → parse_article → previews.
+- ✅ Comando CLI `jw life "<query>" --lang en|es|pt`.
+- ✅ Tool MCP `life_topic_info`.
+- ✅ Golden cases en `jw-eval`: 2 L1 (anxiety_es, parenting_en) + 2 L3 (grief_en, doubts_es).
+- ✅ Guía `docs/guias/temas-de-vida.md`.
+
+### Boundary explícita
+
+- El agente nunca fabrica citas bíblicas; solo enlaza versículos presentes en el material matched.
+- El agente nunca sustituye consejería pastoral.
+- Sin persistencia: stateless por diseño.
+- Lista de temas sensibles cerrada — añadir temas requiere PR independiente con justificación.
+
+### Cobertura de tests
+
+- ✅ 11 tests en `packages/jw-core/tests/test_life_topics_data.py`.
+- ✅ 8 tests en `packages/jw-core/tests/test_life_disclaimers.py`.
+- ✅ 9 tests en `packages/jw-agents/tests/test_life_topics.py`.
+- ✅ 2 tests en `packages/jw-cli/tests/test_life_cmd.py`.
+- ✅ 2 tests en `packages/jw-mcp/tests/test_life_topic_tool.py`.
+- ✅ Suite global sin regresiones.
