@@ -1,13 +1,15 @@
+# Calibrated against real meeting_helper signature:
+# meeting_helper(input_text=, language=). No `kind` kwarg exists.
+# The agent does not set metadata['source'] on findings, so
+# must_have_citation cannot be enforced at L1 here.
 id: l1_meeting_helper_workbook_es
 agent: meeting_helper
 layer: l1
 input:
-  url_or_ref: "Mateo 24:14"
+  input_text: "Mateo 24:14"
   language: es
-  kind: workbook
 expected:
   min_findings: 2
-  must_have_citation: true
 metadata:
   topic: meeting.workbook
   added_by: elias

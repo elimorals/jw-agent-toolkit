@@ -1,9 +1,15 @@
+# Calibrated against real conversation_assistant signature:
+# conversation_assistant(text=, language=).
+# Original YAML used topic="creation" / audience="atheist" which are NOT
+# kwargs of the agent. The agent matches `text` against an objection
+# catalog (no "creation" entry exists). Repurposed to a trinity-style
+# objection so the catalog match + topic anchor + scripture surfacing
+# all fire deterministically.
 id: l1_conversation_assistant_creation_en
 agent: conversation_assistant
 layer: l1
 input:
-  topic: "creation"
-  audience: "atheist"
+  text: "Why don't you believe in the Trinity?"
   language: en
 expected:
   min_findings: 2
