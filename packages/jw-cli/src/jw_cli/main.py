@@ -23,6 +23,7 @@ from jw_cli.commands import (
     jwpub,
     languages,
     letter as letter_module,
+    life,
     ministry,
     news,
     report as report_module,
@@ -62,6 +63,7 @@ app.add_typer(study.study_app, name="study")
 app.add_typer(news.news_app, name="news")
 app.add_typer(report_module.report_app, name="report")
 app.command(name="export")(export_module.export_cmd)
+app.command(name="life")(life.life_cmd)
 
 
 def main() -> None:
