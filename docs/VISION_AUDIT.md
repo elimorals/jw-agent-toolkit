@@ -268,3 +268,7 @@ curl -s http://localhost:8765/healthz
 
 | Fase 36 (vlm-ocr) | ✅ Nuevo | `jw_core.vision.vlm` (`StructuredPage` + 6 providers + factory) + `jw_rag.ingest_image` + `jw image` CLI + 2 MCP tools. Tesseract preservado con `DeprecationWarning`. |
 | Fase 37 (colpali-visual) | ✅ Nuevo | `jw_rag.visual` (`VisualVectorStore` multi-vector + ColPali/ColQwen2 + PageRasterizer + RRF three-way hybrid). Late interaction sobre páginas rasterizadas. Opt-in vía `[visual]` / `[visual-mlx]`; sin GPU el RAG textual queda intacto. |
+
+### Fase 38 — jw-gen (séptimo paquete, generación ilustrativa)
+
+| Fase 38 (jw-gen) | ✅ Nuevo | Política aprobada: "Solo personal/ilustrativo + presentaciones/discursos. Watermark obligatorio. NO emulación contenido oficial JW." Implementada en `packages/jw-gen/src/jw_gen/{policy,safety,i18n}.py`. Property test de 100 prompts adversarios en CI. CLI `jw gen image/audio/video`, MCP tool `generate_illustration`, audit JSONL en `~/.jw-gen/audit.log` (prompt sólo como sha256). |

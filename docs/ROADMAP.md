@@ -712,3 +712,11 @@ vía RRF con el RAG textual. Opt-in `[visual]` / `[visual-mlx]`. Spec:
 `docs/superpowers/specs/2026-05-31-fase-37-colpali-visual-design.md`. Plan:
 `docs/superpowers/plans/2026-05-31-fase-37-colpali-visual-plan.md`.
 Guía: `docs/guias/visual-rag.md`.
+
+
+## Fase 38 — jw-gen (séptimo paquete)
+
+Generación ilustrativa para uso personal con tres safety filters y policy
+fail-closed. Spec: `docs/superpowers/specs/2026-05-31-fase-38-jw-gen-design.md`.
+Plan: `docs/superpowers/plans/2026-05-31-fase-38-jw-gen-plan.md`.
+Guía: `docs/guias/generacion-ilustrativa.md`.
