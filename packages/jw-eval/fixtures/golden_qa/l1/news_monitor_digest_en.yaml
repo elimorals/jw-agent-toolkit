@@ -1,0 +1,23 @@
+# packages/jw-eval/fixtures/golden_qa/l1/news_monitor_digest_en.yaml
+id: l1_news_monitor_digest_en
+agent: news_monitor
+layer: l1
+input:
+  since: epoch
+  languages: [en]
+  channels: [publications]
+  # The eval adapter wires stub sources so this case is deterministic +
+  # network-free. See packages/jw-eval/src/jw_eval/agent_adapters.py for the
+  # stub stub-source registration.
+  _adapter: stub_news_monitor_with_one_item
+expected:
+  min_findings: 1
+  must_have_source: news_monitor
+  must_have_citation: true
+  forbidden_keywords_in_findings:
+    - "(none)"  # the digest's empty marker must not leak into a finding
+metadata:
+  topic: news.publications
+  fase: 25
+  added_by: elias
+  added_at: 2026-05-30
