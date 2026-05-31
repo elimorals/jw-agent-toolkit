@@ -703,3 +703,12 @@ gráficas (export JSON ya lo habilita externamente), modo familia.
 - ✅ 4 `test_vlm_provider_tesseract_fallback.py` + 5 `test_vlm_factory.py` + 3 `test_vlm_extract_v2.py`.
 - ✅ 4 `test_ingest_image.py` (jw-rag) + 2 `test_command_image.py` (jw-cli) + 2 `test_mcp_vlm_tools.py` (jw-mcp).
 - ✅ 4 `test_vlm_real.py` opt-in con `@pytest.mark.vlm_real` (skipped sin env keys / hardware).
+
+
+## Fase 37 — colpali-visual
+
+Multi-vector store con ColPali/ColQwen2 sobre páginas rasterizadas, fusionado
+vía RRF con el RAG textual. Opt-in `[visual]` / `[visual-mlx]`. Spec:
+`docs/superpowers/specs/2026-05-31-fase-37-colpali-visual-design.md`. Plan:
+`docs/superpowers/plans/2026-05-31-fase-37-colpali-visual-plan.md`.
+Guía: `docs/guias/visual-rag.md`.
