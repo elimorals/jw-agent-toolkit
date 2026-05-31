@@ -12,6 +12,7 @@ from jw_rag.embed_providers import (
     get_default_embedder,
     list_available_embedders,
 )
+from jw_rag.ingest_image import ingest_image
 from jw_rag.rerank import (
     Reranker,
     get_default_reranker,
@@ -32,6 +33,7 @@ __all__ = [
     "chunk_paragraphs",
     "get_default_embedder",
     "get_default_reranker",
+    "ingest_image",
     "list_available_embedders",
     "list_available_rerankers",
 ]
