@@ -14,6 +14,11 @@ Use:
 
 The adapter purposely doesn't implement the full Anthropic-style streaming
 API — it's just enough to swap in for ad-hoc summarisation / re-ranking.
+
+Fase 35 — constrained-decoding additions:
+    `generate(..., grammar=...)` forwards a raw GBNF string in
+    `options.grammar`. `generate(..., json_schema=Pydantic)` compiles the
+    Pydantic model to GBNF locally then forwards the same option.
 """
 
 from __future__ import annotations
@@ -21,8 +26,12 @@ from __future__ import annotations
 import os
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import httpx
+
+if TYPE_CHECKING:
+    from pydantic import BaseModel
 
 
 class OllamaError(RuntimeError):
@@ -46,7 +55,35 @@ class OllamaAdapter:
         except Exception:
             return False
 
-    async def generate(self, prompt: str, *, temperature: float = 0.3) -> str:
+    async def generate(
+        self,
+        prompt: str,
+        *,
+        temperature: float = 0.3,
+        grammar: str | None = None,
+        json_schema: type[BaseModel] | None = None,
+    ) -> str:
+        """Generate text from Ollama.
+
+        Constrained-decoding additions (Fase 35):
+        - `grammar`: raw GBNF string forwarded as `options.grammar`.
+        - `json_schema`: Pydantic model class, compiled locally to GBNF.
+
+        Mutually exclusive. If both are passed, raises OllamaError.
+        """
+
+        if grammar is not None and json_schema is not None:
+            raise OllamaError("pass either `grammar` or `json_schema`, not both")
+
+        if json_schema is not None:
+            from jw_core.grammar.schemas import pydantic_to_gbnf
+
+            grammar = pydantic_to_gbnf(json_schema)
+
+        options: dict[str, object] = {"temperature": temperature}
+        if grammar is not None:
+            options["grammar"] = grammar
+
         try:
             async with httpx.AsyncClient(timeout=60.0) as c:
                 resp = await c.post(
@@ -55,7 +92,7 @@ class OllamaAdapter:
                         "model": self.model,
                         "prompt": prompt,
                         "stream": False,
-                        "options": {"temperature": temperature},
+                        "options": options,
                     },
                 )
                 resp.raise_for_status()
