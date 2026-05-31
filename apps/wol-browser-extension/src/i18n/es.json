@@ -1,0 +1,16 @@
+{
+  "action.explain": "Explicar este versículo",
+  "action.crossrefs": "Referencias cruzadas",
+  "action.save_vault": "Guardar en Obsidian",
+  "popup.title": "JW Toolkit — WOL Companion",
+  "popup.vault_path": "Ruta del vault de Obsidian",
+  "popup.vault_path_placeholder": "/Users/tu/Documents/Vault",
+  "popup.test_connection": "Probar conexión",
+  "popup.toolkit_ok": "Toolkit activo ✓",
+  "popup.toolkit_off": "El toolkit no responde. Ejecuta `jw mcp serve`.",
+  "popup.language": "Idioma",
+  "popup.save": "Guardar",
+  "popup.saved": "Guardado.",
+  "toast.saved": "Guardado en {path}",
+  "toast.error": "Error: {msg}"
+}
