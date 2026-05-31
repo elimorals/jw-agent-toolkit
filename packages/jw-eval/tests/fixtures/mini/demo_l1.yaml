@@ -1,0 +1,10 @@
+id: mini_l1_demo
+agent: apologetics
+layer: l1
+input:
+  question: "demo"
+  language: en
+expected:
+  min_findings: 1
+metadata:
+  added_at: 2026-05-30
