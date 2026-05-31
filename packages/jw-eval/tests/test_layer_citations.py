@@ -93,3 +93,45 @@ def test_citations_skip_when_snapshot_missing(tmp_path: Path) -> None:
     )
     r = evaluate_citations_snapshot(case, _stub_agent([url]), snapshots_root=tmp_path)
     assert r.verdict == "skip"
+
+
+def test_citations_live_uses_fetcher() -> None:
+    from jw_eval.layers.citations import evaluate_citations_live
+
+    url = "https://wol.jw.org/x"
+    case = GoldenCase(
+        id="l2_live",
+        agent="verse_explainer",
+        layer="l2",
+        input={"reference": "Juan 3:16"},
+        expected={
+            "expected_citations": [url],
+            "support_phrases": ["amó tanto al mundo"],
+        },
+    )
+
+    def stub_fetch(u: str) -> str:
+        assert u == url
+        return "<p>amó tanto al mundo</p>"
+
+    r = evaluate_citations_live(case, _stub_agent([url]), fetcher=stub_fetch)
+    assert r.verdict == "pass"
+
+
+def test_citations_live_fail_on_drift() -> None:
+    from jw_eval.layers.citations import evaluate_citations_live
+
+    url = "https://wol.jw.org/x"
+    case = GoldenCase(
+        id="l2_drift",
+        agent="verse_explainer",
+        layer="l2",
+        input={},
+        expected={"expected_citations": [url], "support_phrases": ["expected"]},
+    )
+
+    def stub_fetch(_: str) -> str:
+        return "<p>completely different content</p>"
+
+    r = evaluate_citations_live(case, _stub_agent([url]), fetcher=stub_fetch)
+    assert r.verdict == "fail"

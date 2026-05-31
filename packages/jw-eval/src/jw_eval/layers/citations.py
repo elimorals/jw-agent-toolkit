@@ -109,3 +109,50 @@ def evaluate_citations_snapshot(
         reasons=reasons,
         duration_ms=int((time.monotonic() - started) * 1000),
     )
+
+
+def evaluate_citations_live(
+    case: GoldenCase,
+    agent: Callable[[dict[str, Any]], Any],
+    fetcher: Callable[[str], str],
+) -> LayerResult:
+    """Evaluate an L2 case live: re-fetch URLs via `fetcher` callback."""
+
+    started = time.monotonic()
+    expected_urls = case.expected.get("expected_citations") or []
+    phrases = case.expected.get("support_phrases") or []
+    reasons: list[str] = []
+
+    try:
+        result = agent(case.input)
+    except Exception as exc:
+        return LayerResult(
+            case_id=case.id,
+            layer="l2",
+            verdict="error",
+            reasons=[f"agent raised: {exc!r}"],
+            duration_ms=int((time.monotonic() - started) * 1000),
+        )
+
+    actual_urls = _extract_urls(result)
+    for url in expected_urls:
+        if url not in actual_urls:
+            reasons.append(f"missing URL {url} (got {actual_urls})")
+
+    for url in expected_urls:
+        try:
+            html = fetcher(url)
+        except Exception as exc:  # noqa: BLE001
+            reasons.append(f"fetch failed for {url}: {exc!r}")
+            continue
+        if not any(p.lower() in html.lower() for p in phrases):
+            reasons.append(f"live: none of {phrases} found in {url}")
+
+    verdict = "pass" if not reasons else "fail"
+    return LayerResult(
+        case_id=case.id,
+        layer="l2",
+        verdict=verdict,
+        reasons=reasons,
+        duration_ms=int((time.monotonic() - started) * 1000),
+    )
