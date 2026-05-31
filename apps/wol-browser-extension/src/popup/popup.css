@@ -1,0 +1,67 @@
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  width: 320px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+#root {
+  padding: 14px;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+input[type="text"],
+select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+button {
+  margin-top: 12px;
+  margin-right: 6px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 4px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+.status {
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.status-ok {
+  color: #047857;
+}
+
+.status-err {
+  color: #b91c1c;
+}
