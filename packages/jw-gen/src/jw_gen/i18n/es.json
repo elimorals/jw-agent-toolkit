@@ -1,1 +1,21 @@
-{}
+{
+  "watermark.default": "jw-gen · uso personal · no es contenido oficial JW",
+  "disclaimer.body": "Este archivo fue generado por jw-gen para uso personal/ilustrativo (presentaciones y discursos privados). NO es contenido oficial de Jehovah's Witnesses ni de jw.org. No distribuir como si lo fuera. Prompt hash: {prompt_sha256}. Provider: {provider}. Modo de marca: {watermark_mode}.",
+  "disclaimer.realistic_people_warning": "Este archivo contiene rostros realistas generados con opt-in explícito (--realistic-people). No representa a personas reales sin su consentimiento.",
+  "safety.refuse.logo": "Solicitud rechazada: prompts que emulan logos, emblemas o identidad gráfica oficial de Watchtower / Awake! / jw.org / Kingdom Hall están prohibidos.",
+  "safety.refuse.voice_clone_no_consent": "Voice clone requiere flag --voice-clone, archivo de consentimiento firmado hermano y confirmación interactiva.",
+  "safety.confirm.voice_clone": "¿Confirmas que {owner} aprobó este uso? [si/no]: ",
+  "safety.realism_suffix": " en estilo ilustrado, pintura suave, no fotorrealista",
+  "cli.cost_confirm": "Esta generación tiene un coste estimado de ${usd:.2f}. ¿Continuar? [si/no]: ",
+  "logo_keywords": [
+    "logo de la atalaya",
+    "logotipo jw",
+    "portada de despertad",
+    "letrero oficial salon del reino",
+    "emblema oficial jw",
+    "identidad grafica jw.org",
+    "logotipo cuerpo gobernante",
+    "logo de la sentinela",
+    "logo betel"
+  ]
+}

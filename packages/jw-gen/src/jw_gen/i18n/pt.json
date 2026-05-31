@@ -1,1 +1,21 @@
-{}
+{
+  "watermark.default": "jw-gen · uso pessoal · NÃO é conteúdo oficial JW",
+  "disclaimer.body": "Este arquivo foi gerado por jw-gen para uso pessoal/ilustrativo (apresentações e discursos privados). NÃO é conteúdo oficial das Testemunhas de Jeová nem do jw.org. Não distribua como se fosse. Hash do prompt: {prompt_sha256}. Provider: {provider}. Modo de marca: {watermark_mode}.",
+  "disclaimer.realistic_people_warning": "Este arquivo contém rostos realistas gerados com opt-in explícito (--realistic-people). Não representa pessoas reais sem o consentimento delas.",
+  "safety.refuse.logo": "Solicitação recusada: prompts que emulam logotipos, emblemas ou identidade gráfica oficial de Sentinela / Despertai! / jw.org / Salão do Reino estão proibidos.",
+  "safety.refuse.voice_clone_no_consent": "Voice clone requer flag --voice-clone, arquivo de consentimento assinado e confirmação interativa.",
+  "safety.confirm.voice_clone": "Você confirma que {owner} aprovou este uso? [sim/não]: ",
+  "safety.realism_suffix": " em estilo ilustrado, pintura suave, não fotorrealista",
+  "cli.cost_confirm": "Esta geração tem custo estimado de ${usd:.2f}. Continuar? [sim/não]: ",
+  "logo_keywords": [
+    "logo da sentinela",
+    "logotipo jw",
+    "capa de despertai",
+    "placa oficial salao do reino",
+    "emblema oficial jw",
+    "logotipo corpo governante",
+    "identidade grafica jw.org",
+    "logo betel",
+    "emblema oficial watchtower"
+  ]
+}
