@@ -294,9 +294,79 @@ class FieldReportStore:
         self.close()
 
 
-def aggregate_monthly_report(  # pragma: no cover - placeholder until Task 5
-    store: "FieldReportStore", month: str, *, revisits: RevisitProvider | None = None
-) -> MonthlyReport:
-    """Aggregator. Implemented in Task 5."""
+import calendar
+from decimal import ROUND_HALF_UP, Decimal
 
-    raise NotImplementedError
+
+def _format_hours_5min(hours: float) -> str:
+    """Render decimal hours as ``Xh Ymin`` rounded to 5-minute increments."""
+
+    total_min = Decimal(str(hours)) * Decimal(60)
+    rounded_5 = (total_min / Decimal(5)).quantize(Decimal("1"), rounding=ROUND_HALF_UP) * Decimal(5)
+    h, m = divmod(int(rounded_5), 60)
+    return f"{h}h {m:02d}min"
+
+
+def _month_bounds(month: str) -> tuple[_date, _date]:
+    """Return (start, end_inclusive) for ``YYYY-MM``."""
+
+    y, m = month.split("-")
+    yi, mi = int(y), int(m)
+    last = calendar.monthrange(yi, mi)[1]
+    return _date(yi, mi, 1), _date(yi, mi, last)
+
+
+def _is_active_during(study: StudyEntry, start: _date, end: _date) -> bool:
+    if study.started_at > end:
+        return False
+    if study.closed_at is not None and study.closed_at <= start:
+        return False
+    return True
+
+
+def aggregate_monthly_report(
+    store: FieldReportStore,
+    month: str,
+    *,
+    revisits: RevisitProvider | None = None,
+) -> MonthlyReport:
+    """Aggregate every signal for ``month`` (YYYY-MM) into a :class:`MonthlyReport`.
+
+    Active studies use the MAX during the month (per modern JW practice — see
+    spec §"Decisiones clave"). ``revisits`` is optional; if omitted, the count
+    falls back to ``0``.
+    """
+
+    month_start, month_end = _month_bounds(month)
+    entries = store.list_hours(month=month)
+
+    total = sum(e.hours_decimal for e in entries)
+    breakdown: dict[str, float] = {}
+    for e in entries:
+        key = e.tag or "untagged"
+        breakdown[key] = breakdown.get(key, 0.0) + e.hours_decimal
+
+    days_with_service = len({e.date for e in entries})
+
+    studies = store.list_studies()
+    active = [s for s in studies if _is_active_during(s, month_start, month_end)]
+    active_ids = [s.study_id for s in active]
+
+    revisits_count = 0
+    if revisits is not None:
+        try:
+            revisits_count = int(revisits.count_in_range(month_start, month_end))
+        except Exception:  # noqa: BLE001 — provider never crashes the report
+            revisits_count = 0
+
+    return MonthlyReport(
+        month=month,
+        total_hours=round(float(total), 4),
+        total_hours_display=_format_hours_5min(float(total)),
+        breakdown_by_tag=breakdown,
+        active_studies_max=len(active),
+        active_studies_ids=active_ids,
+        revisits_count=revisits_count,
+        entries_count=len(entries),
+        days_with_service=days_with_service,
+    )

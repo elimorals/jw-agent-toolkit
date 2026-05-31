@@ -246,3 +246,86 @@ def test_revisit_provider_protocol_is_structural() -> None:
     from datetime import date as date_
 
     assert p.count_in_range(date_(2026, 5, 1), date_(2026, 5, 31)) == 7
+
+
+# ---------------------------------------------------------------------------
+# Task 5 — aggregate_monthly_report
+# ---------------------------------------------------------------------------
+
+
+def _seed_may_2026(store) -> None:
+    from datetime import date as date_
+    from jw_core.ministry.field_report import HoursEntry, StudyEntry
+
+    store.add_hours(HoursEntry(entry_id="", date=date_(2026, 5, 2), hours_decimal=2.0, tag="street"))
+    store.add_hours(HoursEntry(entry_id="", date=date_(2026, 5, 2), hours_decimal=1.5, tag="return_visit"))
+    store.add_hours(HoursEntry(entry_id="", date=date_(2026, 5, 10), hours_decimal=3.75, tag="cart"))
+    store.add_hours(HoursEntry(entry_id="", date=date_(2026, 5, 20), hours_decimal=0.5, tag=None))
+    # April leftover — must NOT count
+    store.add_hours(HoursEntry(entry_id="", date=date_(2026, 4, 30), hours_decimal=10.0, tag="street"))
+
+    # 4 studies: 1 already closed in April; 2 started before; 1 started mid-May; 1 closed mid-May
+    store.upsert_study(
+        StudyEntry(
+            study_id="", student_id="alpha", started_at=date_(2026, 3, 1), closed_at=date_(2026, 4, 15)
+        )
+    )
+    store.upsert_study(StudyEntry(study_id="", student_id="beta", started_at=date_(2026, 4, 1)))
+    store.upsert_study(StudyEntry(study_id="", student_id="gamma", started_at=date_(2026, 4, 15)))
+    store.upsert_study(StudyEntry(study_id="", student_id="delta", started_at=date_(2026, 5, 5)))
+    store.upsert_study(
+        StudyEntry(
+            study_id="", student_id="epsilon", started_at=date_(2026, 4, 20), closed_at=date_(2026, 5, 12)
+        )
+    )
+
+
+def test_aggregate_monthly_report_basic(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _enc_off(monkeypatch)
+    from jw_core.ministry.field_report import FieldReportStore, aggregate_monthly_report
+
+    store = FieldReportStore(path=tmp_path / "fs.db")
+    _seed_may_2026(store)
+    report = aggregate_monthly_report(
+        store, "2026-05", revisits=_FakeRevisits({"2026-05": 11})
+    )
+
+    # 2.0 + 1.5 + 3.75 + 0.5 = 7.75 hours
+    assert report.total_hours == pytest.approx(7.75)
+    # 5-min rounding: 7h 45min
+    assert report.total_hours_display == "7h 45min"
+    assert report.breakdown_by_tag["street"] == pytest.approx(2.0)
+    assert report.breakdown_by_tag["return_visit"] == pytest.approx(1.5)
+    assert report.breakdown_by_tag["cart"] == pytest.approx(3.75)
+    assert report.breakdown_by_tag["untagged"] == pytest.approx(0.5)
+    assert report.entries_count == 4
+    assert report.days_with_service == 3
+
+    # Active in May: beta, gamma, delta, epsilon. alpha closed in April.
+    assert report.active_studies_max == 4
+    assert report.revisits_count == 11
+
+
+def test_aggregate_monthly_report_5min_rounding_half_up() -> None:
+    """7.46 hours → 7h 30min (rounds 27.6 → 30, since 27.6 is closer to 30 than 25 under 5-min rounding)."""
+
+    from jw_core.ministry.field_report import _format_hours_5min
+
+    assert _format_hours_5min(7.0) == "7h 00min"
+    assert _format_hours_5min(7.5) == "7h 30min"
+    assert _format_hours_5min(7.46) == "7h 30min"  # 27.6min → round to 30
+    assert _format_hours_5min(0.0) == "0h 00min"
+    assert _format_hours_5min(1.0833) == "1h 05min"  # 4.998 → 5
+
+
+def test_aggregate_monthly_report_empty(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _enc_off(monkeypatch)
+    from jw_core.ministry.field_report import FieldReportStore, aggregate_monthly_report
+
+    store = FieldReportStore(path=tmp_path / "fs.db")
+    r = aggregate_monthly_report(store, "2026-05", revisits=None)
+    assert r.total_hours == 0.0
+    assert r.entries_count == 0
+    assert r.active_studies_max == 0
+    assert r.revisits_count == 0
+    assert r.days_with_service == 0
