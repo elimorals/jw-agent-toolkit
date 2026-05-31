@@ -113,3 +113,111 @@ def test_monthly_report_shape() -> None:
     )
     assert r.month == "2026-05"
     assert r.active_studies_max == 3
+
+
+# ---------------------------------------------------------------------------
+# Task 3 — FieldReportStore CRUD
+# ---------------------------------------------------------------------------
+
+
+def _enc_off(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("JW_PRIVACY_KEY", raising=False)
+
+
+def test_store_creates_db_and_inserts_hours(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from datetime import date as date_
+    from jw_core.ministry.field_report import FieldReportStore, HoursEntry
+
+    _enc_off(monkeypatch)
+    db = tmp_path / "fs.db"
+    store = FieldReportStore(path=db)
+    e = store.add_hours(
+        HoursEntry(entry_id="", date=date_(2026, 5, 15), hours_decimal=2.5, tag="street")
+    )
+    assert e.entry_id  # auto-assigned uuid
+    assert db.exists()
+
+    rows = store.list_hours(month="2026-05")
+    assert len(rows) == 1
+    assert rows[0].hours_decimal == 2.5
+    assert rows[0].tag == "street"
+    store.close()
+
+
+def test_store_list_hours_filters_by_month(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from datetime import date as date_
+    from jw_core.ministry.field_report import FieldReportStore, HoursEntry
+
+    _enc_off(monkeypatch)
+    store = FieldReportStore(path=tmp_path / "fs.db")
+    store.add_hours(HoursEntry(entry_id="", date=date_(2026, 4, 30), hours_decimal=1.0))
+    store.add_hours(HoursEntry(entry_id="", date=date_(2026, 5, 1), hours_decimal=2.0))
+    store.add_hours(HoursEntry(entry_id="", date=date_(2026, 5, 31), hours_decimal=3.0))
+    store.add_hours(HoursEntry(entry_id="", date=date_(2026, 6, 1), hours_decimal=4.0))
+
+    may = store.list_hours(month="2026-05")
+    assert sorted(r.hours_decimal for r in may) == [2.0, 3.0]
+    store.close()
+
+
+def test_store_log_study_and_close(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from datetime import date as date_
+    from jw_core.ministry.field_report import FieldReportStore, StudyEntry
+
+    _enc_off(monkeypatch)
+    store = FieldReportStore(path=tmp_path / "fs.db")
+    s = store.upsert_study(
+        StudyEntry(study_id="", student_id="maria", started_at=date_(2026, 4, 1))
+    )
+    assert s.study_id
+    store.close_study(student_id="maria", closed_at=date_(2026, 5, 10))
+    studies = store.list_studies()
+    assert studies[0].closed_at == date_(2026, 5, 10)
+
+
+def test_store_mark_met_today(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from datetime import date as date_
+    from jw_core.ministry.field_report import FieldReportStore, StudyEntry
+
+    _enc_off(monkeypatch)
+    store = FieldReportStore(path=tmp_path / "fs.db")
+    store.upsert_study(StudyEntry(study_id="", student_id="maria", started_at=date_(2026, 5, 1)))
+    store.mark_met(student_id="maria", met_date=date_(2026, 5, 5))
+    store.mark_met(student_id="maria", met_date=date_(2026, 5, 12))
+    store.mark_met(student_id="maria", met_date=date_(2026, 5, 5))  # duplicate must be a no-op
+    studies = store.list_studies()
+    assert sorted(studies[0].met_dates) == [date_(2026, 5, 5), date_(2026, 5, 12)]
+
+
+def test_store_encrypts_note_when_key_set(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import sqlite3
+
+    from cryptography.fernet import Fernet  # type: ignore[import-not-found]
+
+    from datetime import date as date_
+    from jw_core.ministry.field_report import FieldReportStore, HoursEntry
+
+    monkeypatch.setenv("JW_PRIVACY_KEY", Fernet.generate_key().decode("ascii"))
+    db = tmp_path / "fs.db"
+    store = FieldReportStore(path=db)
+    store.add_hours(
+        HoursEntry(
+            entry_id="",
+            date=date_(2026, 5, 15),
+            hours_decimal=2.5,
+            tag="street",
+            note="secret note",
+        )
+    )
+
+    # Inspect raw row: note column must NOT contain "secret note" cleartext.
+    raw = sqlite3.connect(db)
+    raw.row_factory = sqlite3.Row
+    row = raw.execute("SELECT note FROM hours_entries").fetchone()
+    assert "secret note" not in row["note"]
+    raw.close()
+
+    # But round-trip via store decrypts correctly.
+    entries = store.list_hours(month="2026-05")
+    assert entries[0].note == "secret note"
+    store.close()
