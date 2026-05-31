@@ -2395,6 +2395,34 @@ async def news_digest(
     }
 
 
+@mcp.tool
+async def student_part_help(
+    kind: str,
+    topic_or_ref: str,
+    language: str = "en",
+    oratory_point: int | None = None,
+    audience: str = "default",
+) -> dict[str, Any]:
+    """Compose a 4-section script for a Life-and-Ministry student assignment.
+
+    `kind` is one of: bible_reading | starting_conversation | return_visit | bible_study.
+    `topic_or_ref` may be a Bible reference, a free topic, or 'this week'.
+    Returns the structured AgentResult serialized as dict — opening / body /
+    transition / close findings plus metadata.time_target_seconds and
+    metadata.oratory_point_applied.
+    """
+    from jw_agents import student_part_helper as _student_part_helper
+
+    result = await _student_part_helper(
+        kind=kind,
+        topic_or_ref=topic_or_ref,
+        language=language,
+        oratory_point=oratory_point,
+        audience=audience,
+    )
+    return result.to_dict()
+
+
 # ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────

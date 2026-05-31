@@ -113,6 +113,8 @@ _EXPECTED_TOOLS = {
     "set_student_goal",
     # Phase 25 — News monitor
     "news_digest",
+    # Phase 26 — Student parts (Vida y Ministerio)
+    "student_part_help",
 }
 
 
