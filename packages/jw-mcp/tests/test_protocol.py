@@ -129,6 +129,8 @@ _EXPECTED_TOOLS = {
     "songs_for_week",
     # Phase 31 — Exporter (PDF/DOCX/Anki/Markdown)
     "export_study_sheet",
+    # Phase 32 — Life topics (informational + pastoral boundary)
+    "life_topic_info",
 }
 
 

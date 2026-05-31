@@ -2750,6 +2750,43 @@ def export_study_sheet(
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Phase 32 — Life topics (informational + pastoral boundary)
+# ────────────────────────────────────────────────────────────────────────
+
+from jw_agents.life_topics import life_topics as life_topics_agent  # noqa: E402
+
+
+@mcp.tool()
+async def life_topic_info(
+    topic_or_alias: str,
+    language: str = "en",
+    top_articles: int = 5,
+    fetch_top_k: int = 3,
+    max_excerpts_per_article: int = 2,
+) -> dict[str, Any]:
+    """Information on a life topic with verifiable citations + mandatory disclaimer.
+
+    Maps `topic_or_alias` (in any of en/es/pt) to a canonical topic, surfaces
+    Topic Index entries + published article excerpts, and ALWAYS emits a
+    `disclaimer` Finding. For sensitive topics (anxiety, grief, marriage_conflict,
+    depression_signs, addictions, doubts_in_faith), also emits an `elders_redirect`
+    Finding pointing the user to family and congregation elders.
+
+    The agent does not provide pastoral counseling. The LLM consumer of this tool
+    is expected to preserve both the disclaimer and (when present) the redirect
+    in any final answer.
+    """
+    result = await life_topics_agent(
+        topic_or_alias,
+        language=language,
+        top_articles=top_articles,
+        fetch_top_k=fetch_top_k,
+        max_excerpts_per_article=max_excerpts_per_article,
+    )
+    return result.to_dict()
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
 
