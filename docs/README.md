@@ -56,6 +56,7 @@ Orientadas a casos de uso. Cada una es autocontenida con código de ejemplo.
 - [Privacidad local-first](guias/privacidad-local-first.md) — Módulo 11: cifrado, Ollama, audit telemetría.
 - [Personalización y accesibilidad](guias/personalizacion-y-accesibilidad.md) — Módulo 12: profile, memoria, tono, easy-read.
 - [Citation integrity validator](guias/citation-validator.md) — Fase 23. Valida URLs wol.jw.org de agentes (estructural / live / drift). Hermana de Fase 22.
+- [Monitor de novedades](guias/monitor-de-novedades.md) — `jw news digest` detecta publicaciones, videos y workbooks nuevos. Local-first, determinista.
 
 ### Referencia exhaustiva — cada función documentada
 
