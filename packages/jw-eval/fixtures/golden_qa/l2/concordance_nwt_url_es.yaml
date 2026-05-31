@@ -1,0 +1,14 @@
+id: l2_concordance_nwt_url_es
+agent: concordance_search
+layer: l2
+input:
+  query: '"amó tanto al mundo"'
+  language: es
+expected:
+  expected_citations:
+    - https://wol.jw.org/es/wol/b/r4/lp-s/nwt/E/2024/43/3
+  support_phrases:
+    - "amó tanto al mundo"
+metadata:
+  topic: concordance.url_resolution
+  added_at: 2026-05-30

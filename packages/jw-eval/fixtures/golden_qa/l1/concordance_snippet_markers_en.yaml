@@ -1,0 +1,13 @@
+id: l1_concordance_snippet_markers_en
+agent: concordance_search
+layer: l1
+input:
+  query: '"kingdom of God"'
+  language: en
+expected:
+  min_findings: 1
+  forbidden_keywords_in_findings:
+    - "<mark>"  # we use ‹…› not HTML
+metadata:
+  topic: concordance.snippet
+  added_at: 2026-05-30

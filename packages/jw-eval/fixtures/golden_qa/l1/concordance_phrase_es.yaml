@@ -1,0 +1,12 @@
+id: l1_concordance_phrase_es
+agent: concordance_search
+layer: l1
+input:
+  query: '"conocimiento exacto"'
+  language: es
+expected:
+  min_findings: 1
+  must_have_citation: false  # snippet OK without URL when corpus is jwpub
+metadata:
+  topic: concordance.phrase_search
+  added_at: 2026-05-30
