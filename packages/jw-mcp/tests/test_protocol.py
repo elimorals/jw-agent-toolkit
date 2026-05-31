@@ -115,6 +115,10 @@ _EXPECTED_TOOLS = {
     "news_digest",
     # Phase 26 — Student parts (Vida y Ministerio)
     "student_part_help",
+    # Phase 27 — Pioneer monthly report
+    "field_log_hours",
+    "field_log_study",
+    "field_monthly_report",
 }
 
 
