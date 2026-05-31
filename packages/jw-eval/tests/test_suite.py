@@ -3,9 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-import pytest
-
-from jw_eval.models import GoldenCase
 from jw_eval.suite import Suite
 
 
@@ -51,9 +48,7 @@ expected:
 
 def test_suite_unknown_agent_marks_error(tmp_path: Path) -> None:
     yaml = tmp_path / "case.yaml"
-    yaml.write_text(
-        "id: t\nagent: missing\nlayer: l1\ninput: {}\nexpected: {}\n", encoding="utf-8"
-    )
+    yaml.write_text("id: t\nagent: missing\nlayer: l1\ninput: {}\nexpected: {}\n", encoding="utf-8")
     suite = Suite(cases_root=tmp_path, snapshots_root=tmp_path, agent_registry={})
     report = suite.run(layers=["l1"])
     assert report.results[0].verdict == "error"

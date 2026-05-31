@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_eval.loader import load_case_file, load_cases
 
 FIXTURES = Path(__file__).parent / "fixtures" / "mini"

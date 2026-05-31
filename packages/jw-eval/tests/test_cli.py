@@ -33,6 +33,7 @@ expected: {}
     def fake_agent(_: dict[str, Any]):
         class _R:
             findings = []
+
         return _R()
 
     report = run_from_cli(

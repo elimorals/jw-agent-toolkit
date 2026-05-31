@@ -79,7 +79,13 @@ def test_semantic_escalates_when_borderline() -> None:
     calls: list[str] = []
 
     class StubLLM:
-        def judge(self, golden: str, candidate: str, keywords_any: list[str], keywords_none: list[str]) -> tuple[str, str]:
+        def judge(
+            self,
+            golden: str,
+            candidate: str,
+            keywords_any: list[str],
+            keywords_none: list[str],
+        ) -> tuple[str, str]:
             calls.append(candidate)
             return "pass", "escalated and approved"
 

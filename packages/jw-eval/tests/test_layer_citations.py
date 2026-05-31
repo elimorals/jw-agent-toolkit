@@ -4,8 +4,6 @@ import hashlib
 from pathlib import Path
 from typing import Any
 
-import pytest
-
 from jw_eval.layers.citations import evaluate_citations_snapshot, snapshot_path
 from jw_eval.models import GoldenCase
 

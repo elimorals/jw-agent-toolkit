@@ -38,8 +38,10 @@ class Suite:
     def _resolve_agent(self, name: str):
         agent = self.agents.get(name)
         if agent is None:
+
             def _err(_: dict[str, Any]):
                 raise RuntimeError(f"agent {name!r} not registered")
+
             return _err
         return agent
 

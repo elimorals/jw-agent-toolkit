@@ -52,9 +52,7 @@ def evaluate_structural(case: GoldenCase, agent: AgentCallable) -> LayerResult:
         reasons.append(f"min_findings={min_n} but got {len(findings)}")
 
     must_src = exp.get("must_have_source")
-    if isinstance(must_src, str) and not any(
-        getattr(f, "metadata", {}).get("source") == must_src for f in findings
-    ):
+    if isinstance(must_src, str) and not any(getattr(f, "metadata", {}).get("source") == must_src for f in findings):
         reasons.append(f"missing required source={must_src!r}")
 
     ordered = exp.get("sources_in_order")

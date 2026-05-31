@@ -19,6 +19,7 @@ def _make_sync_wrapper(fn: Callable[..., Any]) -> Callable[[dict[str, Any]], Any
     """Wrap an async or sync agent into a sync callable accepting one dict."""
 
     if inspect.iscoroutinefunction(fn):
+
         def call(inp: dict[str, Any]) -> Any:
             return asyncio.run(fn(**inp))
 

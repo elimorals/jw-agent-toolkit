@@ -29,6 +29,7 @@ class FakeResult:
 def _agent_factory(result: FakeResult):
     def run(input_dict: dict[str, Any]) -> FakeResult:  # noqa: ARG001
         return result
+
     return run
 
 

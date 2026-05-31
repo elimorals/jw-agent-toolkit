@@ -57,9 +57,7 @@ class SuiteReport(BaseModel):
     def summarize(results: list[LayerResult]) -> dict[str, dict[str, int]]:
         """Roll up verdict counts per layer."""
 
-        agg: dict[str, dict[str, int]] = defaultdict(
-            lambda: {"pass": 0, "fail": 0, "skip": 0, "error": 0}
-        )
+        agg: dict[str, dict[str, int]] = defaultdict(lambda: {"pass": 0, "fail": 0, "skip": 0, "error": 0})
         for r in results:
             agg[r.layer][r.verdict] += 1
         return dict(agg)
