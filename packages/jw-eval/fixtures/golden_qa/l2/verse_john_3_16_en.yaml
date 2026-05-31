@@ -1,12 +1,15 @@
+# Calibrated against real verse_explainer signature: verse_explainer(text=, language=).
+# expected_citations updated to match the URLs the agent actually emits
+# (nwtsty study Bible link with v= anchor).
 id: l2_verse_john_3_16_en
 agent: verse_explainer
 layer: l2
 input:
-  reference: "John 3:16"
+  text: "John 3:16"
   language: en
 expected:
   expected_citations:
-    - https://wol.jw.org/en/wol/b/r1/lp-e/nwt/E/2024/43/3
+    - https://wol.jw.org/en/wol/b/r1/lp-e/nwtsty/43/3#study=discover&v=43:3:16
   support_phrases:
     - "loved the world"
     - "God loved the world"

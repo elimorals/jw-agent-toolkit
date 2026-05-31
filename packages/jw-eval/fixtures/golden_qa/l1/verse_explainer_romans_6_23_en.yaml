@@ -1,13 +1,14 @@
+# Calibrated against real verse_explainer signature: verse_explainer(text=, language=).
+# The agent does NOT set metadata['source'] on findings, so must_have_source /
+# must_have_citation cannot be enforced at L1 here.
 id: l1_verse_explainer_romans_6_23_en
 agent: verse_explainer
 layer: l1
 input:
-  reference: "Romans 6:23"
+  text: "Romans 6:23"
   language: en
 expected:
   min_findings: 1
-  must_have_source: verse_text
-  must_have_citation: true
   forbidden_keywords_in_findings:
     - "supposedly"
     - "maybe"

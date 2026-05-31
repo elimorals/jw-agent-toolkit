@@ -1,12 +1,13 @@
+# Calibrated against real verse_explainer signature: verse_explainer(text=, language=).
 id: l2_verse_acts_4_12_es
 agent: verse_explainer
 layer: l2
 input:
-  reference: "Hechos 4:12"
+  text: "Hechos 4:12"
   language: es
 expected:
   expected_citations:
-    - https://wol.jw.org/es/wol/b/r4/lp-s/nwt/E/2024/44/4
+    - https://wol.jw.org/es/wol/b/r4/lp-s/nwt/44/4#study=discover&v=44:4:12
   support_phrases:
     - "no hay salvación en ningún otro"
     - "ningún otro nombre"

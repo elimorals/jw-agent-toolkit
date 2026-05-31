@@ -1,12 +1,13 @@
+# Calibrated against real verse_explainer signature: verse_explainer(text=, language=).
 id: l2_verse_acts_4_12_pt
 agent: verse_explainer
 layer: l2
 input:
-  reference: "Atos 4:12"
+  text: "Atos 4:12"
   language: pt
 expected:
   expected_citations:
-    - https://wol.jw.org/pt/wol/b/r5/lp-t/nwt/E/2024/44/4
+    - https://wol.jw.org/pt/wol/b/r5/lp-t/nwt/44/4#study=discover&v=44:4:12
   support_phrases:
     - "não há salvação"
     - "nenhum outro nome"

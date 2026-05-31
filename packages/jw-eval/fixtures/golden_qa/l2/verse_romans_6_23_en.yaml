@@ -1,12 +1,13 @@
+# Calibrated against real verse_explainer signature: verse_explainer(text=, language=).
 id: l2_verse_romans_6_23_en
 agent: verse_explainer
 layer: l2
 input:
-  reference: "Romans 6:23"
+  text: "Romans 6:23"
   language: en
 expected:
   expected_citations:
-    - https://wol.jw.org/en/wol/b/r1/lp-e/nwt/E/2024/45/6
+    - https://wol.jw.org/en/wol/b/r1/lp-e/nwtsty/45/6#study=discover&v=45:6:23
   support_phrases:
     - "wages sin pays is death"
     - "gift God gives is everlasting life"

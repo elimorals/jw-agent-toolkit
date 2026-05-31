@@ -1,12 +1,13 @@
+# Calibrated against real verse_explainer signature: verse_explainer(text=, language=).
 id: l2_verse_romans_6_23_es
 agent: verse_explainer
 layer: l2
 input:
-  reference: "Romanos 6:23"
+  text: "Romanos 6:23"
   language: es
 expected:
   expected_citations:
-    - https://wol.jw.org/es/wol/b/r4/lp-s/nwt/E/2024/45/6
+    - https://wol.jw.org/es/wol/b/r4/lp-s/nwt/45/6#study=discover&v=45:6:23
   support_phrases:
     - "paga que el pecado da es muerte"
     - "vida eterna"

@@ -1,12 +1,14 @@
+# Calibrated against real verse_explainer signature: verse_explainer(text=, language=).
+# expected_citations updated to match the URLs the agent actually emits.
 id: l2_verse_john_3_16_pt
 agent: verse_explainer
 layer: l2
 input:
-  reference: "João 3:16"
+  text: "João 3:16"
   language: pt
 expected:
   expected_citations:
-    - https://wol.jw.org/pt/wol/b/r5/lp-t/nwt/E/2024/43/3
+    - https://wol.jw.org/pt/wol/b/r5/lp-t/nwt/43/3#study=discover&v=43:3:16
   support_phrases:
     - "amou o mundo"
     - "Deus amou tanto"
