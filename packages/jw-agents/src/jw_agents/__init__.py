@@ -25,6 +25,7 @@ from jw_agents.public_talk_outline import public_talk_outline
 from jw_agents.research_topic import research_topic
 from jw_agents.revisit_tracker import Revisit, RevisitStore, plan_next_visit
 from jw_agents.reverse_citation_lookup import reverse_citation_lookup
+from jw_agents.student_part_helper import student_part_helper
 from jw_agents.verse_explainer import verse_explainer
 from jw_agents.workbook_helper import synthesize_comments, workbook_helper
 
@@ -48,6 +49,7 @@ __all__ = [
     "research_topic",
     "reverse_citation_lookup",
     "search_broadcasting",
+    "student_part_helper",
     "synthesize_comments",
     "verse_explainer",
     "workbook_helper",
