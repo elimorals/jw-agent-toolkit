@@ -26,6 +26,7 @@ from jw_cli.commands import (
     news,
     report as report_module,
     search,
+    song,
     student,
     study,
     topic,
@@ -54,6 +55,7 @@ app.command(name="workbook")(workbook.workbook_command)
 app.command(name="student")(student.student_command)
 app.command(name="grep", help="Literal concordance search over the local corpus.")(grep_module.grep_cmd)
 app.add_typer(ministry.ministry_app, name="ministry")
+app.add_typer(song.song_app, name="song")
 app.add_typer(citations.citations_app, name="citations")
 app.add_typer(study.study_app, name="study")
 app.add_typer(news.news_app, name="news")

@@ -198,3 +198,26 @@ def test_enrich_no_workbook_week_finding_is_noop() -> None:
     enrich_with_songs(result, language="en")
     assert result.findings == []
     assert result.warnings == []
+
+
+def test_cli_song_number_renders_table() -> None:
+    from typer.testing import CliRunner
+
+    from jw_cli.main import app
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["song", "5", "--lang", "es"])
+    assert result.exit_code == 0, result.stdout
+    assert "5" in result.stdout
+    assert "amor" in result.stdout.lower() or "amor" in result.stdout.lower()
+
+
+def test_cli_song_unknown_number_reports_error() -> None:
+    from typer.testing import CliRunner
+
+    from jw_cli.main import app
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["song", "999", "--lang", "en"])
+    assert result.exit_code != 0
+    assert "not in registry" in result.stdout.lower() or "999" in result.stdout
