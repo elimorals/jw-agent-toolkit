@@ -74,6 +74,22 @@ vlm-tesseract = [
     "pytesseract>=0.3.10",
     "Pillow>=10.0.0",
 ]
+nli-anthropic = [
+    "anthropic>=0.40,<1.0",
+]
+nli-openai = [
+    "openai>=1.50,<2.0",
+]
+nli-local = [
+    "transformers>=4.45,<5.0",
+    "torch>=2.4",
+]
+nli-all = [
+    "anthropic>=0.40,<1.0",
+    "openai>=1.50,<2.0",
+    "transformers>=4.45,<5.0",
+    "torch>=2.4",
+]
 
 [build-system]
 requires = ["hatchling"]
