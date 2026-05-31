@@ -144,6 +144,8 @@ _EXPECTED_TOOLS = {
     "ingest_publication_visual",
     # Phase 38 — Generative illustrative content
     "generate_illustration",
+    # Phase 35 — Constrained decoding (grammar-anchored synthesis)
+    "run_constrained",
 }
 
 

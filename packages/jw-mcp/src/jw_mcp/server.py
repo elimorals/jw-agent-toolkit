@@ -3121,6 +3121,114 @@ def generate_illustration(
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Phase 35 — Constrained decoding (grammar-anchored synthesis)
+# ────────────────────────────────────────────────────────────────────────
+
+import asyncio as _asyncio  # noqa: E402
+import inspect as _inspect  # noqa: E402
+import json as _json  # noqa: E402
+from typing import Any as _Any  # noqa: E402
+
+# Maps LLM-facing alias keys to the real keyword arguments of the
+# registered agents. Keeps the MCP input contract stable even if
+# individual agent signatures differ slightly.
+_CONSTRAINED_INPUT_ALIASES: dict[str, str] = {
+    "reference": "text",
+    "verse": "text",
+    "verse_reference": "text",
+    "query": "question",
+    "topic": "question",
+    "prompt": "question",
+}
+
+
+def _normalize_constrained_input(fn: _Any, payload: dict[str, _Any]) -> dict[str, _Any]:
+    """Drop unknown keys and remap aliases to the agent's real kwargs."""
+
+    sig = _inspect.signature(fn)
+    valid = {
+        name
+        for name, p in sig.parameters.items()
+        if p.kind
+        in (
+            _inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            _inspect.Parameter.KEYWORD_ONLY,
+        )
+    }
+    out: dict[str, _Any] = {}
+    for k, v in payload.items():
+        target = _CONSTRAINED_INPUT_ALIASES.get(k, k)
+        if target in valid:
+            out[target] = v
+    return out
+
+
+def _resolve_constrained_agent(name: str) -> _Any:
+    from jw_agents.apologetics import apologetics as _apologetics
+    from jw_agents.conversation_assistant import (
+        conversation_assistant as _conversation_assistant,
+    )
+    from jw_agents.meeting_helper import meeting_helper as _meeting_helper
+    from jw_agents.research_topic import research_topic as _research_topic
+    from jw_agents.verse_explainer import verse_explainer as _verse_explainer
+
+    table: dict[str, _Any] = {
+        "apologetics": _apologetics,
+        "conversation_assistant": _conversation_assistant,
+        "meeting_helper": _meeting_helper,
+        "research_topic": _research_topic,
+        "verse_explainer": _verse_explainer,
+    }
+    if name not in table:
+        raise ValueError(f"unknown agent: {name!r} (have {sorted(table)})")
+    fn = table[name]
+
+    def call(inp: dict[str, _Any]) -> _Any:
+        kwargs = _normalize_constrained_input(fn, inp)
+        return fn(**kwargs)
+
+    return call
+
+
+@mcp.tool()
+def run_constrained(
+    agent_name: str,
+    input: dict[str, _Any],  # noqa: A002
+    provider: str = "auto",
+) -> dict[str, _Any]:
+    """Run an agent procedurally and synthesize a citation-anchored AgentResult.
+
+    Provider: auto | ollama | anthropic | openai | fake | llama-cpp.
+
+    Phase 35 (constrained decoding) — guarantees that every URL in the
+    returned `findings[*].citation.url` was present in the procedural
+    result (no LLM forgery) and matches `^https://wol\\.jw\\.org/...`.
+    """
+
+    from jw_agents.constrained import run_with_citations
+    from jw_core.grammar.factory import get_default_constrained_caller
+
+    caller = (
+        None
+        if provider == "auto"
+        else get_default_constrained_caller(provider=provider)  # type: ignore[arg-type]
+    )
+    agent_fn = _resolve_constrained_agent(agent_name)
+
+    async def _runner() -> _Any:
+        return await run_with_citations(
+            prompt=_json.dumps(input, ensure_ascii=False),
+            # Ignore the inp dict synthesized by run_with_citations and
+            # forward the structured payload provided by the MCP caller.
+            agent=lambda _inp: agent_fn(input),
+            caller=caller,
+        )
+
+    result = _asyncio.run(_runner())
+    return result.to_dict()
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
 
