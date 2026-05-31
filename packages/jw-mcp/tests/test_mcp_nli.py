@@ -72,9 +72,7 @@ def test_apologetics_tool_accepts_fidelity_param(monkeypatch) -> None:
         )
 
     monkeypatch.setattr(srv, "apologetics_agent", fake)
-    out = asyncio.run(
-        srv.apologetics(question="?", language="en", use_rag=False, fidelity="warn")
-    )
+    out = asyncio.run(srv.apologetics(question="?", language="en", use_rag=False, fidelity="warn"))
     assert "findings" in out
     assert out["findings"][0]["metadata"]["nli_verdict"] in {
         "entails",
@@ -103,7 +101,5 @@ def test_apologetics_tool_fidelity_off_skips_metadata(monkeypatch) -> None:
         )
 
     monkeypatch.setattr(srv, "apologetics_agent", fake)
-    out = asyncio.run(
-        srv.apologetics(question="?", language="en", use_rag=False, fidelity="off")
-    )
+    out = asyncio.run(srv.apologetics(question="?", language="en", use_rag=False, fidelity="off"))
     assert "nli_verdict" not in out["findings"][0]["metadata"]

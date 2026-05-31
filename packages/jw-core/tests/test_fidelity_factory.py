@@ -16,7 +16,6 @@ Contracts:
 from __future__ import annotations
 
 import pytest
-
 from jw_core.fidelity.factory import (
     ENV_NLI,
     ENV_PROVIDER_ORDER,

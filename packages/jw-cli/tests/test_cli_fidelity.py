@@ -15,10 +15,9 @@ and follows this same pattern.
 from __future__ import annotations
 
 import pytest
-from typer.testing import CliRunner
-
 from jw_agents.base import AgentResult, Citation, Finding
 from jw_cli.main import app
+from typer.testing import CliRunner
 
 
 def _stub_result() -> AgentResult:

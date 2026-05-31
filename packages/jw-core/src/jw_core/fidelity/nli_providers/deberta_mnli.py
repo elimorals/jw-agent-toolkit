@@ -91,9 +91,7 @@ class DeBERTaV3MNLI:
             )
 
             model_id = os.getenv("JW_NLI_DEBERTA_MODEL", _DEFAULT_MODEL)
-            logger.info(
-                "Loading DeBERTa NLI model %s (target=%s)", model_id, self.target
-            )
+            logger.info("Loading DeBERTa NLI model %s (target=%s)", model_id, self.target)
 
             self._tokenizer = AutoTokenizer.from_pretrained(model_id)
             model = AutoModelForSequenceClassification.from_pretrained(model_id)
@@ -113,9 +111,7 @@ class DeBERTaV3MNLI:
             model.eval()
             self._model = model
 
-    def evaluate(
-        self, claim: str, premise: str, *, language: str = "en"
-    ) -> NLIVerdict:
+    def evaluate(self, claim: str, premise: str, *, language: str = "en") -> NLIVerdict:
         # Tests can inject ``_tokenizer`` and ``_model`` directly to bypass
         # _ensure_loaded.
         if self._model is None or self._tokenizer is None:

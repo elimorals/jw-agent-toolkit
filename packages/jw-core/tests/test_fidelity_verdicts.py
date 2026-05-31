@@ -11,7 +11,6 @@ from dataclasses import asdict, is_dataclass
 from typing import get_args
 
 import pytest
-
 from jw_core.fidelity.verdicts import NLIVerdict, Verdict, ensure_verdict
 
 

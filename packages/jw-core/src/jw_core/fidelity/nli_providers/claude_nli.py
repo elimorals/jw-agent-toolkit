@@ -67,17 +67,11 @@ class ClaudeNLI:
             return premise
         return premise[:_MAX_PREMISE_CHARS]
 
-    def evaluate(
-        self, claim: str, premise: str, *, language: str = "en"
-    ) -> NLIVerdict:
+    def evaluate(self, claim: str, premise: str, *, language: str = "en") -> NLIVerdict:
         client = self._ensure_client()
         model = os.getenv("JW_NLI_CLAUDE_MODEL", _DEFAULT_MODEL)
         truncated_premise = self._truncate(premise, claim)
-        user_body = (
-            f"PREMISE:\n{truncated_premise}\n\n"
-            f"CONCLUSION:\n{claim}\n\n"
-            f"Language: {language}"
-        )
+        user_body = f"PREMISE:\n{truncated_premise}\n\nCONCLUSION:\n{claim}\n\nLanguage: {language}"
         system_blocks = [
             {
                 "type": "text",
@@ -108,9 +102,7 @@ class ClaudeNLI:
             score = float(data.get("score", 0.5))
             reason = str(data.get("reason", ""))
         except Exception as exc:  # noqa: BLE001
-            logger.warning(
-                "ClaudeNLI JSON parse failed: %r (raw=%s)", exc, text[:200]
-            )
+            logger.warning("ClaudeNLI JSON parse failed: %r (raw=%s)", exc, text[:200])
             return ensure_verdict(
                 verdict="neutral",
                 score=0.5,

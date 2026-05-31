@@ -16,7 +16,6 @@ forever.
 from __future__ import annotations
 
 import pytest
-
 from jw_core.fidelity import NLIProvider
 from jw_core.fidelity.nli_providers.fakes import FakeNLI
 

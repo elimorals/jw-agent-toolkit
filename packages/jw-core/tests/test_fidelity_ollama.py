@@ -7,10 +7,9 @@ We bypass the network by injecting an ``httpx.Client`` built on
 from __future__ import annotations
 
 import json
-from typing import Callable
+from collections.abc import Callable
 
 import httpx
-
 from jw_core.fidelity.nli_providers.ollama_nli import OllamaNLI
 
 
@@ -37,9 +36,7 @@ def test_ollama_unavailable_when_model_missing() -> None:
 
 def test_ollama_available_when_model_present() -> None:
     def handler(_request: httpx.Request) -> httpx.Response:
-        return httpx.Response(
-            200, json={"models": [{"name": "llama3.1:8b-instruct"}]}
-        )
+        return httpx.Response(200, json={"models": [{"name": "llama3.1:8b-instruct"}]})
 
     p = OllamaNLI(http_client=_mock_client(handler))
     assert p.is_available() is True
@@ -48,19 +45,11 @@ def test_ollama_available_when_model_present() -> None:
 def test_ollama_evaluate_parses_entails() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/api/tags":
-            return httpx.Response(
-                200, json={"models": [{"name": "llama3.1:8b-instruct"}]}
-            )
+            return httpx.Response(200, json={"models": [{"name": "llama3.1:8b-instruct"}]})
         if request.url.path == "/api/chat":
             return httpx.Response(
                 200,
-                json={
-                    "message": {
-                        "content": json.dumps(
-                            {"verdict": "entails", "score": 0.87, "reason": "ok"}
-                        )
-                    }
-                },
+                json={"message": {"content": json.dumps({"verdict": "entails", "score": 0.87, "reason": "ok"})}},
             )
         return httpx.Response(404)
 
@@ -74,9 +63,7 @@ def test_ollama_evaluate_parses_entails() -> None:
 def test_ollama_fallback_on_garbage_response() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/api/tags":
-            return httpx.Response(
-                200, json={"models": [{"name": "llama3.1:8b-instruct"}]}
-            )
+            return httpx.Response(200, json={"models": [{"name": "llama3.1:8b-instruct"}]})
         return httpx.Response(200, json={"message": {"content": "not even json"}})
 
     p = OllamaNLI(http_client=_mock_client(handler))
@@ -91,9 +78,7 @@ def test_ollama_uses_env_host(monkeypatch) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.host == "example.local"
         assert request.url.port == 9999
-        return httpx.Response(
-            200, json={"models": [{"name": "llama3.1:8b-instruct"}]}
-        )
+        return httpx.Response(200, json={"models": [{"name": "llama3.1:8b-instruct"}]})
 
     p = OllamaNLI(http_client=_mock_client(handler))
     assert p.is_available() is True
@@ -110,11 +95,7 @@ def test_ollama_uses_env_model(monkeypatch) -> None:
         captured.append(body)
         return httpx.Response(
             200,
-            json={
-                "message": {
-                    "content": json.dumps({"verdict": "entails", "score": 0.9})
-                }
-            },
+            json={"message": {"content": json.dumps({"verdict": "entails", "score": 0.9})}},
         )
 
     p = OllamaNLI(http_client=_mock_client(handler))

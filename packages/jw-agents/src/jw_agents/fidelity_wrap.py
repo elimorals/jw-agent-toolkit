@@ -21,8 +21,9 @@ from collections.abc import Awaitable, Callable
 from functools import wraps
 from typing import Any, Literal
 
-from jw_agents.base import AgentResult
 from jw_core.fidelity import NLIProvider
+
+from jw_agents.base import AgentResult
 
 OnFail = Literal["warn", "reject", "annotate_only"]
 
@@ -33,9 +34,7 @@ def fidelity_wrap(
     on_fail: OnFail = "warn",
     provider: NLIProvider | None = None,
     min_excerpt_chars: int = 32,
-) -> Callable[
-    [Callable[..., Awaitable[AgentResult]]], Callable[..., Awaitable[AgentResult]]
-]:
+) -> Callable[[Callable[..., Awaitable[AgentResult]]], Callable[..., Awaitable[AgentResult]]]:
     """Decorate an async agent to NLI-verify each Finding.
 
     Args:
@@ -100,8 +99,7 @@ def fidelity_wrap(
                     kept.append(f)
                 elif on_fail == "warn":
                     result.warnings.append(
-                        f"Low NLI fidelity ({verdict.verdict}, "
-                        f"score={verdict.score:.2f}) for citation {f.citation.url}"
+                        f"Low NLI fidelity ({verdict.verdict}, score={verdict.score:.2f}) for citation {f.citation.url}"
                     )
                     kept.append(f)
                 elif on_fail == "reject":

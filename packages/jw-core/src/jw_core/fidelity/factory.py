@@ -87,11 +87,7 @@ def list_available_nli_providers() -> list[NLIProvider]:
     """
 
     order = _provider_order()
-    available = [
-        r
-        for r in _instantiate_registry()
-        if r.is_available() and r.name != "fake-nli"
-    ]
+    available = [r for r in _instantiate_registry() if r.is_available() and r.name != "fake-nli"]
     return sorted(
         available,
         key=lambda r: order.index(r.target) if r.target in order else len(order),
@@ -108,8 +104,7 @@ def get_default_nli_provider() -> NLIProvider:
             raise ValueError(f"unknown JW_NLI_PROVIDER={env_name!r}")
         if not p.is_available():
             raise RuntimeError(
-                f"JW_NLI_PROVIDER={env_name!r} not available "
-                f"(target={p.target}, missing deps or env vars)"
+                f"JW_NLI_PROVIDER={env_name!r} not available (target={p.target}, missing deps or env vars)"
             )
         return p
 

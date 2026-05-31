@@ -55,9 +55,7 @@ def test_openai_unavailable_without_api_key(monkeypatch) -> None:
 
 def test_openai_parses_entails(monkeypatch) -> None:
     monkeypatch.setenv("OPENAI_API_KEY", "sk-fake")
-    client = _FakeOpenAIClient(
-        json.dumps({"verdict": "entails", "score": 0.88, "reason": "ok"})
-    )
+    client = _FakeOpenAIClient(json.dumps({"verdict": "entails", "score": 0.88, "reason": "ok"}))
     p = OpenAINLI(client=client)
     v = p.evaluate(claim="A", premise="B")
     assert v.verdict == "entails"

@@ -18,7 +18,6 @@ import string
 
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
-
 from jw_core.fidelity.nli_providers.fakes import FakeNLI
 
 # Restrict to printable ASCII to avoid byte-level issues in CI logs
@@ -42,9 +41,7 @@ def test_fake_verdict_always_legal(claim: str, premise: str) -> None:
 @settings(max_examples=200)
 def test_fake_is_deterministic(claim: str, premise: str) -> None:
     p = FakeNLI()
-    assert p.evaluate(claim=claim, premise=premise) == p.evaluate(
-        claim=claim, premise=premise
-    )
+    assert p.evaluate(claim=claim, premise=premise) == p.evaluate(claim=claim, premise=premise)
 
 
 @given(text=_TEXT.filter(lambda s: len(s) >= 4))

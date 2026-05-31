@@ -18,7 +18,6 @@ from __future__ import annotations
 import asyncio
 
 import pytest
-
 from jw_agents.base import AgentResult, Citation, Finding
 from jw_agents.fidelity_wrap import fidelity_wrap
 from jw_core.fidelity import NLIVerdict
@@ -86,9 +85,11 @@ def test_reject_mode_drops_finding() -> None:
 
     @fidelity_wrap(min_score=0.7, on_fail="reject", provider=prov)
     async def agent() -> AgentResult:
-        return _result_with([
-            _finding(summary="bad", excerpt="this is a long enough premise text"),
-        ])
+        return _result_with(
+            [
+                _finding(summary="bad", excerpt="this is a long enough premise text"),
+            ]
+        )
 
     r = _run(agent())
     assert r.findings == []
@@ -100,9 +101,11 @@ def test_annotate_only_keeps_finding_no_warning() -> None:
 
     @fidelity_wrap(min_score=0.7, on_fail="annotate_only", provider=prov)
     async def agent() -> AgentResult:
-        return _result_with([
-            _finding(summary="x", excerpt="this is a long enough premise text"),
-        ])
+        return _result_with(
+            [
+                _finding(summary="x", excerpt="this is a long enough premise text"),
+            ]
+        )
 
     r = _run(agent())
     assert len(r.findings) == 1
@@ -115,9 +118,11 @@ def test_pass_verdict_keeps_finding_no_warning() -> None:
 
     @fidelity_wrap(min_score=0.7, on_fail="reject", provider=prov)
     async def agent() -> AgentResult:
-        return _result_with([
-            _finding(summary="x", excerpt="this is a long enough premise text"),
-        ])
+        return _result_with(
+            [
+                _finding(summary="x", excerpt="this is a long enough premise text"),
+            ]
+        )
 
     r = _run(agent())
     assert len(r.findings) == 1
@@ -145,9 +150,11 @@ def test_idempotent_does_not_re_evaluate() -> None:
     @fidelity_wrap(min_score=0.7, provider=prov)
     @fidelity_wrap(min_score=0.7, provider=prov)
     async def agent() -> AgentResult:
-        return _result_with([
-            _finding(summary="x", excerpt="long enough excerpt for evaluation here"),
-        ])
+        return _result_with(
+            [
+                _finding(summary="x", excerpt="long enough excerpt for evaluation here"),
+            ]
+        )
 
     r = _run(agent())
     assert len(r.findings) == 1
@@ -161,12 +168,14 @@ def test_default_provider_falls_back_to_factory(monkeypatch) -> None:
 
     @fidelity_wrap(min_score=0.7)
     async def agent() -> AgentResult:
-        return _result_with([
-            _finding(
-                summary="A test summary",
-                excerpt="a totally different premise that has nothing in common with the claim",
-            ),
-        ])
+        return _result_with(
+            [
+                _finding(
+                    summary="A test summary",
+                    excerpt="a totally different premise that has nothing in common with the claim",
+                ),
+            ]
+        )
 
     r = _run(agent())
     assert r.findings[0].metadata["nli_provider"] == "fake-nli"
@@ -177,9 +186,11 @@ def test_language_is_propagated_from_result_metadata() -> None:
 
     @fidelity_wrap(min_score=0.7, provider=prov)
     async def agent() -> AgentResult:
-        res = _result_with([
-            _finding(summary="x", excerpt="long enough excerpt for evaluation here"),
-        ])
+        res = _result_with(
+            [
+                _finding(summary="x", excerpt="long enough excerpt for evaluation here"),
+            ]
+        )
         res.metadata["language"] = "pt"
         return res
 
@@ -192,10 +203,9 @@ def test_concurrent_findings_each_get_metadata() -> None:
 
     @fidelity_wrap(min_score=0.7, provider=prov)
     async def agent() -> AgentResult:
-        return _result_with([
-            _finding(summary=f"summary {i}", excerpt=f"long enough excerpt #{i} for eval")
-            for i in range(5)
-        ])
+        return _result_with(
+            [_finding(summary=f"summary {i}", excerpt=f"long enough excerpt #{i} for eval") for i in range(5)]
+        )
 
     r = _run(agent())
     assert len(r.findings) == 5
@@ -248,9 +258,7 @@ def test_min_excerpt_chars_huge_skips_everything() -> None:
 
     @fidelity_wrap(min_score=0.7, provider=prov, min_excerpt_chars=100000)
     async def agent() -> AgentResult:
-        return _result_with(
-            [_finding(summary="s", excerpt="a paragraph of reasonable length here.")]
-        )
+        return _result_with([_finding(summary="s", excerpt="a paragraph of reasonable length here.")])
 
     r = _run(agent())
     assert r.findings[0].metadata["nli_verdict"] == "skipped"
@@ -322,9 +330,7 @@ def test_threshold_matrix(verdict, score, min_score, expected_fail) -> None:
 
     @fidelity_wrap(min_score=min_score, on_fail="warn", provider=prov)
     async def agent() -> AgentResult:
-        return _result_with(
-            [_finding(summary="s", excerpt="a sufficiently long excerpt to evaluate")]
-        )
+        return _result_with([_finding(summary="s", excerpt="a sufficiently long excerpt to evaluate")])
 
     r = _run(agent())
     assert len(r.findings) == 1  # warn never drops
@@ -340,9 +346,7 @@ def test_default_on_fail_is_warn() -> None:
 
     @fidelity_wrap(provider=prov)  # no on_fail kwarg
     async def agent() -> AgentResult:
-        return _result_with(
-            [_finding(summary="s", excerpt="a sufficiently long excerpt here")]
-        )
+        return _result_with([_finding(summary="s", excerpt="a sufficiently long excerpt here")])
 
     r = _run(agent())
     assert len(r.findings) == 1
@@ -367,9 +371,7 @@ def test_min_score_below_zero_is_permissive() -> None:
 
     @fidelity_wrap(min_score=0.0, on_fail="reject", provider=prov)
     async def agent() -> AgentResult:
-        return _result_with(
-            [_finding(summary="s", excerpt="a sufficiently long excerpt here")]
-        )
+        return _result_with([_finding(summary="s", excerpt="a sufficiently long excerpt here")])
 
     r = _run(agent())
     assert len(r.findings) == 1
@@ -382,9 +384,7 @@ def test_min_score_above_one_rejects_everything() -> None:
 
     @fidelity_wrap(min_score=1.01, on_fail="reject", provider=prov)
     async def agent() -> AgentResult:
-        return _result_with(
-            [_finding(summary="s", excerpt="a sufficiently long excerpt here")]
-        )
+        return _result_with([_finding(summary="s", excerpt="a sufficiently long excerpt here")])
 
     r = _run(agent())
     assert r.findings == []
@@ -396,10 +396,9 @@ def test_reject_mode_does_not_drop_passing_findings() -> None:
 
     @fidelity_wrap(min_score=0.7, on_fail="reject", provider=prov)
     async def agent() -> AgentResult:
-        return _result_with([
-            _finding(summary=f"good {i}", excerpt=f"a sufficiently long excerpt #{i} here")
-            for i in range(3)
-        ])
+        return _result_with(
+            [_finding(summary=f"good {i}", excerpt=f"a sufficiently long excerpt #{i} here") for i in range(3)]
+        )
 
     r = _run(agent())
     assert len(r.findings) == 3

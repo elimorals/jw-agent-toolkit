@@ -15,7 +15,6 @@ import json
 from typing import Literal
 
 import typer
-
 from jw_agents.apologetics import apologetics
 from jw_agents.fidelity_wrap import fidelity_wrap
 

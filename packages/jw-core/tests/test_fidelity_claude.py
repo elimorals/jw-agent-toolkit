@@ -10,7 +10,6 @@ import json
 from typing import Any
 
 import pytest
-
 from jw_core.fidelity.nli_providers.claude_nli import ClaudeNLI
 
 
@@ -55,9 +54,7 @@ def test_claude_available_with_api_key(monkeypatch) -> None:
 
 def test_claude_parses_entails(monkeypatch) -> None:
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-fake")
-    client = _FakeAnthropicClient(
-        json.dumps({"verdict": "entails", "score": 0.91, "reason": "supported"})
-    )
+    client = _FakeAnthropicClient(json.dumps({"verdict": "entails", "score": 0.91, "reason": "supported"}))
     p = ClaudeNLI(client=client)
     v = p.evaluate(claim="A", premise="B", language="es")
     assert v.verdict == "entails"
@@ -68,9 +65,7 @@ def test_claude_parses_entails(monkeypatch) -> None:
 
 def test_claude_parses_contradicts(monkeypatch) -> None:
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-fake")
-    client = _FakeAnthropicClient(
-        json.dumps({"verdict": "contradicts", "score": 0.83, "reason": "negation"})
-    )
+    client = _FakeAnthropicClient(json.dumps({"verdict": "contradicts", "score": 0.83, "reason": "negation"}))
     p = ClaudeNLI(client=client)
     v = p.evaluate(claim="A", premise="B")
     assert v.verdict == "contradicts"
@@ -132,8 +127,4 @@ def test_claude_sets_prompt_caching(monkeypatch) -> None:
     sent = client.messages.calls[0]
     system = sent["system"]
     assert isinstance(system, list)
-    assert any(
-        block.get("cache_control", {}).get("type") == "ephemeral"
-        for block in system
-        if isinstance(block, dict)
-    )
+    assert any(block.get("cache_control", {}).get("type") == "ephemeral" for block in system if isinstance(block, dict))

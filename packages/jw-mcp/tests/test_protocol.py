@@ -146,6 +146,8 @@ _EXPECTED_TOOLS = {
     "generate_illustration",
     # Phase 35 — Constrained decoding (grammar-anchored synthesis)
     "run_constrained",
+    # Phase 39 — NLI runtime fidelity
+    "evaluate_nli",
 }
 
 

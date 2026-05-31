@@ -52,9 +52,7 @@ def ensure_verdict(
     """Canonical constructor — clamp score, validate verdict label."""
 
     if verdict not in _VALID_VERDICTS:
-        raise ValueError(
-            f"invalid verdict {verdict!r}; expected one of {sorted(_VALID_VERDICTS)}"
-        )
+        raise ValueError(f"invalid verdict {verdict!r}; expected one of {sorted(_VALID_VERDICTS)}")
     score_f = float(score)
     if math.isnan(score_f):
         # Fail-closed: providers that hallucinate NaN (LLM bug) get the

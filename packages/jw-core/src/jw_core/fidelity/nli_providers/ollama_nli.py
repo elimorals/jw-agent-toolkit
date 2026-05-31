@@ -76,16 +76,10 @@ class OllamaNLI:
         self._cache = (host, model, ok)
         return ok
 
-    def evaluate(
-        self, claim: str, premise: str, *, language: str = "en"
-    ) -> NLIVerdict:
+    def evaluate(self, claim: str, premise: str, *, language: str = "en") -> NLIVerdict:
         host = self._host()
         model = self._model()
-        user_body = (
-            f"PREMISE:\n{premise}\n\n"
-            f"CONCLUSION:\n{claim}\n\n"
-            f"Language: {language}"
-        )
+        user_body = f"PREMISE:\n{premise}\n\nCONCLUSION:\n{claim}\n\nLanguage: {language}"
         try:
             r = self._client().post(
                 f"{host}/api/chat",

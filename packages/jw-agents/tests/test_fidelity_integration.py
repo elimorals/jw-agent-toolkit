@@ -19,7 +19,6 @@ from __future__ import annotations
 import asyncio
 
 import pytest
-
 from jw_agents.base import AgentResult, Citation, Finding
 from jw_agents.fidelity_wrap import fidelity_wrap
 

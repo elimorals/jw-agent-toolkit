@@ -76,17 +76,11 @@ class OpenAINLI:
             return premise
         return premise[:_MAX_PREMISE_CHARS]
 
-    def evaluate(
-        self, claim: str, premise: str, *, language: str = "en"
-    ) -> NLIVerdict:
+    def evaluate(self, claim: str, premise: str, *, language: str = "en") -> NLIVerdict:
         client = self._ensure_client()
         model = os.getenv("JW_NLI_OPENAI_MODEL", _DEFAULT_MODEL)
         truncated = self._truncate(premise, claim)
-        user_body = (
-            f"PREMISE:\n{truncated}\n\n"
-            f"CONCLUSION:\n{claim}\n\n"
-            f"Language: {language}"
-        )
+        user_body = f"PREMISE:\n{truncated}\n\nCONCLUSION:\n{claim}\n\nLanguage: {language}"
         try:
             resp = client.chat.completions.create(
                 model=model,

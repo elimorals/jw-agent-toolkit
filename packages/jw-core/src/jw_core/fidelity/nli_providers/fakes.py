@@ -70,9 +70,7 @@ class FakeNLI:
     def is_available(self) -> bool:
         return True
 
-    def evaluate(
-        self, claim: str, premise: str, *, language: str = "en"
-    ) -> NLIVerdict:
+    def evaluate(self, claim: str, premise: str, *, language: str = "en") -> NLIVerdict:
         wa, wb = _words(claim), _words(premise)
         cont = _containment(wa, wb)
 

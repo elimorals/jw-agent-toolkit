@@ -9,7 +9,6 @@ weights are gated by the ``nli-local`` extra and only run in nightly.
 from __future__ import annotations
 
 import pytest
-
 from jw_core.fidelity.nli_providers.deberta_mnli import DeBERTaV3MNLI
 
 
