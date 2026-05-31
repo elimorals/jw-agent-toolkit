@@ -30,6 +30,7 @@ Para colaboradores nuevos y para tomar decisiones de diseño con criterio.
 
 Orientadas a casos de uso. Cada una es autocontenida con código de ejemplo.
 
+- [Fidelidad NLI en runtime](guias/fidelity-nli.md) — Fase 39: verificación NLI claim/premise sobre cada `Finding`; 5 providers (Claude / OpenAI / DeBERTa / Ollama / Fake) con `FakeNLI` siempre disponible; CLI/MCP `--fidelity {off,warn,reject}`.
 - [Resolver citas bíblicas](guias/resolver-citas-biblicas.md) — Usar `parse_reference`, manejar idiomas, construir URLs.
 - [Usar los clientes HTTP](guias/usar-clientes-http.md) — CDN, WOL, Mediator, PubMedia, TopicIndex: patrones comunes.
 - [Infraestructura Fase 9](guias/infraestructura-fase9.md) — Cache SQLite, throttler per-host, telemetría opt-in, factory unificado.
