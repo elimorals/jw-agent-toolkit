@@ -58,3 +58,15 @@ def test_ensure_verdict_rejects_bad_label() -> None:
 def test_ensure_verdict_default_raw_is_empty_dict() -> None:
     v = ensure_verdict(verdict="neutral", score=0.5, provider="x")
     assert v.raw == {}
+
+
+def test_ensure_verdict_maps_nan_to_zero() -> None:
+    """NaN score from a buggy provider must not break the [0, 1] invariant.
+
+    ``min/max`` propagate NaN, so a naive clamp would leave NaN in place.
+    ensure_verdict is the single chokepoint that guarantees finite scores.
+    """
+
+    v = ensure_verdict(verdict="entails", score=float("nan"), provider="x")
+    assert v.score == 0.0
+    assert v.verdict == "entails"

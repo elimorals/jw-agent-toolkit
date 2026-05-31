@@ -13,6 +13,7 @@ provider bugs (LLM hallucinated ``score=1.7``, etc.).
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Any, Literal, get_args
 
@@ -54,7 +55,13 @@ def ensure_verdict(
         raise ValueError(
             f"invalid verdict {verdict!r}; expected one of {sorted(_VALID_VERDICTS)}"
         )
-    clamped = max(0.0, min(1.0, float(score)))
+    score_f = float(score)
+    if math.isnan(score_f):
+        # Fail-closed: providers that hallucinate NaN (LLM bug) get the
+        # most conservative score. ``min/max`` propagate NaN silently,
+        # which would defeat the [0, 1] invariant downstream.
+        score_f = 0.0
+    clamped = max(0.0, min(1.0, score_f))
     return NLIVerdict(
         verdict=verdict,  # type: ignore[arg-type]
         score=clamped,
