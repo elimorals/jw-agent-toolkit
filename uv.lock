@@ -1464,6 +1464,7 @@ version = "0.1.0"
 source = { editable = "packages/jw-cli" }
 dependencies = [
     { name = "jw-core" },
+    { name = "jw-eval" },
     { name = "rich" },
     { name = "typer" },
 ]
@@ -1471,6 +1472,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "jw-core", editable = "packages/jw-core" },
+    { name = "jw-eval", editable = "packages/jw-eval" },
     { name = "rich", specifier = ">=13.9.0" },
     { name = "typer", specifier = ">=0.13.0" },
 ]
