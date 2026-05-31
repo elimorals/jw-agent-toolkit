@@ -1,7 +1,8 @@
-# Agent IS registered now. BLOCKED: prepare_lesson() calls
-# WOLClient.get_publication_page(n=...) but the real signature has no
-# such kwarg (real bug in jw_agents.study_conductor.prepare_lesson, not
-# in this YAML). Tracked separately. Case stays here for when fixed.
+# Agent: study_conductor.prepare_lesson(pub_code, chapter, language).
+# Without a local JWPUB the agent falls back to WOL and emits source=wol_chapter.
+# CI runs offline-by-default, so we assert the offline path. The JWPUB-local
+# path (source=jwpub_chapter) is covered by jw-core unit tests where we can
+# stage a fixture JWPUB.
 id: l1_study_conductor_lff_ch1_es
 agent: study_conductor
 layer: l1
@@ -11,7 +12,7 @@ input:
   language: es
 expected:
   min_findings: 1
-  must_have_source: jwpub_chapter
+  must_have_source: wol_chapter
   must_have_citation: true
   forbidden_keywords_in_findings:
     - "supuestamente"
@@ -21,7 +22,3 @@ metadata:
   topic: study_book.lff.ch1
   added_by: elias
   added_at: 2026-05-30
-  note: |
-    Si la suite corre sin JWPUB local, el agente devuelve source=wol_chapter.
-    En ese caso este caso L1 puede ajustarse a `must_have_source: wol_chapter`
-    en una rama de CI sin red.

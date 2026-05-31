@@ -31,7 +31,7 @@ from jw_core.clients.pub_media import PubMediaClient
 from jw_core.clients.topic_index import TopicIndexClient
 from jw_core.clients.weblang import WeblangClient
 from jw_core.clients.wol import WOLClient
-from jw_core.telemetry import get_telemetry
+from jw_core.telemetry import Telemetry, get_telemetry
 from jw_core.throttle import Throttler
 
 
@@ -47,6 +47,10 @@ class ClientSuite:
     weblang: WeblangClient
     throttler: Throttler
     cache: DiskCache
+    # The shared Telemetry instance (or None when telemetry is off). Exposed
+    # so downstream callers can wire ad-hoc clients (e.g. JWBroadcasting in
+    # news_monitor) into the same drift-detection channel as the suite.
+    telemetry: Telemetry | None = None
 
     async def aclose(self) -> None:
         await self.cdn.aclose()
@@ -104,4 +108,5 @@ def build_clients(
         weblang=weblang,
         throttler=throttler or Throttler(),  # never None in the bundle for typing
         cache=cache or DiskCache(cache_path),
+        telemetry=telemetry,
     )

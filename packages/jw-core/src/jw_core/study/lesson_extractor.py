@@ -110,12 +110,24 @@ def _extract_from_wol(book, chapter, language) -> LessonContent:
 
 
 def _fetch_chapter_from_wol(pub_code: str, chapter: int, language: str):
-    """Lazy import — never touch network at import time."""
+    """Fetch + parse the WOL publication chapter page.
+
+    Lazy import — never touch network at import time. Returns an Article
+    object with .title/.paragraphs that `_extract_from_wol` can read via
+    getattr fallbacks.
+    """
+
+    import asyncio
 
     from jw_core.clients.factory import build_clients
+    from jw_core.parsers.article import parse_article
 
     suite = build_clients()
-    return suite.wol.get_publication_page(pub_code, n=chapter, language=language)
+    # get_publication_page is async and returns (url, html). Use
+    # `number=` (the real kwarg name); the previous `n=` was a typo that
+    # the eval suite revealed.
+    _url, html = asyncio.run(suite.wol.get_publication_page(pub_code, number=chapter, language=language))
+    return parse_article(html)
 
 
 def _collect_scripture_refs(paragraphs: list[str]) -> dict[int, list[str]]:
