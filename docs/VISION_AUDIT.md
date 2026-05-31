@@ -27,6 +27,7 @@
 | Fase 31 (exportador hoja de estudio) | ✅ Nuevo | `jw_core.exporters` — IR `StudySheet` + Markdown / PDF (`[pdf]`) / DOCX (`[docx]`) / Anki (`[anki]`) con GUIDs sha256 estables; CLI `jw export`; MCP `export_study_sheet` |
 | Fase 32 (life topics) | ✅ Nuevo | `life_topics` agente + tool MCP + registry 9 temas |
 | Fase 22 (eval doctrinal) | ✅ Nuevo | `jw-eval` — L1+L2+L3, 30 cases iniciales |
+| Fase 34 (audio-premium) | VISION #3 | TTS Kokoro/XTTSv2/F5/ElevenLabs + ASR WhisperTurbo/Deepgram; CLI `jw say`/`jw transcribe`; MCP `synthesize_speech`/`transcribe_audio`; consent.txt para cloning |
 
 **100% de las 13 secciones tienen entrega.** Métricas:
 - **24+ archivos Python nuevos** organizados en 8 sub-paquetes (`audio/`, `calendar/`, `family/`, `observability/`, `personalization/`, `privacy/`, `study/`, `vision/`).

@@ -619,3 +619,30 @@ gráficas (export JSON ya lo habilita externamente), modo familia.
 - ✅ 26 tests nuevos en `packages/jw-eval/tests/`.
 - ✅ 1 test MCP en `packages/jw-mcp/tests/test_eval_tool.py`.
 - ✅ Suite global sin regresiones.
+
+---
+
+## Fase 34 — `audio-premium` ✅
+
+> Audio upgrade. Spec: `docs/superpowers/specs/2026-05-31-fase-34-audio-premium-design.md`.
+
+- ✅ Kokoro-82M (local, multilingüe) como TTS default
+- ✅ ElevenLabs TTS opt-in (env key)
+- ✅ XTTSv2 voice-cloning con doble opt-in + consent.txt (Política #6)
+- ✅ F5-TTS experimental (nvidia primary)
+- ✅ Whisper Turbo + auto-select por VRAM (`hardware.recommend_model_size()`)
+- ✅ Deepgram ASR opt-in (env key, SDK + httpx fallback)
+- ✅ Providers originales `system`/`edge`/`piper` intactos
+- ✅ Nuevos comandos `jw say` y `jw transcribe`
+- ✅ Nuevas tools MCP `synthesize_speech` y `transcribe_audio`
+- ✅ Guía `docs/guias/audio-premium.md`
+- ✅ Extras opt-in: `tts-kokoro`, `tts-xtts`, `tts-f5`, `tts-elevenlabs`,
+  `asr-deepgram`, `asr-turbo`, `tts-premium`, `asr-premium`, `audio-premium`
+
+### Cobertura de tests
+
+- ✅ 6 tests `test_audio_hardware.py` (target detection + recommend).
+- ✅ 5 tests `test_tts_kokoro.py` + 5 `test_tts_xtts.py` + 5 `test_tts_f5.py` + 5 `test_tts_elevenlabs.py`.
+- ✅ 5 tests `test_asr_whisper_turbo.py` (4 + 1 skipped sin faster-whisper) + 5 `test_asr_deepgram.py`.
+- ✅ 6 tests `test_audio_factory.py` (chain + JW_TTS_PROVIDER).
+- ✅ Suite global sin regresiones.
