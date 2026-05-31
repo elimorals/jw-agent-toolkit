@@ -1,0 +1,79 @@
+name: wol-browser-extension
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/wol-browser-extension/**"
+      - "packages/jw-mcp/src/jw_mcp/rest_api.py"
+      - ".github/workflows/wol-extension.yml"
+  pull_request:
+    paths:
+      - "apps/wol-browser-extension/**"
+  release:
+    types: [published]
+
+jobs:
+  test-and-package:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/wol-browser-extension
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: apps/wol-browser-extension/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build
+        run: pnpm build
+
+      - name: E2E tests
+        run: pnpm test:e2e
+
+      - name: Privacy enforcement (BLOCKING)
+        run: pnpm test:privacy
+
+      - name: Package
+        run: pnpm package
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jw-toolkit-wol-zip
+          path: apps/wol-browser-extension/dist-zip/*.zip
+          if-no-files-found: error
+
+  release:
+    if: github.event_name == 'release'
+    needs: test-and-package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: jw-toolkit-wol-zip
+          path: dist-zip
+      - name: Attach to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist-zip/*.zip
