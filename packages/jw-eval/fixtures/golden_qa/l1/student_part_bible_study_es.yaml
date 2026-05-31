@@ -1,0 +1,18 @@
+# packages/jw-eval/fixtures/golden_qa/l1/student_part_bible_study_es.yaml
+id: l1_student_part_bible_study_es
+agent: student_part_helper
+layer: l1
+input:
+  kind: bible_study
+  topic_or_ref: "Romanos 6:23"
+  language: es
+  audience: new
+  oratory_point: 20
+expected:
+  min_findings: 4
+  must_have_citation: true
+metadata:
+  topic: student_parts.bible_study.es
+  fase: 26
+  added_by: elias
+  added_at: 2026-05-30
