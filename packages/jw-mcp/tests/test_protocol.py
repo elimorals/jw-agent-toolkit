@@ -86,6 +86,9 @@ _EXPECTED_TOOLS = {
     "read_article_aloud",
     "search_broadcasting",
     "index_broadcasting_vtt",
+    # Phase 34 — audio premium
+    "synthesize_speech",
+    "transcribe_audio",
     # Phase 19 — JW Library integrations
     "open_in_jw_library",
     "import_jw_library_backup",

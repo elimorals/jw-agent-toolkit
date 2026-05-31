@@ -1595,6 +1595,71 @@ def index_broadcasting_vtt(
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Tools: audio premium (Phase 34) — generic TTS/ASR
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+def synthesize_speech(
+    text: str,
+    output_path: str,
+    language: str = "en",
+    provider: str = "",
+    voice: str = "",
+) -> dict[str, Any]:
+    """Synthesize arbitrary `text` via the configured TTS chain.
+
+    `provider` empty = use auto-detection (Kokoro local if installed, else
+    Edge/System/ElevenLabs/Piper). Pass one of:
+    kokoro_local|edge|system|elevenlabs|piper|xtts|f5.
+    """
+    from jw_core.audio.tts import synthesize_to_file
+
+    out = synthesize_to_file(
+        text,
+        output_path,
+        language=language,
+        provider=provider or None,
+        voice=voice or None,
+    )
+    return {"path": str(out)}
+
+
+@mcp.tool
+def transcribe_audio(
+    audio_path: str,
+    language: str = "",
+    model_size: str = "auto",
+    provider: str = "whisper_turbo",
+) -> dict[str, Any]:
+    """Transcribe an audio file via whisper_turbo (local) or deepgram (API).
+
+    `model_size="auto"` chooses the largest Whisper variant that fits the
+    available VRAM. `language` empty = autodetect.
+    """
+    from pathlib import Path as _Path
+
+    if provider == "deepgram":
+        from jw_core.audio.asr_providers.deepgram import DeepgramProvider
+
+        p = DeepgramProvider()
+    else:
+        from jw_core.audio.asr_providers.whisper_turbo import WhisperTurboProvider
+
+        p = WhisperTurboProvider()
+    result = p.transcribe(
+        _Path(audio_path),
+        language=language or None,
+        model_size=model_size,
+    )
+    return {
+        "text": result.text,
+        "language": result.language,
+        "duration": result.duration,
+    }
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Tools: JW Library backup parsing (Phase 19 — integrations)
 # ────────────────────────────────────────────────────────────────────────
 
