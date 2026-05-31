@@ -123,3 +123,30 @@ def test_phone_every_audience_has_generic() -> None:
 def test_phone_fallback_chain() -> None:
     t = get_phone_template("nonexistent", "nonexistent")
     assert t is PHONE_TEMPLATES[("default", "generic")]
+
+
+from jw_core.data.cart_templates import CART_TEMPLATES, get_cart_template
+
+
+def test_cart_template_has_time_target_30s() -> None:
+    t = get_cart_template("default", "generic")
+    assert t.time_target_seconds == 30
+    assert t.word_count_target == 0
+
+
+def test_cart_every_audience_has_generic() -> None:
+    from jw_core.data.letter_templates import AUDIENCES
+
+    for aud in AUDIENCES:
+        t = get_cart_template(aud, "generic")
+        for lang in ("en", "es", "pt"):
+            assert t.opener.get(lang)
+            assert t.bridge.get(lang)
+            assert t.closing.get(lang)
+
+
+def test_cart_opener_is_a_question() -> None:
+    # Cart witnessing opens with one short question.
+    t = get_cart_template("default", "generic")
+    assert "?" in t.opener["es"]
+    assert "?" in t.opener["en"]
