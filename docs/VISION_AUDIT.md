@@ -24,6 +24,7 @@
 | Fase 25 (news monitor) | ✅ Nuevo | `jw news digest` — 3 canales, seen-store SQLite, tool MCP |
 | Fase 26 (student parts) | VISION #2 | `student_part_helper` — 4 kinds × 4 audiencias × 3 idiomas, 50 puntos de oratoria, CLI `jw student` + MCP |
 | Fase 30 (kingdom songs) | VISION #1 | `jw_core.songs` — metadatos `sjj` sin letra (12 cánticos en/es/pt), CLI `jw song`, MCP `lookup_song`/`songs_for_week` |
+| Fase 31 (exportador hoja de estudio) | ✅ Nuevo | `jw_core.exporters` — IR `StudySheet` + Markdown / PDF (`[pdf]`) / DOCX (`[docx]`) / Anki (`[anki]`) con GUIDs sha256 estables; CLI `jw export`; MCP `export_study_sheet` |
 
 **100% de las 13 secciones tienen entrega.** Métricas:
 - **24+ archivos Python nuevos** organizados en 8 sub-paquetes (`audio/`, `calendar/`, `family/`, `observability/`, `personalization/`, `privacy/`, `study/`, `vision/`).
@@ -209,6 +210,10 @@ Búsqueda literal con SQLite FTS5 sobre NWT + JWPUB + EPUB. Implementación en `
 ### Fase 29 — Compositor de carta / teléfono / carrito ✅ shipped
 
 Cubre feature #4 (compositor). Agente `letter_composer` con 3 modalidades (letter/phone/cart) × 7 audiencias × 8 familias temáticas. Salida estructurada de 4 secciones (`opener · bridge · scripture · closing`), prosa propia (copyright-safe), `Citation.url` a wol.jw.org sin copiar texto bíblico. CLI `jw letter`; MCP `compose_witnessing`; 3 golden cases L1. Implementación en `jw_agents.letter_composer` + `jw_core.data.{letter,phone,cart}_templates`. Spec: [`docs/superpowers/specs/2026-05-30-fase-29-letter-composer-design.md`](superpowers/specs/2026-05-30-fase-29-letter-composer-design.md). Guía: [`docs/guias/compositor-de-predicacion.md`](guias/compositor-de-predicacion.md).
+
+### Fase 31 — Exportador hoja de estudio (PDF / DOCX / Anki) ✅ shipped
+
+Convierte cualquier `AgentResult` en un entregable imprimible (Markdown / PDF / DOCX) o un mazo Anki para repaso espaciado. IR única `StudySheet` (Pydantic v2) consumida por cuatro exporters; conversión `AgentResult → StudySheet` centralizada en `from_agent_result`. Dependencias pesadas opt-in: `[pdf]` (WeasyPrint), `[docx]` (python-docx), `[anki]` (genanki). Markdown siempre disponible. Anki usa GUIDs sha256-derivados → re-export idempotente (actualiza, no duplica). Templates Jinja2 con override en `~/.jw-agent-toolkit/templates/`. CLI `jw export <source.json> --format {markdown|pdf|docx|apkg}` con soporte stdin (`-`). MCP `export_study_sheet`. Implementación en `jw_core.exporters`. Spec: [`docs/superpowers/specs/2026-05-30-fase-31-exporter-design.md`](superpowers/specs/2026-05-30-fase-31-exporter-design.md). Guía: [`docs/guias/exportador-hoja-de-estudio.md`](guias/exportador-hoja-de-estudio.md).
 
 ## Cómo verificar el toolkit completo
 

@@ -59,6 +59,7 @@ Orientadas a casos de uso. Cada una es autocontenida con código de ejemplo.
 - [Monitor de novedades](guias/monitor-de-novedades.md) — `jw news digest` detecta publicaciones, videos y workbooks nuevos. Local-first, determinista.
 - [Partes del estudiante](guias/partes-del-estudiante.md) — guion 4-sección para lectura, conversación, revisita y estudio bíblico (Fase 26).
 - [Concordancia exacta](guias/concordancia-exacta.md) — `jw grep` literal con SQLite FTS5 sobre NWT + JWPUB + EPUB (Fase 28).
+- [Exportador de hoja de estudio](guias/exportador-hoja-de-estudio.md) — Fase 31: convertir cualquier `AgentResult` en Markdown / PDF / DOCX / Anki con citas verificables y GUIDs Anki estables (re-export idempotente).
 
 ### Referencia exhaustiva — cada función documentada
 

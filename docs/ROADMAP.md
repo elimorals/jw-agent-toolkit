@@ -545,3 +545,20 @@ gráficas (export JSON ya lo habilita externamente), modo familia.
 - ✅ CLI `jw song <N>` y `jw song week`.
 - ✅ Tools MCP `lookup_song`, `songs_for_week`.
 - ✅ Guía `docs/guias/canticos-del-reino.md` con sección legal al frente.
+
+---
+
+## Fase 31 — Exportador hoja de estudio (PDF / DOCX / Anki) ✅
+
+> Objetivo: convertir cualquier `AgentResult` en un entregable imprimible (PDF / DOCX / Markdown) o un mazo Anki para repaso espaciado. IR única (`StudySheet`) consumida por cuatro exporters. Dependencias pesadas opt-in vía extras (`[pdf]`, `[docx]`, `[anki]`). Spec en [`superpowers/specs/2026-05-30-fase-31-exporter-design.md`](superpowers/specs/2026-05-30-fase-31-exporter-design.md).
+
+- ✅ `jw_core.exporters.ir.StudySheet` IR Pydantic v2 + `from_agent_result()` conversor único.
+- ✅ Markdown exporter con 3 estilos de cita (`inline-paren`, `footnote`, `bibliography`).
+- ✅ Jinja2 template resolver con override en `~/.jw-agent-toolkit/templates/` y 2 temas built-in (`plain`, `study-sheet`).
+- ✅ PDF exporter vía WeasyPrint (opt-in `[pdf]`).
+- ✅ DOCX exporter vía python-docx con hyperlinks reales (opt-in `[docx]`).
+- ✅ Anki exporter vía genanki con GUIDs sha256 estables → re-export actualiza, no duplica (opt-in `[anki]`).
+- ✅ CLI `jw export <source.json> --format {markdown|pdf|docx|apkg}` con soporte stdin (`-`).
+- ✅ Tool MCP `export_study_sheet`.
+- ✅ Tests: 45 nuevos (IR · markdown · templates · pdf · docx · anki · CLI · MCP).
+- ✅ Guía `docs/guias/exportador-hoja-de-estudio.md`.
