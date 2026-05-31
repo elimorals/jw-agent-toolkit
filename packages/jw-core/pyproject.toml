@@ -13,6 +13,7 @@ dependencies = [
     "brotli>=1.1.0",
     "defusedxml>=0.7.1",
     "jinja2>=3.1.3",
+    "Pillow>=10.0.0",
 ]
 
 [project.optional-dependencies]
@@ -47,6 +48,31 @@ grammar-openai = [
 ]
 grammar-local = [
     "llama-cpp-python>=0.2.78",
+]
+vlm-anthropic = [
+    "anthropic>=0.34.0",
+]
+vlm-openai = [
+    "openai>=1.40.0",
+]
+vlm-api-qwen = [
+    "httpx>=0.27.0",
+]
+vlm-mlx = [
+    "mlx-vlm>=0.1.0",
+    "Pillow>=10.0.0",
+]
+vlm-nvidia = [
+    "vllm>=0.6.0",
+    "Pillow>=10.0.0",
+]
+vlm-cpu = [
+    "llama-cpp-python>=0.3.0",
+    "Pillow>=10.0.0",
+]
+vlm-tesseract = [
+    "pytesseract>=0.3.10",
+    "Pillow>=10.0.0",
 ]
 
 [build-system]

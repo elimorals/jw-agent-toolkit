@@ -147,4 +147,5 @@ addopts = "--import-mode=importlib"
 markers = [
     "embeddings_local: tests that require sentence-transformers + a local model download",
     "rerank_local: tests that require a local cross-encoder model download",
+    "vlm_real: integration tests that hit real VLM hardware or APIs (opt-in)",
 ]
