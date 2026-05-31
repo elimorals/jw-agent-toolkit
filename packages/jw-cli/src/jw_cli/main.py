@@ -14,6 +14,9 @@ from __future__ import annotations
 import typer
 
 from jw_cli.commands import (
+    apologetics as apologetics_module,
+)
+from jw_cli.commands import (
     chapter,
     citations,
     daily,
@@ -90,6 +93,7 @@ app.command(name="eval")(eval_module.eval_cmd)
 app.command(name="say")(say.say_cmd)
 app.command(name="transcribe")(transcribe.transcribe_cmd)
 app.add_typer(constrained_app, name="constrained")
+app.command(name="apologetics")(apologetics_module.apologetics_cmd)
 
 
 def main() -> None:
