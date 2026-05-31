@@ -23,11 +23,13 @@ from jw_cli.commands import (
     life,
     ministry,
     news,
+    say,
     search,
     song,
     student,
     study,
     topic,
+    transcribe,
     verse,
     workbook,
 )
@@ -76,6 +78,8 @@ app.add_typer(report_module.report_app, name="report")
 app.command(name="export")(export_module.export_cmd)
 app.command(name="life")(life.life_cmd)
 app.command(name="eval")(eval_module.eval_cmd)
+app.command(name="say")(say.say_cmd)
+app.command(name="transcribe")(transcribe.transcribe_cmd)
 
 
 def main() -> None:
