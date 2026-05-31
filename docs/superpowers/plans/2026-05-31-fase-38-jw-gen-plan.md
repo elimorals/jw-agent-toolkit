@@ -2352,8 +2352,103 @@ git commit -m "feat(jw-gen): provider factory with env override + fallback chain
 **Files:**
 - Create: `packages/jw-gen/src/jw_gen/providers/image/__init__.py`
 - Create: `packages/jw-gen/src/jw_gen/providers/image/nanobanana.py`
+- Create: `packages/jw-gen/tests/test_provider_nanobanana.py`
 
-- [ ] **Step 1: Implement adapter (no test — covered by factory + offline policy tests)**
+- [ ] **Step 1: Write the failing test (offline — stub the SDK via sys.modules)**
+
+```python
+# packages/jw-gen/tests/test_provider_nanobanana.py
+"""Offline unit tests for NanoBanana adapter.
+
+The SDK (`google.genai`) is monkeypatched into sys.modules with a fake
+that captures call args. No network, no real key required.
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+import types
+from pathlib import Path
+
+import pytest
+
+from jw_gen.models import GenerationRequest
+
+
+def test_is_available_false_when_no_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    from jw_gen.providers.image.nanobanana import NanoBananaProvider
+
+    assert NanoBananaProvider().is_available() is False
+
+
+def test_is_available_false_when_sdk_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("GEMINI_API_KEY", "fake-key")
+    monkeypatch.setitem(sys.modules, "google.genai", None)
+    from jw_gen.providers.image.nanobanana import NanoBananaProvider
+
+    assert NanoBananaProvider().is_available() is False
+
+
+def test_cost_estimate_is_constant(tmp_path: Path) -> None:
+    from jw_gen.providers.image.nanobanana import NanoBananaProvider
+
+    p = NanoBananaProvider(work_dir=tmp_path)
+    hint = p.cost_estimate(GenerationRequest(prompt="x", kind="image"))
+    assert hint.usd > 0
+    assert hint.time_s > 0
+
+
+def test_generate_calls_sdk_and_writes_png(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    captured: dict = {}
+
+    class _FakeImage:
+        image_bytes = b"\x89PNG\r\n\x1a\nFAKE"
+
+    class _FakeGen:
+        def __init__(self) -> None:
+            self.generated_images = [types.SimpleNamespace(image=_FakeImage())]
+
+    class _FakeModels:
+        def generate_images(self, *, model: str, prompt: str, number_of_images: int):
+            captured["model"] = model
+            captured["prompt"] = prompt
+            captured["n"] = number_of_images
+            return _FakeGen()
+
+    class _FakeClient:
+        def __init__(self, api_key: str) -> None:
+            captured["api_key"] = api_key
+            self.models = _FakeModels()
+
+    fake_genai = types.SimpleNamespace(Client=_FakeClient)
+    fake_google = types.ModuleType("google")
+    fake_google.genai = fake_genai  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "google", fake_google)
+    monkeypatch.setitem(sys.modules, "google.genai", fake_genai)
+    monkeypatch.setenv("GEMINI_API_KEY", "fake-key")
+
+    from jw_gen.providers.image.nanobanana import NanoBananaProvider
+
+    p = NanoBananaProvider(work_dir=tmp_path)
+    out = p.generate(GenerationRequest(prompt="paisaje sereno", kind="image"))
+
+    assert out.exists()
+    assert out.read_bytes().startswith(b"\x89PNG")
+    assert captured["model"] == "imagen-4.0-generate-001"
+    assert captured["prompt"] == "paisaje sereno"
+    assert captured["api_key"] == "fake-key"
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `uv run --no-sync pytest packages/jw-gen/tests/test_provider_nanobanana.py -v`
+Expected: FAIL — `ModuleNotFoundError: jw_gen.providers.image.nanobanana`.
+
+- [ ] **Step 3: Implement adapter to make tests pass**
 
 ```python
 # packages/jw-gen/src/jw_gen/providers/image/__init__.py
@@ -2410,11 +2505,16 @@ class NanoBananaProvider:
         return out
 ```
 
-- [ ] **Step 2: Commit**
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `uv run --no-sync pytest packages/jw-gen/tests/test_provider_nanobanana.py -v`
+Expected: 4 passed.
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add packages/jw-gen/src/jw_gen/providers/image
-git commit -m "feat(jw-gen): NanoBanana image provider adapter (lazy SDK, opt-in via env)"
+git add packages/jw-gen/src/jw_gen/providers/image packages/jw-gen/tests/test_provider_nanobanana.py
+git commit -m "feat(jw-gen): NanoBanana image provider adapter (lazy SDK, opt-in via env) + offline tests"
 ```
 
 ---
@@ -2424,8 +2524,115 @@ git commit -m "feat(jw-gen): NanoBanana image provider adapter (lazy SDK, opt-in
 **Files:**
 - Create: `packages/jw-gen/src/jw_gen/providers/audio/__init__.py`
 - Create: `packages/jw-gen/src/jw_gen/providers/audio/elevenlabs.py`
+- Create: `packages/jw-gen/tests/test_provider_elevenlabs.py`
 
-- [ ] **Step 1: Implement**
+- [ ] **Step 1: Write the failing test (offline — stub elevenlabs SDK)**
+
+```python
+# packages/jw-gen/tests/test_provider_elevenlabs.py
+"""Offline unit tests for ElevenLabs adapter."""
+
+from __future__ import annotations
+
+import sys
+import types
+from pathlib import Path
+
+import pytest
+
+from jw_gen.models import GenerationRequest
+
+
+def test_is_available_false_when_no_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("ELEVENLABS_API_KEY", raising=False)
+    from jw_gen.providers.audio.elevenlabs import ElevenLabsProvider
+
+    assert ElevenLabsProvider().is_available() is False
+
+
+def test_is_available_false_when_sdk_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ELEVENLABS_API_KEY", "fake-key")
+    monkeypatch.setitem(sys.modules, "elevenlabs", None)
+    from jw_gen.providers.audio.elevenlabs import ElevenLabsProvider
+
+    assert ElevenLabsProvider().is_available() is False
+
+
+def test_cost_estimate_scales_with_prompt_length(tmp_path: Path) -> None:
+    from jw_gen.providers.audio.elevenlabs import ElevenLabsProvider
+
+    p = ElevenLabsProvider(work_dir=tmp_path)
+    short = p.cost_estimate(GenerationRequest(prompt="x", kind="audio"))
+    long_ = p.cost_estimate(GenerationRequest(prompt="x" * 1000, kind="audio"))
+    assert long_.usd > short.usd
+
+
+def test_generate_writes_mp3_and_passes_correct_args(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    captured: dict = {}
+
+    class _FakeTTS:
+        def convert(self, *, voice_id: str, output_format: str, text: str):
+            captured["voice_id"] = voice_id
+            captured["output_format"] = output_format
+            captured["text"] = text
+            return iter([b"ID3", b"\x03\x00\x00\x00", b"FAKE_MP3_DATA"])
+
+    class _FakeClient:
+        def __init__(self, api_key: str) -> None:
+            captured["api_key"] = api_key
+            self.text_to_speech = _FakeTTS()
+
+    fake_module = types.SimpleNamespace(ElevenLabs=_FakeClient)
+    monkeypatch.setitem(sys.modules, "elevenlabs", fake_module)
+    monkeypatch.setenv("ELEVENLABS_API_KEY", "fake-key")
+
+    from jw_gen.providers.audio.elevenlabs import ElevenLabsProvider
+
+    p = ElevenLabsProvider(work_dir=tmp_path)
+    out = p.generate(
+        GenerationRequest(prompt="Hola mundo", kind="audio", extra={"voice_id": "v1"})
+    )
+    assert out.suffix == ".mp3"
+    assert out.read_bytes().startswith(b"ID3")
+    assert captured["voice_id"] == "v1"
+    assert captured["text"] == "Hola mundo"
+    assert captured["api_key"] == "fake-key"
+
+
+def test_generate_uses_default_voice_when_none_specified(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    captured: dict = {}
+
+    class _FakeTTS:
+        def convert(self, *, voice_id: str, output_format: str, text: str):
+            captured["voice_id"] = voice_id
+            return iter([b"ID3"])
+
+    class _FakeClient:
+        def __init__(self, api_key: str) -> None:  # noqa: ARG002
+            self.text_to_speech = _FakeTTS()
+
+    fake_module = types.SimpleNamespace(ElevenLabs=_FakeClient)
+    monkeypatch.setitem(sys.modules, "elevenlabs", fake_module)
+    monkeypatch.setenv("ELEVENLABS_API_KEY", "fake-key")
+
+    from jw_gen.providers.audio.elevenlabs import ElevenLabsProvider
+
+    ElevenLabsProvider(work_dir=tmp_path).generate(
+        GenerationRequest(prompt="x", kind="audio")
+    )
+    assert captured["voice_id"] == "EXAVITQu4vr4xnSDxMaL"
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `uv run --no-sync pytest packages/jw-gen/tests/test_provider_elevenlabs.py -v`
+Expected: FAIL — `ModuleNotFoundError: jw_gen.providers.audio.elevenlabs`.
+
+- [ ] **Step 3: Implement adapter**
 
 ```python
 # packages/jw-gen/src/jw_gen/providers/audio/__init__.py
@@ -2483,11 +2690,16 @@ class ElevenLabsProvider:
         return out
 ```
 
-- [ ] **Step 2: Commit**
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `uv run --no-sync pytest packages/jw-gen/tests/test_provider_elevenlabs.py -v`
+Expected: 5 passed.
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add packages/jw-gen/src/jw_gen/providers/audio
-git commit -m "feat(jw-gen): ElevenLabs audio adapter (lazy SDK, voice-clone gated by safety)"
+git add packages/jw-gen/src/jw_gen/providers/audio packages/jw-gen/tests/test_provider_elevenlabs.py
+git commit -m "feat(jw-gen): ElevenLabs audio adapter (lazy SDK, voice-clone gated by safety) + offline tests"
 ```
 
 ---
@@ -2497,8 +2709,161 @@ git commit -m "feat(jw-gen): ElevenLabs audio adapter (lazy SDK, voice-clone gat
 **Files:**
 - Create: `packages/jw-gen/src/jw_gen/providers/video/__init__.py`
 - Create: `packages/jw-gen/src/jw_gen/providers/video/veo3.py`
+- Create: `packages/jw-gen/tests/test_provider_veo3.py`
 
-- [ ] **Step 1: Implement**
+- [ ] **Step 1: Write the failing test (offline — stub SDK + accelerate poll via time.sleep monkeypatch)**
+
+```python
+# packages/jw-gen/tests/test_provider_veo3.py
+"""Offline unit tests for Veo3 adapter. Poll loop accelerated by stubbing time.sleep."""
+
+from __future__ import annotations
+
+import sys
+import types
+from pathlib import Path
+
+import pytest
+
+from jw_gen.models import GenerationRequest
+
+
+def test_is_available_false_when_no_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    from jw_gen.providers.video.veo3 import Veo3Provider
+
+    assert Veo3Provider().is_available() is False
+
+
+def test_is_available_false_when_sdk_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("GEMINI_API_KEY", "fake-key")
+    monkeypatch.setitem(sys.modules, "google.genai", None)
+    from jw_gen.providers.video.veo3 import Veo3Provider
+
+    assert Veo3Provider().is_available() is False
+
+
+def test_cost_estimate_scales_with_duration(tmp_path: Path) -> None:
+    from jw_gen.providers.video.veo3 import Veo3Provider
+
+    p = Veo3Provider(work_dir=tmp_path)
+    short = p.cost_estimate(GenerationRequest(prompt="x", kind="video", duration_s=4))
+    long_ = p.cost_estimate(GenerationRequest(prompt="x", kind="video", duration_s=12))
+    assert long_.usd > short.usd
+
+
+def test_generate_polls_until_done_and_downloads(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    captured: dict = {}
+
+    class _FakeVideo:
+        pass
+
+    class _FakeResponse:
+        generated_videos = [types.SimpleNamespace(video=_FakeVideo())]
+
+    class _FakeOp:
+        def __init__(self) -> None:
+            self.done = False
+            self.response = _FakeResponse()
+            self.calls = 0
+
+    fake_op = _FakeOp()
+
+    class _FakeModels:
+        def generate_videos(self, *, model: str, prompt: str):
+            captured["model"] = model
+            captured["prompt"] = prompt
+            return fake_op
+
+    class _FakeOperations:
+        def get(self, op):  # noqa: ARG002
+            fake_op.calls += 1
+            if fake_op.calls >= 2:
+                fake_op.done = True
+            return fake_op
+
+    class _FakeFiles:
+        def download(self, *, file, destination):  # noqa: ARG002
+            captured["destination"] = destination
+            Path(destination).write_bytes(b"\x00\x00\x00\x18ftypmp42FAKE")
+
+    class _FakeClient:
+        def __init__(self, api_key: str) -> None:
+            captured["api_key"] = api_key
+            self.models = _FakeModels()
+            self.operations = _FakeOperations()
+            self.files = _FakeFiles()
+
+    fake_genai = types.SimpleNamespace(Client=_FakeClient)
+    fake_google = types.ModuleType("google")
+    fake_google.genai = fake_genai  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "google", fake_google)
+    monkeypatch.setitem(sys.modules, "google.genai", fake_genai)
+    monkeypatch.setenv("GEMINI_API_KEY", "fake-key")
+    # Accelerate the poll loop.
+    monkeypatch.setattr("time.sleep", lambda _s: None)
+
+    from jw_gen.providers.video.veo3 import Veo3Provider
+
+    out = Veo3Provider(work_dir=tmp_path).generate(
+        GenerationRequest(prompt="océano al amanecer", kind="video")
+    )
+    assert out.exists()
+    assert out.read_bytes().startswith(b"\x00\x00\x00\x18ftypmp42")
+    assert captured["model"] == "veo-3.0-generate-preview"
+    assert fake_op.calls >= 1
+
+
+def test_generate_raises_on_timeout(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    class _FakeOp:
+        done = False
+        response = None
+
+    class _FakeModels:
+        def generate_videos(self, *, model: str, prompt: str):  # noqa: ARG002
+            return _FakeOp()
+
+    class _FakeOperations:
+        def get(self, op):  # noqa: ARG002
+            return _FakeOp()
+
+    class _FakeClient:
+        def __init__(self, api_key: str) -> None:  # noqa: ARG002
+            self.models = _FakeModels()
+            self.operations = _FakeOperations()
+            self.files = types.SimpleNamespace()
+
+    fake_genai = types.SimpleNamespace(Client=_FakeClient)
+    fake_google = types.ModuleType("google")
+    fake_google.genai = fake_genai  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "google", fake_google)
+    monkeypatch.setitem(sys.modules, "google.genai", fake_genai)
+    monkeypatch.setenv("GEMINI_API_KEY", "fake-key")
+    # Make time advance fast so we hit the deadline.
+    import time as _time
+
+    times = iter([0.0, 1000.0])
+    monkeypatch.setattr(_time, "time", lambda: next(times))
+    monkeypatch.setattr(_time, "sleep", lambda _s: None)
+
+    from jw_gen.providers.video.veo3 import Veo3Provider
+
+    with pytest.raises(RuntimeError, match="timed out"):
+        Veo3Provider(work_dir=tmp_path).generate(
+            GenerationRequest(prompt="x", kind="video")
+        )
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `uv run --no-sync pytest packages/jw-gen/tests/test_provider_veo3.py -v`
+Expected: FAIL — `ModuleNotFoundError: jw_gen.providers.video.veo3`.
+
+- [ ] **Step 3: Implement adapter**
 
 ```python
 # packages/jw-gen/src/jw_gen/providers/video/__init__.py
@@ -2561,11 +2926,16 @@ class Veo3Provider:
         return out
 ```
 
-- [ ] **Step 2: Commit**
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `uv run --no-sync pytest packages/jw-gen/tests/test_provider_veo3.py -v`
+Expected: 5 passed.
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add packages/jw-gen/src/jw_gen/providers/video
-git commit -m "feat(jw-gen): Veo3 video adapter (lazy SDK, long-running op poll)"
+git add packages/jw-gen/src/jw_gen/providers/video packages/jw-gen/tests/test_provider_veo3.py
+git commit -m "feat(jw-gen): Veo3 video adapter (lazy SDK, long-running op poll) + offline tests"
 ```
 
 ---
