@@ -24,6 +24,16 @@ export default defineConfig({
       prefixDefaultLocale: false,
     },
   },
+  // Backwards-compat redirects for URLs that never had a page file but were
+  // linked from the homepage during earlier iterations. Astro emits native
+  // 301 redirects in static output (Vercel honors them) and meta-refresh
+  // pages in dev.
+  redirects: {
+    "/arquitectura": "/docs/architecture",
+    "/en/arquitectura": "/en/docs/architecture",
+    "/vision": "/docs/vision",
+    "/en/vision": "/en/docs/vision",
+  },
   vite: {
     plugins: [tailwindcss()],
   },
