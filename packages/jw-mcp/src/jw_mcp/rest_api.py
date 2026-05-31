@@ -31,10 +31,11 @@ Phase 20 (Obsidian bridge):
 from __future__ import annotations
 
 import logging
+from pathlib import Path as _Path
 from typing import Any
 
 try:
-    from fastapi import FastAPI
+    from fastapi import FastAPI, HTTPException
     from fastapi.middleware.cors import CORSMiddleware
     from pydantic import BaseModel
 except ImportError as e:  # pragma: no cover
@@ -437,6 +438,135 @@ async def post_cross_references(req: CrossRefRequest) -> dict[str, Any]:
         )
 
     return {"refs": refs, "reference": ref.display(), "language": req.language}
+
+
+def _resolve_safe_vault(vault_path: str, subdir: str) -> tuple[_Path, _Path]:
+    """Validate ``vault_path`` is inside an Obsidian vault and ``subdir`` does
+    not escape it. Returns ``(vault_root, target_dir)``.
+
+    Defense (Spec Risk #7):
+      1. Refuse empty / root-only paths (``/``, ``~`` literal).
+      2. ``expanduser().resolve()`` the path (symlinks normalized).
+      3. Require existing directory.
+      4. Require ``.obsidian/`` marker in the path or any ancestor (walks up
+         to FS root). The marker's parent is the canonical vault root.
+      5. ``vault / subdir`` resolved must stay below ``vault`` (``relative_to``).
+    """
+
+    if not vault_path or vault_path in {"/", "~"}:
+        raise HTTPException(
+            status_code=400, detail="vault_path may not be a root path"
+        )
+
+    vault = _Path(vault_path).expanduser().resolve(strict=False)
+    if not vault.exists() or not vault.is_dir():
+        raise HTTPException(
+            status_code=400, detail=f"vault_path does not exist: {vault}"
+        )
+
+    has_marker = False
+    for candidate in (vault, *vault.parents):
+        if (candidate / ".obsidian").is_dir():
+            has_marker = True
+            # Treat the marker holder as the actual vault root.
+            vault = candidate
+            break
+    if not has_marker:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "vault_path is not inside an Obsidian vault "
+                "(no `.obsidian/` marker found in ancestry)"
+            ),
+        )
+
+    target_dir = (vault / subdir).resolve(strict=False)
+    try:
+        target_dir.relative_to(vault)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=f"subdir resolves outside vault (path traversal): {subdir!r}",
+        ) from exc
+
+    return vault, target_dir
+
+
+def _safe_filename(ref_display: str) -> str:
+    """Convert a reference like 'Juan 3:16' to a filesystem-safe filename."""
+    return (
+        ref_display.replace(":", "_").replace(" ", "_").replace("/", "-") + ".md"
+    )
+
+
+@app.post("/api/v1/vault/append")
+async def post_vault_append(req: VaultAppendRequest) -> dict[str, Any]:
+    """Append (or create) a markdown file in the user's vault with the verse block.
+
+    Security:
+      - Refuses if vault_path is not within an Obsidian vault.
+      - Refuses subdir values that escape the vault via ``..``.
+      - Existing files get a separator + new block appended.
+    """
+    ref = parse_reference(req.reference)
+    if ref is None:
+        raise HTTPException(
+            status_code=400,
+            detail=f"unparseable reference: {req.reference!r}",
+        )
+
+    vault, target_dir = _resolve_safe_vault(req.vault_path, req.subdir)
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    # Fetch verse text (best-effort — failure leaves verse_text empty).
+    verse_text = ""
+    source_url = ""
+    try:
+        wol = _get_wol()
+        url, html = await wol.get_bible_chapter(
+            ref.book_num,
+            ref.chapter,
+            language=req.language,
+            publication=req.publication,
+        )
+        if ref.has_verse and ref.verse_start is not None:
+            v = get_verse(
+                html,
+                ref.book_num,
+                ref.chapter,
+                ref.verse_start,
+                language=req.language,
+            )
+            verse_text = v.text if v else ""
+        source_url = url
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("vault_append: verse fetch failed: %r", exc)
+
+    md = render_verse_block(
+        ref,
+        verse_text,
+        template=req.template,  # type: ignore[arg-type]
+        length=req.length,  # type: ignore[arg-type]
+        language=req.language,
+    )
+
+    fname = _safe_filename(ref.display())
+    target = target_dir / fname
+
+    block = f"{md}\n\n<!-- jw-ext source: {source_url} -->\n"
+    if target.exists():
+        with target.open("a", encoding="utf-8") as fh:
+            fh.write("\n\n---\n\n")
+            fh.write(block)
+    else:
+        target.write_text(block, encoding="utf-8")
+
+    return {
+        "ok": True,
+        "path": str(target),
+        "vault": str(vault),
+        "reference": ref.display(),
+    }
 
 
 @app.on_event("shutdown")
