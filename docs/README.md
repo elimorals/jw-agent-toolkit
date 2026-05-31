@@ -40,6 +40,7 @@ Orientadas a casos de uso. Cada una es autocontenida con código de ejemplo.
 - [Integración con JW Library](guias/integracion-jw-library.md) — Deep links `jwlibrary://`, parser de backups `.jwlibrary`, sync incremental, catálogo MEPS docid↔pub_code, inspector local (Windows publications.db + macOS userData.db con Full Disk Access).
 - [Usar con Obsidian (second brain)](guias/usar-con-obsidian.md) — Setup paso a paso del plugin Obsidian: linkify, insertar versos con quote callouts, importar notas de JW Library al vault, indexar al RAG, agente LLM con vista total.
 - [Scripts de exploración](guias/scripts-de-exploracion.md) — Los 20 scripts en `scripts/`: discovery de fixtures, exploración de HTML, reverse engineering JWPUB, live tests end-to-end.
+- [Eval doctrinal](guias/eval-doctrinal.md) — Suite de regresión doctrinal `jw-eval`: 3 capas (estructural, citas, semántico), CI bloqueante + nightly.
 - [Fine-tuning local](guias/fine-tuning-local.md) — Entrena tu propio modelo JW personal con `jw-finetune` (Unsloth + JWPUB/EPUB locales).
 
 ### Guías de los módulos Fase 11-18 (VISION.md)
