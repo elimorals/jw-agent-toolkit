@@ -206,3 +206,38 @@ def test_letter_composer_importable_from_package_root() -> None:
     import jw_agents
 
     assert hasattr(jw_agents, "letter_composer")
+
+
+import itertools
+
+from jw_core.data.letter_templates import AUDIENCES, TOPIC_FAMILIES
+
+
+@pytest.mark.parametrize(
+    ("kind", "audience", "family", "lang"),
+    list(itertools.product(("letter", "phone", "cart"), AUDIENCES, TOPIC_FAMILIES, ("en", "es", "pt"))),
+)
+def test_every_combination_emits_no_empty_citation(kind, audience, family, lang) -> None:
+    # Construct a topic input that resolves to `family`. For 'generic' we
+    # pass an unrelated string; for others we pass the first keyword.
+    if family == "generic":
+        topic = "zzz_unmatched_term_zzz"
+    else:
+        # Pick a known keyword from the resolver map for this language.
+        from jw_core.data.letter_templates import TOPIC_FAMILY_KEYWORDS
+
+        lang_map = TOPIC_FAMILY_KEYWORDS.get(lang) or TOPIC_FAMILY_KEYWORDS["en"]
+        topic = lang_map[family][0]
+
+    result = _run(
+        kind=kind,
+        language=lang,
+        topic_or_question=topic,
+        audience=audience,
+    )
+    assert len(result.findings) >= 4
+    for f in result.findings:
+        assert f.citation.url, (
+            f"empty citation for kind={kind} audience={audience} "
+            f"family={family} lang={lang} section={f.metadata.get('section')}"
+        )
