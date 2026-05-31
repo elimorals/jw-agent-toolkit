@@ -142,6 +142,8 @@ _EXPECTED_TOOLS = {
     # Phase 37 — Visual RAG (ColPali/ColQwen2 late-interaction)
     "visual_search",
     "ingest_publication_visual",
+    # Phase 38 — Generative illustrative content
+    "generate_illustration",
 }
 
 

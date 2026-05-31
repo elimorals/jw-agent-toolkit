@@ -10,6 +10,7 @@ dependencies = [
     "jw-rag",
     "jw-agents",
     "jw-eval",
+    "jw-gen",
     "fastmcp>=2.0.0",
 ]
 

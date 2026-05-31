@@ -3071,6 +3071,56 @@ def ingest_publication_visual(
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Fase 38 — jw-gen (generative illustrative content)
+# ────────────────────────────────────────────────────────────────────────
+
+
+from pathlib import Path as _Path38  # noqa: E402
+
+from jw_gen.factory import get_provider as _jwgen_get_provider  # noqa: E402
+from jw_gen.models import GenerationRequest as _JwGenRequest  # noqa: E402
+from jw_gen.policy import finalize_output as _jwgen_finalize  # noqa: E402
+from jw_gen.safety import evaluate as _jwgen_safety_evaluate  # noqa: E402
+
+
+@mcp.tool()
+def generate_illustration(
+    prompt: str,
+    kind: str = "image",
+    size: str = "1024x1024",
+    watermark: bool = True,
+    lang: str = "es",
+) -> dict[str, str]:
+    """Generate a personal-use illustrative file (image / audio / video).
+
+    The output is always watermarked + EXIF/XMP-tagged + accompanied by a
+    sibling .disclaimer.txt. `watermark=False` is silently ignored over MCP —
+    use the local CLI with `--no-visible-watermark` if you need metadata-only.
+    """
+
+    _ = watermark  # not respected over MCP — policy is non-negotiable here
+    request = _JwGenRequest(prompt=prompt, kind=kind, lang=lang, size=size)  # type: ignore[arg-type]
+    decision = _jwgen_safety_evaluate(request)
+    if not decision.allow:
+        return {"error": decision.reason or "safety.refuse.logo"}
+    provider = _jwgen_get_provider(kind)  # type: ignore[arg-type]
+    augmented = request.model_copy(
+        update={"prompt": decision.augmented_prompt or prompt}
+    )
+    raw = provider.generate(augmented)
+    dest = _Path38(raw).parent / f"mcp_{_Path38(raw).stem}.png"
+    result = _jwgen_finalize(
+        raw_path=raw, request=request, dest=dest, provider=provider.name
+    )
+    return {
+        "output_path": str(result.output_path),
+        "disclaimer_path": str(result.disclaimer_path),
+        "audit_id": result.audit_id,
+        "provider": result.provider,
+    }
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
 

@@ -3397,6 +3397,7 @@ dependencies = [
     { name = "jw-agents" },
     { name = "jw-core" },
     { name = "jw-eval" },
+    { name = "jw-gen" },
     { name = "jw-rag" },
 ]
 
@@ -3406,6 +3407,7 @@ requires-dist = [
     { name = "jw-agents", editable = "packages/jw-agents" },
     { name = "jw-core", editable = "packages/jw-core" },
     { name = "jw-eval", editable = "packages/jw-eval" },
+    { name = "jw-gen", editable = "packages/jw-gen" },
     { name = "jw-rag", editable = "packages/jw-rag" },
 ]
 
