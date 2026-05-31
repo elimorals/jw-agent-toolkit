@@ -20,15 +20,11 @@ console = Console()
 
 
 def life_cmd(
-    query: str = typer.Argument(
-        ..., help='Topic or alias (e.g. "anxiety", "ansiedad", "luto").'
-    ),
+    query: str = typer.Argument(..., help='Topic or alias (e.g. "anxiety", "ansiedad", "luto").'),
     lang: str = typer.Option("en", "--lang", "-l", help="ISO language: en, es, pt."),
     top_articles: int = typer.Option(5, "--top", help="Max CDN search hits to consider."),
     fetch_top_k: int = typer.Option(3, "--fetch", help="Max articles to actually parse."),
-    max_excerpts_per_article: int = typer.Option(
-        2, "--excerpts", help="Paragraphs per article."
-    ),
+    max_excerpts_per_article: int = typer.Option(2, "--excerpts", help="Paragraphs per article."),
     json: bool = typer.Option(False, "--json", help="Emit JSON dump of AgentResult."),
 ) -> None:
     """Show published material on a life topic plus the mandatory disclaimer."""
@@ -51,25 +47,16 @@ def life_cmd(
         family = result.metadata.get("family", "—")
         console.print(
             Panel(
-                f"[bold]Topic:[/bold] {topic_id}\n[bold]Family:[/bold] {family}\n"
-                f"[bold]Language:[/bold] {lang}",
+                f"[bold]Topic:[/bold] {topic_id}\n[bold]Family:[/bold] {family}\n[bold]Language:[/bold] {lang}",
                 title="life_topics",
                 border_style="cyan",
             )
         )
 
         # Sections: excerpts first, then disclaimer/redirect at the bottom.
-        excerpts = [
-            f
-            for f in result.findings
-            if f.metadata.get("source") in {"topic_index_entry", "cdn_search"}
-        ]
-        disclaimers = [
-            f for f in result.findings if f.metadata.get("source") == "disclaimer"
-        ]
-        redirects = [
-            f for f in result.findings if f.metadata.get("source") == "elders_redirect"
-        ]
+        excerpts = [f for f in result.findings if f.metadata.get("source") in {"topic_index_entry", "cdn_search"}]
+        disclaimers = [f for f in result.findings if f.metadata.get("source") == "disclaimer"]
+        redirects = [f for f in result.findings if f.metadata.get("source") == "elders_redirect"]
 
         if excerpts:
             table = Table(title="Published material")

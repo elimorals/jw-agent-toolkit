@@ -1943,7 +1943,9 @@ def check_jw_library_full_disk_access() -> dict[str, Any]:
 
 
 @mcp.tool
-def read_jw_library_live_userdata(book_num: int | None = None, chapter: int | None = None, limit: int = 50) -> dict[str, Any]:
+def read_jw_library_live_userdata(
+    book_num: int | None = None, chapter: int | None = None, limit: int = 50
+) -> dict[str, Any]:
     """Load notes from the live macOS sandbox container (requires FDA).
 
     Same shape as `list_user_notes`, but reads the **live** `userData.db`
@@ -2201,9 +2203,7 @@ def validate_citations(
         return {"error": "pass exactly one of urls= or agent_output="}
 
     if live and _os.environ.get("JW_CITATIONS_LIVE", "").lower() not in {"1", "true", "yes"}:
-        return {
-            "error": "live=True requires env JW_CITATIONS_LIVE=1 to authorize network access"
-        }
+        return {"error": "live=True requires env JW_CITATIONS_LIVE=1 to authorize network access"}
 
     async def _run() -> dict:
         catalog = _MepsCatalog()
@@ -2310,14 +2310,16 @@ def log_student_progress(
     try:
         now = _dt_study.now(_tz_study.utc).isoformat()
         row = _LessonRow(
-            student_id=student_id, book_pub=book_pub, lesson=lesson,
-            status=_LessonStatus(status), notes=note,
+            student_id=student_id,
+            book_pub=book_pub,
+            lesson=lesson,
+            status=_LessonStatus(status),
+            notes=note,
             updated_at_iso=now,
             started_at_iso=now if status == "in_progress" else None,
             completed_at_iso=now if status == "completed" else None,
             goals=[
-                _StudentGoal(kind=_GoalKind(g), set_at_iso=now,
-                              target_iso=(target_iso if g == "baptism" else None))
+                _StudentGoal(kind=_GoalKind(g), set_at_iso=now, target_iso=(target_iso if g == "baptism" else None))
                 for g in (goals or [])
             ],
             baptism_target_iso=(target_iso if goals and "baptism" in goals else None),
@@ -2330,7 +2332,8 @@ def log_student_progress(
 
 @mcp.tool
 def list_student_lessons(
-    student_id: str, book_pub: str | None = None,
+    student_id: str,
+    book_pub: str | None = None,
 ) -> dict[str, Any]:
     """List a student's lessons (decrypted notes in-memory)."""
 
@@ -2358,8 +2361,13 @@ def set_student_goal(
         return store_or_err
     try:
         row = _set_goal_for_student(
-            store_or_err, student_id, book_pub, lesson,
-            kind=_GoalKind(kind), target_iso=target_iso, note=note,
+            store_or_err,
+            student_id,
+            book_pub,
+            lesson,
+            kind=_GoalKind(kind),
+            target_iso=target_iso,
+            note=note,
         )
         return {"row": row.model_dump(mode="json")}
     except Exception as e:  # noqa: BLE001
@@ -2450,9 +2458,7 @@ def field_log_hours(
 
     d = _date.fromisoformat(date) if date else _date.today()
     with FieldReportStore() as store:
-        e = store.add_hours(
-            HoursEntry(entry_id="", date=d, hours_decimal=hours_decimal, tag=tag, note=note)
-        )
+        e = store.add_hours(HoursEntry(entry_id="", date=d, hours_decimal=hours_decimal, tag=tag, note=note))
     return {"entry_id": e.entry_id, "date": e.date.isoformat(), "hours_decimal": e.hours_decimal, "tag": e.tag}
 
 
@@ -2648,9 +2654,7 @@ async def songs_for_week(
     import jw_mcp.server as _self
 
     try:
-        result = await _self._workbook_helper_agent(
-            date, language=language, include_comments=False
-        )
+        result = await _self._workbook_helper_agent(date, language=language, include_comments=False)
     except Exception as exc:  # noqa: BLE001
         return {"error": f"workbook_helper failed: {exc!r}"}
 

@@ -85,9 +85,7 @@ async def life_topics(
         except KeyError:
             jw_lang = "E"
 
-        await _surface_topic_index(
-            result, matched, topic=topic, jw_lang=jw_lang, language=language
-        )
+        await _surface_topic_index(result, matched, topic=topic, jw_lang=jw_lang, language=language)
         await _surface_cdn_articles(
             result,
             matched,

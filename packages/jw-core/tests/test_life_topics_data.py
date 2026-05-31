@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import pytest
-
-from jw_core.data.life_topics import REGISTRY, LifeTopic, resolve_topic
+from jw_core.data.life_topics import REGISTRY, resolve_topic
 
 
 def test_registry_has_expected_topics() -> None:

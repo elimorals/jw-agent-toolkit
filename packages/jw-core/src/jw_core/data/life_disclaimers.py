@@ -65,11 +65,7 @@ def get_disclaimer(family: LifeTopicFamily | str, language: str) -> str:
     key = (family if family in {"general", "sensitive"} else "general", language)
     if key in DISCLAIMERS:
         return DISCLAIMERS[key]
-    return (
-        DISCLAIMERS[(key[0], "en")]
-        if (key[0], "en") in DISCLAIMERS
-        else DISCLAIMERS[("general", "en")]
-    )
+    return DISCLAIMERS[(key[0], "en")] if (key[0], "en") in DISCLAIMERS else DISCLAIMERS[("general", "en")]
 
 
 def get_elders_redirect(language: str) -> str:

@@ -4,9 +4,8 @@ import json
 from typing import Any
 
 import pytest
-from typer.testing import CliRunner
-
 from jw_cli.main import app
+from typer.testing import CliRunner
 
 
 @pytest.fixture
@@ -23,9 +22,7 @@ def fake_life_topics(monkeypatch):
             Finding(
                 summary="Excerpt from How to Cope With Anxiety",
                 excerpt="Trust in Jehovah brings peace.",
-                citation=Citation(
-                    url="https://wol.jw.org/x", title="How to Cope", kind="article"
-                ),
+                citation=Citation(url="https://wol.jw.org/x", title="How to Cope", kind="article"),
                 metadata={"source": "cdn_search"},
             )
         )

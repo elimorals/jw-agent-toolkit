@@ -5,9 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-
 from jw_agents.life_topics import life_topics
-
 
 # --- Stubs ----------------------------------------------------------
 
@@ -17,9 +15,7 @@ class StubTopicIndex:
         self._subjects = subjects or {}
         self.searched: list[tuple[str, str]] = []
 
-    async def search_subjects(
-        self, anchor: str, *, language: str = "E", limit: int = 1
-    ) -> list[dict[str, Any]]:
+    async def search_subjects(self, anchor: str, *, language: str = "E", limit: int = 1) -> list[dict[str, Any]]:
         self.searched.append((anchor, language))
         if anchor in self._subjects:
             return [
@@ -129,9 +125,7 @@ async def test_sensitive_topic_emits_disclaimer_and_redirect() -> None:
     )
     wol = StubWOL()
 
-    result = await life_topics(
-        "ansiedad", language="es", topic=topic, cdn=cdn, wol=wol
-    )
+    result = await life_topics("ansiedad", language="es", topic=topic, cdn=cdn, wol=wol)
 
     sources = [f.metadata.get("source") for f in result.findings]
     assert "topic_index_entry" in sources
@@ -153,11 +147,7 @@ async def test_general_topic_does_not_emit_redirect() -> None:
             }
         }
     )
-    cdn = StubCDN(
-        results=[
-            {"title": "Family Help", "links": {"wol": "https://wol.jw.org/articles/family-1"}}
-        ]
-    )
+    cdn = StubCDN(results=[{"title": "Family Help", "links": {"wol": "https://wol.jw.org/articles/family-1"}}])
     wol = StubWOL()
 
     result = await life_topics("parenting", language="en", topic=topic, cdn=cdn, wol=wol)
@@ -193,9 +183,7 @@ async def test_cdn_error_does_not_kill_disclaimer() -> None:
     topic = StubTopicIndex()
     wol = StubWOL()
 
-    result = await life_topics(
-        "anxiety", language="en", topic=topic, cdn=BrokenCDN(), wol=wol
-    )
+    result = await life_topics("anxiety", language="en", topic=topic, cdn=BrokenCDN(), wol=wol)
     sources = [f.metadata.get("source") for f in result.findings]
     assert "disclaimer" in sources
     assert "elders_redirect" in sources  # still sensitive
@@ -254,12 +242,8 @@ async def test_no_bible_quotation_fabrication() -> None:
     assert that no Finding text mentions it.
     """
     topic = StubTopicIndex()
-    cdn = StubCDN(
-        results=[{"title": "Article", "links": {"wol": "https://wol.jw.org/x"}}]
-    )
-    html_without_hebrews = (
-        "<html><body><article><p data-pid='1'>Anxiety is common.</p></article></body></html>"
-    )
+    cdn = StubCDN(results=[{"title": "Article", "links": {"wol": "https://wol.jw.org/x"}}])
+    html_without_hebrews = "<html><body><article><p data-pid='1'>Anxiety is common.</p></article></body></html>"
     wol = StubWOL(html=html_without_hebrews)
     result = await life_topics("anxiety", language="en", topic=topic, cdn=cdn, wol=wol)
     for f in result.findings:
