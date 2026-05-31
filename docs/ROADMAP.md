@@ -622,6 +622,30 @@ gráficas (export JSON ya lo habilita externamente), modo familia.
 
 ---
 
+## Fase 33 — embed-rerank: núcleo RAG al SOTA ✅
+
+> Tier 1 núcleo. Spec: `docs/superpowers/specs/2026-05-31-fase-33-embed-rerank-design.md`.
+
+- ✅ `EmbedProvider` Protocol + `Target` literal (api/mlx/nvidia/cpu).
+- ✅ 6 embed providers: BGE-M3, Multilingual-E5, Jina-v3, Cohere-v3, Voyage-multilingual-2, Ollama (nomic-embed-text).
+- ✅ Fake sibling por cada provider — deterministic, used by tests.
+- ✅ `Reranker` Protocol + `NoOpReranker` fallback.
+- ✅ 3 rerank providers reales: BGE-reranker-v2-m3, Cohere-rerank-v3.5, Jina-reranker-v2.
+- ✅ Factory con auto-detect + env override (`JW_EMBED_PROVIDER`, `JW_RERANK_PROVIDER`, `JW_PROVIDER_ORDER`).
+- ✅ `VectorStore.hybrid_search(rerank=True, reranker=None, candidate_pool=50)` — backwards-compatible.
+- ✅ Param MCP `semantic_search(rerank: bool = True)`.
+- ✅ Lazy SDK loading; cero red en import time; safe_repr para API keys.
+- ✅ Extras pyproject: `[embeddings-local]`, `[embeddings-api]`, `[rerank-local]`, `[rerank-api]`.
+- ✅ Guía `docs/guias/embeddings-y-rerank.md`.
+
+### Cobertura de tests
+
+- ✅ ~50 tests nuevos en `packages/jw-rag/tests/`.
+- ✅ 1649 tests previos sin regresión.
+- ✅ Markers `@pytest.mark.embeddings_local` y `@pytest.mark.rerank_local` para tests con descargas reales.
+
+---
+
 ## Fase 34 — `audio-premium` ✅
 
 > Audio upgrade. Spec: `docs/superpowers/specs/2026-05-31-fase-34-audio-premium-design.md`.

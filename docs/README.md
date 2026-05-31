@@ -35,6 +35,7 @@ Orientadas a casos de uso. Cada una es autocontenida con código de ejemplo.
 - [Infraestructura Fase 9](guias/infraestructura-fase9.md) — Cache SQLite, throttler per-host, telemetría opt-in, factory unificado.
 - [Construir un agente](guias/construir-un-agente.md) — Cómo escribir un nuevo agente procedural sobre `jw-core`.
 - [Indexar y buscar con RAG](guias/indexar-y-buscar-con-rag.md) — Ingest (incluyendo JWPUB descifrado), persistencia, búsqueda híbrida, RRF, embedders.
+- [Embeddings y reranking](guias/embeddings-y-rerank.md) — Fase 33: providers reales (BGE-M3, Cohere, Jina, Voyage, Ollama, E5) + cross-encoder reranker con auto-detect.
 - [Extender el parser de referencias](guias/extender-el-parser.md) — Añadir un idioma, añadir abreviaturas, manejar casos especiales.
 - [Conectar el MCP a Claude Desktop](guias/conectar-mcp-a-claude-desktop.md) — Configuración paso a paso, troubleshooting.
 - [Integración con JW Library](guias/integracion-jw-library.md) — Deep links `jwlibrary://`, parser de backups `.jwlibrary`, sync incremental, catálogo MEPS docid↔pub_code, inspector local (Windows publications.db + macOS userData.db con Full Disk Access).

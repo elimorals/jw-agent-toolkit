@@ -259,3 +259,7 @@ curl -s http://localhost:8765/healthz
 - ✅ Privacidad: cifrado columnar opt-in via `JW_PRIVACY_KEY`; warning amistoso si desactivado.
 - ✅ Cross-package: `RevisitProvider` Protocol inyectable; no acopla `jw-core` a `jw-agents`.
 - ✅ Tests CPU-only; PDF opcional via `[pdf]` extra.
+
+### Fase 33 — embed-rerank (núcleo RAG)
+
+| Fase 33 (embed-rerank) | ✅ Nuevo | `jw-rag.embed_providers` + `jw-rag.rerank_providers` — 6 embed + 4 rerank providers + factory |

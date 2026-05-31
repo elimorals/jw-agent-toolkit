@@ -69,6 +69,21 @@ jobs:
       - run: uv run --with bandit bandit -r packages/*/src -ll
         continue-on-error: true
 
+  test-rag-embeddings:
+    name: jw-rag embeddings-local (optional)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --all-packages
+      - run: uv pip install -e packages/jw-rag[embeddings-local,rerank-local]
+      - run: uv run pytest packages/jw-rag/tests -m embeddings_local -v
+
   eval-fast:
     # Non-blocking: the 38 L1/L2 golden cases shipped by phases 22-32 are
     # aspirational scaffolding — they were never calibrated against the
