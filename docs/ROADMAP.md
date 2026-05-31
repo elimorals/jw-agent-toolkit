@@ -530,3 +530,18 @@ gráficas (export JSON ya lo habilita externamente), modo familia.
 - CLI `jw letter`, tool MCP `compose_witnessing`, 3 golden cases L1.
 - Guía: [`docs/guias/compositor-de-predicacion.md`](guias/compositor-de-predicacion.md).
 - Spec / plan: `docs/superpowers/specs/2026-05-30-fase-29-letter-composer-design.md`.
+
+---
+
+## Fase 30 — Compañero de cánticos del Reino ✅
+
+> Objetivo: registro local de metadatos de Cánticos del Reino (`sjj`) — número, títulos en/es/pt, tema en una línea, referencias bíblicas citadas, URL canónica en jw.org. Sin letra (copyright). Integración opt-in con `workbook_helper`. Spec en [`superpowers/specs/2026-05-30-fase-30-kingdom-songs-design.md`](superpowers/specs/2026-05-30-fase-30-kingdom-songs-design.md).
+
+- ✅ `jw_core.data.kingdom_songs/{E,S,T}.json` — seed de 12 cánticos paralelos en los 3 idiomas.
+- ✅ `jw_core.songs.models.KingdomSong` (Pydantic, máximo 200 chars en `theme`, scriptures parseables).
+- ✅ `jw_core.songs.registry.SongRegistry` con `importlib.resources` + `lru_cache` por idioma.
+- ✅ `jw_core.songs.integration.enrich_with_songs` — adapter idempotente para `workbook_helper`.
+- ✅ Test de integridad anti-letra (`test_seed_integrity`).
+- ✅ CLI `jw song <N>` y `jw song week`.
+- ✅ Tools MCP `lookup_song`, `songs_for_week`.
+- ✅ Guía `docs/guias/canticos-del-reino.md` con sección legal al frente.

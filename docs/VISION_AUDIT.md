@@ -23,6 +23,7 @@
 | Fase 24 | VISION #1 | `study_conductor` + `StudentProgress` | ✅ |
 | Fase 25 (news monitor) | ✅ Nuevo | `jw news digest` — 3 canales, seen-store SQLite, tool MCP |
 | Fase 26 (student parts) | VISION #2 | `student_part_helper` — 4 kinds × 4 audiencias × 3 idiomas, 50 puntos de oratoria, CLI `jw student` + MCP |
+| Fase 30 (kingdom songs) | VISION #1 | `jw_core.songs` — metadatos `sjj` sin letra (12 cánticos en/es/pt), CLI `jw song`, MCP `lookup_song`/`songs_for_week` |
 
 **100% de las 13 secciones tienen entrega.** Métricas:
 - **24+ archivos Python nuevos** organizados en 8 sub-paquetes (`audio/`, `calendar/`, `family/`, `observability/`, `personalization/`, `privacy/`, `study/`, `vision/`).
