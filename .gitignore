@@ -71,3 +71,6 @@ data/
 
 # jw-finetune runtime workspace (logs, events, intermediate datasets)
 jw-finetune-workspace/
+
+# Claude Code session state
+.claude/
