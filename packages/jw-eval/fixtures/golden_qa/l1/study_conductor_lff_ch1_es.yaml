@@ -1,7 +1,7 @@
-# Agent "study_conductor" is NOT registered in
-# jw_eval/cli.py::default_agent_registry. The function exists as
-# jw_agents.study_conductor.prepare_lesson(pub_code, chapter, language)
-# — kwargs match. Will pass once the registry is updated to expose it.
+# Agent IS registered now. BLOCKED: prepare_lesson() calls
+# WOLClient.get_publication_page(n=...) but the real signature has no
+# such kwarg (real bug in jw_agents.study_conductor.prepare_lesson, not
+# in this YAML). Tracked separately. Case stays here for when fixed.
 id: l1_study_conductor_lff_ch1_es
 agent: study_conductor
 layer: l1
