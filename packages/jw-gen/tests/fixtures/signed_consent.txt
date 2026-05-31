@@ -1,0 +1,4 @@
+voice_owner: Hermano Demo
+date: 2026-05-31
+purpose: ejemplo de archivo de consentimiento (fixture)
+signature_sha256: 0000000000000000000000000000000000000000000000000000000000000000
