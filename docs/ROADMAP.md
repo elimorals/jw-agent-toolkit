@@ -673,6 +673,30 @@ gráficas (export JSON ya lo habilita externamente), modo familia.
 
 ---
 
+## Fase 35 — Constrained decoding ✅
+
+> Tier 2 habilitador transversal. Spec: `docs/superpowers/specs/2026-05-31-fase-35-constrained-decoding-design.md`.
+
+- ✅ `jw_core.grammar`: builders GBNF, Pydantic → GBNF, regex anclada a `wol.jw.org`.
+- ✅ Pydantic mirror `AgentResultModel` con conversión bidireccional al dataclass.
+- ✅ Factory `get_default_constrained_caller(provider="auto"|...)` con fallback seguro a `FakeConstrainedCaller`.
+- ✅ `OllamaAdapter` extendido con `grammar=` y `json_schema=` (back-compat).
+- ✅ `AnthropicAdapter` (tool-use) — extra `[grammar-claude]`.
+- ✅ `OpenAIAdapter` (response_format json_schema strict) — extra `[grammar-openai]`.
+- ✅ `LlamaCppAdapter` (in-process GBNF nativo) — extra `[grammar-local]`.
+- ✅ Helper `run_with_citations()` con reconciliación contra forja.
+- ✅ Property test Hypothesis: 100 prompts adversarios → 0 violaciones.
+- ✅ CLI `jw constrained ask` + tool MCP `run_constrained`.
+- ✅ Guía `docs/guias/constrained-decoding.md`.
+
+### Cobertura de tests
+
+- ✅ ~30 tests nuevos en `packages/jw-core/tests/` + `packages/jw-agents/tests/` + `packages/jw-cli/tests/` + `packages/jw-mcp/tests/`.
+- ✅ Property test cubre el contrato schema↔grammar↔sampler↔schema.
+- ✅ Suite global sin regresiones.
+
+---
+
 ## Fase 36 — `vlm-ocr` ✅
 
 > Tier 1 visual upgrade. Spec: `docs/superpowers/specs/2026-05-31-fase-36-vlm-ocr-design.md`.
