@@ -21,6 +21,7 @@ from jw_cli.commands import (
     jwpub,
     languages,
     ministry,
+    news,
     search,
     study,
     topic,
@@ -48,6 +49,7 @@ app.command(name="workbook")(workbook.workbook_command)
 app.add_typer(ministry.ministry_app, name="ministry")
 app.add_typer(citations.citations_app, name="citations")
 app.add_typer(study.study_app, name="study")
+app.add_typer(news.news_app, name="news")
 
 
 def main() -> None:
