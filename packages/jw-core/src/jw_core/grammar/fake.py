@@ -13,12 +13,15 @@ from __future__ import annotations
 
 import json
 import random
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
 from pydantic import BaseModel
 
 from jw_core.grammar.schemas import AgentResultModel
+
+_URL_IN_PROMPT_REGEX = re.compile(r"https://wol\.jw\.org/[a-z]{2,3}/[-A-Za-z0-9_/.%]+")
 
 _DEFAULT_URLS: tuple[str, ...] = (
     "https://wol.jw.org/es/wol/d/r4/lp-s/2024001",
@@ -65,11 +68,17 @@ class FakeConstrainedCaller:
             json_schema = AgentResultModel
 
         rng = random.Random((self.seed * 1_000_003) ^ hash(prompt))
-        n = rng.randint(self.min_findings, self.max_findings)
+
+        # If the prompt mentions allowed URLs (e.g. via run_with_citations),
+        # restrict picks to that subset so reconciliation passes downstream.
+        prompt_urls = list(dict.fromkeys(_URL_IN_PROMPT_REGEX.findall(prompt)))
+        pick_pool = prompt_urls or self.allowed_urls
+
+        n = rng.randint(self.min_findings, min(self.max_findings, max(len(pick_pool), 1)))
 
         findings: list[dict[str, Any]] = []
         for i in range(n):
-            url = rng.choice(self.allowed_urls)
+            url = rng.choice(pick_pool)
             findings.append(
                 {
                     "summary": f"finding {i} for prompt prefix {prompt[:40]!r}",
