@@ -46,3 +46,52 @@ def test_resolved_scriptures_filters_unparseable() -> None:
     refs = s.resolved_scriptures()
     assert len(refs) == 1
     assert refs[0].book_num == 43  # John
+
+
+def test_get_registry_loads_three_languages() -> None:
+    from jw_core.songs import get_registry
+
+    for lang in ["en", "es", "pt"]:
+        reg = get_registry(lang)
+        assert len(reg.all()) >= 10, f"{lang} registry too small"
+
+
+def test_get_registry_caches_per_language() -> None:
+    from jw_core.songs import get_registry
+
+    a = get_registry("en")
+    b = get_registry("en")
+    assert a is b
+
+
+def test_lookup_returns_song() -> None:
+    from jw_core.songs import get_registry
+
+    reg = get_registry("es")
+    song = reg.lookup(5)
+    assert song.number == 5
+    assert "amor" in song.title.lower() or "amor" in song.theme.lower()
+
+
+def test_lookup_unknown_raises() -> None:
+    from jw_core.songs import SongLookupError, get_registry
+
+    reg = get_registry("en")
+    with pytest.raises(SongLookupError):
+        reg.lookup(999)
+
+
+def test_unknown_language_returns_empty_registry() -> None:
+    from jw_core.songs import get_registry
+
+    reg = get_registry("xx")
+    assert reg.all() == []
+
+
+def test_canonical_url_falls_back_to_finder_pattern() -> None:
+    from jw_core.songs import get_registry
+
+    reg = get_registry("es")
+    song = reg.lookup(5)
+    # Spanish wtlocale = "S".
+    assert song.canonical_url == "https://www.jw.org/finder?wtlocale=S&pub=sjj"
