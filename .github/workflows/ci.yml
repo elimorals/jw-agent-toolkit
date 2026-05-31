@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main, master]
   workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * MON"
+    - cron: "0 4 * * *"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -65,3 +68,51 @@ jobs:
           enable-cache: true
       - run: uv run --with bandit bandit -r packages/*/src -ll
         continue-on-error: true
+
+  eval-fast:
+    name: Eval fast (L1 + L2 snapshot)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - run: uv python install 3.13
+      - run: uv sync --all-packages
+      - name: Run jw eval layers 1+2
+        run: uv run jw eval --layer 1,2 --report md --out eval-fast.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eval-fast-report
+          path: eval-fast.md
+
+  eval-l2-live:
+    name: Eval L2 live (weekly)
+    if: github.event_name == 'schedule' && github.event.schedule == '0 6 * * MON'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv python install 3.13
+      - run: uv sync --all-packages
+      - run: uv run jw eval --layer 2 --live --report json --out l2-live.json
+      - run: uv run python packages/jw-eval/scripts/eval_open_drift_issues.py l2-live.json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  eval-nightly:
+    name: Eval nightly (L1+L2+L3 Ollama)
+    if: github.event_name == 'schedule' && github.event.schedule == '0 4 * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv python install 3.13
+      - run: uv sync --all-packages
+      - run: JW_EVAL_LLM=none uv run jw eval --layer 1,2,3 --report md --out eval-nightly.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eval-nightly-report
+          path: eval-nightly.md
