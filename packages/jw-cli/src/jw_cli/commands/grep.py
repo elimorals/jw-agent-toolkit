@@ -49,6 +49,11 @@ def grep_cmd(
         help="Path(s) to .epub/.jwpub or directories to ingest before searching",
         exists=False,
     ),
+    build_nwt: list[str] = typer.Option(
+        [],
+        "--build-nwt",
+        help="Reference(s) like 'Juan 3' or '43:3' to fetch from WOL and index.",
+    ),
     recursive: bool = typer.Option(False, "--recursive", "-r", help="Scan directories recursively"),
     force: bool = typer.Option(False, "--force", help="Re-index even if sha256 unchanged"),
     stats: bool = typer.Option(False, "--stats", help="Print index stats and exit"),
@@ -56,6 +61,49 @@ def grep_cmd(
     """Exact-match concordance over the local corpus."""
 
     db = default_db_path()
+
+    if build_nwt:
+        if not language:
+            console.print("[red]--build-nwt requires --language[/red]")
+            raise typer.Exit(code=2)
+        import asyncio
+
+        from jw_core.clients.factory import build_clients
+        from jw_core.concordance import build_index as _build_index
+        from jw_core.concordance.nwt_ingest import nwt_chapter_from_html
+        from jw_core.parsers.reference import parse_reference
+
+        async def _ingest_nwt() -> list:
+            chapters: list = []
+            clients = build_clients()
+            try:
+                for raw in build_nwt:
+                    parsed = parse_reference(raw)
+                    if parsed is None:
+                        console.print(f"[yellow]Could not parse '{raw}' — skipping[/yellow]")
+                        continue
+                    url, html = await clients.wol.get_bible_chapter(
+                        parsed.book_num, parsed.chapter, language=language
+                    )
+                    chapters.append(
+                        nwt_chapter_from_html(
+                            html,
+                            language=language,
+                            book_num=parsed.book_num,
+                            chapter=parsed.chapter,
+                            url=url,
+                            book_name=parsed.book_canonical,
+                        )
+                    )
+            finally:
+                await clients.aclose()
+            return chapters
+
+        chapters = asyncio.run(_ingest_nwt())
+        n_nwt = _build_index(paths=None, language=language, db_path=db, nwt_chapters=chapters)
+        console.print(f"[green]NWT[/green] {len(chapters)} chapter(s) → {n_nwt} verse(s)")
+        if not query and not build_index_paths and not stats:
+            return
 
     if stats:
         store = ConcordanceStore(db_path=db)
