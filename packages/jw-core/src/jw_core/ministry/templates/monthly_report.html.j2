@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Informe mensual — {{ report.month }}</title>
+  <style>
+    @page { size: A4; margin: 22mm; }
+    body { font-family: "Helvetica", "Arial", sans-serif; color: #1f2937; }
+    h1   { font-size: 22pt; margin-bottom: 0; }
+    h2   { font-size: 14pt; margin-top: 24pt; border-bottom: 1px solid #e5e7eb; padding-bottom: 4pt; }
+    table{ width: 100%; border-collapse: collapse; margin-top: 8pt; }
+    th, td { padding: 6pt 8pt; border-bottom: 1px solid #f3f4f6; text-align: left; }
+    th   { background: #f9fafb; font-weight: 600; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .summary li { margin: 4pt 0; }
+    .footer { margin-top: 24pt; color: #6b7280; font-size: 9pt; }
+  </style>
+</head>
+<body>
+  <h1>Informe mensual</h1>
+  <p>{{ report.month }}</p>
+
+  <h2>Resumen</h2>
+  <ul class="summary">
+    <li><strong>Horas totales</strong>: {{ report.total_hours_display }} ({{ "%.2f"|format(report.total_hours) }} h)</li>
+    <li><strong>Días con servicio</strong>: {{ report.days_with_service }}</li>
+    <li><strong>Cursos bíblicos activos (máximo)</strong>: {{ report.active_studies_max }}</li>
+    <li><strong>Revisitas registradas</strong>: {{ report.revisits_count }}</li>
+    <li><strong>Entradas registradas</strong>: {{ report.entries_count }}</li>
+  </ul>
+
+  {% if report.breakdown_by_tag %}
+  <h2>Desglose por modalidad</h2>
+  <table>
+    <thead><tr><th>Modalidad</th><th class="num">Horas</th></tr></thead>
+    <tbody>
+    {% for tag, hours in breakdown %}
+      <tr><td>{{ labels[tag] }}</td><td class="num">{{ "%.2f"|format(hours) }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <p class="footer">
+    Cursos bíblicos activos se reportan como el <em>máximo</em> durante
+    el mes (práctica JW vigente). Las revisitas vienen del store local
+    de RevisitTracker (Fase 12, solo lectura). Generado por jw-agent-toolkit.
+  </p>
+</body>
+</html>

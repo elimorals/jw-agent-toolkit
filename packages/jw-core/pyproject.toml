@@ -14,6 +14,12 @@ dependencies = [
     "defusedxml>=0.7.1",
 ]
 
+[project.optional-dependencies]
+pdf = [
+    "jinja2>=3.1",
+    "weasyprint>=62",
+]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

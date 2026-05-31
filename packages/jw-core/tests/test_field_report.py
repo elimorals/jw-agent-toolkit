@@ -419,3 +419,72 @@ def test_render_csv_has_expected_header_and_rows() -> None:
     assert flat[("2026-05", "revisitas")] == "11"
     assert flat[("2026-05", "tag.street")] == "2.00"
     assert flat[("2026-05", "tag.cart")] == "3.75"
+
+
+# ---------------------------------------------------------------------------
+# Task 8 — PDF exporter (optional extra)
+# ---------------------------------------------------------------------------
+
+
+def test_render_pdf_writes_bytes(tmp_path: Path) -> None:
+    pytest.importorskip("jinja2")
+    pytest.importorskip("weasyprint")
+
+    from jw_core.ministry.exporters import render_pdf
+    from jw_core.ministry.field_report import MonthlyReport
+
+    out = tmp_path / "r.pdf"
+    render_pdf(
+        MonthlyReport(
+            month="2026-05",
+            total_hours=7.75,
+            total_hours_display="7h 45min",
+            breakdown_by_tag={"street": 2.0, "cart": 3.75},
+            active_studies_max=4,
+            active_studies_ids=[],
+            revisits_count=11,
+            entries_count=4,
+            days_with_service=3,
+        ),
+        out_path=out,
+    )
+    assert out.exists()
+    head = out.read_bytes()[:4]
+    assert head == b"%PDF"
+
+
+def test_render_pdf_raises_helpful_error_when_extra_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import builtins
+
+    real_import = builtins.__import__
+
+    def fake_import(name: str, *args, **kwargs):  # type: ignore[no-untyped-def]
+        if name in ("weasyprint", "jinja2"):
+            raise ImportError(f"forced missing: {name}")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+    from jw_core.ministry import exporters as ex
+
+    # Reload to retrigger lazy imports
+    import importlib
+
+    importlib.reload(ex)
+    with pytest.raises(RuntimeError, match=r"\[pdf\]"):
+        ex.render_pdf(
+            ex.MonthlyReport(  # type: ignore[attr-defined]
+                month="2026-05",
+                total_hours=0.0,
+                total_hours_display="0h 00min",
+                breakdown_by_tag={},
+                active_studies_max=0,
+                active_studies_ids=[],
+                revisits_count=0,
+                entries_count=0,
+                days_with_service=0,
+            ),
+            out_path=Path("/tmp/unused.pdf"),
+        )

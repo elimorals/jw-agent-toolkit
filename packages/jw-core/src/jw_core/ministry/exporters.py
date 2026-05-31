@@ -81,3 +81,38 @@ def render_csv(report: "MonthlyReport") -> str:
     for tag, hours in sorted(report.breakdown_by_tag.items()):
         w.writerow([report.month, f"tag.{tag}", f"{hours:.2f}"])
     return buf.getvalue()
+
+
+# Lazy-import re-export of MonthlyReport so the missing-extras test can
+# call `exporters.MonthlyReport` after a reload.
+from jw_core.ministry.field_report import MonthlyReport  # noqa: E402
+
+
+def render_pdf(report: "MonthlyReport", *, out_path: Path) -> Path:
+    """Render the report to PDF (requires the ``[pdf]`` extra)."""
+
+    try:
+        from jinja2 import Environment, FileSystemLoader, select_autoescape
+        from weasyprint import HTML
+    except ImportError as exc:  # noqa: BLE001
+        raise RuntimeError(
+            "PDF rendering requires the [pdf] extra. Install with "
+            "`uv pip install -e 'packages/jw-core[pdf]'`."
+        ) from exc
+
+    templates_dir = Path(__file__).parent / "templates"
+    env = Environment(
+        loader=FileSystemLoader(str(templates_dir)),
+        autoescape=select_autoescape(["html", "xml"]),
+    )
+    tpl = env.get_template("monthly_report.html.j2")
+    breakdown = sorted(
+        report.breakdown_by_tag.items(), key=lambda kv: -kv[1]
+    )
+    html = tpl.render(
+        report=report,
+        breakdown=breakdown,
+        labels={**_TAG_LABELS_ES, **{k: _tag_label(k) for k in report.breakdown_by_tag}},
+    )
+    HTML(string=html).write_pdf(str(out_path))
+    return out_path
