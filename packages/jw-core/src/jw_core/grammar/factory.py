@@ -89,8 +89,7 @@ def get_default_constrained_caller(
 
     if warn_on_fallback:
         print(
-            "jw_core.grammar.factory: no LLM provider available, "
-            "falling back to FakeConstrainedCaller (test-only).",
+            "jw_core.grammar.factory: no LLM provider available, falling back to FakeConstrainedCaller (test-only).",
             file=sys.stderr,
         )
     return FakeConstrainedCaller()

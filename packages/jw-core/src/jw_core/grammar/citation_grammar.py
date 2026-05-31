@@ -24,7 +24,7 @@ def citation_url_grammar() -> str:
     return (
         'citation-url ::= "\\"" "https://wol.jw.org/" lang "/" rest "\\""\n'
         "lang ::= [a-z] [a-z] [a-z]?\n"
-        'rest ::= [-A-Za-z0-9_/.%]+\n'
+        "rest ::= [-A-Za-z0-9_/.%]+\n"
     )
 
 

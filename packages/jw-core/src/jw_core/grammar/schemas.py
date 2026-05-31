@@ -33,9 +33,7 @@ CitationKind = Literal["verse", "article", "daily_text", "chapter", "topic", "st
 class CitationModel(BaseModel):
     """Mirror of jw_agents.base.Citation, with hard URL constraint."""
 
-    url: Annotated[
-        str, StringConstraints(pattern=CITATION_URL_REGEX, min_length=20, max_length=512)
-    ]
+    url: Annotated[str, StringConstraints(pattern=CITATION_URL_REGEX, min_length=20, max_length=512)]
     title: str = ""
     kind: CitationKind = "article"
 
@@ -108,9 +106,7 @@ class AgentResultModel(BaseModel):
             findings=[
                 Finding(
                     summary=f.summary,
-                    citation=Citation(
-                        url=f.citation.url, title=f.citation.title, kind=f.citation.kind
-                    ),
+                    citation=Citation(url=f.citation.url, title=f.citation.title, kind=f.citation.kind),
                     excerpt=f.excerpt,
                 )
                 for f in self.findings

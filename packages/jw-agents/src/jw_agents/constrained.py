@@ -16,11 +16,11 @@ import inspect
 from collections.abc import Awaitable, Callable
 from typing import Any
 
+from jw_core.grammar.factory import ConstrainedCaller, get_default_constrained_caller
+from jw_core.grammar.schemas import AgentResultModel
 from pydantic import ValidationError
 
 from jw_agents.base import AgentResult
-from jw_core.grammar.factory import ConstrainedCaller, get_default_constrained_caller
-from jw_core.grammar.schemas import AgentResultModel
 
 
 class CitationForgeryError(RuntimeError):
@@ -58,9 +58,7 @@ async def run_with_citations(
     procedural_urls = {f.citation.url for f in procedural.findings}
     for f in model.findings:
         if f.citation.url not in procedural_urls:
-            raise CitationForgeryError(
-                f"LLM emitted URL not in procedural findings: {f.citation.url}"
-            )
+            raise CitationForgeryError(f"LLM emitted URL not in procedural findings: {f.citation.url}")
 
     return model.to_dataclass()
 
@@ -75,14 +73,10 @@ def _build_prompt(user_prompt: str, procedural: AgentResult) -> str:
         "Verified sources (use ONLY these URLs in `citation.url`):",
     ]
     for i, f in enumerate(procedural.findings):
-        lines.append(
-            f"{i + 1}. url={f.citation.url} title={f.citation.title!r} "
-            f"summary={f.summary[:200]!r}"
-        )
+        lines.append(f"{i + 1}. url={f.citation.url} title={f.citation.title!r} summary={f.summary[:200]!r}")
     lines.append("")
     lines.append(
-        "Emit a single JSON object matching the AgentResult schema. "
-        "Every citation.url MUST appear in the list above."
+        "Emit a single JSON object matching the AgentResult schema. Every citation.url MUST appear in the list above."
     )
     return "\n".join(lines)
 
