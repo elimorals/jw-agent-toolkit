@@ -15,7 +15,7 @@ import json
 import os
 import sqlite3
 import threading
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from jw_core.news.models import NewsItem, SeenRecord
@@ -47,14 +47,14 @@ def _default_path() -> Path:
 
 def _iso(dt: datetime) -> str:
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc).isoformat()
+        dt = dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC).isoformat()
 
 
 def _from_iso(s: str) -> datetime:
     dt = datetime.fromisoformat(s)
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
     return dt
 
 
@@ -83,10 +83,8 @@ class SeenStore:
         return row is not None
 
     def mark_seen(self, item: NewsItem, *, now: datetime | None = None) -> None:
-        ts = _iso(now or datetime.now(timezone.utc))
-        metadata = json.dumps(
-            item.metadata or {}, separators=(",", ":"), sort_keys=True
-        )
+        ts = _iso(now or datetime.now(UTC))
+        metadata = json.dumps(item.metadata or {}, separators=(",", ":"), sort_keys=True)
         with self._lock:
             existing = self._conn.execute(
                 "SELECT first_seen_at FROM news_seen WHERE channel = ? AND item_id = ?",
@@ -122,9 +120,7 @@ class SeenStore:
 
     def last_run_at(self) -> datetime | None:
         with self._lock:
-            row = self._conn.execute(
-                "SELECT last_run_at FROM news_runs WHERE id = 1"
-            ).fetchone()
+            row = self._conn.execute("SELECT last_run_at FROM news_runs WHERE id = 1").fetchone()
         return _from_iso(row[0]) if row else None
 
     def set_last_run_at(self, when: datetime) -> None:

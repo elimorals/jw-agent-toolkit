@@ -15,13 +15,12 @@ import json
 from pathlib import Path
 
 import typer
-from rich.console import Console
-
 from jw_agents.news_monitor import (
     DEFAULT_CHANNELS,
     DEFAULT_LANGUAGES,
     news_monitor,
 )
+from rich.console import Console
 
 news_app = typer.Typer(
     name="news",

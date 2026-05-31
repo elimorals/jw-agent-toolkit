@@ -30,7 +30,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Callable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Protocol
 
 from jw_core.clients.pub_media import PubMediaError
@@ -60,7 +60,7 @@ def _iso_to_jw(language: str) -> str:
 
 
 def _now_default() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 # ── Publications ────────────────────────────────────────────────────────
@@ -105,14 +105,11 @@ class PublicationsSource:
                     )
                 except PubMediaError as exc:
                     self.warnings.append(
-                        f"publications: {pub_code}/{jw_lang}"
-                        f"{'/' + str(issue) if issue else ''} → {exc}"
+                        f"publications: {pub_code}/{jw_lang}{'/' + str(issue) if issue else ''} → {exc}"
                     )
                     continue
                 except Exception as exc:  # noqa: BLE001
-                    self.warnings.append(
-                        f"publications: unexpected error for {pub_code}/{jw_lang}: {exc!r}"
-                    )
+                    self.warnings.append(f"publications: unexpected error for {pub_code}/{jw_lang}: {exc!r}")
                     continue
                 for f in pub.files:
                     if f.file_format.upper() not in {"EPUB", "JWPUB", "PDF"}:
@@ -190,9 +187,7 @@ class BroadcastingSource:
                 guid = getattr(v, "guid", "") or ""
                 if not guid:
                     continue
-                url = getattr(v, "download_url", "") or _TV_URL.format(
-                    lang=_iso_to_jw(lang_iso), guid=guid
-                )
+                url = getattr(v, "download_url", "") or _TV_URL.format(lang=_iso_to_jw(lang_iso), guid=guid)
                 items.append(
                     NewsItem(
                         channel="broadcasting",
@@ -201,9 +196,7 @@ class BroadcastingSource:
                         language=lang_iso,
                         url=url,
                         description=getattr(v, "description", "") or "",
-                        first_published=_parse_first_published(
-                            getattr(v, "first_published", "")
-                        ),
+                        first_published=_parse_first_published(getattr(v, "first_published", "")),
                         metadata={
                             "duration_seconds": float(getattr(v, "duration_seconds", 0.0) or 0.0),
                             "natural_key": getattr(v, "natural_key", ""),
@@ -255,7 +248,7 @@ class ProgramsSource:
         months = _months_window(now, self._lookahead)
         for lang_iso in languages:
             jw_lang = _iso_to_jw(lang_iso)
-            for (year, month) in months:
+            for year, month in months:
                 issue = year * 100 + month
                 for pub_code in ("mwb", "w"):
                     item_id = f"{pub_code}{year % 100:02d}.{month:02d}"
@@ -268,9 +261,7 @@ class ProgramsSource:
                     except PubMediaError:
                         continue
                     except Exception as exc:  # noqa: BLE001
-                        self.warnings.append(
-                            f"programs: {pub_code}/{jw_lang}/{issue}: {exc!r}"
-                        )
+                        self.warnings.append(f"programs: {pub_code}/{jw_lang}/{issue}: {exc!r}")
                         continue
                     if not pub.files:
                         continue

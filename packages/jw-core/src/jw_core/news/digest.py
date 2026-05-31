@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from jw_core.news.models import DigestReport, NewsItem, SeenRecord
 from jw_core.news.sources import NewsSource
@@ -104,9 +104,7 @@ def render_markdown(
         lines.append("- Ventana: epoch (todo el catálogo seed)")
     lines.append(f"- Idiomas: {', '.join(languages)}")
     lines.append(f"- Canales: {', '.join(channels)}")
-    lines.append(
-        f"- Nuevos: {len(new_sorted)} · Retirados: {len(retired_sorted)}"
-    )
+    lines.append(f"- Nuevos: {len(new_sorted)} · Retirados: {len(retired_sorted)}")
     if warnings:
         lines.append(f"- Avisos: {len(warnings)}")
     lines.append("")
@@ -165,8 +163,8 @@ def _render_item_line(item: NewsItem) -> str:
 
 def _iso(dt: datetime) -> str:
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc).isoformat()
+        dt = dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC).isoformat()
 
 
 async def build_digest(
@@ -181,7 +179,7 @@ async def build_digest(
 ) -> DigestReport:
     """End-to-end: collect → diff → render → (optionally) update store."""
 
-    generated_at = now or datetime.now(timezone.utc)
+    generated_at = now or datetime.now(UTC)
     items = await collect_items(sources, languages=languages, since=since)
     items = [i for i in items if i.channel in channels]
     new_items, retired_items = diff_against_store(items, store)

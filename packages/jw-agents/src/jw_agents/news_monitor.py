@@ -11,7 +11,7 @@ other agent.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from jw_core.clients.factory import build_clients
 from jw_core.clients.jw_broadcasting import JWBroadcastingClient
@@ -41,11 +41,9 @@ def _resolve_since(since: str | None, store: SeenStore) -> datetime | None:
     try:
         dt = datetime.fromisoformat(since)
     except ValueError as exc:
-        raise ValueError(
-            f"--since must be 'last_run', 'epoch' or ISO-8601 date, got {since!r}"
-        ) from exc
+        raise ValueError(f"--since must be 'last_run', 'epoch' or ISO-8601 date, got {since!r}") from exc
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
     return dt
 
 

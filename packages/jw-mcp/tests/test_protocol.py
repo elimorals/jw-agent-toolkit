@@ -111,6 +111,8 @@ _EXPECTED_TOOLS = {
     "log_student_progress",
     "list_student_lessons",
     "set_student_goal",
+    # Phase 25 — News monitor
+    "news_digest",
 }
 
 
