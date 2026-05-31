@@ -118,7 +118,9 @@ def test_vector_search_returns_top_k(populated_store: VectorStore) -> None:
 
 
 def test_hybrid_search_combines_signals(populated_store: VectorStore) -> None:
-    hits = populated_store.hybrid_search("peace", top_k=3)
+    # Fase 33: default rerank=True; NoOpReranker preserves order but tags hit
+    # source as "hybrid+rerank". Use rerank=False for pre-Fase-33 source tag.
+    hits = populated_store.hybrid_search("peace", top_k=3, rerank=False)
     assert hits[0].source == "hybrid"
     ids = [h.chunk.id for h in hits]
     # 'peace' chunk should be in the top hits (BM25 boosts it).

@@ -128,8 +128,17 @@ class VectorStore:
         *,
         candidate_pool: int = 50,
         rrf_k: int = 60,
+        rerank: bool = True,
+        reranker: object | None = None,  # Reranker — typed as object to avoid import cycle
     ) -> list[SearchHit]:
-        """Reciprocal Rank Fusion across BM25 and vector results."""
+        """Reciprocal Rank Fusion across BM25 and vector results, then optional rerank.
+
+        Backwards compat: with `rerank=False`, output is bit-identical to the
+        pre-Fase-33 behavior. With `rerank=True` and no real reranker
+        available, the factory returns NoOpReranker (passthrough) so the order
+        stays the same but `source` becomes "hybrid+rerank" — this is the only
+        observable change for offline callers.
+        """
         vec_hits = self.vector_search(query, top_k=candidate_pool)
         bm25_hits = self.bm25_search(query, top_k=candidate_pool)
         fused: dict[str, tuple[float, Chunk]] = {}
@@ -141,9 +150,30 @@ class VectorStore:
                     fused[hit.chunk.id] = (prev_score + contribution, hit.chunk)
                 else:
                     fused[hit.chunk.id] = (contribution, hit.chunk)
+
         ordered = sorted(fused.values(), key=lambda t: -t[0])
+        if not ordered:
+            return []
+
+        if not rerank:
+            return [
+                SearchHit(chunk=c, score=float(s), rank=r, source="hybrid")
+                for r, (s, c) in enumerate(ordered[:top_k], 1)
+            ]
+
+        # Resolve reranker lazily to avoid touching factory on cold paths.
+        if reranker is None:
+            from jw_rag.rerank_providers.factory import get_default_reranker
+
+            reranker = get_default_reranker()
+
+        texts = [c.text for _, c in ordered]
+        scores = reranker.rerank(query, texts)  # type: ignore[union-attr]
+        reranked = sorted(zip(scores, ordered, strict=True), key=lambda t: -t[0])
+
         return [
-            SearchHit(chunk=c, score=float(s), rank=r, source="hybrid") for r, (s, c) in enumerate(ordered[:top_k], 1)
+            SearchHit(chunk=c, score=float(s), rank=r, source="hybrid+rerank")
+            for r, (s, (_, c)) in enumerate(reranked[:top_k], 1)
         ]
 
     # ── Persistence ────────────────────────────────────────────────────
