@@ -453,3 +453,28 @@ siempre»).
 
 **No cubre** (post-fase): recordatorios temporales (Fase 25-adjacent),
 gráficas (export JSON ya lo habilita externamente), modo familia.
+
+---
+
+## Fase 25 — Monitor de novedades jw.org ✅
+
+> Tier 2 alto valor recurrente. Spec: `docs/superpowers/specs/2026-05-30-fase-25-news-monitor-design.md`.
+
+- ✅ Módulo nuevo `jw_core.news` (`models`, `store`, `sources`, `digest`, `seeds`).
+- ✅ Tres `NewsSource`:
+  - `PublicationsSource` — seed list × idiomas, periodical/non-periodical.
+  - `BroadcastingSource` — `discover_all_videos` sobre `VideoOnDemand`.
+  - `ProgramsSource` — `mwb`/`w` para [mes_actual, mes_actual+2).
+- ✅ `SeenStore` SQLite en `~/.jw-agent-toolkit/news_seen.db` (`JW_NEWS_SEEN_DB`).
+- ✅ Cache TTL: 6h (publications), 24h (broadcasting), 7d (programs).
+- ✅ Diff `(new, retired)` + render markdown determinista byte-estable.
+- ✅ Agente `news_monitor` (envuelve sources + store en AgentResult).
+- ✅ CLI `jw news digest --since {last_run|epoch|ISO} --languages --channels --out --no-update --json`.
+- ✅ Tool MCP `news_digest`.
+- ✅ Guía `docs/guias/monitor-de-novedades.md` (incluye cron + systemd timers de ejemplo).
+- ✅ 1 case L1 nuevo en `jw-eval` (`news_monitor_digest_en`).
+
+### Cobertura de tests
+
+- ✅ ~29 tests nuevos (`test_news_models.py`, `test_news_store.py`, `test_news_sources.py`, `test_news_digest.py`, `test_news_monitor.py`, `test_news_cli.py`).
+- ✅ Suite global sin regresiones.

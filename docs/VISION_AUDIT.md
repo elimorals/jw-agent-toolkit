@@ -21,6 +21,7 @@
 | 13. Accesibilidad | ✅ Cubierto | M12 — easy_read + palette + legibility |
 | Fase 23 (citation validator) | ✅ Nuevo | `jw_core.citations` — 3 modos, CLI + MCP, hermana de Fase 22 |
 | Fase 24 | VISION #1 | `study_conductor` + `StudentProgress` | ✅ |
+| Fase 25 (news monitor) | ✅ Nuevo | `jw news digest` — 3 canales, seen-store SQLite, tool MCP |
 
 **100% de las 13 secciones tienen entrega.** Métricas:
 - **24+ archivos Python nuevos** organizados en 8 sub-paquetes (`audio/`, `calendar/`, `family/`, `observability/`, `personalization/`, `privacy/`, `study/`, `vision/`).
