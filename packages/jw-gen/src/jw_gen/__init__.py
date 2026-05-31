@@ -1,6 +1,6 @@
 """jw-gen — generative-content toolkit for personal illustrative use.
 
-Public API (re-exports will land as each module is implemented):
+Public API:
     from jw_gen import (
         GenerationRequest,
         GenerationResult,
@@ -15,4 +15,22 @@ The policy is LOAD-BEARING. Every output that touches disk MUST pass through
 before reaching `factory.get_provider(...).generate(...)`.
 """
 
-__all__: list[str] = []
+from jw_gen.factory import get_provider
+from jw_gen.models import (
+    CostHint,
+    GenerationRequest,
+    GenerationResult,
+    SafetyDecision,
+    WatermarkConfig,
+)
+from jw_gen.policy import finalize_output
+
+__all__ = [
+    "CostHint",
+    "GenerationRequest",
+    "GenerationResult",
+    "SafetyDecision",
+    "WatermarkConfig",
+    "finalize_output",
+    "get_provider",
+]
