@@ -23,6 +23,12 @@ except ImportError:  # pragma: no cover
     AnthropicAdapter = None  # type: ignore[assignment,misc]
     AnthropicAdapterError = RuntimeError  # type: ignore[assignment,misc]
 
+try:  # optional import — only succeeds with [grammar-openai] extra
+    from jw_core.privacy.openai_adapter import OpenAIAdapter, OpenAIAdapterError
+except ImportError:  # pragma: no cover
+    OpenAIAdapter = None  # type: ignore[assignment,misc]
+    OpenAIAdapterError = RuntimeError  # type: ignore[assignment,misc]
+
 __all__ = [
     "AnthropicAdapter",
     "AnthropicAdapterError",
@@ -30,6 +36,8 @@ __all__ = [
     "FieldEncryptor",
     "OllamaAdapter",
     "OllamaError",
+    "OpenAIAdapter",
+    "OpenAIAdapterError",
     "TelemetryAuditResult",
     "audit_telemetry_outflow",
     "derive_key_from_password",
