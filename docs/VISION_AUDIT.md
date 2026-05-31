@@ -263,3 +263,7 @@ curl -s http://localhost:8765/healthz
 ### Fase 33 — embed-rerank (núcleo RAG)
 
 | Fase 33 (embed-rerank) | ✅ Nuevo | `jw-rag.embed_providers` + `jw-rag.rerank_providers` — 6 embed + 4 rerank providers + factory |
+
+### Fase 36 — vlm-ocr (Qwen3-VL / Claude Vision / OpenAI Vision)
+
+| Fase 36 (vlm-ocr) | ✅ Nuevo | `jw_core.vision.vlm` (`StructuredPage` + 6 providers + factory) + `jw_rag.ingest_image` + `jw image` CLI + 2 MCP tools. Tesseract preservado con `DeprecationWarning`. |

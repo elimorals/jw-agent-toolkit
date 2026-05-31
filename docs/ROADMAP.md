@@ -670,3 +670,36 @@ gráficas (export JSON ya lo habilita externamente), modo familia.
 - ✅ 5 tests `test_asr_whisper_turbo.py` (4 + 1 skipped sin faster-whisper) + 5 `test_asr_deepgram.py`.
 - ✅ 6 tests `test_audio_factory.py` (chain + JW_TTS_PROVIDER).
 - ✅ Suite global sin regresiones.
+
+---
+
+## Fase 36 — `vlm-ocr` ✅
+
+> Tier 1 visual upgrade. Spec: `docs/superpowers/specs/2026-05-31-fase-36-vlm-ocr-design.md`.
+> Plan: `docs/superpowers/plans/2026-05-31-fase-36-vlm-ocr-plan.md`.
+
+- ✅ `StructuredBlock` + `StructuredPage` Pydantic models (`jw_core.vision.vlm`).
+- ✅ `VLMProvider` Protocol con triple-target taxonomy (`api` / `mlx` / `nvidia` / `cpu`).
+- ✅ 6 providers concretos:
+  - `FakeVLMProvider` (deterministic, used by tests).
+  - `ClaudeVisionProvider` (adapter sobre `anthropic` SDK — Claude 4.5/4.6/4.7 son nativamente multimodales).
+  - `OpenAIVisionProvider` (adapter sobre `openai` SDK).
+  - `Qwen3VLAPIProvider` (httpx contra DashScope / Replicate).
+  - `Qwen3VLProvider` local con backends `_MLXBackend`, `_VLLMBackend`, `_GGUFBackend`.
+  - `TesseractFallbackProvider` que emite `DeprecationWarning` y envuelve el legacy `ocr_image()`.
+- ✅ Factory `get_default_provider()` + `JW_VLM_PROVIDER` env override.
+- ✅ `extract_bible_reference_from_image_v2()` — replacement v2 con `StructuredPage`.
+- ✅ `jw_rag.ingest_image()` — one chunk per StructuredBlock; `bible_ref` blocks carry `parsed_reference`.
+- ✅ CLI `jw image extract|ingest`.
+- ✅ MCP tools `extract_structured_page` + `ingest_image_to_rag`.
+- ✅ `migrate_to_vlm()` helper devuelve un callable drop-in con la misma firma que `ocr_image()`.
+- ✅ Extras opt-in: `vlm-anthropic`, `vlm-openai`, `vlm-api-qwen`, `vlm-mlx`, `vlm-nvidia`, `vlm-cpu`, `vlm-tesseract`.
+- ✅ Guía `docs/guias/vlm-ocr.md`.
+
+### Cobertura de tests
+
+- ✅ 8 `test_vlm_models.py` + 6 `test_vlm_provider_fake.py` + 5 `test_vlm_provider_claude.py`.
+- ✅ 3 `test_vlm_provider_openai.py` + 3 `test_vlm_provider_qwen_api.py` + 4 `test_vlm_provider_qwen_local.py`.
+- ✅ 4 `test_vlm_provider_tesseract_fallback.py` + 5 `test_vlm_factory.py` + 3 `test_vlm_extract_v2.py`.
+- ✅ 4 `test_ingest_image.py` (jw-rag) + 2 `test_command_image.py` (jw-cli) + 2 `test_mcp_vlm_tools.py` (jw-mcp).
+- ✅ 4 `test_vlm_real.py` opt-in con `@pytest.mark.vlm_real` (skipped sin env keys / hardware).
