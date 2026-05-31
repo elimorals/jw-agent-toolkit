@@ -1,0 +1,21 @@
+# packages/jw-eval/fixtures/golden_qa/l1/student_part_return_visit_pt.yaml
+id: l1_student_part_return_visit_pt
+agent: student_part_helper
+layer: l1
+input:
+  kind: return_visit
+  topic_or_ref: "João 3:16"
+  language: pt
+  audience: religious
+  oratory_point: 27
+expected:
+  min_findings: 4
+  must_have_citation: true
+  forbidden_keywords_in_findings:
+    - "supostamente"
+    - "talvez"
+metadata:
+  topic: student_parts.return_visit.pt
+  fase: 26
+  added_by: elias
+  added_at: 2026-05-30
