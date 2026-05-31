@@ -164,3 +164,48 @@ class VLMProvider(Protocol):
         *,
         language: str = "en",
     ) -> StructuredPage: ...
+
+
+def extract_bible_reference_from_image_v2(
+    image_path: Path | str,
+    *,
+    language: str = "en",
+    provider: "VLMProvider | None" = None,
+) -> dict[str, object]:
+    """V2 of extract_bible_reference_from_image — VLM-first with fallback.
+
+    Returns:
+        {
+            "structured_page": StructuredPage,
+            "reference": BibleRef.model_dump() | None,
+            "text": str,                  # = page.raw_text_fallback (compat)
+            "language_hint": str,
+        }
+    """
+
+    from jw_core.parsers.reference import parse_reference
+
+    if provider is None:
+        from jw_core.vision.vlm_providers import get_default_provider
+
+        provider = get_default_provider()
+
+    page = provider.extract_structured(Path(image_path), language=language)
+
+    # Prefer parsing the first bible_ref block; else parse the full text.
+    ref = None
+    for block in page.blocks:
+        if block.kind == "bible_ref":
+            parsed = parse_reference(block.text)
+            if parsed is not None:
+                ref = parsed
+                break
+    if ref is None:
+        ref = parse_reference(page.raw_text_fallback) or parse_reference(page.text_only())
+
+    return {
+        "structured_page": page,
+        "reference": ref.model_dump() if ref else None,
+        "text": page.raw_text_fallback,
+        "language_hint": language,
+    }
