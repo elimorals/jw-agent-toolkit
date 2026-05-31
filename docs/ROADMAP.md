@@ -478,3 +478,26 @@ gráficas (export JSON ya lo habilita externamente), modo familia.
 
 - ✅ ~29 tests nuevos (`test_news_models.py`, `test_news_store.py`, `test_news_sources.py`, `test_news_digest.py`, `test_news_monitor.py`, `test_news_cli.py`).
 - ✅ Suite global sin regresiones.
+
+---
+
+## Fase 26 — Asistente de partes del estudiante V&M ✅
+
+> Tier 2 alto valor recurrente. Spec: `docs/superpowers/specs/2026-05-30-fase-26-student-parts-design.md`.
+
+- ✅ 4 tipos de asignación: `bible_reading`, `starting_conversation`, `return_visit`, `bible_study`.
+- ✅ 4 audiencias (`default` / `new` / `religious` / `atheist`) × 3 idiomas (`en` / `es` / `pt`) → **48 plantillas** en `jw_core.data.student_parts_templates`.
+- ✅ Registro de **50 puntos de oratoria** del folleto *Mejore su predicación* (`th`) en `jw_core.data.oratory_points` (paráfrasis ≤300 chars, `applies_to` por kind, mapping mes→punto).
+- ✅ Agente procedural `jw_agents.student_part_helper` — sin LLM, sin red salvo modo `"this week"` (delegado al workbook scraper, Fase 11).
+- ✅ Salida AgentResult con exactamente 4 findings (`opening` / `body` / `transition` / `close`), `time_target_seconds`, `oratory_point_applied`, citation por sección (`verse` o `topic_anchor`).
+- ✅ CLI `jw student <kind> <topic_or_ref> --lang --audience --point --json` con aliases (`reading`/`conversation`/`revisit`/`study`).
+- ✅ Tool MCP `student_part_help`.
+- ✅ 4 golden cases L1 (uno por kind): `student_part_bible_reading_es`, `student_part_conversation_en`, `student_part_return_visit_pt`, `student_part_bible_study_es`.
+- ✅ Guía `docs/guias/partes-del-estudiante.md`.
+
+### Cobertura de tests
+
+- ✅ **34 tests nuevos** (`test_oratory_points.py` 11 · `test_student_parts_templates.py` 9 · `test_student_part_helper.py` 14).
+- ✅ Suite global sin regresiones.
+
+**Cubre**: VISION.md item #2 («Ministerio / predicación») — pieza recurrente de Vida y Ministerio.

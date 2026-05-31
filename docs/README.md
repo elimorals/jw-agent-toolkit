@@ -57,6 +57,7 @@ Orientadas a casos de uso. Cada una es autocontenida con código de ejemplo.
 - [Personalización y accesibilidad](guias/personalizacion-y-accesibilidad.md) — Módulo 12: profile, memoria, tono, easy-read.
 - [Citation integrity validator](guias/citation-validator.md) — Fase 23. Valida URLs wol.jw.org de agentes (estructural / live / drift). Hermana de Fase 22.
 - [Monitor de novedades](guias/monitor-de-novedades.md) — `jw news digest` detecta publicaciones, videos y workbooks nuevos. Local-first, determinista.
+- [Partes del estudiante](guias/partes-del-estudiante.md) — guion 4-sección para lectura, conversación, revisita y estudio bíblico (Fase 26).
 
 ### Referencia exhaustiva — cada función documentada
 
