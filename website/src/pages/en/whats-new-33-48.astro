@@ -1,0 +1,565 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+interface Phase {
+  number: number;
+  tier: 1 | 2 | 3 | 4;
+  title: string;
+  tagline: string;
+  description: string;
+  status: "shipped" | "planned";
+  tests?: number;
+  commits?: number;
+  whatWasDone?: string[];
+  pending?: string[];
+  guideHref?: string;
+}
+
+const phases: Phase[] = [
+  // ─── Fases 33-38 (SHIPPED) ────────────────────────────────────────
+  {
+    number: 33,
+    tier: 1,
+    title: "embed-rerank",
+    tagline: "Núcleo RAG al SOTA multilingüe",
+    description:
+      "Reemplaza el FakeEmbedder por proveedores reales con auto-detección triple-target (API/MLX/NVIDIA/CPU) + cross-encoder reranker después del RRF. NDCG@10 sube significativamente en es/en/pt.",
+    status: "shipped",
+    tests: 50,
+    commits: 19,
+    whatWasDone: [
+      "6 embedders: BGE-M3, Multilingual-E5, Jina v3, Cohere v3, Voyage, Ollama nomic.",
+      "3 rerankers: BGE-reranker-v2-m3 (local Apache 2.0), Cohere Rerank 3.5, Jina Reranker v2.",
+      "VectorStore.hybrid_search(rerank=True) con backwards-compat completa.",
+      "Auto-detect: API → MLX → NVIDIA → CPU según JW_EMBED_PROVIDER / JW_RERANK_PROVIDER.",
+      "Tests cross-provider con stub SDK vía sys.modules — cero red.",
+    ],
+    pending: ["Métricas NDCG sobre corpus mayor con eval comparativo."],
+    guideHref: "/docs/guias/embeddings-y-rerank",
+  },
+  {
+    number: 34,
+    tier: 1,
+    title: "audio-premium",
+    tagline: "TTS / ASR de calidad sin perder local-first",
+    description:
+      "Añade providers premium sin tocar los 3 existentes (system/edge/piper). Kokoro 82M es default cuando hay; XTTSv2 voice-cloning gateado por doble opt-in (consent.txt obligatorio).",
+    status: "shipped",
+    tests: 36,
+    commits: 14,
+    whatWasDone: [
+      "TTS premium: Kokoro 82M (SOTA TTS Arena ene-2026), XTTSv2 cloning, F5-TTS, ElevenLabs API.",
+      "ASR: WhisperLargeV3Turbo con auto-select por VRAM, Deepgram streaming API.",
+      "XTTSv2 doble opt-in: requiere --voice-clone flag AND consent.txt junto al sample.",
+      "Chain default: kokoro_local → edge → system → ElevenLabs → piper.",
+      "Backwards-compat: transcribe_file('audio.mp3') sigue dando model_size='base'.",
+    ],
+    guideHref: "/docs/guias/audio-premium",
+  },
+  {
+    number: 35,
+    tier: 2,
+    title: "constrained-decoding",
+    tagline: "Citas verificables a nivel de gramática",
+    description:
+      'Aplica el principio "citas verificables" al nivel de DECODIFICACIÓN del LLM, no del prompt. Property test con 100 prompts adversariales: 0 outputs sin citation_url válida.',
+    status: "shipped",
+    tests: 46,
+    commits: 16,
+    whatWasDone: [
+      "Módulo nuevo jw_core.grammar/ con GBNF builders + Pydantic mirror models.",
+      "citation_grammar fuerza ^https://wol\\.jw\\.org/... en cada Finding.",
+      "4 adapters: OllamaAdapter (grammar kwarg), Anthropic (tool-use), OpenAI (response_format), llama-cpp-python.",
+      "FakeConstrainedCaller determinístico para tests offline.",
+      "Property test 100 prompts adversariales × Hypothesis → 0 schema violations.",
+      "CLI `jw constrained ask` + MCP tool `run_constrained`.",
+    ],
+    guideHref: "/docs/guias/constrained-decoding",
+  },
+  {
+    number: 36,
+    tier: 2,
+    title: "vlm-ocr",
+    tagline: "VLM moderno reemplaza Tesseract",
+    description:
+      "Output estructurado por bloques (header/paragraph/citation/footnote) listo para ingestar al RAG. Tesseract sigue como fallback con DeprecationWarning.",
+    status: "shipped",
+    tests: 53,
+    commits: 18,
+    whatWasDone: [
+      "VLMProvider Protocol + StructuredPage Pydantic con bloques tipados.",
+      "Providers: Qwen3-VL local (mlx-vlm/vLLM/llama.cpp), Qwen3-VL API (DashScope), ClaudeVision (adapter SDK anthropic), OpenAIVision.",
+      "ClaudeVisionProvider NO es un modelo separado — es adapter sobre claude-haiku-4-5/sonnet-4-6/opus-4-7 con input de imagen.",
+      "ingest_image() en jw-rag consume StructuredPage y emite un chunk por bloque.",
+      "End-to-end demo: PNG de versículo → BibleRef(book_num=43, chapter=3, verse=16).",
+    ],
+    guideHref: "/docs/guias/vlm-ocr",
+  },
+  {
+    number: 37,
+    tier: 3,
+    title: "colpali-visual",
+    tagline: "Late interaction sobre páginas renderizadas",
+    description:
+      "Recuperación visual sobre páginas rasterizadas de PDF/EPUB/JWPUB. Multi-vector embeddings + MaxSim scoring. Three-way RRF (BM25 + text-vector + visual-MaxSim).",
+    status: "shipped",
+    tests: 42,
+    commits: 14,
+    whatWasDone: [
+      "Subpaquete jw_rag.visual con ColPali + ColQwen2 embedders (multi-vector).",
+      "VisualVectorStore con persistence + MaxSim + mismatch detection.",
+      "PageRasterizer para PDF (pdf2image) / EPUB (playwright) / JWPUB.",
+      "Fail-fast sin GPU: ConfigError con install hint accionable, NO CPU path.",
+      "Ingest pipeline sha256-idempotent (re-runs skip unchanged).",
+      "5 figure-heavy L1 golden cases nuevos en eval.",
+    ],
+    pending: [
+      "Solo NVIDIA primario; MLX vía mlx-vlm experimental.",
+      "Sin API fallback (no hay servicio comercial ColPali estable en 2026).",
+    ],
+    guideHref: "/docs/guias/visual-retrieval",
+  },
+  {
+    number: 38,
+    tier: 4,
+    title: "jw-gen (8º paquete)",
+    tagline: "Generación con difusión y política LOAD-BEARING",
+    description:
+      "Octavo paquete del monorepo. Imagen + audio + video para presentaciones/discursos personales. Política no-negociable: watermark + EXIF/XMP + disclaimer.txt sibling. Safety filters anti-emulación JW oficial.",
+    status: "shipped",
+    tests: 85,
+    commits: 18,
+    whatWasDone: [
+      "Paquete nuevo packages/jw-gen/ (8º workspace member).",
+      "13 adapters: 5 image (NanoBanana, Flux 2 Pro, Recraft v4, Ideogram v3, Imagen 4) + 3 audio (ElevenLabs, Suno, MusicGen) + 5 video (Veo 3, Kling, Seedance, Higgsfield, Runway).",
+      "Policy fail-closed: finalize_output exige watermark + metadata + disclaimer.",
+      "3 safety filters: anti-logo-JW (con bypass real encontrado y corregido: 'Despertai'), voice-cloning double opt-in, realistic-faces stylized default.",
+      "MCP tool generate_illustration fuerza watermark=True silenciosamente.",
+      "Audit log con sha256(prompt) — nunca prompt en claro.",
+      "Property test Hypothesis 100 prompts adversariales en en/es/pt.",
+    ],
+    pending: [
+      "CI matrix con [pdf]/[docx]/[anki] extras instalados.",
+      "Cassettes pytest-recording para los 13 adapters reales.",
+    ],
+    guideHref: "/docs/guias/jw-gen",
+  },
+  // ─── Fases 39-48 (PLANNED, specs + plans escritos) ────────────────
+  {
+    number: 39,
+    tier: 1,
+    title: "nli-runtime",
+    tagline: "El guardián semántico en vivo",
+    description:
+      "Verifica en runtime que cada Finding del agente se desprende lógicamente del passage citado. Es la contraparte ONLINE de la eval doctrinal (Fase 22) y la contraparte SEMÁNTICA de constrained-decoding (Fase 35).",
+    status: "planned",
+    whatWasDone: [
+      "Spec aprobado: 395 líneas. Plan TDD: 3962 líneas, 16 tasks.",
+      "Triple-target: DeBERTa-v3-MNLI local + Claude/OpenAI/Ollama NLI APIs.",
+      "Decorador @fidelity_wrap(min_score=0.7, on_fail='warn') sobre agentes existentes.",
+      "Default on_fail='warn' (no 'reject') para no romper los 1986 tests existentes.",
+    ],
+  },
+  {
+    number: 40,
+    tier: 1,
+    title: "content-provenance",
+    tagline: "Trazabilidad del passage exacto usado",
+    description:
+      "Cada Citation lleva published_date + accessed_at + content_hash + revision. Permite re-validar cuando jw.org cambia un artículo o NWT publica una revisión. Complemento natural de Fase 39.",
+    status: "planned",
+    whatWasDone: [
+      "Spec aprobado: 336 líneas. Plan TDD: 3607 líneas, 14 tasks.",
+      "Citation.metadata gana 4 campos obligatorios (backwards-compat: aditivo).",
+      "provenance_check() re-fetcha la URL y compara content_hash.",
+      "Cuando detecta cambio, re-ejecuta NLI (Fase 39) automáticamente.",
+    ],
+  },
+  {
+    number: 41,
+    tier: 2,
+    title: "plugin-sdk",
+    tagline: "Extension points sin forkear el monorepo",
+    description:
+      "Terceros publican paquetes Python en PyPI que extienden el toolkit vía entry points (PEP 621). 5 grupos: agentes / parsers / embedders / VLMs / gen providers. La pieza más alta de palanca para convertir el proyecto en 'lo de la comunidad'.",
+    status: "planned",
+    whatWasDone: [
+      "Spec aprobado: 495 líneas. Plan TDD: 3398 líneas, 16 tasks.",
+      "5 entry-point groups documentados con Protocols estrictos.",
+      "Política de conflictos: NAMESPACED (no FIRST_WINS) para evitar dependencia del orden de install.",
+      "Evolución de contratos: additive-only Protocols + hasattr capability detection.",
+    ],
+  },
+  {
+    number: 42,
+    tier: 2,
+    title: "scaffolding",
+    tagline: "create-jw-agent + cookbook ejecutable",
+    description:
+      "CLI generator que baja la curva de 'primer agente custom' a 10 minutos. Cookbook con 12 recipes auto-testeados en CI vía plugin pytest-cookbook.",
+    status: "planned",
+    whatWasDone: [
+      "Spec aprobado: 443 líneas. Plan TDD: 3412 líneas, 18 tasks.",
+      "Doble surface: paquete PyPI standalone `create-jw-agent` + wrapper `jw create-agent`.",
+      "12 recipes copy-pasteables con bloques '# test' parseados automáticamente.",
+      "CI job cookbook-tests rompe build si cualquier recipe deja de compilar.",
+    ],
+  },
+  {
+    number: 43,
+    tier: 2,
+    title: "agent-tracing",
+    tagline: "Debuggability local de agentes",
+    description:
+      "Cada agente emite trace JSON con findings considerados, descartados, ranking y razones. Distinto de Fase 22 (mide outputs) — esto explica el PROCESO.",
+    status: "planned",
+    whatWasDone: [
+      "Spec aprobado: 394 líneas. Plan TDD: 3231 líneas, 15 tasks.",
+      "JSONL append-only en ~/.jw-agent-toolkit/traces/ (envelope al final, no header).",
+      "OTel bridge opt-in vía [otel] extra (no default, para mantener zero-dep local-first).",
+      "CustomEvent escape hatch + lint guard en CI para agentes nuevos sin instrumentar.",
+    ],
+  },
+  {
+    number: 44,
+    tier: 2,
+    title: "synth-judge",
+    tagline: "Filtro de calidad para Q&A sintético",
+    description:
+      "Filtra pares Q&A sintéticos antes de fine-tuning. Reusa Fase 39 (NLI). 4 dimensiones: cites_jw_publication / nli_score / pedagogical_quality / overall.",
+    status: "planned",
+    whatWasDone: [
+      "Spec aprobado: 453 líneas. Plan TDD: 3413 líneas, 13 tasks.",
+      "NLI extrae premise de comilla inline en respuesta (no del chunk fuente).",
+      "Fórmula overall aditiva con valores neutros para degradación grácil.",
+      "Default modo loose descarta overall < 6; recipe override.",
+    ],
+  },
+  {
+    number: 45,
+    tier: 3,
+    title: "semantic-chunking",
+    tagline: "Chunking por unidad de pensamiento",
+    description:
+      "Mejora chunking actual (paragraph-based) con detección de continuación argumentativa. Heurística primero + LLM opt-in. Métrica de éxito: NDCG@10 ≥10% mejora PER language.",
+    status: "planned",
+    whatWasDone: [
+      "Spec aprobado: 346 líneas. Plan TDD: 3341 líneas, 12 tasks.",
+      "Backwards-compat: paragraph chunker se mueve, façade existente queda bit-identical.",
+      "Continuation markers en es/en/pt vía JSON catalog.",
+      "NDCG@10 ≥10% PER LANGUAGE (no aggregate) para evitar regresión sub-idioma.",
+    ],
+  },
+  {
+    number: 46,
+    tier: 3,
+    title: "canonical-versification",
+    tagline: "Mapeo entre tradiciones de numeración",
+    description:
+      "Mapeo entre cristiano (NWT) / hebreo masorético / Septuaginta / Vulgata. ~150 discrepancias documentadas (Salmos superscripts, Joel 2:28-32 = Joel 3 Heb, etc.).",
+    status: "planned",
+    whatWasDone: [
+      "Spec aprobado: 372 líneas. Plan TDD: 2512 líneas, 14 tasks.",
+      "VerseCoord permite verse_start=0 (superscripciones); BibleRef stays strict.",
+      "MappingResult wrapper fuerza acknowledge tradition incluso cuando no hay discrepancia.",
+      "Copyright guard test: scan stop-phrases de Tov/BHS/NETS para garantizar prosa original.",
+    ],
+  },
+  {
+    number: 47,
+    tier: 4,
+    title: "jw-core-js-minimal",
+    tagline: "Port TypeScript de 3 módulos críticos",
+    description:
+      "Port TS de parse_reference + WOLClient.get_bible_chapter + parsers.article. Abre la puerta Capacitor/Expo/browser sin portar 33k líneas de Python. Cross-language parity en CI.",
+    status: "planned",
+    whatWasDone: [
+      "Spec aprobado: 591 líneas. Plan TDD: 3944 líneas, 21 tasks (8 sprints).",
+      "Stack: pnpm + tsdown (Rolldown) + Biome + Vitest. ESM-only.",
+      "500 cross-lang fixtures: parse_reference TS y Python deben producir JSON idéntico.",
+      "npm scope @jw-agent-toolkit con placeholder v0.0.1 reservado en Sprint 1.",
+    ],
+  },
+  {
+    number: 48,
+    tier: 4,
+    title: "wol-browser-ext",
+    tagline: "Extensión Chrome/Firefox para wol.jw.org",
+    description:
+      "Inyecta UI inline en wol.jw.org. Cada versículo gana botones: 📖 Explicar, 🔗 Cross-refs, 📝 Guardar a Obsidian. Backend REST localhost:8765 — local-only, sin enviar datos a 3rd parties.",
+    status: "planned",
+    whatWasDone: [
+      "Spec aprobado: 380 líneas. Plan TDD: 3328 líneas, 16 tasks.",
+      "Manifest v3 unificado Chrome/Edge/Firefox.",
+      "Tighten CORS de '*' a allow-list explícito wol.jw.org + chrome-extension://* (fix de seguridad).",
+      "Distribución v0.1: GitHub Releases zip + 'Load unpacked'. Web stores en v0.2+ (review tardío).",
+      "Vault path validation: defensa anti path-traversal con check '.obsidian/' marker.",
+    ],
+  },
+];
+
+const tierMeta: Record<number, { label: string; color: string; description: string }> = {
+  1: {
+    label: "Tier 1 · Confianza en runtime",
+    color: "text-[var(--color-accent)] border-[var(--color-accent)]/40",
+    description: "Mide y protege todo lo demás en vivo.",
+  },
+  2: {
+    label: "Tier 2 · Comunidad",
+    color: "text-[#f0b97a] border-[#f0b97a]/40",
+    description: "Plugin SDK, scaffolding, tracing, judge.",
+  },
+  3: {
+    label: "Tier 3 · Frontera técnica",
+    color: "text-[#a8c8ff] border-[#a8c8ff]/40",
+    description: "Chunking semántico, versification.",
+  },
+  4: {
+    label: "Tier 4 · Superficie JS",
+    color: "text-[#c4a7e7] border-[#c4a7e7]/40",
+    description: "Port TS mínimo + extensión navegador.",
+  },
+};
+
+const shipped = phases.filter((p) => p.status === "shipped");
+const planned = phases.filter((p) => p.status === "planned");
+const totalCommits = shipped.reduce((a, p) => a + (p.commits ?? 0), 0);
+const totalTests = shipped.reduce((a, p) => a + (p.tests ?? 0), 0);
+
+const groupByTier = (subset: Phase[]) =>
+  [1, 2, 3, 4].map((t) => ({
+    meta: tierMeta[t],
+    phases: subset.filter((p) => p.tier === t),
+  }));
+
+const shippedTiers = groupByTier(shipped);
+const plannedTiers = groupByTier(planned);
+---
+
+<BaseLayout
+  title="Novedades — Fases 33-48"
+  description="Las 6 fases entregadas (33-38) y las 10 planeadas (39-48) que completan el ecosistema: embeddings SOTA, audio premium, gramáticas constrained, VLM, ColPali visual, generación con difusión, NLI runtime, provenance, plugin SDK, scaffolding, tracing, TS port y browser extension."
+>
+  <!-- ───────── Hero ───────── -->
+  <section class="grid-noise relative overflow-hidden border-b border-[var(--color-line-subtle)]">
+    <div class="mx-auto max-w-7xl px-4 pb-16 pt-16 sm:px-6 sm:pb-20 sm:pt-20 lg:pb-24 lg:pt-24">
+      <p class="rise rise-1 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        <span class="inline-block h-px w-8 bg-[var(--color-accent)]"></span>
+        <span>2026-05-31 · Release 33-48</span>
+      </p>
+      <h1 class="rise rise-2 mt-6 max-w-3xl text-balance font-display text-[clamp(1.85rem,6vw,3.8rem)] leading-[1.02]">
+        <span class="text-[var(--color-ink-primary)]">6 fases entregadas. </span>
+        <span class="text-[var(--color-accent)]">10 fases planeadas</span>
+        <span class="text-[var(--color-ink-primary)]">. Ecosistema al SOTA.</span>
+      </h1>
+      <p class="rise rise-3 mt-6 max-w-2xl text-[17px] leading-relaxed text-[var(--color-ink-secondary)]">
+        Las Fases 33-38 subieron el techo técnico del <em class="text-[var(--color-ink-primary)]">núcleo</em>
+        (embeddings, audio, gramáticas, VLM, visual, generación). Las Fases 39-48 atacan tres frentes ortogonales:
+        <em class="text-[var(--color-ink-primary)]">confianza en runtime</em> (NLI + provenance),
+        <em class="text-[var(--color-ink-primary)]">comunidad</em> (plugin SDK + scaffolding + tracing) y
+        <em class="text-[var(--color-ink-primary)]">superficie JS</em> (TS port + browser extension).
+      </p>
+
+      <div class="rise rise-4 mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Fases entregadas</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{shipped.length}</p>
+          <p class="mt-1 text-[12px] text-[var(--color-ink-secondary)]">33 → 38</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Commits TDD</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-accent)]">{totalCommits}</p>
+          <p class="mt-1 text-[12px] text-[var(--color-ink-secondary)]">red → green → commit</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Tests nuevos</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">+{totalTests}</p>
+          <p class="mt-1 text-[12px] text-[var(--color-ink-secondary)]">1641 → 1986 passing</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Planeadas</p>
+          <p class="mt-2 font-display text-3xl text-[#f0b97a]">{planned.length}</p>
+          <p class="mt-1 text-[12px] text-[var(--color-ink-secondary)]">specs + plans listos</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── Shipped ───────── -->
+  <section class="border-b border-[var(--color-line-subtle)] bg-[var(--color-surface-1)]">
+    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <h2 class="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
+        ▌ ENTREGADAS · Fases 33-38
+      </h2>
+      <p class="mt-2 text-[14px] text-[var(--color-ink-secondary)]">
+        Implementadas, 99 commits TDD, suite 1986/0, 0 regresiones.
+      </p>
+    </div>
+  </section>
+
+  {shippedTiers.filter((g) => g.phases.length > 0).map((group) => (
+    <section class="border-b border-[var(--color-line-subtle)]">
+      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <div class={`mb-10 flex flex-wrap items-baseline gap-x-6 gap-y-2 border-l-2 pl-4 ${group.meta.color}`}>
+          <h3 class="font-mono text-[12px] uppercase tracking-[0.2em]">{group.meta.label}</h3>
+          <p class="text-[14px] text-[var(--color-ink-secondary)]">{group.meta.description}</p>
+        </div>
+        <div class="space-y-12">
+          {group.phases.map((phase) => (
+            <article class="grid gap-8 border-t border-[var(--color-line-subtle)] pt-10 lg:grid-cols-[280px_1fr]">
+              <header class="space-y-3">
+                <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">
+                  Fase {phase.number}
+                </p>
+                <h4 class="font-display text-[26px] leading-tight text-[var(--color-ink-primary)]">
+                  {phase.title}
+                </h4>
+                <p class="text-[14px] italic text-[var(--color-accent)]">{phase.tagline}</p>
+                <div class="flex flex-wrap gap-3 pt-2 font-mono text-[11px] text-[var(--color-ink-tertiary)]">
+                  {phase.tests && (
+                    <span class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-2)] px-2 py-1">
+                      +{phase.tests} tests
+                    </span>
+                  )}
+                  {phase.commits && (
+                    <span class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-2)] px-2 py-1">
+                      {phase.commits} commits
+                    </span>
+                  )}
+                  <span class="rounded-sm border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 px-2 py-1 text-[var(--color-accent)]">
+                    ✓ Shipped
+                  </span>
+                </div>
+                {phase.guideHref && (
+                  <a
+                    href={phase.guideHref}
+                    class="mt-3 inline-flex items-center gap-1.5 font-mono text-[12px] text-[var(--color-accent)] no-underline hover:underline"
+                  >
+                    Guía →
+                  </a>
+                )}
+              </header>
+              <div class="space-y-6">
+                <p class="text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">{phase.description}</p>
+                {phase.whatWasDone && (
+                  <div>
+                    <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+                      Qué se entregó
+                    </p>
+                    <ul class="mt-3 space-y-1.5 text-[14px] leading-relaxed text-[var(--color-ink-primary)]">
+                      {phase.whatWasDone.map((item) => (
+                        <li class="flex gap-2">
+                          <span class="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-[var(--color-accent)]"></span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {phase.pending && phase.pending.length > 0 && (
+                  <div>
+                    <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-[#f0b97a]">
+                      Pendiente / siguiente PR
+                    </p>
+                    <ul class="mt-3 space-y-1.5 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+                      {phase.pending.map((item) => (
+                        <li class="flex gap-2">
+                          <span class="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-[#f0b97a]"></span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <!-- ───────── Planned ───────── -->
+  <section class="border-b border-[var(--color-line-subtle)] bg-[#f0b97a]/5">
+    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <h2 class="font-mono text-[12px] uppercase tracking-[0.22em] text-[#f0b97a]">
+        ▌ PLANEADAS · Fases 39-48
+      </h2>
+      <p class="mt-2 text-[14px] text-[var(--color-ink-secondary)]">
+        Specs + plans escritos (4205 + 34148 = 38353 líneas, 155 TDD tasks). Listas para implementar por tiers.
+      </p>
+    </div>
+  </section>
+
+  {plannedTiers.filter((g) => g.phases.length > 0).map((group) => (
+    <section class="border-b border-[var(--color-line-subtle)]">
+      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <div class={`mb-10 flex flex-wrap items-baseline gap-x-6 gap-y-2 border-l-2 pl-4 ${group.meta.color}`}>
+          <h3 class="font-mono text-[12px] uppercase tracking-[0.2em]">{group.meta.label}</h3>
+          <p class="text-[14px] text-[var(--color-ink-secondary)]">{group.meta.description}</p>
+        </div>
+        <div class="space-y-12">
+          {group.phases.map((phase) => (
+            <article class="grid gap-8 border-t border-[var(--color-line-subtle)] pt-10 lg:grid-cols-[280px_1fr]">
+              <header class="space-y-3">
+                <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">
+                  Fase {phase.number}
+                </p>
+                <h4 class="font-display text-[26px] leading-tight text-[var(--color-ink-primary)]">
+                  {phase.title}
+                </h4>
+                <p class="text-[14px] italic text-[#f0b97a]">{phase.tagline}</p>
+                <div class="flex flex-wrap gap-3 pt-2 font-mono text-[11px] text-[var(--color-ink-tertiary)]">
+                  <span class="rounded-sm border border-[#f0b97a]/40 bg-[#f0b97a]/5 px-2 py-1 text-[#f0b97a]">
+                    📋 Planeada
+                  </span>
+                </div>
+              </header>
+              <div class="space-y-6">
+                <p class="text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">{phase.description}</p>
+                {phase.whatWasDone && (
+                  <div>
+                    <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+                      Planeado
+                    </p>
+                    <ul class="mt-3 space-y-1.5 text-[14px] leading-relaxed text-[var(--color-ink-primary)]">
+                      {phase.whatWasDone.map((item) => (
+                        <li class="flex gap-2">
+                          <span class="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-[#f0b97a]"></span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <!-- ───────── Footer CTA ───────── -->
+  <section>
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ Más
+      </h2>
+      <div class="mt-12 flex flex-wrap gap-4">
+        <a
+          href="/en/whats-new"
+          class="inline-flex items-center gap-2 rounded-sm border border-[var(--color-line)] bg-transparent px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-ink-primary)] no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+        >
+          ← Fases 22-32
+        </a>
+        <a
+          href="/en/roadmap"
+          class="inline-flex items-center gap-2 rounded-sm bg-[var(--color-accent)] px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-surface-base)] no-underline transition-opacity hover:opacity-90"
+        >
+          Roadmap maestro 22-48 →
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

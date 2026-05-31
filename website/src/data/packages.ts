@@ -460,6 +460,74 @@ uv run jw eval --report md --out report.md`,
     referenceHref: "/docs/guias/eval-doctrinal",
     guideHref: "/docs/guias/eval-doctrinal",
   },
+  {
+    slug: "jw-gen",
+    name: "jw-gen",
+    tagline: "Generación con difusión, uso personal",
+    color: "violet",
+    short:
+      "Octavo paquete del monorepo. Genera imagen / audio / video para presentaciones y discursos personales. Watermark obligatorio + metadata EXIF/XMP + safety filters anti-emulación-JW-oficial.",
+    about:
+      "Construido en la Fase 38 con política LOAD-BEARING: cada output a disco pasa por watermark + EXIF/XMP + disclaimer.txt sibling. Tres safety filters no-negociables: anti-logos-JW, voice-cloning con doble opt-in, realistic-faces stylized por defecto. MCP tool fuerza watermark=True silenciosamente — un cliente remoto no puede desactivarlo. Audit log guarda sha256(prompt), nunca prompt en claro. Property test con 100 prompts adversariales detectó (y corrigió) un bypass real durante desarrollo: 'Despertai logo'.",
+    highlights: [
+      "Image · Audio · Video — APIs SOTA",
+      "Watermark + EXIF + disclaimer obligatorio",
+      "3 safety filters no-negociables",
+      "Audit log con sha256(prompt)",
+    ],
+    features: [
+      {
+        title: "Image providers (5)",
+        body: "NanoBanana 2 (Gemini), Flux 2 Pro (BFL), Recraft v4, Ideogram v3, Imagen 4. Cada uno con FakeImageProvider hermano para tests offline. Default routing por env JW_GEN_IMAGE_PROVIDER.",
+      },
+      {
+        title: "Audio providers (3)",
+        body: "ElevenLabs (TTS+music), Suno (music), MusicGen (Meta local). Voice cloning gateado por safety.refuse_voice_cloning_without_double_optin: requiere --voice-clone flag AND signed input.txt sibling.",
+      },
+      {
+        title: "Video providers (5)",
+        body: "Veo 3 (Gemini), Kling Video O3, Seedance 2.0, Higgsfield MCP, Runway. Generación long-running con poll loop bounded a 5min.",
+      },
+      {
+        title: "Policy fail-closed",
+        body: "policy.finalize_output: si falta watermark o disclaimer no escribe el archivo. policy.apply_watermark + embed_metadata + write_disclaimer_sibling encadenados. PIL para visible watermark, piexif para EXIF, python-xmp-toolkit (opcional) para XMP.",
+      },
+      {
+        title: "Safety filters property-tested",
+        body: "Hypothesis con 100 prompts adversariales en en/es/pt. Bloquea: Watchtower logo, JW brand, kingdom hall sign, awake/despertai/despertad/betel. Encontró el bypass 'Despertai' durante test → vocabulario extendido.",
+      },
+    ],
+    install: "uv sync --package jw-gen",
+    usage: {
+      language: "bash",
+      caption: "Generar una ilustración para un discurso público.",
+      code: `# Default offline (FakeProvider): produce un PNG placeholder
+jw gen image \\
+  --prompt "ilustración pacífica al amanecer" \\
+  --out /tmp/illustration.png
+
+# Con NanoBanana real (requiere GEMINI_API_KEY)
+JW_GEN_IMAGE_PROVIDER=nanobanana \\
+GEMINI_API_KEY=... \\
+jw gen image \\
+  --prompt "..." \\
+  --out illustration.png
+
+# Output siempre lleva:
+#   illustration.png                       (con watermark visible)
+#   illustration.png.disclaimer.txt        (en/es/pt)
+#   audit log JSONL en ~/.jw-agent-toolkit/jw-gen-audit.jsonl`,
+    },
+    dependsOn: ["jw-core"],
+    exports: [
+      "policy.apply_watermark · embed_metadata · write_disclaimer_sibling",
+      "safety.refuse_jw_logo_emulation · *_voice_cloning · *_realistic_faces",
+      "factory.get_provider (image/audio/video) + 13 adapters",
+      "MCP tool: generate_illustration (watermark forzado)",
+    ],
+    referenceHref: "/docs/guias/jw-gen",
+    guideHref: "/docs/guias/jw-gen",
+  },
 ];
 
 export const packageBySlug = (slug: string): PackageInfo | undefined =>

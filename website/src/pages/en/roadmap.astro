@@ -1,0 +1,211 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+interface PhaseRow {
+  number: number;
+  title: string;
+  tier: string;
+  status: "shipped" | "planned";
+  release: "22-32" | "33-38" | "39-48";
+}
+
+const phases: PhaseRow[] = [
+  // 22-32 entregadas
+  { number: 22, title: "eval-doctrinal", tier: "T1 Confianza", status: "shipped", release: "22-32" },
+  { number: 23, title: "citation-validator", tier: "T1 Confianza", status: "shipped", release: "22-32" },
+  { number: 24, title: "study-conductor", tier: "T2 Alto valor", status: "shipped", release: "22-32" },
+  { number: 25, title: "news-monitor", tier: "T2 Alto valor", status: "shipped", release: "22-32" },
+  { number: 26, title: "student-parts", tier: "T3 Especializado", status: "shipped", release: "22-32" },
+  { number: 27, title: "pioneer-report", tier: "T3 Especializado", status: "shipped", release: "22-32" },
+  { number: 28, title: "concordance", tier: "T3 Especializado", status: "shipped", release: "22-32" },
+  { number: 29, title: "letter-composer", tier: "T4 UX", status: "shipped", release: "22-32" },
+  { number: 30, title: "kingdom-songs", tier: "T4 UX", status: "shipped", release: "22-32" },
+  { number: 31, title: "exporter", tier: "T4 UX", status: "shipped", release: "22-32" },
+  { number: 32, title: "life-topics", tier: "T4 UX", status: "shipped", release: "22-32" },
+  // 33-38 entregadas
+  { number: 33, title: "embed-rerank", tier: "T1 Núcleo", status: "shipped", release: "33-38" },
+  { number: 34, title: "audio-premium", tier: "T1 Núcleo", status: "shipped", release: "33-38" },
+  { number: 35, title: "constrained-decoding", tier: "T2 Habilitador", status: "shipped", release: "33-38" },
+  { number: 36, title: "vlm-ocr", tier: "T2 Habilitador", status: "shipped", release: "33-38" },
+  { number: 37, title: "colpali-visual", tier: "T3 Especializado", status: "shipped", release: "33-38" },
+  { number: 38, title: "jw-gen (8º paquete)", tier: "T4 UX", status: "shipped", release: "33-38" },
+  // 39-48 planeadas
+  { number: 39, title: "nli-runtime", tier: "T1 Confianza runtime", status: "planned", release: "39-48" },
+  { number: 40, title: "content-provenance", tier: "T1 Confianza runtime", status: "planned", release: "39-48" },
+  { number: 41, title: "plugin-sdk", tier: "T2 Comunidad", status: "planned", release: "39-48" },
+  { number: 42, title: "scaffolding", tier: "T2 Comunidad", status: "planned", release: "39-48" },
+  { number: 43, title: "agent-tracing", tier: "T2 Comunidad", status: "planned", release: "39-48" },
+  { number: 44, title: "synth-judge", tier: "T2 Comunidad", status: "planned", release: "39-48" },
+  { number: 45, title: "semantic-chunking", tier: "T3 Frontera", status: "planned", release: "39-48" },
+  { number: 46, title: "canonical-versification", tier: "T3 Frontera", status: "planned", release: "39-48" },
+  { number: 47, title: "jw-core-js-minimal", tier: "T4 Superficie JS", status: "planned", release: "39-48" },
+  { number: 48, title: "wol-browser-ext", tier: "T4 Superficie JS", status: "planned", release: "39-48" },
+];
+
+const shippedCount = phases.filter((p) => p.status === "shipped").length;
+const plannedCount = phases.filter((p) => p.status === "planned").length;
+
+const releases = [
+  {
+    id: "22-32",
+    title: "Release 22-32 · Ecosistema discipulado",
+    description:
+      "11 fases ortogonales que cierran el ciclo de discipulado activo + infraestructura de confianza inicial.",
+    href: "/novedades",
+    color: "text-[var(--color-accent)]",
+  },
+  {
+    id: "33-38",
+    title: "Release 33-38 · Núcleo al SOTA",
+    description:
+      "6 fases que suben el techo técnico: embeddings + audio + gramáticas + VLM + visual + generación. Octavo paquete (jw-gen) introducido.",
+    href: "/novedades-33-48",
+    color: "text-[#f0b97a]",
+  },
+  {
+    id: "39-48",
+    title: "Release 39-48 · Confianza runtime + comunidad + JS",
+    description:
+      "10 fases planeadas con specs + plans completos. NLI en vivo, provenance, plugin SDK, scaffolding, tracing, judge, chunking, versification, TS port, browser ext.",
+    href: "/novedades-33-48",
+    color: "text-[#c4a7e7]",
+  },
+];
+---
+
+<BaseLayout
+  title="Roadmap maestro — Fases 22 a 48"
+  description="Vista consolidada de 27 fases del jw-agent-toolkit organizadas por release (22-32 + 33-38 + 39-48) y por tier técnico. 17 entregadas, 10 planeadas con specs+plans completos."
+>
+  <section class="grid-noise relative overflow-hidden border-b border-[var(--color-line-subtle)]">
+    <div class="mx-auto max-w-7xl px-4 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20">
+      <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        <span class="inline-block h-px w-8 bg-[var(--color-accent)] align-middle"></span>
+        <span class="ml-2">Roadmap maestro · 27 fases</span>
+      </p>
+      <h1 class="mt-6 max-w-3xl text-balance font-display text-[clamp(1.85rem,5vw,3.4rem)] leading-[1.05]">
+        <span class="text-[var(--color-ink-primary)]">De librería técnica a </span>
+        <span class="text-[var(--color-accent)]">plataforma adoptable</span>
+      </h1>
+      <p class="mt-6 max-w-2xl text-[16px] leading-relaxed text-[var(--color-ink-secondary)]">
+        Tres releases consecutivas que cubren <strong class="text-[var(--color-ink-primary)]">discipulado completo</strong>,
+        <strong class="text-[var(--color-ink-primary)]">núcleo técnico al SOTA</strong> y
+        <strong class="text-[var(--color-ink-primary)]">confianza en runtime + comunidad + frontera JS</strong>.
+        Mismo flujo en cada fase: brainstorming → spec aprobado → plan TDD bite-sized → implementación red-green-commit → audit.
+      </p>
+
+      <div class="mt-10 grid grid-cols-3 gap-4">
+        <div class="rounded-sm border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-accent)]">Entregadas</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{shippedCount}</p>
+        </div>
+        <div class="rounded-sm border border-[#f0b97a]/40 bg-[#f0b97a]/5 p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[#f0b97a]">Planeadas</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{plannedCount}</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Total</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{phases.length}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Releases panel -->
+  <section class="border-b border-[var(--color-line-subtle)]">
+    <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ 3 releases
+      </h2>
+      <div class="mt-6 grid gap-6 md:grid-cols-3">
+        {releases.map((r) => (
+          <a
+            href={r.href}
+            class="block rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-6 no-underline transition-colors hover:border-[var(--color-line-strong)]"
+          >
+            <p class={`font-mono text-[11px] uppercase tracking-[0.2em] ${r.color}`}>{r.id}</p>
+            <p class="mt-3 font-display text-[20px] leading-tight text-[var(--color-ink-primary)]">
+              {r.title}
+            </p>
+            <p class="mt-3 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+              {r.description}
+            </p>
+            <p class="mt-4 font-mono text-[12px] text-[var(--color-accent)]">Ver detalle →</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabla maestra -->
+  <section>
+    <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ Tabla maestra · 27 fases (22 → 48)
+      </h2>
+
+      <div class="mt-6 overflow-x-auto">
+        <table class="w-full border-collapse text-left font-mono text-[13px]">
+          <thead>
+            <tr class="border-b border-[var(--color-line)] text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink-tertiary)]">
+              <th class="py-3 pr-4">Fase</th>
+              <th class="py-3 pr-4">Slug</th>
+              <th class="py-3 pr-4">Tier</th>
+              <th class="py-3 pr-4">Estado</th>
+              <th class="py-3">Release</th>
+            </tr>
+          </thead>
+          <tbody>
+            {phases.map((p) => (
+              <tr class="border-b border-[var(--color-line-subtle)] hover:bg-[var(--color-surface-1)]">
+                <td class="py-3 pr-4 text-[var(--color-ink-primary)]">{p.number}</td>
+                <td class="py-3 pr-4">
+                  <code class="text-[var(--color-accent)]">{p.title}</code>
+                </td>
+                <td class="py-3 pr-4 text-[var(--color-ink-secondary)]">{p.tier}</td>
+                <td class="py-3 pr-4">
+                  {p.status === "shipped" ? (
+                    <span class="inline-block rounded-sm border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 px-2 py-0.5 text-[11px] text-[var(--color-accent)]">
+                      ✓ entregada
+                    </span>
+                  ) : (
+                    <span class="inline-block rounded-sm border border-[#f0b97a]/40 bg-[#f0b97a]/5 px-2 py-0.5 text-[11px] text-[#f0b97a]">
+                      📋 planeada
+                    </span>
+                  )}
+                </td>
+                <td class="py-3 text-[var(--color-ink-secondary)]">{p.release}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="mt-8 text-[13px] leading-relaxed text-[var(--color-ink-tertiary)]">
+        Cada fase planeada tiene su spec aprobado y plan TDD bite-sized en
+        <code class="text-[var(--color-ink-secondary)]">docs/superpowers/specs/</code> y
+        <code class="text-[var(--color-ink-secondary)]">docs/superpowers/plans/</code> respectivamente.
+        Total de planning: ~92k líneas, 251 TDD tasks documentadas, paralelizables por tier.
+      </p>
+    </div>
+  </section>
+
+  <!-- Reglas duras -->
+  <section class="border-t border-[var(--color-line-subtle)] bg-[var(--color-surface-1)]">
+    <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ Reglas duras que respetan las 27 fases
+      </h2>
+      <ul class="mt-6 grid gap-x-10 gap-y-3 text-[14px] text-[var(--color-ink-secondary)] sm:grid-cols-2">
+        <li><span class="text-[var(--color-accent)]">→</span> Sin LLM en el camino crítico — parsers/agentes/stores determinísticos.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Citas siempre verificables con URL canónica a wol.jw.org.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Local-first; toda persistencia personal en <code>~/.jw-agent-toolkit/</code>.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> No red en tests — fixtures + cassettes + injectable fetchers.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Multilenguaje desde día 1 (en/es/pt mínimo, hasta 17 locales).</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Triple-target providers: API + GPU NVIDIA + MLX/Apple Silicon.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> No sustituye la palabra de los ancianos.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Sin distribuir letras de cánticos ni texto bíblico (copyright).</li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
