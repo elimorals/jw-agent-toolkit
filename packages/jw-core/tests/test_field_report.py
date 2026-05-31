@@ -382,3 +382,40 @@ def test_render_markdown_handles_empty_report() -> None:
     )
     assert "2026-05" in md
     assert "0h 00min" in md
+
+
+# ---------------------------------------------------------------------------
+# Task 7 — CSV exporter
+# ---------------------------------------------------------------------------
+
+
+def test_render_csv_has_expected_header_and_rows() -> None:
+    import csv
+    import io
+
+    from jw_core.ministry.exporters import render_csv
+    from jw_core.ministry.field_report import MonthlyReport
+
+    report = MonthlyReport(
+        month="2026-05",
+        total_hours=7.75,
+        total_hours_display="7h 45min",
+        breakdown_by_tag={"street": 2.0, "cart": 3.75},
+        active_studies_max=4,
+        active_studies_ids=["a", "b", "c", "d"],
+        revisits_count=11,
+        entries_count=4,
+        days_with_service=3,
+    )
+    csv_text = render_csv(report)
+    reader = csv.reader(io.StringIO(csv_text))
+    rows = list(reader)
+    assert rows[0] == ["mes", "metrica", "valor"]
+    flat = {(r[0], r[1]): r[2] for r in rows[1:]}
+    assert flat[("2026-05", "horas_totales")] == "7.75"
+    assert flat[("2026-05", "horas_display")] == "7h 45min"
+    assert flat[("2026-05", "dias_con_servicio")] == "3"
+    assert flat[("2026-05", "cursos_activos_max")] == "4"
+    assert flat[("2026-05", "revisitas")] == "11"
+    assert flat[("2026-05", "tag.street")] == "2.00"
+    assert flat[("2026-05", "tag.cart")] == "3.75"

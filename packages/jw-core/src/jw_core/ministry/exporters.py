@@ -64,3 +64,20 @@ def render_markdown(report: "MonthlyReport") -> str:
         "local de RevisitTracker (Fase 12, solo lectura)._"
     )
     return "\n".join(lines)
+
+
+def render_csv(report: "MonthlyReport") -> str:
+    """Render the report as a long-form CSV (mes, metrica, valor)."""
+
+    buf = io.StringIO()
+    w = csv.writer(buf, lineterminator="\n")
+    w.writerow(["mes", "metrica", "valor"])
+    w.writerow([report.month, "horas_totales", f"{report.total_hours:.2f}"])
+    w.writerow([report.month, "horas_display", report.total_hours_display])
+    w.writerow([report.month, "dias_con_servicio", str(report.days_with_service)])
+    w.writerow([report.month, "cursos_activos_max", str(report.active_studies_max)])
+    w.writerow([report.month, "revisitas", str(report.revisits_count)])
+    w.writerow([report.month, "entradas_registradas", str(report.entries_count)])
+    for tag, hours in sorted(report.breakdown_by_tag.items()):
+        w.writerow([report.month, f"tag.{tag}", f"{hours:.2f}"])
+    return buf.getvalue()
