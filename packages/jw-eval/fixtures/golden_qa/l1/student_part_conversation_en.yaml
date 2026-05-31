@@ -1,0 +1,20 @@
+# packages/jw-eval/fixtures/golden_qa/l1/student_part_conversation_en.yaml
+id: l1_student_part_conversation_en
+agent: student_part_helper
+layer: l1
+input:
+  kind: starting_conversation
+  topic_or_ref: "hope amid suffering"
+  language: en
+  audience: atheist
+  oratory_point: 13
+expected:
+  min_findings: 4
+  forbidden_keywords_in_findings:
+    - "supposedly"
+    - "maybe"
+metadata:
+  topic: student_parts.conversation.en
+  fase: 26
+  added_by: elias
+  added_at: 2026-05-30
