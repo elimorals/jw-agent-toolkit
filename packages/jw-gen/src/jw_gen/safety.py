@@ -88,16 +88,22 @@ def refuse_jw_logo_emulation(prompt: str, lang: Lang = "es") -> None:
                 )
 
     # Proximity heuristic (multilingual): brand name + neighbor noun within window.
+    # Brand vocabulary covers Watchtower/Awake! magazine titles in EN/ES/PT plus
+    # Kingdom Hall / Bethel / jw.org markers.
     brand_words = {
         "watchtower",
         "atalaya",
         "sentinela",
+        "awake",
+        "despertai",
+        "despertad",
         "jw.org",
         "jw",
         "kingdom hall",
         "salao do reino",
         "salon del reino",
         "bethel",
+        "betel",
     }
     tokens = norm.split()
     for i, _tok in enumerate(tokens):
