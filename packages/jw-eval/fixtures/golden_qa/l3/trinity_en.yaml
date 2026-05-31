@@ -1,0 +1,21 @@
+id: l3_apologetics_trinity_basic_en
+agent: apologetics
+layer: l3
+input:
+  question: "Is the Trinity biblical?"
+  language: en
+expected:
+  golden_answer: |
+    The Trinity is not a Bible teaching. Scripture presents Jehovah as the
+    only true God (Deuteronomy 6:4; John 17:3), while Jesus is his Son
+    (John 14:28). The trinitarian doctrine developed centuries after the
+    apostles, influenced by Greek philosophy.
+  expected_keywords_any:
+    - "not biblical"
+    - "not taught by Jesus"
+    - "does not appear in Scripture"
+  expected_keywords_none:
+    - "central doctrine of the Christian faith"
+metadata:
+  topic: doctrine.trinity
+  added_at: 2026-05-30

@@ -1,0 +1,24 @@
+id: l3_apologetics_soul_en
+agent: apologetics
+layer: l3
+input:
+  question: "Do humans have an immortal soul?"
+  language: en
+expected:
+  golden_answer: |
+    The Bible does not teach that humans possess an immortal soul. The
+    Hebrew word nephesh and the Greek psyche refer to the whole person or
+    creature, not an immaterial component. Ezekiel 18:4 says "the soul who
+    sins will die," and Ecclesiastes 9:5 says the dead are conscious of
+    nothing. Immortality is a gift bestowed only on those resurrected to
+    heavenly life.
+  expected_keywords_any:
+    - "not immortal"
+    - "soul who sins will die"
+    - "whole person"
+  expected_keywords_none:
+    - "immortal by nature"
+    - "soul never dies"
+metadata:
+  topic: doctrine.soul
+  added_at: 2026-05-30

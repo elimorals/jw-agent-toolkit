@@ -1,0 +1,24 @@
+id: l3_apologetics_gods_name_es
+agent: apologetics
+layer: l3
+input:
+  question: "¿Cuál es el nombre de Dios?"
+  language: es
+expected:
+  golden_answer: |
+    El nombre personal de Dios es Jehová, representado por el Tetragrámaton
+    YHWH y mencionado casi 7000 veces en las Escrituras Hebreas. Salmo
+    83:18 declara: "Que sepan que tú, cuyo nombre es Jehová, tú solo eres
+    el Altísimo sobre toda la tierra". Isaías 42:8 dice: "Yo soy Jehová.
+    Ese es mi nombre". Usar su nombre forma parte de la verdadera
+    adoración.
+  expected_keywords_any:
+    - "Jehová"
+    - "YHWH"
+    - "Tetragrámaton"
+  expected_keywords_none:
+    - "el nombre no debe pronunciarse"
+    - "su nombre es Señor"
+metadata:
+  topic: doctrine.gods_name
+  added_at: 2026-05-30

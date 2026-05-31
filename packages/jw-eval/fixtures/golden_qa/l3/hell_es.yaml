@@ -1,0 +1,25 @@
+id: l3_apologetics_hell_es
+agent: apologetics
+layer: l3
+input:
+  question: "¿Existe el infierno de fuego?"
+  language: es
+expected:
+  golden_answer: |
+    La Biblia no enseña un infierno de tormento eterno. Las palabras Seol
+    (hebreo) y Hades (griego) se refieren a la tumba común de la humanidad,
+    donde los muertos están inconscientes (Eclesiastés 9:5, 10). El
+    "lago de fuego" en Apocalipsis 20:14 es un símbolo de destrucción
+    total, no de tormento. Un Dios de amor (1 Juan 4:8) no atormentaría
+    a nadie eternamente.
+  expected_keywords_any:
+    - "no enseña un infierno"
+    - "tumba común"
+    - "Seol"
+    - "destrucción"
+  expected_keywords_none:
+    - "llamas eternas literales"
+    - "tormento sin fin"
+metadata:
+  topic: doctrine.hell
+  added_at: 2026-05-30

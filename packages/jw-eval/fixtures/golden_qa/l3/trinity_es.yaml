@@ -1,0 +1,21 @@
+id: l3_apologetics_trinity_basic_es
+agent: apologetics
+layer: l3
+input:
+  question: "¿Es la Trinidad bíblica?"
+  language: es
+expected:
+  golden_answer: |
+    La Trinidad no es una enseñanza bíblica. Las Escrituras presentan a Jehová
+    como el único Dios verdadero (Deuteronomio 6:4; Juan 17:3), mientras que
+    Jesús es su Hijo (Juan 14:28). La doctrina trinitaria se desarrolló siglos
+    después de los apóstoles, influida por filosofía griega.
+  expected_keywords_any:
+    - "no es bíblica"
+    - "no enseñada por Jesús"
+    - "no aparece en las Escrituras"
+  expected_keywords_none:
+    - "doctrina central de la fe cristiana"
+metadata:
+  topic: doctrine.trinity
+  added_at: 2026-05-30

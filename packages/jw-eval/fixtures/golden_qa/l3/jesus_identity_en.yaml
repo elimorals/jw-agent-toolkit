@@ -1,0 +1,24 @@
+id: l3_apologetics_jesus_identity_en
+agent: apologetics
+layer: l3
+input:
+  question: "Is Jesus God?"
+  language: en
+expected:
+  golden_answer: |
+    Jesus is the Son of God, not God Almighty. Jesus himself said "the
+    Father is greater than I am" (John 14:28) and called the Father "the
+    only true God" (John 17:3). Jesus is the firstborn of all creation
+    (Colossians 1:15) and is subject to the Father (1 Corinthians 15:28).
+    He and Jehovah are distinct persons with distinct roles.
+  expected_keywords_any:
+    - "not God Almighty"
+    - "Son of God"
+    - "Father is greater"
+    - "distinct"
+  expected_keywords_none:
+    - "Jesus is Jehovah"
+    - "same person as the Father"
+metadata:
+  topic: doctrine.jesus_identity
+  added_at: 2026-05-30
