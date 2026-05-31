@@ -221,3 +221,28 @@ def test_store_encrypts_note_when_key_set(tmp_path: Path, monkeypatch: pytest.Mo
     entries = store.list_hours(month="2026-05")
     assert entries[0].note == "secret note"
     store.close()
+
+
+# ---------------------------------------------------------------------------
+# Task 4 — RevisitProvider
+# ---------------------------------------------------------------------------
+
+
+class _FakeRevisits:
+    def __init__(self, by_month: dict[str, int]) -> None:
+        self._by_month = by_month
+
+    def count_in_range(self, start, end):  # type: ignore[no-untyped-def]
+        from datetime import date as date_
+
+        assert isinstance(start, date_) and isinstance(end, date_)
+        return self._by_month.get(start.strftime("%Y-%m"), 0)
+
+
+def test_revisit_provider_protocol_is_structural() -> None:
+    from jw_core.ministry.field_report import RevisitProvider
+
+    p: RevisitProvider = _FakeRevisits({"2026-05": 7})
+    from datetime import date as date_
+
+    assert p.count_in_range(date_(2026, 5, 1), date_(2026, 5, 31)) == 7
