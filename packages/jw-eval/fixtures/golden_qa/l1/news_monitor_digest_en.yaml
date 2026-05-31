@@ -1,4 +1,9 @@
 # packages/jw-eval/fixtures/golden_qa/l1/news_monitor_digest_en.yaml
+# Agent "news_monitor" is NOT registered in
+# jw_eval/cli.py::default_agent_registry, and the `_adapter:` key is bogus
+# (no agent_adapters.py exists). Kwargs (since, languages, channels) match
+# the real signature though; will pass once the registry is updated and the
+# stub-source mechanism lands.
 id: l1_news_monitor_digest_en
 agent: news_monitor
 layer: l1

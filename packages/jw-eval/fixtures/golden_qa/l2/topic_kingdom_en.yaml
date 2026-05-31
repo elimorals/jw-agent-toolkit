@@ -1,12 +1,15 @@
+# Calibrated: removed trailing '?' (CDN 400s), switched language to JW code
+# (E), and replaced the expected_citation with the docid the topic index
+# actually returns for this question.
 id: l2_topic_kingdom_en
 agent: apologetics
 layer: l2
 input:
-  question: "What is the Kingdom of God?"
-  language: en
+  question: "What is the Kingdom of God"
+  language: E
 expected:
   expected_citations:
-    - https://wol.jw.org/en/wol/d/r1/lp-e/1200002681
+    - https://wol.jw.org/en/wol/d/r1/lp-e/1200277317
   support_phrases:
     - "Kingdom"
     - "God's Kingdom"

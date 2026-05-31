@@ -1,4 +1,8 @@
 # packages/jw-eval/fixtures/golden_qa/l1/student_part_bible_reading_es.yaml
+# Agent "student_part_helper" is NOT registered in
+# jw_eval/cli.py::default_agent_registry. Kwargs (kind, topic_or_ref,
+# language, audience, oratory_point) match the real signature; will pass
+# once the registry is updated.
 id: l1_student_part_bible_reading_es
 agent: student_part_helper
 layer: l1

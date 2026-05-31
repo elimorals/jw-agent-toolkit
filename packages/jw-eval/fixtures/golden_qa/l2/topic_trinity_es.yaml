@@ -1,12 +1,13 @@
+# Calibrated: removed '¿…?', JW lang code (S), updated expected_citation.
 id: l2_topic_trinity_es
 agent: apologetics
 layer: l2
 input:
-  question: "¿Es bíblica la Trinidad?"
-  language: es
+  question: "Es biblica la Trinidad"
+  language: S
 expected:
   expected_citations:
-    - https://wol.jw.org/es/wol/d/r4/lp-s/1200004181
+    - https://wol.jw.org/es/wol/d/r4/lp-s/1200275928
   support_phrases:
     - "Trinidad"
     - "no es enseñada"

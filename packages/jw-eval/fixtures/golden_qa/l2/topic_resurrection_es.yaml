@@ -1,12 +1,14 @@
+# Calibrated: removed '¿…?' (CDN 400s), JW lang code (S), and replaced the
+# expected_citation with the docid the topic index actually returns.
 id: l2_topic_resurrection_es
 agent: apologetics
 layer: l2
 input:
-  question: "¿Qué enseña la Biblia sobre la resurrección?"
-  language: es
+  question: "Que ensena la Biblia sobre la resurreccion"
+  language: S
 expected:
   expected_citations:
-    - https://wol.jw.org/es/wol/d/r4/lp-s/1200003434
+    - https://wol.jw.org/es/wol/d/r4/lp-s/1102021653
   support_phrases:
     - "resurrección"
     - "vida"

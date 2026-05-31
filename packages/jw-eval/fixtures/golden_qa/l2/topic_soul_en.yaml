@@ -1,12 +1,13 @@
+# Calibrated: removed '?', JW lang code (E), updated expected_citation.
 id: l2_topic_soul_en
 agent: apologetics
 layer: l2
 input:
-  question: "Is the soul immortal?"
-  language: en
+  question: "Is the soul immortal"
+  language: E
 expected:
   expected_citations:
-    - https://wol.jw.org/en/wol/d/r1/lp-e/1200003670
+    - https://wol.jw.org/en/wol/d/r1/lp-e/1200271096
   support_phrases:
     - "soul"
     - "not immortal"

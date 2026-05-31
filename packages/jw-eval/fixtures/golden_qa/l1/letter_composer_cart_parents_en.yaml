@@ -1,3 +1,8 @@
+# letter_composer kwargs already match the real signature
+# (kind, language, topic_or_question, audience). However the agent is NOT
+# registered in jw_eval/cli.py::default_agent_registry, so this case
+# currently errors with "agent 'letter_composer' not registered".
+# Will pass once the registry is updated.
 id: l1_letter_composer_cart_parents_en
 agent: letter_composer
 layer: l1

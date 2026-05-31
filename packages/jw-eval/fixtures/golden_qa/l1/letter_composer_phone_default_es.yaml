@@ -1,3 +1,6 @@
+# letter_composer kwargs match the real signature. However the agent is
+# NOT registered in jw_eval/cli.py::default_agent_registry, so this case
+# currently errors with "agent 'letter_composer' not registered".
 id: l1_letter_composer_phone_default_es
 agent: letter_composer
 layer: l1

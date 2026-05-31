@@ -1,3 +1,6 @@
+# Agent "concordance_search" is NOT registered in
+# jw_eval/cli.py::default_agent_registry (no jw_agents.concordance_search
+# module exists either). This case will error until both pieces are added.
 id: l1_concordance_phrase_es
 agent: concordance_search
 layer: l1

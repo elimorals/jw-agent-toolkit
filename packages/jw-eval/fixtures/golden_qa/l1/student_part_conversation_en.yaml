@@ -1,4 +1,6 @@
 # packages/jw-eval/fixtures/golden_qa/l1/student_part_conversation_en.yaml
+# Agent "student_part_helper" is NOT registered in
+# jw_eval/cli.py::default_agent_registry. Will pass once registered.
 id: l1_student_part_conversation_en
 agent: student_part_helper
 layer: l1
