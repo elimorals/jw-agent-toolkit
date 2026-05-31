@@ -9,12 +9,28 @@ dependencies = [
     "jw-core",
     "numpy>=2.0.0",
     "rank-bm25>=0.2.2",
+    "httpx>=0.27.0",
 ]
 
 [project.optional-dependencies]
-# Plug-and-play embedders. Pick one (or roll your own via the Embedder Protocol).
+# Legacy aliases kept for backwards compat with Fase 6 docs:
 openai = ["openai>=1.50.0"]
 local = ["sentence-transformers>=3.0.0"]
+
+# Fase 33: real embed + rerank stack.
+embeddings-local = [
+    "sentence-transformers>=3.0.0",
+]
+embeddings-api = [
+    "cohere>=5.5.0",
+    "voyageai>=0.2.3",
+]
+rerank-local = [
+    "sentence-transformers>=3.0.0",
+]
+rerank-api = [
+    "cohere>=5.5.0",
+]
 
 [build-system]
 requires = ["hatchling"]
