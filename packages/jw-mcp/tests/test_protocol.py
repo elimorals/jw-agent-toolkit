@@ -124,6 +124,9 @@ _EXPECTED_TOOLS = {
     "concordance_search",
     # Phase 29 — Letter composer
     "compose_witnessing",
+    # Phase 30 — Kingdom songs
+    "lookup_song",
+    "songs_for_week",
 }
 
 

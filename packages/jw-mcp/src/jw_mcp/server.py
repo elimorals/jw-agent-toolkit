@@ -36,6 +36,7 @@ from jw_agents import (
 from jw_agents import (
     workbook_helper as workbook_helper_agent,
 )
+from jw_agents import workbook_helper as _workbook_helper_agent
 from jw_agents.audio_helper import (
     read_article_aloud as _read_article_aloud,
 )
@@ -60,6 +61,8 @@ from jw_core.clients.pub_media import PubMediaClient, PubMediaError
 from jw_core.clients.topic_index import TopicIndexClient, TopicIndexError
 from jw_core.clients.wol import WOLClient
 from jw_core.data.objections import list_objections
+from jw_core.songs import SongLookupError, get_registry as _get_song_registry
+from jw_core.songs.integration import enrich_with_songs as _enrich_with_songs
 from jw_core.integrations.jw_library import (
     JWLibraryError,
     build_bible_url,
@@ -2584,6 +2587,39 @@ async def compose_witnessing(
         jw_link=jw_link,
     )
     return result.to_dict()
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tools: Kingdom Songs (Phase 30 — metadata-only, no lyrics)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+def lookup_song(number: int, language: str = "en") -> dict[str, Any]:
+    """Look up Kingdom Song metadata by number.
+
+    Returns a dict with: number, title, theme, scriptures, scriptures_resolved
+    (list of BibleRef-as-dict), canonical_url, language, pub_symbol.
+    On unknown number returns `{"error": "..."}`.
+
+    Copyright-safe: this tool NEVER returns lyrics, only metadata.
+    """
+
+    try:
+        registry = _get_song_registry(language)
+        song = registry.lookup(number)
+    except SongLookupError as exc:
+        return {"error": str(exc)}
+    return {
+        "number": song.number,
+        "title": song.title,
+        "theme": song.theme,
+        "scriptures": song.scriptures,
+        "scriptures_resolved": [r.model_dump() for r in song.resolved_scriptures()],
+        "canonical_url": song.canonical_url,
+        "language": song.language,
+        "pub_symbol": song.pub_symbol,
+    }
 
 
 # ────────────────────────────────────────────────────────────────────────
