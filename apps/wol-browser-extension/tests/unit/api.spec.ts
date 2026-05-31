@@ -23,9 +23,13 @@ describe("JwApiClient", () => {
 
   it("refuses to construct a request to a non-localhost URL", async () => {
     const client = new JwApiClient();
+    // Bracket access bypasses the `private` visibility for this defense check.
     await expect(
-      // @ts-expect-error: testing private guard
-      client["request"]("https://wol.jw.org/evil", "GET"),
+      (
+        client as unknown as {
+          request: (u: string, m: string) => Promise<unknown>;
+        }
+      ).request("https://wol.jw.org/evil", "GET"),
     ).rejects.toThrow(/non-localhost/);
   });
 

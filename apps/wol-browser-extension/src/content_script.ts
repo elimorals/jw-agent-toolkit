@@ -161,7 +161,6 @@ export function run(opts: RunOpts = {}): void {
     t,
   });
 
-  // eslint-disable-next-line no-console
   console.info(`[jw-ext] injected ${verses.length} verse action(s)`);
 }
 

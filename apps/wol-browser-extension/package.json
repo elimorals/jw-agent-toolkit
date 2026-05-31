@@ -14,7 +14,6 @@
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {},
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.27",
     "@playwright/test": "^1.46.0",
@@ -24,6 +23,7 @@
     "@typescript-eslint/parser": "^8.5.0",
     "archiver": "^7.0.1",
     "eslint": "^9.10.0",
+    "globals": "^17.6.0",
     "happy-dom": "^15.0.0",
     "typescript": "^5.5.4",
     "vite": "^5.4.0",
