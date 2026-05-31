@@ -233,3 +233,12 @@ curl -s http://localhost:8765/healthz
 - **Local-first** — toda la persistencia nueva (revisitas, notas, flashcards, eventos, memoria, profile) está en SQLite local, sin sync por defecto.
 - **Sin red en tests** — los 100+ tests nuevos son CPU-only.
 - **Multilenguaje desde el día 1** — todos los catálogos exponen `en/es/pt` con fallback elegante.
+
+### Fase 27 — Informe mensual de precursor (VISION #3)
+
+- ✅ Aggregator `jw_core.ministry.field_report` (horas + estudios + revisitas) cifrable.
+- ✅ CLI `jw report --month YYYY-MM` (md/csv/pdf).
+- ✅ MCP tools: `field_log_hours`, `field_log_study`, `field_monthly_report`.
+- ✅ Privacidad: cifrado columnar opt-in via `JW_PRIVACY_KEY`; warning amistoso si desactivado.
+- ✅ Cross-package: `RevisitProvider` Protocol inyectable; no acopla `jw-core` a `jw-agents`.
+- ✅ Tests CPU-only; PDF opcional via `[pdf]` extra.

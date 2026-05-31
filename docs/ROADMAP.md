@@ -501,3 +501,16 @@ gráficas (export JSON ya lo habilita externamente), modo familia.
 - ✅ Suite global sin regresiones.
 
 **Cubre**: VISION.md item #2 («Ministerio / predicación») — pieza recurrente de Vida y Ministerio.
+
+## Fase 27 — Informe mensual de precursor
+
+- ✅ `jw_core.data.field_service_tags` con vocabulario controlado + override JSON.
+- ✅ `jw_core.ministry.field_report.FieldReportStore` SQLite con cifrado columnar (`note`, `student_id`).
+- ✅ `HoursEntry` + `StudyEntry` + `MonthlyReport` Pydantic models.
+- ✅ `aggregate_monthly_report` con regla MAX para estudios activos y redondeo de display a 5 min.
+- ✅ `RevisitProvider` Protocol inyectable; CLI/MCP usan adapter read-only sobre `RevisitStore` (Fase 12).
+- ✅ Exporters: `render_markdown`, `render_csv`, `render_pdf` (PDF detrás de `[pdf]` extra).
+- ✅ CLI `jw report` con sub-sub `log-hours`, `log-study`, `met-today`, `show`.
+- ✅ MCP tools: `field_log_hours`, `field_log_study`, `field_monthly_report`.
+- ✅ Tests: 100% paths, `test_field_report.py` con fakes para revisitas y test de encriptación raw-row.
+- ✅ Guía `docs/guias/informe-precursor.md`.
