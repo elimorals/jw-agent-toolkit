@@ -66,12 +66,21 @@ from jw_mcp.dashboard import router as dashboard_router
 logger = logging.getLogger("jw-rest")
 app = FastAPI(title="jw-agent-toolkit REST", version="0.1.0")
 
-# Permissive CORS — bots may run anywhere; tighten for production.
+# CORS — Fase 48 tightening. Only browser surfaces we own:
+#   - https://wol.jw.org : the page where the extension content_script runs.
+#   - chrome-extension://<id>, moz-extension://<uuid> : popup + background.
+# Everything else is denied. Bots/Telegram/etc consume the API via direct
+# HTTP from the server side (no Origin header) so they are unaffected.
+#
+# starlette's CORSMiddleware echoes the requesting Origin into ACAO when
+# it matches `allow_origins` OR `allow_origin_regex`. Non-matches get no
+# ACAO header at all → the browser blocks the response.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["GET", "POST"],
-    allow_headers=["*"],
+    allow_origins=["https://wol.jw.org"],
+    allow_origin_regex=r"^(chrome-extension|moz-extension)://[a-zA-Z0-9\-]+$",
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 app.include_router(dashboard_router)
 
