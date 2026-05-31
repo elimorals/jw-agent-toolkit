@@ -1,0 +1,24 @@
+id: l1_life_topics_parenting_en
+agent: life_topics
+layer: l1
+input:
+  query: "parenting"
+  language: "en"
+expected:
+  min_findings: 1
+  must_have_source: disclaimer
+  forbidden_keywords_in_findings:
+    - "therapist"
+    - "psychologist"
+    - "psychiatrist"
+    - "elders of your congregation are willing"
+metadata:
+  topic: life.parenting
+  family: general
+  notes: >
+    General topic — disclaimer required but NO elders_redirect.
+    The forbidden phrase "elders of your congregation are willing" is a
+    quote from the elders_redirect text; if it appears in a Finding the
+    agent emitted a redirect for a non-sensitive topic.
+  added_by: elias
+  added_at: 2026-05-30
