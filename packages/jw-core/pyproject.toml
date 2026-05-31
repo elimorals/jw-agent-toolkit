@@ -25,6 +25,20 @@ docx = [
 anki = [
     "genanki>=0.13.1,<1.0",
 ]
+tts-kokoro = [
+    "huggingface_hub>=0.24.0",
+    "onnxruntime>=1.19.0",
+    "soundfile>=0.12.1",
+    "numpy>=1.26.0",
+]
+tts-xtts = ["coqui-tts>=0.24.0"]
+tts-f5 = ["f5-tts>=0.4.0"]
+tts-elevenlabs = ["elevenlabs>=1.5.0"]
+asr-deepgram = ["deepgram-sdk>=3.7.0"]
+asr-turbo = ["faster-whisper>=1.1.0"]
+tts-premium = ["jw-core[tts-kokoro,tts-elevenlabs]"]
+asr-premium = ["jw-core[asr-turbo,asr-deepgram]"]
+audio-premium = ["jw-core[tts-kokoro,asr-turbo]"]
 
 [build-system]
 requires = ["hatchling"]

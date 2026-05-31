@@ -25,6 +25,7 @@ import shutil
 import subprocess
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import ClassVar, Literal
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,7 @@ class TTSProvider(ABC):
     """Abstract synthesizer."""
 
     name: str
+    target: ClassVar[Literal["api", "nvidia", "mlx", "cpu"]] = "cpu"
     languages_supported: set[str] = set()
 
     @abstractmethod
@@ -89,6 +91,7 @@ class SystemTTSProvider(TTSProvider):
 
 class EdgeTTSProvider(TTSProvider):
     name = "edge"
+    target: ClassVar[Literal["api", "nvidia", "mlx", "cpu"]] = "api"
     languages_supported = {
         "en",
         "es",
