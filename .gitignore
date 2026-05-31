@@ -31,6 +31,11 @@ htmlcov/
 # Data (corpus indexado, NO commitear — pesado y/o protegido por copyright)
 data/
 !website/src/data/
+# Source-of-truth code modules live under packages/<pkg>/src/<pkg>/data/
+# and are intentionally tracked (book registries, templates, golden seeds,
+# topic catalogs). These are CODE, not corpus.
+!packages/**/src/**/data/
+!packages/**/src/**/data/**
 *.jwpub
 *.epub
 *.pdf
