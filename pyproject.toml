@@ -17,6 +17,7 @@ members = [
     "packages/jw-rag",
     "packages/jw-agents",
     "packages/jw-finetune",
+    "packages/jw-eval",
 ]
 
 [tool.uv.sources]
@@ -26,6 +27,7 @@ jw-mcp = { workspace = true }
 jw-rag = { workspace = true }
 jw-agents = { workspace = true }
 jw-finetune = { workspace = true }
+jw-eval = { workspace = true }
 
 [dependency-groups]
 dev = [
@@ -77,6 +79,7 @@ testpaths = [
     "packages/jw-cli/tests",
     "packages/jw-rag/tests",
     "packages/jw-agents/tests",
+    "packages/jw-eval/tests",
     "tests",
 ]
 # `importlib` mode avoids namespace collisions when multiple workspace packages

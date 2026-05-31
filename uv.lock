@@ -19,6 +19,7 @@ members = [
     "jw-agents",
     "jw-cli",
     "jw-core",
+    "jw-eval",
     "jw-finetune",
     "jw-mcp",
     "jw-rag",
@@ -1513,6 +1514,46 @@ requires-dist = [
     { name = "weasyprint", marker = "extra == 'pdf'", specifier = ">=62.3" },
 ]
 provides-extras = ["pdf", "docx", "anki"]
+
+[[package]]
+name = "jw-eval"
+version = "0.1.0"
+source = { editable = "packages/jw-eval" }
+dependencies = [
+    { name = "httpx" },
+    { name = "jw-agents" },
+    { name = "jw-core" },
+    { name = "jw-rag" },
+    { name = "pydantic" },
+    { name = "pyyaml" },
+    { name = "typer" },
+]
+
+[package.optional-dependencies]
+claude = [
+    { name = "anthropic" },
+]
+embeddings = [
+    { name = "sentence-transformers" },
+]
+openai = [
+    { name = "openai" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anthropic", marker = "extra == 'claude'", specifier = ">=0.34.0" },
+    { name = "httpx", specifier = ">=0.27.0" },
+    { name = "jw-agents", editable = "packages/jw-agents" },
+    { name = "jw-core", editable = "packages/jw-core" },
+    { name = "jw-rag", editable = "packages/jw-rag" },
+    { name = "openai", marker = "extra == 'openai'", specifier = ">=1.40.0" },
+    { name = "pydantic", specifier = ">=2.5.0" },
+    { name = "pyyaml", specifier = ">=6.0.1" },
+    { name = "sentence-transformers", marker = "extra == 'embeddings'", specifier = ">=2.7.0" },
+    { name = "typer", specifier = ">=0.12.0" },
+]
+provides-extras = ["embeddings", "ollama", "claude", "openai"]
 
 [[package]]
 name = "jw-finetune"

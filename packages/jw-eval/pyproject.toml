@@ -1,0 +1,37 @@
+[project]
+name = "jw-eval"
+version = "0.1.0"
+description = "Doctrinal regression eval suite for jw-agent-toolkit"
+readme = "README.md"
+requires-python = ">=3.13"
+license = "GPL-3.0-only"
+dependencies = [
+    "jw-core",
+    "jw-rag",
+    "jw-agents",
+    "pydantic>=2.5.0",
+    "pyyaml>=6.0.1",
+    "typer>=0.12.0",
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+embeddings = [
+    "sentence-transformers>=2.7.0",
+]
+ollama = [
+    # nothing — uses httpx directly against local Ollama HTTP API
+]
+claude = [
+    "anthropic>=0.34.0",
+]
+openai = [
+    "openai>=1.40.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/jw_eval"]
