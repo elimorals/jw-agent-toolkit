@@ -17,7 +17,15 @@ from jw_core.privacy.telemetry_audit import (
     is_offline_mode,
 )
 
+try:  # optional import — only succeeds with [grammar-claude] extra
+    from jw_core.privacy.anthropic_adapter import AnthropicAdapter, AnthropicAdapterError
+except ImportError:  # pragma: no cover
+    AnthropicAdapter = None  # type: ignore[assignment,misc]
+    AnthropicAdapterError = RuntimeError  # type: ignore[assignment,misc]
+
 __all__ = [
+    "AnthropicAdapter",
+    "AnthropicAdapterError",
     "EncryptionError",
     "FieldEncryptor",
     "OllamaAdapter",
