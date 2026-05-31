@@ -1,0 +1,14 @@
+id: l1_research_topic_kingdom_en
+agent: research_topic
+layer: l1
+input:
+  topic: "Kingdom of God"
+  language: en
+expected:
+  min_findings: 1
+  must_have_source: cdn_search
+  must_have_citation: true
+metadata:
+  topic: theme.kingdom
+  added_by: elias
+  added_at: 2026-05-30

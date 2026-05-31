@@ -1,0 +1,18 @@
+id: l1_apologetics_trinity_es
+agent: apologetics
+layer: l1
+input:
+  question: "¿Es la Trinidad bíblica?"
+  language: es
+expected:
+  min_findings: 3
+  sources_in_order:
+    - topic_index
+  must_have_source: topic_index
+  must_have_citation: true
+  forbidden_keywords_in_findings:
+    - "doctrina central"
+metadata:
+  topic: doctrine.trinity
+  added_by: elias
+  added_at: 2026-05-30

@@ -1,0 +1,16 @@
+id: l1_apologetics_hell_es
+agent: apologetics
+layer: l1
+input:
+  question: "¿Existe el infierno de fuego?"
+  language: es
+expected:
+  min_findings: 2
+  must_have_source: topic_index
+  must_have_citation: true
+  forbidden_keywords_in_findings:
+    - "llamas eternas literales"
+metadata:
+  topic: doctrine.hell
+  added_by: elias
+  added_at: 2026-05-30

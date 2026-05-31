@@ -1,0 +1,14 @@
+id: l1_conversation_assistant_creation_en
+agent: conversation_assistant
+layer: l1
+input:
+  topic: "creation"
+  audience: "atheist"
+  language: en
+expected:
+  min_findings: 2
+  must_have_citation: true
+metadata:
+  topic: conversation.creation
+  added_by: elias
+  added_at: 2026-05-30

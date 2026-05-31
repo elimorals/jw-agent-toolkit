@@ -1,0 +1,14 @@
+id: l1_meeting_helper_pubtalk_en
+agent: meeting_helper
+layer: l1
+input:
+  url_or_ref: "Romans 12:1"
+  language: en
+  kind: public_talk
+expected:
+  min_findings: 2
+  must_have_citation: true
+metadata:
+  topic: meeting.public_talk
+  added_by: elias
+  added_at: 2026-05-30

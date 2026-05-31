@@ -1,0 +1,14 @@
+id: l1_meeting_helper_workbook_es
+agent: meeting_helper
+layer: l1
+input:
+  url_or_ref: "Mateo 24:14"
+  language: es
+  kind: workbook
+expected:
+  min_findings: 2
+  must_have_citation: true
+metadata:
+  topic: meeting.workbook
+  added_by: elias
+  added_at: 2026-05-30

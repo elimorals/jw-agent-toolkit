@@ -1,0 +1,16 @@
+id: l1_apologetics_soul_en
+agent: apologetics
+layer: l1
+input:
+  question: "Do humans have an immortal soul?"
+  language: en
+expected:
+  min_findings: 2
+  must_have_source: topic_index
+  must_have_citation: true
+  forbidden_keywords_in_findings:
+    - "immortal by nature"
+metadata:
+  topic: doctrine.soul
+  added_by: elias
+  added_at: 2026-05-30
