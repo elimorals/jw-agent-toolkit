@@ -122,6 +122,8 @@ _EXPECTED_TOOLS = {
     # Phase 28 — Concordance
     "concordance_build_index",
     "concordance_search",
+    # Phase 29 — Letter composer
+    "compose_witnessing",
 }
 
 

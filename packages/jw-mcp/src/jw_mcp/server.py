@@ -2543,6 +2543,49 @@ mcp.tool(name="concordance_build_index")(_concordance_build_index_tool)
 mcp.tool(name="concordance_search")(_concordance_search_tool)
 
 
+# ---------------------------------------------------------------------------
+# Phase 29 — Letter composer (letter / phone / cart witnessing scaffolds)
+# ---------------------------------------------------------------------------
+
+
+from jw_agents.letter_composer import letter_composer as _letter_composer  # noqa: E402
+
+
+@mcp.tool
+async def compose_witnessing(
+    kind: str,
+    language: str = "es",
+    topic: str = "",
+    audience: str = "default",
+    territory_hint: str | None = None,
+    jw_link: str | None = None,
+) -> dict[str, Any]:
+    """Compose a witnessing scaffold (letter | phone | cart).
+
+    Sections returned in order: opener, bridge, scripture, closing.
+    Each carries a verifiable citation URL. No PII is persisted.
+
+    Args:
+        kind: One of 'letter', 'phone', 'cart'.
+        language: 'en' | 'es' | 'pt'.
+        topic: Free-form topic or question that the scaffold addresses.
+        audience: 'default' | 'new' | 'religious' | 'atheist' | 'grieving' |
+                  'young' | 'parents'.
+        territory_hint: Optional cosmetic territory string for the opener.
+        jw_link: Optional jw.org URL to use in the closing.
+    """
+
+    result = await _letter_composer(
+        kind=kind,  # type: ignore[arg-type]
+        language=language,
+        topic_or_question=topic,
+        audience=audience,
+        territory_hint=territory_hint,
+        jw_link=jw_link,
+    )
+    return result.to_dict()
+
+
 # ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
