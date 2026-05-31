@@ -136,6 +136,9 @@ _EXPECTED_TOOLS = {
     "life_topic_info",
     # Phase 22 — Doctrinal regression eval suite
     "run_eval_suite",
+    # Phase 36 — VLM-OCR (structured page extraction)
+    "extract_structured_page",
+    "ingest_image_to_rag",
 }
 
 
