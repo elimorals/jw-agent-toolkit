@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-
 from jw_core.exporters.errors import ExportError, MissingDependencyError
 from jw_core.exporters.ir import StudySheet
 from jw_core.exporters.markdown import export_markdown
@@ -27,12 +26,8 @@ def export_cmd(
         Path,
         typer.Option("--out", "-o", help="Output path."),
     ] = Path("out.md"),
-    title: Annotated[
-        str | None, typer.Option("--title", help="Override the sheet title.")
-    ] = None,
-    language: Annotated[
-        str | None, typer.Option("--language", "-l", help="Override the sheet language.")
-    ] = None,
+    title: Annotated[str | None, typer.Option("--title", help="Override the sheet title.")] = None,
+    language: Annotated[str | None, typer.Option("--language", "-l", help="Override the sheet language.")] = None,
     citation_style: Annotated[
         str,
         typer.Option(
@@ -40,12 +35,8 @@ def export_cmd(
             help="inline-paren | footnote | bibliography",
         ),
     ] = "footnote",
-    include_citations: Annotated[
-        bool, typer.Option("--include-citations/--no-citations")
-    ] = True,
-    theme: Annotated[
-        str, typer.Option("--theme", help="PDF theme: plain | study-sheet")
-    ] = "study-sheet",
+    include_citations: Annotated[bool, typer.Option("--include-citations/--no-citations")] = True,
+    theme: Annotated[str, typer.Option("--theme", help="PDF theme: plain | study-sheet")] = "study-sheet",
     per_citation_cards: Annotated[
         bool,
         typer.Option(

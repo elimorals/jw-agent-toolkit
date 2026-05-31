@@ -18,7 +18,6 @@ from pathlib import Path
 from jw_core.exporters.errors import MissingDependencyError
 from jw_core.exporters.ir import CitationIR, StudySection, StudySheet
 
-
 _MODEL_NAME = "jw-agent-toolkit study sheet"
 
 
@@ -35,8 +34,7 @@ def export_apkg(
         import genanki  # noqa: PLC0415
     except ImportError as exc:
         raise MissingDependencyError(
-            "genanki is required for Anki export. "
-            "Install with: pip install 'jw-core[anki]'"
+            "genanki is required for Anki export. Install with: pip install 'jw-core[anki]'"
         ) from exc
 
     deck = build_deck(sheet, deck_name=deck_name, per_citation_cards=per_citation_cards)
@@ -56,9 +54,7 @@ def build_deck(
     try:
         import genanki  # noqa: PLC0415
     except ImportError as exc:
-        raise MissingDependencyError(
-            "genanki is required for Anki export."
-        ) from exc
+        raise MissingDependencyError("genanki is required for Anki export.") from exc
 
     model_id = _id_from(_MODEL_NAME)
     deck_id = _id_from(sheet.title)
@@ -111,8 +107,7 @@ def _section_note(genanki, model, sheet: StudySheet, section: StudySection):
         back_parts.append(f"<blockquote>{section.excerpt}</blockquote>")
     if section.citations:
         items = "".join(
-            f'<li><a href="{c.url}">{c.short_label or c.title or c.url}</a></li>'
-            for c in section.citations
+            f'<li><a href="{c.url}">{c.short_label or c.title or c.url}</a></li>' for c in section.citations
         )
         back_parts.append(f"<ul>{items}</ul>")
     back = "".join(back_parts)

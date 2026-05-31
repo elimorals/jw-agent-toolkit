@@ -13,7 +13,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from jw_core.exporters.ir import CitationIR, StudySection, StudySheet
+from jw_core.exporters.ir import CitationIR, StudySheet
 
 CitationStyleStr = str  # 'inline-paren' | 'footnote' | 'bibliography'
 

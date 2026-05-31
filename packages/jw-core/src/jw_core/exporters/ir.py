@@ -12,7 +12,7 @@ Why a separate IR:
 
 from __future__ import annotations
 
-from typing import Any, TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -73,7 +73,7 @@ class StudySheet(BaseModel):
     @classmethod
     def from_agent_result(
         cls,
-        result: "AgentResult | dict[str, Any]",
+        result: AgentResult | dict[str, Any],
         *,
         title: str | None = None,
         language: str | None = None,

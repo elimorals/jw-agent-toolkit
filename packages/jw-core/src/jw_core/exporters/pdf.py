@@ -43,8 +43,7 @@ def export_pdf(
         from weasyprint import HTML  # noqa: PLC0415  (lazy by design)
     except ImportError as exc:
         raise MissingDependencyError(
-            "weasyprint is required for PDF export. "
-            "Install with: pip install 'jw-core[pdf]'"
+            "weasyprint is required for PDF export. Install with: pip install 'jw-core[pdf]'"
         ) from exc
 
     if theme not in _THEME_TO_TEMPLATE:

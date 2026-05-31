@@ -20,12 +20,11 @@ def export_docx(sheet: StudySheet, *, out: Path) -> Path:
 
     try:
         from docx import Document  # noqa: PLC0415  (lazy)
-        from docx.oxml.ns import qn  # noqa: PLC0415
         from docx.oxml import OxmlElement  # noqa: PLC0415
+        from docx.oxml.ns import qn  # noqa: PLC0415
     except ImportError as exc:
         raise MissingDependencyError(
-            "python-docx is required for DOCX export. "
-            "Install with: pip install 'jw-core[docx]'"
+            "python-docx is required for DOCX export. Install with: pip install 'jw-core[docx]'"
         ) from exc
 
     doc = Document()
@@ -63,7 +62,7 @@ def export_docx(sheet: StudySheet, *, out: Path) -> Path:
     return out
 
 
-def _add_citation_paragraph(doc, cite: CitationIR, qn, OxmlElement) -> None:
+def _add_citation_paragraph(doc, cite: CitationIR, qn, OxmlElement) -> None:  # noqa: N803  (passed-in factory class keeps its API name)
     """Add a paragraph holding a hyperlink to the citation URL."""
 
     p = doc.add_paragraph()

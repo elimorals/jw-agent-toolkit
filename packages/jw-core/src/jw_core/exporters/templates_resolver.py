@@ -37,9 +37,7 @@ def resolve_template_path(name: str) -> Path:
     candidate = _packaged_dir() / name
     if candidate.exists():
         return candidate
-    raise ExportError(
-        f"Template {name!r} not found (looked in {_user_dir()} and {_packaged_dir()})"
-    )
+    raise ExportError(f"Template {name!r} not found (looked in {_user_dir()} and {_packaged_dir()})")
 
 
 def render_html(sheet: StudySheet, *, template_name: str = "plain.html.j2") -> str:
