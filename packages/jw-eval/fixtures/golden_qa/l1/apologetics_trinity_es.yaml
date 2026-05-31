@@ -1,9 +1,12 @@
+# Calibrated against real apologetics signature:
+# apologetics(question=, language=). Removed leading "¿" and trailing "?"
+# (CDN 400s on '?') and switched language to JW code (S).
 id: l1_apologetics_trinity_es
 agent: apologetics
 layer: l1
 input:
-  question: "¿Es la Trinidad bíblica?"
-  language: es
+  question: "Es la Trinidad bíblica"
+  language: S
 expected:
   min_findings: 3
   sources_in_order:

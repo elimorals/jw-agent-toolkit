@@ -1,9 +1,12 @@
+# Calibrated against real apologetics signature:
+# apologetics(question=, language=). Removed trailing '?' (CDN 400s on it)
+# and switched language to JW code (E) per agent's CDN-passthrough.
 id: l1_apologetics_soul_en
 agent: apologetics
 layer: l1
 input:
-  question: "Do humans have an immortal soul?"
-  language: en
+  question: "Do humans have an immortal soul"
+  language: E
 expected:
   min_findings: 2
   must_have_source: topic_index

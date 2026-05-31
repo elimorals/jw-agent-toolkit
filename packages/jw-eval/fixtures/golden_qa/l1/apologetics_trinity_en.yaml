@@ -1,9 +1,12 @@
+# Calibrated against real apologetics signature:
+# apologetics(question=, language=). Removed trailing '?' (CDN 400s on it)
+# and switched language to JW code (E).
 id: l1_apologetics_trinity_en
 agent: apologetics
 layer: l1
 input:
-  question: "Is the Trinity biblical?"
-  language: en
+  question: "Is the Trinity biblical"
+  language: E
 expected:
   min_findings: 3
   sources_in_order:

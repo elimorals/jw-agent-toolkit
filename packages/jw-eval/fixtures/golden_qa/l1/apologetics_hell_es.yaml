@@ -1,9 +1,13 @@
+# Calibrated against real apologetics signature:
+# apologetics(question=, language=). The agent passes `language` directly
+# to the JW CDN search, which requires JW codes (E/S/T), not ISO (en/es/pt).
+# Also removed the trailing '?' — the CDN rejects question marks with 400.
 id: l1_apologetics_hell_es
 agent: apologetics
 layer: l1
 input:
-  question: "¿Existe el infierno de fuego?"
-  language: es
+  question: "Existe el infierno de fuego"
+  language: S
 expected:
   min_findings: 2
   must_have_source: topic_index
