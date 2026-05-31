@@ -58,6 +58,7 @@ Orientadas a casos de uso. Cada una es autocontenida con código de ejemplo.
 - [Citation integrity validator](guias/citation-validator.md) — Fase 23. Valida URLs wol.jw.org de agentes (estructural / live / drift). Hermana de Fase 22.
 - [Monitor de novedades](guias/monitor-de-novedades.md) — `jw news digest` detecta publicaciones, videos y workbooks nuevos. Local-first, determinista.
 - [Partes del estudiante](guias/partes-del-estudiante.md) — guion 4-sección para lectura, conversación, revisita y estudio bíblico (Fase 26).
+- [Concordancia exacta](guias/concordancia-exacta.md) — `jw grep` literal con SQLite FTS5 sobre NWT + JWPUB + EPUB (Fase 28).
 
 ### Referencia exhaustiva — cada función documentada
 
