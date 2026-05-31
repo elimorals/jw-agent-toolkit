@@ -119,6 +119,9 @@ _EXPECTED_TOOLS = {
     "field_log_hours",
     "field_log_study",
     "field_monthly_report",
+    # Phase 28 — Concordance
+    "concordance_build_index",
+    "concordance_search",
 }
 
 

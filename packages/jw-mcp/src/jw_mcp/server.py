@@ -2528,6 +2528,21 @@ def field_monthly_report(
     return {"format": "json", **report.model_dump()}
 
 
+# ---------------------------------------------------------------------------
+# Phase 28 — Concordance (literal FTS5 search over local corpus)
+# ---------------------------------------------------------------------------
+
+
+from jw_mcp.tools.concordance import (  # noqa: E402
+    concordance_build_index_tool as _concordance_build_index_tool,
+    concordance_search_tool as _concordance_search_tool,
+)
+
+
+mcp.tool(name="concordance_build_index")(_concordance_build_index_tool)
+mcp.tool(name="concordance_search")(_concordance_search_tool)
+
+
 # ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
