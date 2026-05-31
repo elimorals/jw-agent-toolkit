@@ -22,6 +22,7 @@ from jw_cli.commands import (
     languages,
     ministry,
     news,
+    report as report_module,
     search,
     student,
     study,
@@ -52,6 +53,7 @@ app.add_typer(ministry.ministry_app, name="ministry")
 app.add_typer(citations.citations_app, name="citations")
 app.add_typer(study.study_app, name="study")
 app.add_typer(news.news_app, name="news")
+app.add_typer(report_module.report_app, name="report")
 
 
 def main() -> None:
