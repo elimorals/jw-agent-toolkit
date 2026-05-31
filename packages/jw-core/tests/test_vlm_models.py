@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import pytest
-from pydantic import ValidationError
-
 from jw_core.vision.vlm import (
     DEFAULT_VLM_PROMPT,
     StructuredBlock,
     StructuredPage,
     parse_structured_page_json,
 )
+from pydantic import ValidationError
 
 
 def test_structured_block_minimal() -> None:

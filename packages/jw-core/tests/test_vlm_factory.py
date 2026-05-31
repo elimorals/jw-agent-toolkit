@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_core.vision.vlm_providers import (
-    FakeVLMProvider,
     JW_VLM_PROVIDER_ENV,
+    FakeVLMProvider,
     get_default_provider,
 )
 from jw_core.vision.vlm_providers.factory import (

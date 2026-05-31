@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from jw_core.parsers.reference import parse_reference
+
 from jw_rag.chunker import Chunk
 
 if TYPE_CHECKING:  # avoid hard dep at import time
@@ -32,7 +33,7 @@ def ingest_image(
     image_path: Path | str,
     *,
     language: str = "en",
-    provider: "VLMProvider | None" = None,
+    provider: VLMProvider | None = None,
     min_confidence: float | None = None,
 ) -> int:
     """Ingest one page image. Returns the number of chunks added."""
@@ -48,9 +49,8 @@ def ingest_image(
 
     chunks: list[Chunk] = []
     for i, block in enumerate(page.blocks):
-        if min_confidence is not None and block.confidence is not None:
-            if block.confidence < min_confidence:
-                continue
+        if min_confidence is not None and block.confidence is not None and block.confidence < min_confidence:
+            continue
         metadata: dict[str, object] = {
             "kind": block.kind,
             "lang_hint": block.lang_hint,

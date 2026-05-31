@@ -37,8 +37,8 @@ from jw_core.vision.vlm import (
     parse_structured_page_json,
 )
 from jw_core.vision.vlm_providers import (
-    FakeVLMProvider,
     JW_VLM_PROVIDER_ENV,
+    FakeVLMProvider,
     build_provider,
     get_default_provider,
 )

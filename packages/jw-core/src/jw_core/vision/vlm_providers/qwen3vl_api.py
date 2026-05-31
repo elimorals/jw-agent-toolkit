@@ -71,9 +71,7 @@ class Qwen3VLAPIProvider:
         language: str = "en",
     ) -> StructuredPage:
         if not self.is_available():
-            raise RuntimeError(
-                "Qwen3VLAPIProvider unavailable: set JW_QWEN3VL_API_KEY and JW_QWEN3VL_API_BASE."
-            )
+            raise RuntimeError("Qwen3VLAPIProvider unavailable: set JW_QWEN3VL_API_KEY and JW_QWEN3VL_API_BASE.")
         path = os.environ.get("JW_QWEN3VL_API_PATH", DEFAULT_PATH)
         model = os.environ.get("JW_QWEN3VL_API_MODEL", DEFAULT_MODEL)
         prompt_text = (prompt or DEFAULT_VLM_PROMPT) + f"\nLanguage hint: {language}\n"

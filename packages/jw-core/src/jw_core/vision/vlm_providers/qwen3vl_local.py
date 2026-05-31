@@ -34,7 +34,9 @@ class _Backend(Protocol):
 
 
 def _materialize_bytes(buf: bytes) -> Path:
-    f = tempfile.NamedTemporaryFile(prefix="jwvlm-", suffix=".png", delete=False)
+    # NamedTemporaryFile with delete=False intentionally outlives this scope;
+    # the caller passes the resulting path to a model that opens it again.
+    f = tempfile.NamedTemporaryFile(prefix="jwvlm-", suffix=".png", delete=False)  # noqa: SIM115
     f.write(buf)
     f.close()
     return Path(f.name)
@@ -44,11 +46,7 @@ class _MLXBackend:
     name = "mlx-vlm"
 
     def __init__(self, model: str | None = None) -> None:
-        self.model = (
-            model
-            or os.environ.get("JW_QWEN3VL_LOCAL_MODEL")
-            or "mlx-community/Qwen3-VL-2B-Instruct-4bit"
-        )
+        self.model = model or os.environ.get("JW_QWEN3VL_LOCAL_MODEL") or "mlx-community/Qwen3-VL-2B-Instruct-4bit"
 
     def available(self) -> bool:
         try:
@@ -69,11 +67,7 @@ class _VLLMBackend:
     name = "vllm"
 
     def __init__(self, model: str | None = None) -> None:
-        self.model = (
-            model
-            or os.environ.get("JW_QWEN3VL_LOCAL_MODEL")
-            or "Qwen/Qwen3-VL-8B-Instruct"
-        )
+        self.model = model or os.environ.get("JW_QWEN3VL_LOCAL_MODEL") or "Qwen/Qwen3-VL-8B-Instruct"
 
     def available(self) -> bool:
         try:
@@ -173,9 +167,7 @@ class Qwen3VLProvider:
     ) -> StructuredPage:
         backend = self._pick()
         if backend is None:
-            raise RuntimeError(
-                "Qwen3VLProvider unavailable: install one of mlx-vlm / vllm / llama-cpp-python."
-            )
+            raise RuntimeError("Qwen3VLProvider unavailable: install one of mlx-vlm / vllm / llama-cpp-python.")
         prompt_text = (prompt or DEFAULT_VLM_PROMPT) + f"\nLanguage hint: {language}\n"
         raw_text = backend.generate(image, prompt_text)
         blocks, lang = parse_structured_page_json(raw_text)

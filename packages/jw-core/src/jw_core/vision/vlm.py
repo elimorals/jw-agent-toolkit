@@ -50,9 +50,7 @@ class StructuredBlock(BaseModel):
 
     @field_validator("bbox")
     @classmethod
-    def _check_bbox(
-        cls, v: tuple[float, float, float, float] | None
-    ) -> tuple[float, float, float, float] | None:
+    def _check_bbox(cls, v: tuple[float, float, float, float] | None) -> tuple[float, float, float, float] | None:
         if v is None:
             return v
         for coord in v:
@@ -170,7 +168,7 @@ def extract_bible_reference_from_image_v2(
     image_path: Path | str,
     *,
     language: str = "en",
-    provider: "VLMProvider | None" = None,
+    provider: VLMProvider | None = None,
 ) -> dict[str, object]:
     """V2 of extract_bible_reference_from_image — VLM-first with fallback.
 

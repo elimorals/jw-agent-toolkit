@@ -14,14 +14,10 @@ def test_emits_deprecation_warning(tmp_path: Path, monkeypatch) -> None:
     def fake_ocr(image_path, *, language="eng"):  # noqa: ARG001
         return "Some OCR text"
 
-    monkeypatch.setattr(
-        "jw_core.vision.vlm_providers.tesseract_fallback.ocr_image", fake_ocr
-    )
+    monkeypatch.setattr("jw_core.vision.vlm_providers.tesseract_fallback.ocr_image", fake_ocr)
     # also force _probe to return True so is_available reports True even if
     # pytesseract isn't installed.
-    monkeypatch.setattr(
-        "jw_core.vision.vlm_providers.tesseract_fallback._probe", lambda: True
-    )
+    monkeypatch.setattr("jw_core.vision.vlm_providers.tesseract_fallback._probe", lambda: True)
     p = TesseractFallbackProvider()
     assert p.is_available()
     with warnings.catch_warnings(record=True) as caught:
@@ -39,9 +35,7 @@ def test_unavailable_when_pytesseract_missing(monkeypatch) -> None:
     def boom():
         raise ImportError("no module")
 
-    monkeypatch.setattr(
-        "jw_core.vision.vlm_providers.tesseract_fallback._probe", boom
-    )
+    monkeypatch.setattr("jw_core.vision.vlm_providers.tesseract_fallback._probe", boom)
     assert TesseractFallbackProvider().is_available() is False
 
 
@@ -58,9 +52,7 @@ def test_deprecated_extract_bible_reference_warns(monkeypatch, tmp_path: Path) -
     img = tmp_path / "p.png"
     img.write_bytes(b"\x89PNG")
 
-    monkeypatch.setattr(
-        "jw_core.vision.ocr.ocr_image", lambda *a, **k: "x"
-    )
+    monkeypatch.setattr("jw_core.vision.ocr.ocr_image", lambda *a, **k: "x")
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         ocr_mod.extract_bible_reference_from_image(img, language="en")

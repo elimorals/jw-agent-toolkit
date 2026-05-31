@@ -29,31 +29,31 @@ class ProviderUnavailableError(RuntimeError):
     """Raised when no provider is usable in the current environment."""
 
 
-def _build_fake() -> "VLMProvider":
+def _build_fake() -> VLMProvider:
     from jw_core.vision.vlm_providers.fakes import FakeVLMProvider
 
     return FakeVLMProvider()
 
 
-def _build_claude() -> "VLMProvider":
+def _build_claude() -> VLMProvider:
     from jw_core.vision.vlm_providers.claude_vision import ClaudeVisionProvider
 
     return ClaudeVisionProvider()
 
 
-def _build_openai() -> "VLMProvider":
+def _build_openai() -> VLMProvider:
     from jw_core.vision.vlm_providers.openai_vision import OpenAIVisionProvider
 
     return OpenAIVisionProvider()
 
 
-def _build_qwen_api() -> "VLMProvider":
+def _build_qwen_api() -> VLMProvider:
     from jw_core.vision.vlm_providers.qwen3vl_api import Qwen3VLAPIProvider
 
     return Qwen3VLAPIProvider()
 
 
-def _build_qwen_local() -> "VLMProvider":
+def _build_qwen_local() -> VLMProvider:
     from jw_core.vision.vlm_providers.qwen3vl_local import Qwen3VLProvider
 
     # default to mlx; users override target via JW_QWEN3VL_LOCAL_TARGET
@@ -63,7 +63,7 @@ def _build_qwen_local() -> "VLMProvider":
     return Qwen3VLProvider(target=target)  # type: ignore[arg-type]
 
 
-def _build_tesseract_fallback() -> "VLMProvider":
+def _build_tesseract_fallback() -> VLMProvider:
     from jw_core.vision.vlm_providers.tesseract_fallback import (
         TesseractFallbackProvider,
     )
@@ -71,7 +71,7 @@ def _build_tesseract_fallback() -> "VLMProvider":
     return TesseractFallbackProvider()
 
 
-_REGISTRY_BUILDERS: dict[str, Callable[[], "VLMProvider"]] = {
+_REGISTRY_BUILDERS: dict[str, Callable[[], VLMProvider]] = {
     "fake": _build_fake,
     "claude_vision": _build_claude,
     "openai_vision": _build_openai,
@@ -90,19 +90,16 @@ DEFAULT_CHAIN: list[str] = [
 ]
 
 
-def build_provider(name: str) -> "VLMProvider":
+def build_provider(name: str) -> VLMProvider:
     """Construct a provider by registry name. Raise if unknown."""
 
     builder = _REGISTRY_BUILDERS.get(name)
     if builder is None:
-        raise ProviderUnavailableError(
-            f"unknown VLM provider {name!r}. "
-            f"Known: {sorted(_REGISTRY_BUILDERS)}"
-        )
+        raise ProviderUnavailableError(f"unknown VLM provider {name!r}. Known: {sorted(_REGISTRY_BUILDERS)}")
     return builder()
 
 
-def get_default_provider() -> "VLMProvider":
+def get_default_provider() -> VLMProvider:
     """Pick a provider per resolution rules above."""
 
     forced = os.environ.get(JW_VLM_PROVIDER_ENV)

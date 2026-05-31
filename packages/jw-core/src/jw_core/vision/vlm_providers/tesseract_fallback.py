@@ -60,7 +60,9 @@ class TesseractFallbackProvider:
         )
         lang_code = _LANG_HINT.get(language, "eng+spa+por")
         if isinstance(image, bytes):
-            f = tempfile.NamedTemporaryFile(prefix="jwvlm-", suffix=".png", delete=False)
+            # NamedTemporaryFile(delete=False) intentionally outlives this scope;
+            # tesseract opens the file by path on disk.
+            f = tempfile.NamedTemporaryFile(prefix="jwvlm-", suffix=".png", delete=False)  # noqa: SIM115
             f.write(image)
             f.close()
             path: Path | str = f.name

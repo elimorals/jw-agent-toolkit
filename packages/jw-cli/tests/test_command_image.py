@@ -3,9 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from typer.testing import CliRunner
-
 from jw_cli.commands.image import image_app
+from typer.testing import CliRunner
 
 
 def _img(tmp_path: Path) -> Path:

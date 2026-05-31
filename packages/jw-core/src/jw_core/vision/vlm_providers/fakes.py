@@ -26,11 +26,7 @@ from jw_core.vision.vlm import (
 #   packages/jw-core/tests/fixtures/vlm/expected_structured/
 # That means 4 .parent hops + tests/fixtures/...
 _GOLDEN_DIR = (
-    Path(__file__).resolve().parent.parent.parent.parent.parent
-    / "tests"
-    / "fixtures"
-    / "vlm"
-    / "expected_structured"
+    Path(__file__).resolve().parent.parent.parent.parent.parent / "tests" / "fixtures" / "vlm" / "expected_structured"
 )
 
 

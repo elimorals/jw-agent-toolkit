@@ -40,9 +40,7 @@ def test_ingest_image_creates_one_chunk_per_block(tmp_path: Path) -> None:
 
 def test_ingest_image_parses_bible_ref_metadata(tmp_path: Path) -> None:
     store = _FakeStore()
-    provider = FakeVLMProvider(
-        canned_blocks=[StructuredBlock(kind="bible_ref", text="John 3:16")]
-    )
+    provider = FakeVLMProvider(canned_blocks=[StructuredBlock(kind="bible_ref", text="John 3:16")])
     ingest_image(store, _img(tmp_path), language="en", provider=provider)
     parsed = store.added[0].metadata.get("parsed_reference")
     assert parsed is not None
@@ -58,18 +56,14 @@ def test_ingest_image_filters_low_confidence(tmp_path: Path) -> None:
             StructuredBlock(kind="paragraph", text="weak", confidence=0.1),
         ]
     )
-    n = ingest_image(
-        store, _img(tmp_path), language="en", provider=provider, min_confidence=0.3
-    )
+    n = ingest_image(store, _img(tmp_path), language="en", provider=provider, min_confidence=0.3)
     assert n == 1
     assert store.added[0].text == "strong"
 
 
 def test_ingest_image_source_id_is_stable(tmp_path: Path) -> None:
     store = _FakeStore()
-    provider = FakeVLMProvider(
-        canned_blocks=[StructuredBlock(kind="paragraph", text="t")]
-    )
+    provider = FakeVLMProvider(canned_blocks=[StructuredBlock(kind="paragraph", text="t")])
     img = _img(tmp_path)
     ingest_image(store, img, language="en", provider=provider)
     sid = store.added[0].source_id

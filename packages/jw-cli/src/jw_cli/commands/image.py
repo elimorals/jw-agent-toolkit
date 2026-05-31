@@ -14,9 +14,7 @@ image_app = typer.Typer(no_args_is_help=True, help="VLM-backed page image ops.")
 def extract(
     image: Path = typer.Argument(..., exists=True, readable=True),
     language: str = typer.Option("en", "--language", "-l"),
-    provider_name: str | None = typer.Option(
-        None, "--provider", help="override JW_VLM_PROVIDER for this call"
-    ),
+    provider_name: str | None = typer.Option(None, "--provider", help="override JW_VLM_PROVIDER for this call"),
 ) -> None:
     """Print the StructuredPage JSON for IMAGE."""
 
@@ -31,9 +29,7 @@ def extract(
 def ingest(
     image: Path = typer.Argument(..., exists=True, readable=True),
     language: str = typer.Option("en", "--language", "-l"),
-    store_path: Path = typer.Option(
-        Path("~/.jw-toolkit/rag").expanduser(), "--store"
-    ),
+    store_path: Path = typer.Option(Path("~/.jw-toolkit/rag").expanduser(), "--store"),
     provider_name: str | None = typer.Option(None, "--provider"),
     min_confidence: float | None = typer.Option(None, "--min-confidence"),
 ) -> None:

@@ -85,9 +85,7 @@ class ClaudeVisionProvider:
         language: str = "en",
     ) -> StructuredPage:
         if not self.is_available():
-            raise RuntimeError(
-                "ClaudeVisionProvider unavailable: set ANTHROPIC_API_KEY and pip install anthropic."
-            )
+            raise RuntimeError("ClaudeVisionProvider unavailable: set ANTHROPIC_API_KEY and pip install anthropic.")
 
         media_type, raw = _read_image(image)
         encoded = base64.standard_b64encode(raw).decode("ascii")

@@ -43,10 +43,7 @@ def test_extract_structured(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
     img = tmp_path / "p.png"
     img.write_bytes(b"\x89PNG\r\n\x1a\nfake")
-    payload = (
-        '{"blocks":[{"kind":"paragraph","text":"hello","lang_hint":"en"}],'
-        '"language_detected":"en"}'
-    )
+    payload = '{"blocks":[{"kind":"paragraph","text":"hello","lang_hint":"en"}],"language_detected":"en"}'
     client = _FakeClient(payload)
     p = OpenAIVisionProvider(client=client, model="gpt-4o-mini")
     page = p.extract_structured(img, language="en")

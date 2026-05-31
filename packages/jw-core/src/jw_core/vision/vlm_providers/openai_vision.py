@@ -72,9 +72,7 @@ class OpenAIVisionProvider:
         language: str = "en",
     ) -> StructuredPage:
         if not self.is_available():
-            raise RuntimeError(
-                "OpenAIVisionProvider unavailable: set OPENAI_API_KEY and pip install openai."
-            )
+            raise RuntimeError("OpenAIVisionProvider unavailable: set OPENAI_API_KEY and pip install openai.")
 
         text_prompt = (prompt or DEFAULT_VLM_PROMPT) + f"\n\nLanguage hint: {language}\n"
         data_url = _data_url(image)

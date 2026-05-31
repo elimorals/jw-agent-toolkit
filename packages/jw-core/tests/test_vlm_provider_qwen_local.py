@@ -24,7 +24,9 @@ class _FakeBackend:
 
     def generate(self, image: Path | bytes, prompt: str) -> str:  # noqa: ARG002
         self.calls.append(image)
-        return self.payload or '{"blocks":[{"kind":"paragraph","text":"local-out","lang_hint":"en"}],"language_detected":"en"}'
+        return self.payload or (
+            '{"blocks":[{"kind":"paragraph","text":"local-out","lang_hint":"en"}],"language_detected":"en"}'
+        )
 
 
 def test_unavailable_when_no_backend() -> None:

@@ -12,7 +12,6 @@ import os
 from pathlib import Path
 
 import pytest
-
 from jw_core.vision.vlm_providers.claude_vision import ClaudeVisionProvider
 from jw_core.vision.vlm_providers.openai_vision import OpenAIVisionProvider
 from jw_core.vision.vlm_providers.qwen3vl_api import Qwen3VLAPIProvider
