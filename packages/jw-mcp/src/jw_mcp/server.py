@@ -2907,6 +2907,43 @@ def run_eval_suite(
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Fase 36 — VLM / OCR structured tools
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool()
+def extract_structured_page(image_path: str, language: str = "en") -> dict:
+    """Run the configured VLM on IMAGE_PATH and return a StructuredPage as JSON."""
+
+    from jw_core.vision.vlm_providers import get_default_provider
+
+    page = get_default_provider().extract_structured(image_path, language=language)
+    return page.model_dump()
+
+
+@mcp.tool()
+def ingest_image_to_rag(image_path: str, language: str = "en") -> dict:
+    """Ingest IMAGE_PATH into the default RAG store. Returns {'chunks': int}."""
+
+    from pathlib import Path as _Path36
+
+    from jw_core.vision.vlm_providers import get_default_provider
+    from jw_rag import FakeEmbedder, VectorStore
+    from jw_rag.ingest_image import ingest_image as _ingest
+
+    store = VectorStore(
+        _Path36("~/.jw-toolkit/rag").expanduser(), FakeEmbedder(dim=64)
+    )
+    n = _ingest(
+        store,
+        image_path,
+        language=language,
+        provider=get_default_provider(),
+    )
+    return {"chunks": n}
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
 
