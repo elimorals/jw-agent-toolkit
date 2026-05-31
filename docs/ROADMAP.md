@@ -744,3 +744,37 @@ Generación ilustrativa para uso personal con tres safety filters y policy
 fail-closed. Spec: `docs/superpowers/specs/2026-05-31-fase-38-jw-gen-design.md`.
 Plan: `docs/superpowers/plans/2026-05-31-fase-38-jw-gen-plan.md`.
 Guía: `docs/guias/generacion-ilustrativa.md`.
+
+
+## Fase 48 — wol-browser-extension (nueva superficie web) ✅
+
+> Tier 4 nueva superficie. Spec: `docs/superpowers/specs/2026-05-31-fase-48-wol-browser-ext-design.md`. Guía: `docs/guias/wol-browser-ext.md`.
+
+Extensión MV3 para Chrome/Edge/Firefox que añade 3 botones inline a cada
+versículo en `wol.jw.org`:
+
+- ✅ **📖 Explicar** → `POST /api/v1/verse_markdown`
+- ✅ **🔗 Referencias cruzadas** → `POST /api/v1/cross_references` *(endpoint nuevo)*
+- ✅ **📝 Guardar en Obsidian** → `POST /api/v1/vault/append` *(endpoint nuevo, con `.obsidian/` marker check + path-traversal defense)*
+
+Privacidad por construcción — 3 capas:
+1. Manifest v3 `host_permissions=["http://localhost:8765/*"]`.
+2. Runtime `JwApiClient.assertLocal()` guard.
+3. CI `tests/playwright/privacy.spec.ts` (BLOCKING) — rompe la build si aparece cualquier URL externa.
+
+Backend hardening incluido en la misma fase:
+- ✅ CORS tightening: de `allow_origins=["*"]` a `["https://wol.jw.org"]` + regex `(chrome|moz)-extension://` only.
+- ✅ Nuevo `POST /api/v1/cross_references` con tolerancia de red (vacío + error string en lugar de 5xx).
+- ✅ Nuevo `POST /api/v1/vault/append` con guard `.obsidian/` marker check, `subdir.resolve().relative_to(vault)` para bloquear `..`, rechaza `/` y `~` literal.
+
+### Cobertura de tests
+
+- ✅ **15 tests Python nuevos** (6 CORS + 3 cross_references + 6 vault/append).
+- ✅ **34 tests vitest verde** sobre la extensión: manifest contract (5) + JwApiClient con fetch mock (7) + verse_detector (6) + button_injector (5) + i18n (6) + content_script (2) + popup (2) + no-external-URL static guard (1).
+- ✅ ESLint flat config v9 con `no-restricted-syntax` que prohíbe `fetch()` fuera de `src/api.ts` y URL literales no-localhost.
+- ✅ Playwright E2E + privacy.spec.ts listos (requieren `pnpm exec playwright install chromium` en CI; el workflow `.github/workflows/wol-extension.yml` lo hace).
+
+### Métricas de bundle
+
+- ✅ dist/ raw: ~20 KB, gzip: ~8 KB.
+- ✅ zip de release: 13 KB *(ceiling pactado: 800 KB; 98% headroom).*

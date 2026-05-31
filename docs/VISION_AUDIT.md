@@ -30,6 +30,7 @@
 | Fase 34 (audio-premium) | VISION #3 | TTS Kokoro/XTTSv2/F5/ElevenLabs + ASR WhisperTurbo/Deepgram; CLI `jw say`/`jw transcribe`; MCP `synthesize_speech`/`transcribe_audio`; consent.txt para cloning |
 | Fase 35 (constrained-decoding) | ✅ Nuevo | `jw_core.grammar` + adapters Ollama/Anthropic/OpenAI/llama-cpp; `run_with_citations` con reconciliación; CLI `jw constrained ask`; MCP `run_constrained`; property test 100/100 |
 | Fase 39 (nli-runtime) | ✅ Nuevo | `jw_core.fidelity` — 5 providers (Claude/OpenAI/DeBERTa/Ollama/Fake), `@fidelity_wrap` decorator (warn/reject/annotate_only, min_excerpt_chars), CLI `jw apologetics --fidelity`, MCP `evaluate_nli` + `fidelity` param; ~107 tests; suite global 2063 passed |
+| Fase 48 (wol-browser-ext) | ✅ Nuevo | `apps/wol-browser-extension/` MV3 + backend `POST /api/v1/cross_references` + `POST /api/v1/vault/append` (con `.obsidian/` marker check), CORS tightened, 3 capas anti-leak, 34 tests vitest + 15 tests Python, zip 13KB / 800KB ceiling |
 
 **100% de las 13 secciones tienen entrega.** Métricas:
 - **24+ archivos Python nuevos** organizados en 8 sub-paquetes (`audio/`, `calendar/`, `family/`, `observability/`, `personalization/`, `privacy/`, `study/`, `vision/`).
