@@ -522,3 +522,11 @@ gráficas (export JSON ya lo habilita externamente), modo familia.
 - CLI `jw grep "<phrase>"` con `--build-index`, `--build-nwt`, `--stats`, `--kind`, `--language`.
 - MCP tools `concordance_build_index` y `concordance_search`.
 - Guía: [`docs/guias/concordancia-exacta.md`](guias/concordancia-exacta.md).
+
+### Fase 29 — Compositor de carta / teléfono / carrito (Tier 4) ✅
+
+- Agente `letter_composer` con 3 modalidades × 7 audiencias × 8 familias temáticas.
+- Salida estructurada (`opener · bridge · scripture · closing`), copyright-safe.
+- CLI `jw letter`, tool MCP `compose_witnessing`, 3 golden cases L1.
+- Guía: [`docs/guias/compositor-de-predicacion.md`](guias/compositor-de-predicacion.md).
+- Spec / plan: `docs/superpowers/specs/2026-05-30-fase-29-letter-composer-design.md`.

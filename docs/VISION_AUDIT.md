@@ -205,6 +205,10 @@ Items de VISION.md que conscientemente quedan como next iteration:
 
 Búsqueda literal con SQLite FTS5 sobre NWT + JWPUB + EPUB. Implementación en `jw_core.concordance`; CLI `jw grep`; MCP `concordance_search` / `concordance_build_index`. Spec: [`docs/superpowers/specs/2026-05-30-fase-28-concordance-design.md`](superpowers/specs/2026-05-30-fase-28-concordance-design.md). Guía: [`docs/guias/concordancia-exacta.md`](guias/concordancia-exacta.md).
 
+### Fase 29 — Compositor de carta / teléfono / carrito ✅ shipped
+
+Cubre feature #4 (compositor). Agente `letter_composer` con 3 modalidades (letter/phone/cart) × 7 audiencias × 8 familias temáticas. Salida estructurada de 4 secciones (`opener · bridge · scripture · closing`), prosa propia (copyright-safe), `Citation.url` a wol.jw.org sin copiar texto bíblico. CLI `jw letter`; MCP `compose_witnessing`; 3 golden cases L1. Implementación en `jw_agents.letter_composer` + `jw_core.data.{letter,phone,cart}_templates`. Spec: [`docs/superpowers/specs/2026-05-30-fase-29-letter-composer-design.md`](superpowers/specs/2026-05-30-fase-29-letter-composer-design.md). Guía: [`docs/guias/compositor-de-predicacion.md`](guias/compositor-de-predicacion.md).
+
 ## Cómo verificar el toolkit completo
 
 ```bash
