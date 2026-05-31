@@ -16,6 +16,8 @@ import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from jw_core.audio.hardware import recommend_model_size
+
 logger = logging.getLogger(__name__)
 
 
@@ -50,11 +52,14 @@ def transcribe_file(
 
     Args:
         audio_path: WAV/MP3/M4A/FLAC.
-        model_size: 'tiny', 'base' (default), 'small', 'medium', 'large-v3'.
+        model_size: 'tiny', 'base' (default), 'small', 'medium', 'large-v3',
+            'large-v3-turbo', or 'auto' (resolves via hardware.recommend_model_size()).
         language: optional ISO-639 hint; None = auto-detect.
         device: 'auto', 'cpu', or 'cuda'.
         beam_size: decoder beam size (higher = better, slower).
     """
+    if model_size == "auto":
+        model_size = recommend_model_size()
     try:
         from faster_whisper import WhisperModel
     except ImportError as e:
