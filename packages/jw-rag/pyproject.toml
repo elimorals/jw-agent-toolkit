@@ -38,3 +38,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/jw_rag"]
+
+[tool.pytest.ini_options]
+markers = [
+    "embeddings_local: tests that require sentence-transformers + a local model download",
+    "rerank_local: tests that require a local cross-encoder model download",
+]

@@ -144,3 +144,7 @@ testpaths = [
 # `importlib` mode avoids namespace collisions when multiple workspace packages
 # each have a tests/ folder (we have jw-core/tests/ and jw-mcp/tests/).
 addopts = "--import-mode=importlib"
+markers = [
+    "embeddings_local: tests that require sentence-transformers + a local model download",
+    "rerank_local: tests that require a local cross-encoder model download",
+]
