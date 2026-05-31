@@ -1,0 +1,15 @@
+id: l2_topic_resurrection_es
+agent: apologetics
+layer: l2
+input:
+  question: "¿Qué enseña la Biblia sobre la resurrección?"
+  language: es
+expected:
+  expected_citations:
+    - https://wol.jw.org/es/wol/d/r4/lp-s/1200003434
+  support_phrases:
+    - "resurrección"
+    - "vida"
+metadata:
+  topic: theme.resurrection
+  added_at: 2026-05-30

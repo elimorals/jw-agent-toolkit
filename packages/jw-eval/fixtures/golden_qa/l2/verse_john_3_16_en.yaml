@@ -1,0 +1,14 @@
+id: l2_verse_john_3_16_en
+agent: verse_explainer
+layer: l2
+input:
+  reference: "John 3:16"
+  language: en
+expected:
+  expected_citations:
+    - https://wol.jw.org/en/wol/b/r1/lp-e/nwt/E/2024/43/3
+  support_phrases:
+    - "loved the world"
+    - "God loved the world"
+metadata:
+  added_at: 2026-05-30

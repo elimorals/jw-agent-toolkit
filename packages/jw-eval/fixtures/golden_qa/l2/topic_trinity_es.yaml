@@ -1,0 +1,15 @@
+id: l2_topic_trinity_es
+agent: apologetics
+layer: l2
+input:
+  question: "¿Es bíblica la Trinidad?"
+  language: es
+expected:
+  expected_citations:
+    - https://wol.jw.org/es/wol/d/r4/lp-s/1200004181
+  support_phrases:
+    - "Trinidad"
+    - "no es enseñada"
+metadata:
+  topic: doctrine.trinity
+  added_at: 2026-05-30

@@ -1,0 +1,15 @@
+id: l2_topic_kingdom_en
+agent: apologetics
+layer: l2
+input:
+  question: "What is the Kingdom of God?"
+  language: en
+expected:
+  expected_citations:
+    - https://wol.jw.org/en/wol/d/r1/lp-e/1200002681
+  support_phrases:
+    - "Kingdom"
+    - "God's Kingdom"
+metadata:
+  topic: theme.kingdom
+  added_at: 2026-05-30

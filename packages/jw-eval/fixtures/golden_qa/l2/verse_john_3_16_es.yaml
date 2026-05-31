@@ -1,0 +1,14 @@
+id: l2_verse_john_3_16_es
+agent: verse_explainer
+layer: l2
+input:
+  reference: "Juan 3:16"
+  language: es
+expected:
+  expected_citations:
+    - https://wol.jw.org/es/wol/b/r4/lp-s/nwt/E/2024/43/3
+  support_phrases:
+    - "amó tanto al mundo"
+    - "Dios amó tanto"
+metadata:
+  added_at: 2026-05-30

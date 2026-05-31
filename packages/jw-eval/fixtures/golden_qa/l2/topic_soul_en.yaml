@@ -1,0 +1,15 @@
+id: l2_topic_soul_en
+agent: apologetics
+layer: l2
+input:
+  question: "Is the soul immortal?"
+  language: en
+expected:
+  expected_citations:
+    - https://wol.jw.org/en/wol/d/r1/lp-e/1200003670
+  support_phrases:
+    - "soul"
+    - "not immortal"
+metadata:
+  topic: doctrine.soul
+  added_at: 2026-05-30

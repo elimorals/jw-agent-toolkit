@@ -1,0 +1,14 @@
+id: l2_verse_john_3_16_pt
+agent: verse_explainer
+layer: l2
+input:
+  reference: "João 3:16"
+  language: pt
+expected:
+  expected_citations:
+    - https://wol.jw.org/pt/wol/b/r5/lp-t/nwt/E/2024/43/3
+  support_phrases:
+    - "amou o mundo"
+    - "Deus amou tanto"
+metadata:
+  added_at: 2026-05-30
