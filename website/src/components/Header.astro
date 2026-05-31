@@ -10,7 +10,7 @@ const path = Astro.url.pathname;
 const nav = [
   { href: lang === 'es' ? "/" : "/en", label: t("nav.home"), match: lang === 'es' ? "/" : "/en" },
   { href: lang === 'es' ? "/#paquetes" : "/en/#paquetes", label: t("nav.packages"), match: "/#paquetes" },
-  { href: lang === 'es' ? "/#arquitectura" : "/en/#arquitectura", label: t("nav.architecture"), match: "/#arquitectura" },
+  { href: lang === 'es' ? "/novedades" : "/en/whats-new", label: t("nav.changelog"), match: lang === 'es' ? "/novedades" : "/en/whats-new" },
   { href: lang === 'es' ? "/docs" : "/en/docs", label: t("nav.docs"), match: "/docs" },
   { href: lang === 'es' ? "/docs/vision" : "/en/docs/vision", label: t("nav.vision"), match: "/docs/vision" },
 ];

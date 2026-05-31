@@ -1,0 +1,487 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+interface Phase {
+  number: number;
+  tier: 1 | 2 | 3 | 4;
+  title: string;
+  tagline: string;
+  description: string;
+  whatWasDone: string[];
+  pending: string[];
+  tests: number;
+  commits: number;
+  guideHref?: string;
+}
+
+const phases: Phase[] = [
+  {
+    number: 22,
+    tier: 1,
+    title: "Doctrinal regression eval",
+    tagline: "A safety net that measures every change",
+    description:
+      "Three-layer suite (structural · citations · semantic) with 47 golden cases. Turns the risk of doctrinal hallucination into an auditable metric that gates PRs. The piece protecting the other 10.",
+    whatWasDone: [
+      "New packages/jw-eval with Suite + GoldenCase + LayerResult.",
+      "L1 structural: contract regression for 6 agents — no network, no LLM, CI-blocking.",
+      "L2 citations: offline snapshot mode (always-on) + live weekly mode (auto-opens drift issues).",
+      "L3 semantic: sentence-transformers + LLM escalation (Ollama/Claude/OpenAI via JW_EVAL_LLM).",
+      "47 golden cases (25 L1 + 13 L2 + 9 L3) covering all major agents.",
+      "CLI `jw eval`, MCP tool `run_eval_suite`, 3 new CI jobs (fast/weekly/nightly).",
+    ],
+    pending: [
+      "Build the 12 wol.jw.org HTML snapshots via `build_eval_snapshots.py`.",
+      "Bot-comment of markdown report on PRs.",
+    ],
+    tests: 35,
+    commits: 20,
+    guideHref: "/en/docs/guias/eval-doctrinal",
+  },
+  {
+    number: 23,
+    tier: 1,
+    title: "Citation integrity validator",
+    tagline: "Telemetry's counterpart — output side",
+    description:
+      "jw_core.citations subpackage validates that every URL emitted by an agent resolves and preserves its docId↔pub_code mapping. Three modes: structural (offline), live (HTTP), drift (HTML fingerprint diff).",
+    whatWasDone: [
+      "Subpackage jw_core.citations with models + validator.",
+      "Structural mode: uses MepsCatalog to validate docId offline.",
+      "Live mode: httpx_fetcher with redirect handling + bounded concurrency.",
+      "Drift mode: HTML-skeleton hash (robust to content edits, sensitive to structural change).",
+      "CLI `jw citations check --urls/--agent-output [--live] [--drift]`.",
+      "MCP tool validate_citations.",
+    ],
+    pending: ["Auto-refresh snapshots from Phase 22 when drift detected."],
+    tests: 33,
+    commits: 12,
+    guideHref: "/en/docs/guias/citation-validator",
+  },
+  {
+    number: 24,
+    tier: 2,
+    title: 'Study conductor "Enjoy Life Forever"',
+    tagline: "Full lifecycle of the current study book",
+    description:
+      "The biggest gap in active discipleship today. Prepares each lesson with anticipated questions, suggests supporting verses, and tracks each student's progress (lessons completed, goals, attendance). Local-only, encrypted by passphrase.",
+    whatWasDone: [
+      "study_conductor.prepare_lesson agent (templated, no LLM).",
+      "StudentProgressStore: SQLite + FieldEncryptor-encrypted sensitive columns.",
+      "LessonRow/StudentGoal/GoalKind/LessonStatus models.",
+      "Controlled goal vocabulary (attend_meetings, baptism, drop_addiction_*, etc.).",
+      "CLI: `jw study lesson/log/progress/lessons/goals/directory`.",
+      "MCP tools: prepare_lesson, log_student_progress, list_student_lessons, set_student_goal.",
+      "Crisis-keyword scan warns without blocking; consent disclosure on first run.",
+    ],
+    pending: [
+      "Auto-extract real Q&A from the 'lff' JWPUB when locally available.",
+      "Optional reverse-sync with JW Library to mark lessons completed.",
+    ],
+    tests: 49,
+    commits: 20,
+    guideHref: "/en/docs/guias/conductor-de-estudio",
+  },
+  {
+    number: 25,
+    tier: 2,
+    title: "jw.org news monitor",
+    tagline: "Weekly/monthly digest of what's new",
+    description:
+      "Detects new publications, new JW Broadcasting videos, and new workbooks/Watchtower issues. Distinct from telemetry (which detects API drift): this watches published content.",
+    whatWasDone: [
+      "jw_core.news subpackage: SeenStore SQLite, 3 sources (publications/broadcasting/programs).",
+      "Seed pub_code list for periodicals + non-periodicals.",
+      "Markdown digest grouped by channel/language + JSON.",
+      "news_monitor agent + CLI `jw news digest`.",
+      "MCP tool news_digest.",
+    ],
+    pending: ["No shipped daemon (only recommended cron documented)."],
+    tests: 29,
+    commits: 13,
+    guideHref: "/en/docs/guias/monitor-de-novedades",
+  },
+  {
+    number: 26,
+    tier: 3,
+    title: "Life & Ministry student parts",
+    tagline: "Pedagogical script per assignment kind",
+    description:
+      "Four assignment kinds: bible reading, starting conversations, return visit, bible study demo. Each with its own script and hook to the month's oratory point.",
+    whatWasDone: [
+      "oratory_points registry: 50 points × 3 languages (paraphrased ≤120 char, copyright-safe CI guard).",
+      "48-slot templates: 4 kinds × 4 audiences × 3 languages.",
+      "student_part_helper agent (opening/body/transition/close + time_target_seconds).",
+      "CLI `jw student`, MCP tool student_part_help.",
+      "4 L1 golden cases.",
+    ],
+    pending: ["Configurable month → oratory-point offset.", "More audience×family templates."],
+    tests: 34,
+    commits: 12,
+    guideHref: "/en/docs/guias/partes-del-estudiante",
+  },
+  {
+    number: 27,
+    tier: 3,
+    title: "Monthly pioneer report",
+    tagline: "Pioneers only · encrypted by default",
+    description:
+      "Local-only aggregator of hours + active bible studies + return visits. For regular/auxiliary pioneers only. Encrypted by default; markdown/CSV/PDF outputs.",
+    whatWasDone: [
+      "jw_core.ministry: field_report (store + aggregator) + exporters.",
+      "Encrypted sensitive columns via FieldEncryptor; documented opt-out.",
+      "Active-studies rule: MAX during month (modern JW practice).",
+      "Read-only adapter over RevisitTracker.",
+      "CLI `jw report --month YYYY-MM --format md/csv/pdf`.",
+      "MCP tools: field_log_hours, field_log_study, field_monthly_report.",
+    ],
+    pending: ["Official S-13/S-301 export shape.", "12-month annual aggregate."],
+    tests: 22,
+    commits: 13,
+    guideHref: "/en/docs/guias/informe-precursor",
+  },
+  {
+    number: 28,
+    tier: 3,
+    title: "Exact NWT + publications concordance",
+    tagline: "Watchtower Library-style literal search",
+    description:
+      "Deterministic, complements the semantic RAG. SQLite FTS5 over the already-decrypted corpus. Diacritic-tolerant tokenizer for Spanish/Portuguese UX.",
+    whatWasDone: [
+      "jw_core.concordance: store, indexer, search.",
+      "FTS5 unicode61 remove_diacritics 2.",
+      "Three source kinds: nwt / jwpub / epub with per-channel URL resolution.",
+      "Incremental indexing by sha256.",
+      "Unicode ‹…› snippet markers (markdown-safe).",
+      "CLI `jw grep`. MCP tools concordance_build_index, concordance_search.",
+    ],
+    pending: ["`--build-nwt` whole-book mode.", "Eval adapter for golden cases."],
+    tests: 39,
+    commits: 11,
+    guideHref: "/en/docs/guias/concordancia-exacta",
+  },
+  {
+    number: 29,
+    tier: 4,
+    title: "Letter / phone / cart composer",
+    tagline: "3 unaddressed ministry modalities",
+    description:
+      "Personalized letter (120-180 words), phone script (~60-90s), cart-witnessing micro-script. Copyright-safe: scripture excerpt always empty, only Citation.url.",
+    whatWasDone: [
+      "letter_composer agent with 3 kinds.",
+      "7 audiences × 8 topic_families × 3 languages = 504 combos via 3-level fallback.",
+      "Enforced copyright safety + territory-hint isolation (both tested).",
+      "CLI `jw letter`, MCP tool compose_witnessing.",
+      "3 L1 golden cases.",
+    ],
+    pending: ["More specific templates.", "Offline jw_link suggestions via pub_media cache."],
+    tests: 543,
+    commits: 11,
+    guideHref: "/en/docs/guias/compositor-de-predicacion",
+  },
+  {
+    number: 30,
+    tier: 4,
+    title: "Kingdom songs companion",
+    tagline: "Metadata only · zero lyrics",
+    description:
+      "Hand-curated registry: number, title, theme (≤200 char paraphrase), cited scriptures, canonical URL. NEVER lyrics (copyright). Non-destructive integration with workbook_helper.",
+    whatWasDone: [
+      "Seed JSON E/S/T (12 songs each; 151 pending via PRs).",
+      "KingdomSong model + SongRegistry loader.",
+      "Anti-lyrics CI guard (200-char cap + banned tokens).",
+      "Non-destructive enrich_with_songs adapter (opt-in --with-songs).",
+      "Offline URL derivation with finder fallback.",
+      "CLI `jw song`. MCP tools lookup_song, songs_for_week.",
+    ],
+    pending: ["Expand 12 → 151 entries.", "doc_id per entry for deep URLs."],
+    tests: 20,
+    commits: 11,
+    guideHref: "/en/docs/guias/canticos-del-reino",
+  },
+  {
+    number: 31,
+    tier: 4,
+    title: "PDF / DOCX / Anki exporter",
+    tagline: "Any AgentResult → printable deliverable",
+    description:
+      "Convert any agent output into a printable study sheet (PDF/DOCX) or spaced-repetition Anki deck. Single IR (StudySheet) consumed by every exporter. Opt-in extras.",
+    whatWasDone: [
+      "jw_core.exporters: ir.py + markdown/pdf/docx/anki exporters.",
+      "Jinja2 templates with ~/.jw-agent-toolkit/templates/ override.",
+      "Stable Anki GUIDs sha256(title+heading+body[:200]); re-export updates without duplicating.",
+      "MissingDependencyError with pip hint.",
+      "CLI `jw export`. MCP tool export_study_sheet.",
+    ],
+    pending: ["CI matrix with [pdf] extras.", "Additional themes."],
+    tests: 54,
+    commits: 11,
+    guideHref: "/en/docs/guias/exportador-hoja-de-estudio",
+  },
+  {
+    number: 32,
+    tier: 4,
+    title: "Life topics informational assistant",
+    tagline: "Orientation with citations, not counsel",
+    description:
+      "For questions like 'What does the Bible say about anxiety/grief/marriage problems?'. Each response includes a disclaimer + elders redirect on sensitive topics. Never fabricates Bible quotes.",
+    whatWasDone: [
+      "life_topics registry: 9 topic_ids with aliases & sensitive/general families.",
+      "life_topics agent: topic_index → CDN search → preview + disclaimer + elders_redirect (sensitive).",
+      "Disclaimer text excludes medical-professional names (tested invariant).",
+      "Empty + disclaimer + redirect on no matches; never synthetic Bible quotes.",
+      "CLI `jw life`. MCP tool life_topic_info.",
+      "4 golden cases (2 L1 + 2 L3) for anxiety_es and grief_en.",
+    ],
+    pending: ["Expand 9 → 30+ topics.", "User-overridable disclaimer (keeping elders_redirect mandatory)."],
+    tests: 32,
+    commits: 12,
+    guideHref: "/en/docs/guias/temas-de-vida",
+  },
+];
+
+const tierMeta: Record<number, { label: string; color: string; description: string }> = {
+  1: {
+    label: "Tier 1 · Trust infrastructure",
+    color: "text-[var(--color-accent)] border-[var(--color-accent)]/40",
+    description: "Measures and protects everything else.",
+  },
+  2: {
+    label: "Tier 2 · Recurrent high value",
+    color: "text-[#f0b97a] border-[#f0b97a]/40",
+    description: "Weekly usage per publisher.",
+  },
+  3: {
+    label: "Tier 3 · Specialized but unique",
+    color: "text-[#a8c8ff] border-[#a8c8ff]/40",
+    description: "Fills pedagogical or reporting gaps.",
+  },
+  4: {
+    label: "Tier 4 · UX & niche layers",
+    color: "text-[var(--color-ink-secondary)] border-[var(--color-line)]",
+    description: "Closes the prep & conversion loop.",
+  },
+};
+
+const totalCommits = phases.reduce((acc, p) => acc + p.commits, 0);
+const totalTests = phases.reduce((acc, p) => acc + p.tests, 0);
+const tierGroups = [1, 2, 3, 4].map((t) => ({
+  meta: tierMeta[t],
+  phases: phases.filter((p) => p.tier === t),
+}));
+---
+
+<BaseLayout
+  title="What's new — Phases 22-32"
+  description="The 11 phases shipped on 2026-05-30: doctrinal eval, citation validator, study conductor, news monitor, student parts, pioneer report, concordance, witnessing composer, kingdom songs, exporter, life-topics assistant."
+>
+  <section class="grid-noise relative overflow-hidden border-b border-[var(--color-line-subtle)]">
+    <div class="mx-auto max-w-7xl px-4 pb-16 pt-16 sm:px-6 sm:pb-20 sm:pt-20 lg:pb-24 lg:pt-24">
+      <p class="rise rise-1 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        <span class="inline-block h-px w-8 bg-[var(--color-accent)]"></span>
+        <span>2026-05-30 · Release 22-32</span>
+      </p>
+      <h1 class="rise rise-2 mt-6 max-w-3xl text-balance font-display text-[clamp(1.85rem,6vw,3.8rem)] leading-[1.02]">
+        <span class="text-[var(--color-ink-primary)]">11 phases. </span>
+        <span class="text-[var(--color-accent)]">A complete ecosystem</span>
+        <span class="text-[var(--color-ink-primary)]"> for discipleship and trust.</span>
+      </h1>
+      <p class="rise rise-3 mt-6 max-w-2xl text-[17px] leading-relaxed text-[var(--color-ink-secondary)]">
+        Phases 22–32 close the <em class="text-[var(--color-ink-primary)]">active-discipleship</em> loop
+        (study conductor, student parts, pioneer report) and the
+        <em class="text-[var(--color-ink-primary)]">trust infrastructure</em>
+        (doctrinal eval + citation validator) that measures every change. No LLM in the critical path,
+        no network in tests, citations always verifiable.
+      </p>
+
+      <div class="rise rise-4 mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Phases shipped</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">11</p>
+          <p class="mt-1 text-[12px] text-[var(--color-ink-secondary)]">22 → 32</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">TDD commits</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-accent)]">{totalCommits}</p>
+          <p class="mt-1 text-[12px] text-[var(--color-ink-secondary)]">red → green → commit</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">New tests</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">+{totalTests}</p>
+          <p class="mt-1 text-[12px] text-[var(--color-ink-secondary)]">551 → 1641 passing</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Regressions</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">0</p>
+          <p class="mt-1 text-[12px] text-[var(--color-ink-secondary)]">1:1 audit per phase</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="border-b border-[var(--color-line-subtle)] bg-[var(--color-surface-1)]">
+    <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ Hard rules respected across all 11 phases
+      </h2>
+      <ul class="mt-6 grid gap-x-10 gap-y-3 text-[14px] text-[var(--color-ink-secondary)] sm:grid-cols-2">
+        <li><span class="text-[var(--color-accent)]">→</span> No LLM in the critical path — deterministic parsers/agents/stores.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Citations always verifiable via canonical wol.jw.org URLs.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Local-first; all personal storage in <code>~/.jw-agent-toolkit/</code>.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> No network in tests — fixtures + cassettes + injectable fetchers.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Multilingual from day 1 (en/es/pt minimum, up to 17 locales).</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Doesn't replace the word of the elders — agents orient, never counsel.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> No tracking of brothers without explicit opt-in + E2E encryption.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> No distribution of song lyrics or Bible text (copyright).</li>
+      </ul>
+    </div>
+  </section>
+
+  {tierGroups.map((group) => (
+    <section class="border-b border-[var(--color-line-subtle)]">
+      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <div class={`mb-10 flex flex-wrap items-baseline gap-x-6 gap-y-2 border-l-2 pl-4 ${group.meta.color}`}>
+          <h2 class="font-mono text-[12px] uppercase tracking-[0.2em]">{group.meta.label}</h2>
+          <p class="text-[14px] text-[var(--color-ink-secondary)]">{group.meta.description}</p>
+        </div>
+        <div class="space-y-12">
+          {group.phases.map((phase) => (
+            <article class="grid gap-8 border-t border-[var(--color-line-subtle)] pt-10 lg:grid-cols-[280px_1fr]">
+              <header class="space-y-3">
+                <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">
+                  Phase {phase.number}
+                </p>
+                <h3 class="font-display text-[26px] leading-tight text-[var(--color-ink-primary)]">
+                  {phase.title}
+                </h3>
+                <p class="text-[14px] italic text-[var(--color-accent)]">{phase.tagline}</p>
+                <div class="flex flex-wrap gap-3 pt-2 font-mono text-[11px] text-[var(--color-ink-tertiary)]">
+                  <span class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-2)] px-2 py-1">
+                    +{phase.tests} tests
+                  </span>
+                  <span class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-2)] px-2 py-1">
+                    {phase.commits} commits
+                  </span>
+                  <span class="rounded-sm border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 px-2 py-1 text-[var(--color-accent)]">
+                    ✓ Shipped
+                  </span>
+                </div>
+                {phase.guideHref && (
+                  <a
+                    href={phase.guideHref}
+                    class="mt-3 inline-flex items-center gap-1.5 font-mono text-[12px] text-[var(--color-accent)] no-underline hover:underline"
+                  >
+                    Guide →
+                  </a>
+                )}
+              </header>
+              <div class="space-y-6">
+                <p class="text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">{phase.description}</p>
+                <div>
+                  <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+                    What shipped
+                  </p>
+                  <ul class="mt-3 space-y-1.5 text-[14px] leading-relaxed text-[var(--color-ink-primary)]">
+                    {phase.whatWasDone.map((item) => (
+                      <li class="flex gap-2">
+                        <span class="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-[var(--color-accent)]"></span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                {phase.pending.length > 0 && (
+                  <div>
+                    <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-[#f0b97a]">
+                      Pending / next PR
+                    </p>
+                    <ul class="mt-3 space-y-1.5 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+                      {phase.pending.map((item) => (
+                        <li class="flex gap-2">
+                          <span class="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-[#f0b97a]"></span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <section class="bg-[var(--color-surface-1)]">
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ Process · how the 11 phases were built
+      </h2>
+      <div class="mt-6 grid gap-6 lg:grid-cols-3">
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-base)] p-6">
+          <p class="font-display text-[20px] text-[var(--color-ink-primary)]">1. Brainstorming</p>
+          <p class="mt-3 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+            Before touching code, each phase went through a structured session: oracle, judge, scope, plus 2–3 approaches with tradeoffs.
+          </p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-base)] p-6">
+          <p class="font-display text-[20px] text-[var(--color-ink-primary)]">2. Spec + Plan</p>
+          <p class="mt-3 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+            Every phase has an approved <code>spec-design.md</code> and a bite-sized <code>plan.md</code>
+            (2-5 min tasks with exact code). All committed under <code>docs/superpowers/</code>.
+          </p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-base)] p-6">
+          <p class="font-display text-[20px] text-[var(--color-ink-primary)]">3. Strict TDD</p>
+          <p class="mt-3 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+            Each task: <span class="text-[#f47878]">red</span> → <span class="text-[#86efac]">green</span> → <span class="text-[var(--color-accent)]">commit</span>.
+            154 tasks executed. Failing test observed before each impl. Zero exceptions.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ Next steps
+      </h2>
+      <div class="mt-6 grid gap-6 lg:grid-cols-2">
+        <div>
+          <p class="font-display text-[22px] text-[var(--color-ink-primary)]">Operational</p>
+          <ul class="mt-3 space-y-2 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+            <li>– Build HTML snapshots for Phase 22 (offline CI).</li>
+            <li>– Publish jw-eval to PyPI when stabilized.</li>
+            <li>– CI matrix with [pdf]/[docx]/[anki] extras installed.</li>
+            <li>– PR bot-comment of eval report.</li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-display text-[22px] text-[var(--color-ink-primary)]">Content</p>
+          <ul class="mt-3 space-y-2 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+            <li>– Expand Kingdom songs from 12 → 151 entries.</li>
+            <li>– More topics in life_topics (9 → 30+).</li>
+            <li>– Auto-extract real Q&A for study_conductor.</li>
+            <li>– More golden cases (policy: each PR adds ≥3).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mt-12 flex flex-wrap gap-4">
+        <a
+          href="/en/docs/roadmap"
+          class="inline-flex items-center gap-2 rounded-sm bg-[var(--color-accent)] px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-surface-base)] no-underline transition-opacity hover:opacity-90"
+        >
+          Full roadmap →
+        </a>
+        <a
+          href="/en/docs/vision_audit"
+          class="inline-flex items-center gap-2 rounded-sm border border-[var(--color-line)] bg-transparent px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-ink-primary)] no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+        >
+          Vision audit 1:1 →
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

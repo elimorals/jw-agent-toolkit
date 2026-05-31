@@ -394,6 +394,72 @@ jw-finetune export gguf \\
     referenceHref: "/docs/guias/fine-tuning-local",
     guideHref: "/docs/guias/fine-tuning-local",
   },
+  {
+    slug: "jw-eval",
+    name: "jw-eval",
+    tagline: "Red de seguridad doctrinal",
+    color: "amber",
+    short:
+      "Suite de evaluación con regresión: 3 capas (estructural, citas, semántico) que gating cada PR contra 47 golden Q&A. Convierte 'confío en mí' en métrica.",
+    about:
+      "Construido en la Fase 22 — la última en ser implementada porque sirve para medir todas las demás. Tres capas independientes: L1 verifica el contrato estructural de cada agente (sin red, sin LLM, bloqueante en CI); L2 valida que cada URL emitida resuelva y respalde su afirmación (snapshot offline + live weekly); L3 compara la respuesta del agente contra una respuesta dorada via sentence-transformers + escalada a Ollama/Claude cuando el score cae en zona ambigua (0.55–0.78). Cada nueva fase debe añadir ≥3 golden cases al merge.",
+    highlights: [
+      "47 golden cases · 6 agentes",
+      "L1 estructural · L2 citas · L3 semántico",
+      "Embeddings + LLM judge híbrido",
+      "Snapshots offline en CI · live weekly",
+    ],
+    features: [
+      {
+        title: "Capa 1 — Estructural",
+        body: "Verifica que cada agente devuelva la forma esperada: tipos de fuente (topic_index, verse_text, etc.), número mínimo de findings, orden de prioridad, presencia de citation_metadata, keywords prohibidas. 100% determinista, sin red, sin LLM. Bloquea CI si <100%.",
+      },
+      {
+        title: "Capa 2 — Citas",
+        body: "Modo snapshot (siempre activo): HTML congelado en fixtures/wol_snapshots/ valida que las URLs producidas existan y contengan el texto que sustenta la cita. Modo live (cron weekly): re-descarga, compara fingerprint y abre issues de drift automáticamente.",
+      },
+      {
+        title: "Capa 3 — Semántico",
+        body: "sentence-transformers (paraphrase-multilingual-MiniLM-L12-v2) calcula cosine entre la respuesta del agente y la respuesta dorada. Threshold 0.78 pasa, <0.55 falla, en medio escala a LLM judge (Ollama default / Claude / OpenAI vía env JW_EVAL_LLM).",
+      },
+      {
+        title: "47 Golden Cases",
+        body: "25 L1 + 13 L2 + 9 L3 cubriendo apologetics, verse_explainer, research_topic, meeting_helper, conversation_assistant, life_topics, study_conductor, news_monitor, student_part_helper, letter_composer. Política: cada nueva fase añade ≥3 al merge.",
+      },
+      {
+        title: "Integración CI",
+        body: "Tres jobs nuevos: eval-fast (L1+L2 offline, bloquea PRs), eval-l2-live (weekly cron, abre issues de drift), eval-nightly (L1+L2+L3 con Ollama, no bloquea). Reporte markdown + JSON; tool MCP run_eval_suite expuesto para clientes externos.",
+      },
+    ],
+    install: "uv sync --package jw-eval",
+    usage: {
+      language: "bash",
+      caption: "Correr la suite localmente y filtrar por agente.",
+      code: `# L1+L2 offline (rápido, bloqueante en CI)
+uv run jw eval --layer 1,2
+
+# L1+L2+L3 con LLM judge Ollama
+JW_EVAL_LLM=ollama uv run jw eval --layer 1,2,3
+
+# Filtrar por agente
+uv run jw eval --filter-agent apologetics
+
+# Modo live (red real)
+uv run jw eval --layer 2 --live
+
+# Reporte a archivo
+uv run jw eval --report md --out report.md`,
+    },
+    dependsOn: ["jw-core", "jw-rag", "jw-agents"],
+    exports: [
+      "Suite · GoldenCase · LayerResult · SuiteReport",
+      "evaluate_structural · evaluate_citations · evaluate_semantic",
+      "EmbeddingsJudge · LLMJudge (Ollama/Claude/OpenAI)",
+      "47 golden cases (L1+L2+L3) · 6 agentes",
+    ],
+    referenceHref: "/docs/guias/eval-doctrinal",
+    guideHref: "/docs/guias/eval-doctrinal",
+  },
 ];
 
 export const packageBySlug = (slug: string): PackageInfo | undefined =>

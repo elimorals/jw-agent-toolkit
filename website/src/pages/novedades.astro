@@ -1,0 +1,548 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+interface Phase {
+  number: number;
+  tier: 1 | 2 | 3 | 4;
+  title: string;
+  tagline: string;
+  description: string;
+  whatWasDone: string[];
+  pending: string[];
+  tests: number;
+  commits: number;
+  guideHref?: string;
+  status: "shipped";
+}
+
+const phases: Phase[] = [
+  {
+    number: 22,
+    tier: 1,
+    title: "Eval doctrinal con regresión",
+    tagline: "Red de seguridad que mide cada cambio",
+    description:
+      "Suite de tres capas (estructural · citas · semántico) con 47 golden cases. Convierte el riesgo de alucinación doctrinal en métrica auditable que bloquea PRs. Es la pieza que protege a las otras 10.",
+    whatWasDone: [
+      "Paquete nuevo packages/jw-eval con Suite + GoldenCase + LayerResult.",
+      "L1 estructural: contract regression sobre 6 agentes — sin red, sin LLM, bloqueante en CI.",
+      "L2 citas: modo snapshot offline (siempre activo) + modo live weekly (abre issues de drift).",
+      "L3 semántico: embeddings (sentence-transformers) + escalada LLM (Ollama/Claude/OpenAI vía JW_EVAL_LLM).",
+      "47 golden cases (25 L1 + 13 L2 + 9 L3) cubriendo apologetics, verse_explainer, study_conductor, life_topics y más.",
+      "CLI `jw eval`, herramienta MCP `run_eval_suite`, 3 jobs CI nuevos (fast / weekly / nightly).",
+    ],
+    pending: [
+      "Construir los 12 snapshots HTML de wol.jw.org con `build_eval_snapshots.py` (requiere red).",
+      "Bot-comment de reporte markdown en PRs (existe el artifact; falta el comment hook).",
+    ],
+    tests: 35,
+    commits: 20,
+    guideHref: "/docs/guias/eval-doctrinal",
+    status: "shipped",
+  },
+  {
+    number: 23,
+    tier: 1,
+    title: "Citation integrity validator",
+    tagline: "Contraparte de la telemetría — lado salida",
+    description:
+      "Subpaquete jw_core.citations que valida que cada URL emitida por un agente resuelva y mantenga su mapeo docId↔pub_code. Tres modos: estructural (offline), live (HTTP real), drift (compara fingerprint HTML).",
+    whatWasDone: [
+      "Subpaquete jw_core.citations: models.py (CitationCheck/CitationReport), validator.py.",
+      "Modo estructural: usa MepsCatalog para validar docId sin red.",
+      "Modo live: httpx_fetcher con redirect handling (hasta 3) + asyncio.Semaphore(4).",
+      "Modo drift: hash de HTML-skeleton para detectar cambios estructurales sin falsos positivos por contenido.",
+      "CLI `jw citations check --urls/--agent-output [--live] [--drift]`.",
+      "Herramienta MCP validate_citations con tres modos.",
+    ],
+    pending: [
+      "Reuso automático de snapshots con Fase 22 para refresh de fixtures cuando se detecta drift.",
+    ],
+    tests: 33,
+    commits: 12,
+    guideHref: "/docs/guias/citation-validator",
+    status: "shipped",
+  },
+  {
+    number: 24,
+    tier: 2,
+    title: 'Conductor "Disfruta de la vida para siempre"',
+    tagline: "Lifecycle completo del libro de estudio actual",
+    description:
+      "El hueco más grande del discipulado actual. Prepara cada lección con preguntas anticipadas, sugiere versículos de apoyo y mantiene el progreso de cada estudiante (lecciones completadas, metas, asistencia). Local-only, cifrado por passphrase, en línea con la postura de privacidad del proyecto.",
+    whatWasDone: [
+      "Agente study_conductor.prepare_lesson (templated, sin LLM).",
+      "Store StudentProgressStore: SQLite local + columnas sensibles cifradas con FieldEncryptor.",
+      "Modelos LessonRow/StudentGoal/GoalKind/LessonStatus.",
+      "Vocabulario controlado de metas (attend_meetings, baptism, drop_addiction_*, family_worship, pray_daily).",
+      "CLI: `jw study lesson/log/progress/lessons/goals/directory`.",
+      "Tools MCP: prepare_lesson, log_student_progress, list_student_lessons, set_student_goal.",
+      "Crisis-keyword scan emite warning sin bloquear (la nota se guarda igual).",
+      "Disclosure de privacidad + consent en first-run de CLI.",
+    ],
+    pending: [
+      "Auto-extracción de Q&A reales desde el libro 'lff' cuando esté disponible en JWPUB local (hoy templates).",
+      "Sync inverso opcional con JW Library para marcar lecciones completadas en la app.",
+    ],
+    tests: 49,
+    commits: 20,
+    guideHref: "/docs/guias/conductor-de-estudio",
+    status: "shipped",
+  },
+  {
+    number: 25,
+    tier: 2,
+    title: "Monitor de novedades jw.org",
+    tagline: "Digest semanal/mensual de lo nuevo",
+    description:
+      "Detecta nuevas publicaciones, nuevos videos de JW Broadcasting y nuevos workbooks/Atalayas. Distinto de la telemetría (que detecta drift de la API): este vigila contenido publicado. Diff incremental con seen-store local.",
+    whatWasDone: [
+      "Subpaquete jw_core.news: SeenStore SQLite, 3 sources (publications/broadcasting/programs).",
+      "Seed pub_code list para periódicos + non-periodicals.",
+      "ProgramsSource probe ventana +2 meses para no perder workbooks que se publican antes de fin de mes.",
+      "Digest markdown agrupado por canal/idioma + JSON.",
+      "Agente news_monitor wrapper para MCP/CLI surfaces.",
+      "CLI `jw news digest --since=... --languages=... --channels=...`.",
+      "Tool MCP news_digest.",
+    ],
+    pending: [
+      "Daemon/scheduler shipped (hoy solo doc del cron recomendado).",
+      "Retired items: hoy se loguean; podrían disparar notifs opt-in.",
+    ],
+    tests: 29,
+    commits: 13,
+    guideHref: "/docs/guias/monitor-de-novedades",
+    status: "shipped",
+  },
+  {
+    number: 26,
+    tier: 3,
+    title: "Partes del estudiante (Vida y Ministerio)",
+    tagline: "Guion pedagógico por tipo de asignación",
+    description:
+      "Cuatro tipos de asignación del aula auxiliar: lectura de la Biblia, empezar conversaciones, revisita, demostración de estudio bíblico. Cada uno con su guion y enganche al punto de oratoria del mes. Distinto del generador de discursos públicos.",
+    whatWasDone: [
+      "Registro oratory_points: 50 puntos × 3 idiomas (paráfrasis ≤120 char con CI guard de copyright).",
+      "Templates 48 slots: 4 kinds × 4 audiences × 3 lenguajes.",
+      "Agente student_part_helper con secciones opening/body/transition/close + time_target_seconds + oratory_point_applied.",
+      "'this week' mode: opt-in lazy import de workbook_helper con soft-fail.",
+      "CLI `jw student`, MCP tool student_part_help.",
+      "4 golden cases L1 (bible_reading es / starting_conversation en / return_visit pt / bible_study es).",
+    ],
+    pending: [
+      "Mapeo mes → punto de oratoria configurable (hoy fijo 1→1, 2→5, …).",
+      "Templates específicos adicionales para más combinaciones audience×family.",
+    ],
+    tests: 34,
+    commits: 12,
+    guideHref: "/docs/guias/partes-del-estudiante",
+    status: "shipped",
+  },
+  {
+    number: 27,
+    tier: 3,
+    title: "Informe mensual de precursor",
+    tagline: "Solo precursores · cifrado por defecto",
+    description:
+      "Agregador local-only de horas + cursos bíblicos activos + revisitas. Para precursores regulares y auxiliares — los publicadores reportan solo participación, fuera de scope. Cifrado por passphrase por defecto; salida markdown/CSV/PDF opt-in.",
+    whatWasDone: [
+      "Subpaquete jw_core.ministry: field_report (store + aggregator) + exporters (md/csv/pdf).",
+      "Cifrado de columnas sensibles (note, student_id) por FieldEncryptor; opt-out documentado.",
+      "Vocabulario de tags + override local en field_service_tags_local.json.",
+      "Cursos activos: regla MAX-durante-el-mes (práctica JW moderna), documentada en el footer del reporte.",
+      "Revisits adapter: read-only sobre RevisitTracker (Fase 12), nunca escribe.",
+      "CLI `jw report --month YYYY-MM --format md/csv/pdf`.",
+      "Tools MCP: field_log_hours, field_log_study, field_monthly_report.",
+      "PDF via weasyprint + jinja2 como extra [pdf] (skip cleanly cuando no instalado).",
+    ],
+    pending: [
+      "Exportar a S-13/S-301 oficial (estructura, no formato).",
+      "Reporte anual agregado (12 meses).",
+    ],
+    tests: 22,
+    commits: 13,
+    guideHref: "/docs/guias/informe-precursor",
+    status: "shipped",
+  },
+  {
+    number: 28,
+    tier: 3,
+    title: "Concordancia exacta NWT + publicaciones",
+    tagline: "Búsqueda literal estilo Watchtower Library",
+    description:
+      "Determinístico, complementa el RAG semántico. SQLite FTS5 sobre el corpus ya descifrado (NWT + JWPUB + EPUB). Búsqueda literal con tokenizer unicode61 remove_diacritics 2 (UX hispano).",
+    whatWasDone: [
+      "Subpaquete jw_core.concordance: store, indexer, search, models.",
+      "FTS5 con unicode61 remove_diacritics 2 (Espíritu ≈ espiritu).",
+      "Tres source kinds: nwt / jwpub / epub con URL resolution por canal.",
+      "Indexación incremental por sha256 (re-runs skip unchanged).",
+      "Snippet markers Unicode ‹…› (markdown-safe, html-safe, CLI-readable).",
+      "CLI `jw grep <query> [--lang] [--kind] [--build-index] [--build-nwt]`.",
+      "Tools MCP: concordance_build_index, concordance_search.",
+      "Tests property-based con corpora aleatorios de 50 versículos.",
+    ],
+    pending: [
+      "`--build-nwt` por libro entero (hoy capítulo-a-capítulo).",
+      "Wiring del adapter concordance_search en jw-eval para golden cases.",
+    ],
+    tests: 39,
+    commits: 11,
+    guideHref: "/docs/guias/concordancia-exacta",
+    status: "shipped",
+  },
+  {
+    number: 29,
+    tier: 4,
+    title: "Compositor de carta / teléfono / carrito",
+    tagline: "3 modalidades ministeriales no cubiertas",
+    description:
+      "Carta personalizada (120-180 palabras, pensamiento bíblico + versículo + link jw.org), guion telefónico (~60-90s), micro-script de carrito (1 opener + 2 réplicas + invitación). Templates por audiencia × topic_family. Copyright-safe: scripture.excerpt = '' siempre.",
+    whatWasDone: [
+      "Agente letter_composer con tres kinds (letter/phone/cart).",
+      "7 audiences × 8 topic_families × 3 idiomas — 504 combinaciones cubiertas vía fallback de 3 niveles.",
+      "Copyright safety: scripture Finding nunca lleva texto bíblico, solo Citation.url a wol.jw.org. Test enforced.",
+      "Territory hint cosmético: insertado en opener prefix, nunca filtra contenido. Test enforced.",
+      "CLI `jw letter --kind --topic --language --audience [--territory-hint]`.",
+      "Tool MCP compose_witnessing.",
+      "3 golden cases L1 (letter/phone/cart).",
+    ],
+    pending: [
+      "Templates específicos adicionales (hoy 30 hand-written + fallback).",
+      "Modo offline para sugerencias de jw_link via pub_media cache.",
+    ],
+    tests: 543,
+    commits: 11,
+    guideHref: "/docs/guias/compositor-de-predicacion",
+    status: "shipped",
+  },
+  {
+    number: 30,
+    tier: 4,
+    title: "Compañero de cánticos del Reino",
+    tagline: "Solo metadata · cero letra",
+    description:
+      "Registro hand-curated de cánticos: número, título, tema (paráfrasis ≤200 char), scriptures citadas, URL canónica. NUNCA letra (copyright). Integración no-destructiva con workbook_helper.",
+    whatWasDone: [
+      "Seed JSON E/S/T con 12 cánticos cada uno (151 totales pendientes vía PRs).",
+      "Modelo KingdomSong + SongLookupError.",
+      "SongRegistry loader con cache por idioma.",
+      "Anti-lyrics CI guard: cap 200 char + tokens prohibidos (verse, chorus, estrofa, refrão, ©).",
+      "Adapter enrich_with_songs no-destructivo sobre workbook_helper (opt-in vía --with-songs).",
+      "URL derivation offline: fallback a https://www.jw.org/finder?wtlocale=X&pub=sjj cuando no hay docid.",
+      "CLI `jw song <number> [--lang]`.",
+      "Tools MCP: lookup_song, songs_for_week.",
+    ],
+    pending: [
+      "Expandir seed de 12 → 151 cánticos completos (PRs incrementales).",
+      "doc_id por entrada para deep URLs (hoy mayoría usa finder fallback).",
+    ],
+    tests: 20,
+    commits: 11,
+    guideHref: "/docs/guias/canticos-del-reino",
+    status: "shipped",
+  },
+  {
+    number: 31,
+    tier: 4,
+    title: "Exportador PDF / DOCX / Anki",
+    tagline: "Cualquier AgentResult → entregable",
+    description:
+      "Convierte el output de cualquier agente en hoja imprimible (PDF/DOCX) o mazo de repaso espaciado (Anki). IR única (StudySheet) — todos los exporters consumen lo mismo. Extras opt-in: [pdf], [docx], [anki].",
+    whatWasDone: [
+      "Subpaquete jw_core.exporters: ir.py (StudySheet Pydantic + from_agent_result).",
+      "Exporters: markdown (siempre) · pdf (weasyprint) · docx (python-docx) · apkg (genanki).",
+      "Templates Jinja2 con override en ~/.jw-agent-toolkit/templates/ (auto-detected).",
+      "2 themes built-in: plain · study-sheet.",
+      "Anki GUIDs estables: sha256(title + heading + body[:200]). Re-export actualiza, no duplica.",
+      "MissingDependencyError con pip hint copy-pasteable cuando falta extra.",
+      "CLI `jw export --format md/pdf/docx/apkg --out PATH`.",
+      "Tool MCP export_study_sheet.",
+      "3 citation styles: inline-paren / footnote (default) / bibliography.",
+    ],
+    pending: [
+      "CI matrix con [pdf] instalado para cazar regresiones de weasyprint.",
+      "Themes adicionales (high-contrast, dyslexia-friendly).",
+    ],
+    tests: 54,
+    commits: 11,
+    guideHref: "/docs/guias/exportador-hoja-de-estudio",
+    status: "shipped",
+  },
+  {
+    number: 32,
+    tier: 4,
+    title: "Asistente informativo de temas de vida",
+    tagline: "Orientación con citas, no consejería",
+    description:
+      "Para preguntas como '¿Qué dice la Biblia sobre la ansiedad/el duelo/los problemas matrimoniales?'. Framing distinto del de objeciones: el usuario pregunta para sí. Cada respuesta incluye disclaimer + redirect a ancianos cuando el tema es sensible.",
+    whatWasDone: [
+      "Subpaquete jw_core.data.life_topics (registry + aliases + family sensitive/general).",
+      "9 topic_ids iniciales: anxiety, grief, marriage_conflict, parenting, depression_signs, loneliness, addictions, conflict_with_brother, doubts_in_faith.",
+      "Agente life_topics con pipeline: topic_index → CDN search → preview Finding + URL + disclaimer + elders_redirect (sensitive only).",
+      "Disclaimer text NO menciona terapeutas/psicólogos/médicos — invariante de datos, tested.",
+      "Agente NUNCA fabrica citas bíblicas; sin matches devuelve empty + disclaimer + redirect.",
+      "CLI `jw life <topic> --language`.",
+      "Tool MCP life_topic_info.",
+      "4 golden cases (2 L1 + 2 L3) para anxiety_es y grief_en.",
+    ],
+    pending: [
+      "Expandir registry de 9 → 30+ topics.",
+      "Permitir override del disclaimer a nivel personalizado (manteniendo elders_redirect obligatorio para sensibles).",
+    ],
+    tests: 32,
+    commits: 12,
+    guideHref: "/docs/guias/temas-de-vida",
+    status: "shipped",
+  },
+];
+
+const tierMeta: Record<number, { label: string; color: string; description: string }> = {
+  1: {
+    label: "Tier 1 · Infraestructura de confianza",
+    color: "text-[var(--color-accent)] border-[var(--color-accent)]/40",
+    description: "Mide y protege todo lo demás.",
+  },
+  2: {
+    label: "Tier 2 · Alto valor recurrente",
+    color: "text-[#f0b97a] border-[#f0b97a]/40",
+    description: "Uso semanal por publicador.",
+  },
+  3: {
+    label: "Tier 3 · Especializado pero único",
+    color: "text-[#a8c8ff] border-[#a8c8ff]/40",
+    description: "Llena huecos pedagógicos o de informe.",
+  },
+  4: {
+    label: "Tier 4 · Capas de UX y nicho",
+    color: "text-[var(--color-ink-secondary)] border-[var(--color-line)]",
+    description: "Cierran el círculo de preparación y conversión.",
+  },
+};
+
+const totalCommits = phases.reduce((acc, p) => acc + p.commits, 0);
+const totalTests = phases.reduce((acc, p) => acc + p.tests, 0);
+const tierGroups = [1, 2, 3, 4].map((t) => ({
+  meta: tierMeta[t],
+  phases: phases.filter((p) => p.tier === t),
+}));
+---
+
+<BaseLayout
+  title="Novedades — Fases 22-32"
+  description="Las 11 fases entregadas en 2026-05-30: red de seguridad doctrinal, conductor de estudio, monitor de novedades, partes del estudiante, informe de precursor, concordancia exacta, compositor de predicación, cánticos, exportador, asistente de temas de vida."
+>
+  <!-- ───────────────────────────── Hero ───────────────────────────── -->
+  <section class="grid-noise relative overflow-hidden border-b border-[var(--color-line-subtle)]">
+    <div class="mx-auto max-w-7xl px-4 pb-16 pt-16 sm:px-6 sm:pb-20 sm:pt-20 lg:pb-24 lg:pt-24">
+      <p class="rise rise-1 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        <span class="inline-block h-px w-8 bg-[var(--color-accent)]"></span>
+        <span>2026-05-30 · Release 22-32</span>
+      </p>
+      <h1 class="rise rise-2 mt-6 max-w-3xl text-balance font-display text-[clamp(1.85rem,6vw,3.8rem)] leading-[1.02]">
+        <span class="text-[var(--color-ink-primary)]">11 fases. </span>
+        <span class="text-[var(--color-accent)]">Un ecosistema completo</span>
+        <span class="text-[var(--color-ink-primary)]"> de discipulado y confianza.</span>
+      </h1>
+      <p class="rise rise-3 mt-6 max-w-2xl text-[17px] leading-relaxed text-[var(--color-ink-secondary)]">
+        Las Fases 22–32 cierran el ciclo de <em class="text-[var(--color-ink-primary)]">discipulado activo</em>
+        (conductor de estudio, partes del estudiante, informe de precursor) y la
+        <em class="text-[var(--color-ink-primary)]">infraestructura de confianza</em>
+        (eval doctrinal + citation validator) que mide cada cambio. Sin LLM en el camino crítico,
+        sin red en tests, citas siempre verificables.
+      </p>
+
+      <div class="rise rise-4 mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Fases entregadas</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">11</p>
+          <p class="mt-1 text-[12px] text-[var(--color-ink-secondary)]">22 → 32</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Commits TDD</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-accent)]">{totalCommits}</p>
+          <p class="mt-1 text-[12px] text-[var(--color-ink-secondary)]">red → green → commit</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Tests nuevos</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">+{totalTests}</p>
+          <p class="mt-1 text-[12px] text-[var(--color-ink-secondary)]">551 → 1641 passing</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Regresiones</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">0</p>
+          <p class="mt-1 text-[12px] text-[var(--color-ink-secondary)]">audit 1:1 por fase</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────── Principios ───────────────────────────── -->
+  <section class="border-b border-[var(--color-line-subtle)] bg-[var(--color-surface-1)]">
+    <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ Reglas duras respetadas por las 11 fases
+      </h2>
+      <ul class="mt-6 grid gap-x-10 gap-y-3 text-[14px] text-[var(--color-ink-secondary)] sm:grid-cols-2">
+        <li><span class="text-[var(--color-accent)]">→</span> Sin LLM en el camino crítico — parsers/agentes/stores determinísticos.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Citas siempre verificables con URL canónica a wol.jw.org.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Local-first; toda persistencia personal en <code>~/.jw-agent-toolkit/</code>.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Sin red en tests — fixtures + cassettes + injectable fetchers.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Multilenguaje desde el día 1 (en/es/pt mínimo, hasta 17 locales).</li>
+        <li><span class="text-[var(--color-accent)]">→</span> No sustituye la palabra de los ancianos — los agentes orientan, no aconsejan.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Sin tracker de hermanos sin opt-in explícito + cifrado E2E.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Sin distribuir letras de cánticos ni texto bíblico (copyright).</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────── Tiers + Fases ───────────────────────────── -->
+  {tierGroups.map((group) => (
+    <section class="border-b border-[var(--color-line-subtle)]">
+      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <div class={`mb-10 flex flex-wrap items-baseline gap-x-6 gap-y-2 border-l-2 pl-4 ${group.meta.color}`}>
+          <h2 class="font-mono text-[12px] uppercase tracking-[0.2em]">{group.meta.label}</h2>
+          <p class="text-[14px] text-[var(--color-ink-secondary)]">{group.meta.description}</p>
+        </div>
+        <div class="space-y-12">
+          {group.phases.map((phase) => (
+            <article class="grid gap-8 border-t border-[var(--color-line-subtle)] pt-10 lg:grid-cols-[280px_1fr]">
+              <header class="space-y-3">
+                <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">
+                  Fase {phase.number}
+                </p>
+                <h3 class="font-display text-[26px] leading-tight text-[var(--color-ink-primary)]">
+                  {phase.title}
+                </h3>
+                <p class="text-[14px] italic text-[var(--color-accent)]">{phase.tagline}</p>
+                <div class="flex flex-wrap gap-3 pt-2 font-mono text-[11px] text-[var(--color-ink-tertiary)]">
+                  <span class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-2)] px-2 py-1">
+                    +{phase.tests} tests
+                  </span>
+                  <span class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-2)] px-2 py-1">
+                    {phase.commits} commits
+                  </span>
+                  <span class="rounded-sm border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 px-2 py-1 text-[var(--color-accent)]">
+                    ✓ Shipped
+                  </span>
+                </div>
+                {phase.guideHref && (
+                  <a
+                    href={phase.guideHref}
+                    class="mt-3 inline-flex items-center gap-1.5 font-mono text-[12px] text-[var(--color-accent)] no-underline hover:underline"
+                  >
+                    Guía →
+                  </a>
+                )}
+              </header>
+              <div class="space-y-6">
+                <p class="text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">{phase.description}</p>
+                <div>
+                  <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+                    Qué se entregó
+                  </p>
+                  <ul class="mt-3 space-y-1.5 text-[14px] leading-relaxed text-[var(--color-ink-primary)]">
+                    {phase.whatWasDone.map((item) => (
+                      <li class="flex gap-2">
+                        <span class="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-[var(--color-accent)]"></span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                {phase.pending.length > 0 && (
+                  <div>
+                    <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-[#f0b97a]">
+                      Pendiente / siguiente PR
+                    </p>
+                    <ul class="mt-3 space-y-1.5 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+                      {phase.pending.map((item) => (
+                        <li class="flex gap-2">
+                          <span class="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-[#f0b97a]"></span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <!-- ───────────────────────────── Cómo se construyeron ───────────────────────────── -->
+  <section class="bg-[var(--color-surface-1)]">
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ Proceso · cómo se ejecutaron las 11 fases
+      </h2>
+      <div class="mt-6 grid gap-6 lg:grid-cols-3">
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-base)] p-6">
+          <p class="font-display text-[20px] text-[var(--color-ink-primary)]">1. Brainstorming</p>
+          <p class="mt-3 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+            Antes de tocar código, cada fase pasó por una sesión estructurada de preguntas (oráculo, juez, scope) y propuesta de 2-3 enfoques con tradeoffs.
+          </p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-base)] p-6">
+          <p class="font-display text-[20px] text-[var(--color-ink-primary)]">2. Spec + Plan</p>
+          <p class="mt-3 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+            Cada fase tiene su <code>spec-design.md</code> aprobado y su <code>plan.md</code> bite-sized
+            (tasks de 2-5 min con código exacto). Todo committed en <code>docs/superpowers/</code>.
+          </p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-base)] p-6">
+          <p class="font-display text-[20px] text-[var(--color-ink-primary)]">3. TDD estricto</p>
+          <p class="mt-3 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+            Cada task: <span class="text-[#f47878]">red</span> → <span class="text-[#86efac]">green</span> → <span class="text-[var(--color-accent)]">commit</span>.
+            154 tasks ejecutadas. Test fallando observada antes de cada impl. Cero excepciones.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────── Siguiente ───────────────────────────── -->
+  <section>
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ Próximos pasos del ecosistema
+      </h2>
+      <div class="mt-6 grid gap-6 lg:grid-cols-2">
+        <div>
+          <p class="font-display text-[22px] text-[var(--color-ink-primary)]">Operacional</p>
+          <ul class="mt-3 space-y-2 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+            <li>– Build de snapshots HTML para Fase 22 (offline en CI).</li>
+            <li>– Publicar jw-eval a PyPI cuando estabilice.</li>
+            <li>– CI matrix con extras [pdf]/[docx]/[anki] instalados.</li>
+            <li>– Bot-comment del reporte de eval en cada PR.</li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-display text-[22px] text-[var(--color-ink-primary)]">Contenido</p>
+          <ul class="mt-3 space-y-2 text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+            <li>– Expandir cánticos del Reino de 12 → 151 entradas.</li>
+            <li>– Más topics en life_topics (de 9 → 30+).</li>
+            <li>– Auto-extract de Q&A reales para study_conductor.</li>
+            <li>– Más golden cases (política: cada PR añade ≥3).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mt-12 flex flex-wrap gap-4">
+        <a
+          href="/docs/roadmap"
+          class="inline-flex items-center gap-2 rounded-sm bg-[var(--color-accent)] px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-surface-base)] no-underline transition-opacity hover:opacity-90"
+        >
+          Roadmap completo →
+        </a>
+        <a
+          href="/docs/vision_audit"
+          class="inline-flex items-center gap-2 rounded-sm border border-[var(--color-line)] bg-transparent px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-ink-primary)] no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+        >
+          Audit Vision 1:1 →
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
