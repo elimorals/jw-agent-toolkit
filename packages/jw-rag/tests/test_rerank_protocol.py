@@ -3,7 +3,6 @@ from __future__ import annotations
 import typing
 
 import pytest
-
 from jw_rag.rerank_providers import Reranker, Target, get_default_reranker, list_available_rerankers
 
 

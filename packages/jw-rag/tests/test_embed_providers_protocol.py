@@ -5,8 +5,6 @@ from __future__ import annotations
 import typing
 
 import numpy as np
-import pytest
-
 from jw_rag.embed_providers import EmbedProvider, Target
 
 

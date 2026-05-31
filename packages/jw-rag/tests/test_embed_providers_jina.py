@@ -7,7 +7,6 @@ import json
 import httpx
 import numpy as np
 import pytest
-
 from jw_rag.embed_providers.jina import JinaEmbeddingsV3Provider
 
 

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from jw_rag.embed_providers import EmbedProvider
 from jw_rag.embed_providers.fakes import (
     FakeBGEM3,
@@ -27,9 +26,7 @@ from jw_rag.embed_providers.fakes import (
         (FakeOllamaEmbed, 768, "ollama", "cpu"),
     ],
 )
-def test_fakes_satisfy_protocol(
-    cls: type, expected_dim: int, expected_name: str, expected_target: str
-) -> None:
+def test_fakes_satisfy_protocol(cls: type, expected_dim: int, expected_name: str, expected_target: str) -> None:
     p = cls()
     assert isinstance(p, EmbedProvider)
     assert p.name == expected_name

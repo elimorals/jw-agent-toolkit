@@ -6,7 +6,6 @@ import importlib.util
 
 import numpy as np
 import pytest
-
 from jw_rag.embed_providers.bge_m3 import BGEM3Provider, _detect_target
 
 

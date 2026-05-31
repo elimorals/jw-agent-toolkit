@@ -12,7 +12,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_rag.chunker import Chunk
 from jw_rag.embed import FakeEmbedder
 from jw_rag.rerank_providers.factory import NoOpReranker, Reranker, Target
@@ -24,7 +23,12 @@ def _store(tmp_path: Path) -> VectorStore:
     s.add(
         [
             Chunk(id="a", text="trinity short", source_id="s1", metadata={}),
-            Chunk(id="b", text="the doctrine of the trinity is taught only by humans not the bible itself", source_id="s2", metadata={}),
+            Chunk(
+                id="b",
+                text="the doctrine of the trinity is taught only by humans not the bible itself",
+                source_id="s2",
+                metadata={},
+            ),
             Chunk(id="c", text="trinity is biblical", source_id="s3", metadata={}),
         ]
     )

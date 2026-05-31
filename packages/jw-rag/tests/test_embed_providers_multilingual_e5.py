@@ -4,7 +4,6 @@ import importlib.util
 
 import numpy as np
 import pytest
-
 from jw_rag.embed_providers.multilingual_e5 import MultilingualE5Provider
 
 

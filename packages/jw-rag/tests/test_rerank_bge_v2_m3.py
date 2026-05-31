@@ -3,7 +3,6 @@ from __future__ import annotations
 import importlib.util
 
 import pytest
-
 from jw_rag.rerank_providers.bge_v2_m3 import BGERerankerV2M3Provider
 
 

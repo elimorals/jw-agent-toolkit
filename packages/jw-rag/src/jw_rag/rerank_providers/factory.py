@@ -99,11 +99,7 @@ def list_available_rerankers() -> list[Reranker]:
     order = _provider_order()
     # Exclude fakes from the public listing — they're selectable via explicit
     # JW_RERANK_PROVIDER=fake-* only (handled by `_named_lookup`).
-    rs = [
-        r
-        for r in _instantiate_registry()
-        if r.is_available() and not type(r).__module__.endswith(".fakes")
-    ]
+    rs = [r for r in _instantiate_registry() if r.is_available() and not type(r).__module__.endswith(".fakes")]
     return sorted(rs, key=lambda r: order.index(r.target) if r.target in order else len(order))
 
 

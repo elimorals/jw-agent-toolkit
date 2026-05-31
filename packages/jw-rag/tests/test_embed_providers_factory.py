@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_rag.embed import FakeEmbedder
-from jw_rag.embed_providers import EmbedProvider, get_default_embedder, list_available_embedders
+from jw_rag.embed_providers import get_default_embedder, list_available_embedders
 
 
 def test_env_override_picks_named_provider(monkeypatch: pytest.MonkeyPatch) -> None:

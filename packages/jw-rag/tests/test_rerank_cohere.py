@@ -4,7 +4,6 @@ import sys
 import types
 
 import pytest
-
 from jw_rag.rerank_providers.cohere_rerank import CohereRerankV35Provider
 
 

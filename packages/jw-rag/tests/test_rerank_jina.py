@@ -4,7 +4,6 @@ import json
 
 import httpx
 import pytest
-
 from jw_rag.rerank_providers.jina_rerank import JinaRerankerV2Provider
 
 

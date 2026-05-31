@@ -114,11 +114,7 @@ def list_available_embedders() -> list[EmbedProvider]:
     `JW_EMBED_PROVIDER=fake-*` (handled by `_named_lookup`).
     """
     order = _provider_order()
-    registry = [
-        p
-        for p in _instantiate_registry()
-        if p.is_available() and not type(p).__module__.endswith(".fakes")
-    ]
+    registry = [p for p in _instantiate_registry() if p.is_available() and not type(p).__module__.endswith(".fakes")]
     return sorted(registry, key=lambda p: order.index(p.target) if p.target in order else len(order))
 
 

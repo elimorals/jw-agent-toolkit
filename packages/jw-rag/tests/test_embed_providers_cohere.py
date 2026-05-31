@@ -6,7 +6,6 @@ import types
 
 import numpy as np
 import pytest
-
 from jw_rag.embed_providers.cohere import CohereEmbedV3Provider
 
 

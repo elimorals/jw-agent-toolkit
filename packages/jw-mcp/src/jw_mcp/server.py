@@ -794,9 +794,7 @@ async def get_topic_articles(docid_or_url: str, language: str = "en") -> dict[st
 
 
 @mcp.tool
-def semantic_search(
-    query: str, top_k: int = 5, mode: str = "hybrid", rerank: bool = True
-) -> dict[str, Any]:
+def semantic_search(query: str, top_k: int = 5, mode: str = "hybrid", rerank: bool = True) -> dict[str, Any]:
     """Search the local RAG store (Bible chapters + ingested articles).
 
     The store is created on demand at JW_RAG_STORE_PATH (default
