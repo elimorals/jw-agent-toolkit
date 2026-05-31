@@ -20,6 +20,10 @@ from jw_core.concordance.store import ConcordanceStore
 SNIPPET_START = "‹"
 SNIPPET_END = "›"
 _REGEX_RED_FLAGS = re.compile(r"\\b|\\d|\\s|\\w|\[|\]|\{|\}|\+\B|\^|\$")
+# Match `›<whitespace>‹` so we can collapse adjacent matched tokens into a
+# single highlighted span: `‹brown› ‹fox›` → `‹brown fox›`. Improves
+# readability and makes substring assertions like `"brown fox"` work.
+_ADJACENT_SPANS_RE = re.compile(re.escape(SNIPPET_END) + r"(\s+)" + re.escape(SNIPPET_START))
 
 
 # ── Query helpers ──────────────────────────────────────────────────────
@@ -86,7 +90,7 @@ def concordance_search(
             source_kind=row["source_kind"],
             source_id=row["source_id"],
             ref=row["ref"],
-            snippet=row["snip"],
+            snippet=_ADJACENT_SPANS_RE.sub(r"\1", row["snip"]),
             language=row["language"],
             url=row["url"],
         )

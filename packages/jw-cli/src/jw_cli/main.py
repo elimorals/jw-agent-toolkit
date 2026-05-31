@@ -18,6 +18,7 @@ from jw_cli.commands import (
     citations,
     daily,
     download,
+    grep as grep_module,
     jwpub,
     languages,
     ministry,
@@ -49,6 +50,7 @@ app.command(name="jwpub")(jwpub.jwpub_cmd)
 app.command(name="topic")(topic.topic_cmd)
 app.command(name="workbook")(workbook.workbook_command)
 app.command(name="student")(student.student_command)
+app.command(name="grep", help="Literal concordance search over the local corpus.")(grep_module.grep_cmd)
 app.add_typer(ministry.ministry_app, name="ministry")
 app.add_typer(citations.citations_app, name="citations")
 app.add_typer(study.study_app, name="study")
