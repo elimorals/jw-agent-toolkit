@@ -181,8 +181,36 @@ class PiperTTSProvider(TTSProvider):
 
 # ── Registry + factory ──────────────────────────────────────────────────
 
+# Import lazily — we do NOT want to crash if a premium provider's deps are
+# absent. The provider classes themselves are pure-python; SDK imports are
+# inside their own methods. These imports come AFTER the base classes are
+# fully defined to avoid circular-import issues.
+from jw_core.audio.tts_providers.elevenlabs import ElevenLabsProvider  # noqa: E402
+from jw_core.audio.tts_providers.f5 import F5TTSProvider  # noqa: E402
+from jw_core.audio.tts_providers.kokoro import KokoroTTSProvider  # noqa: E402
+from jw_core.audio.tts_providers.xtts import XTTSv2Provider  # noqa: E402
 
-_PROVIDERS: list[type[TTSProvider]] = [PiperTTSProvider, EdgeTTSProvider, SystemTTSProvider]
+
+_PROVIDERS: list[type[TTSProvider]] = [
+    KokoroTTSProvider,
+    EdgeTTSProvider,
+    SystemTTSProvider,
+    ElevenLabsProvider,
+    PiperTTSProvider,
+    XTTSv2Provider,
+    F5TTSProvider,
+]
+
+# Chain that auto-selection walks in order. Not all entries appear; e.g. xtts
+# and f5 are never picked automatically because their `is_available()`
+# requires explicit consent / GPU.
+DEFAULT_TTS_CHAIN: list[str] = [
+    "kokoro_local",
+    "edge",
+    "system",
+    "elevenlabs",
+    "piper",
+]
 
 
 def list_tts_providers() -> list[dict[str, object]]:
@@ -191,26 +219,54 @@ def list_tts_providers() -> list[dict[str, object]]:
             "name": cls.name,
             "available": cls().is_available(),
             "languages": sorted(cls.languages_supported),
+            "target": cls.target,
         }
         for cls in _PROVIDERS
     ]
 
 
-def get_tts_provider(name: str | None = None) -> TTSProvider:
-    """Return the first available provider, or `name` if explicitly requested."""
-    if name is not None:
-        for cls in _PROVIDERS:
-            if cls.name == name:
-                instance = cls()
-                if not instance.is_available():
-                    raise TTSError(f"Provider {name!r} is registered but not available on this machine.")
-                return instance
-        raise TTSError(f"Unknown TTS provider {name!r}. Available: {[c.name for c in _PROVIDERS]}")
+def _by_name(name: str) -> type[TTSProvider] | None:
     for cls in _PROVIDERS:
+        if cls.name == name:
+            return cls
+    return None
+
+
+def get_tts_provider(name: str | None = None) -> TTSProvider:
+    """Return a TTS provider.
+
+    Resolution order:
+      1. Explicit `name` argument (raises if registered but not available).
+      2. JW_TTS_PROVIDER env (same semantics).
+      3. DEFAULT_TTS_CHAIN — first available wins.
+    """
+
+    requested = name or os.getenv("JW_TTS_PROVIDER")
+    if requested:
+        cls = _by_name(requested)
+        if cls is None:
+            raise TTSError(
+                f"Unknown TTS provider {requested!r}. Known: {[c.name for c in _PROVIDERS]}"
+            )
+        instance = cls()
+        if not instance.is_available():
+            raise TTSError(
+                f"Provider {requested!r} is registered but not available on this machine."
+            )
+        return instance
+
+    for entry in DEFAULT_TTS_CHAIN:
+        cls = _by_name(entry)
+        if cls is None:
+            continue
         instance = cls()
         if instance.is_available():
             return instance
-    raise TTSError("No TTS provider available. Install edge-tts (`pip install edge-tts`) or piper-tts.")
+
+    raise TTSError(
+        "No TTS provider available. Install one of: "
+        "jw-core[tts-kokoro] | edge-tts | piper-tts | system `say`/`espeak`."
+    )
 
 
 def synthesize_to_file(
