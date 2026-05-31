@@ -201,6 +201,10 @@ Items de VISION.md que conscientemente quedan como next iteration:
 5. **Auto-detección de asambleas (M6)** — requiere endpoint público de jw.org/eventos que no existe; el store local + recordatorios es la solución defendible.
 6. **Strong's dump completo (M4)** — catalog mínimo built-in; cargar Brown-Driver-Briggs / Thayer's queda como `register_strong_dump`.
 
+### Fase 28 — Concordancia exacta ✅ shipped
+
+Búsqueda literal con SQLite FTS5 sobre NWT + JWPUB + EPUB. Implementación en `jw_core.concordance`; CLI `jw grep`; MCP `concordance_search` / `concordance_build_index`. Spec: [`docs/superpowers/specs/2026-05-30-fase-28-concordance-design.md`](superpowers/specs/2026-05-30-fase-28-concordance-design.md). Guía: [`docs/guias/concordancia-exacta.md`](guias/concordancia-exacta.md).
+
 ## Cómo verificar el toolkit completo
 
 ```bash

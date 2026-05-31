@@ -514,3 +514,11 @@ gráficas (export JSON ya lo habilita externamente), modo familia.
 - ✅ MCP tools: `field_log_hours`, `field_log_study`, `field_monthly_report`.
 - ✅ Tests: 100% paths, `test_field_report.py` con fakes para revisitas y test de encriptación raw-row.
 - ✅ Guía `docs/guias/informe-precursor.md`.
+
+### Fase 28 — Concordancia exacta NWT + publicaciones ✅
+
+- `jw_core.concordance` con SQLite FTS5 y dedupe por sha256.
+- Indexer adapters: NWT chapters (HTML), JWPUB descifrado, EPUB.
+- CLI `jw grep "<phrase>"` con `--build-index`, `--build-nwt`, `--stats`, `--kind`, `--language`.
+- MCP tools `concordance_build_index` y `concordance_search`.
+- Guía: [`docs/guias/concordancia-exacta.md`](guias/concordancia-exacta.md).
