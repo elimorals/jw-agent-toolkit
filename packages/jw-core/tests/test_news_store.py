@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
-
 from jw_core.news.models import NewsItem
 from jw_core.news.store import SeenStore
 
@@ -36,8 +35,8 @@ def test_mark_seen_then_is_seen_true(store: SeenStore) -> None:
 
 
 def test_mark_seen_twice_keeps_first_seen(store: SeenStore) -> None:
-    t0 = datetime(2026, 1, 1, tzinfo=timezone.utc)
-    t1 = datetime(2026, 5, 30, tzinfo=timezone.utc)
+    t0 = datetime(2026, 1, 1, tzinfo=UTC)
+    t1 = datetime(2026, 5, 30, tzinfo=UTC)
     store.mark_seen(_item(), now=t0)
     store.mark_seen(_item(), now=t1)
     records = store.all_seen("publications")
@@ -57,7 +56,7 @@ def test_all_seen_filter_by_channel(store: SeenStore) -> None:
 
 def test_last_run_roundtrip(store: SeenStore) -> None:
     assert store.last_run_at() is None
-    when = datetime(2026, 5, 30, 12, tzinfo=timezone.utc)
+    when = datetime(2026, 5, 30, 12, tzinfo=UTC)
     store.set_last_run_at(when)
     assert store.last_run_at() == when
 

@@ -133,10 +133,7 @@ class RevisitStore:
         cols = ", ".join(row.keys())
         placeholders = ", ".join(f":{k}" for k in row.keys())
         updates = ", ".join(f"{k}=excluded.{k}" for k in row.keys() if k != "interest_id")
-        sql = (
-            f"INSERT INTO revisits ({cols}) VALUES ({placeholders}) "
-            f"ON CONFLICT(interest_id) DO UPDATE SET {updates}"
-        )
+        sql = f"INSERT INTO revisits ({cols}) VALUES ({placeholders}) ON CONFLICT(interest_id) DO UPDATE SET {updates}"
         self._conn.execute(sql, row)
         self._conn.commit()
         return revisit
@@ -159,8 +156,7 @@ class RevisitStore:
     def due(self, *, on_or_before: str) -> list[Revisit]:
         """Return revisits whose next_visit_iso is non-empty and <= cutoff."""
         cur = self._conn.execute(
-            "SELECT * FROM revisits WHERE next_visit_iso != '' AND next_visit_iso <= ? "
-            "ORDER BY next_visit_iso",
+            "SELECT * FROM revisits WHERE next_visit_iso != '' AND next_visit_iso <= ? ORDER BY next_visit_iso",
             (on_or_before,),
         )
         return [self._decrypt_row(r) for r in cur.fetchall()]
@@ -175,13 +171,13 @@ class RevisitStore:
             # SQL LIKE doesn't see plaintext; decrypt all and filter in memory.
             q = query.lower()
             return [
-                r for r in self.list_all()
+                r
+                for r in self.list_all()
                 if q in r.notes.lower() or q in r.name_alias.lower() or q in r.last_topic.lower()
             ]
         q = f"%{query.lower()}%"
         cur = self._conn.execute(
-            "SELECT * FROM revisits WHERE LOWER(notes) LIKE ? OR LOWER(name_alias) LIKE ? "
-            "OR LOWER(last_topic) LIKE ?",
+            "SELECT * FROM revisits WHERE LOWER(notes) LIKE ? OR LOWER(name_alias) LIKE ? OR LOWER(last_topic) LIKE ?",
             (q, q, q),
         )
         return [self._decrypt_row(r) for r in cur.fetchall()]

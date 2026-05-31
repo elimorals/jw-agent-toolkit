@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Task 1 — vocabulary
 # ---------------------------------------------------------------------------
@@ -56,6 +55,7 @@ def test_override_missing_file_returns_defaults(tmp_path: Path) -> None:
 
 def test_hours_entry_validates() -> None:
     from datetime import date as date_
+
     from jw_core.ministry.field_report import HoursEntry
 
     e = HoursEntry(
@@ -71,6 +71,7 @@ def test_hours_entry_validates() -> None:
 
 def test_hours_entry_rejects_overflow() -> None:
     from datetime import date as date_
+
     from jw_core.ministry.field_report import HoursEntry
 
     with pytest.raises(ValueError):
@@ -79,16 +80,21 @@ def test_hours_entry_rejects_overflow() -> None:
 
 def test_hours_entry_rejects_unknown_tag() -> None:
     from datetime import date as date_
+
     from jw_core.ministry.field_report import HoursEntry
 
     with pytest.raises(ValueError):
         HoursEntry(
-            entry_id="x", date=date_(2026, 5, 15), hours_decimal=1.0, tag="weird"  # type: ignore[arg-type]
+            entry_id="x",
+            date=date_(2026, 5, 15),
+            hours_decimal=1.0,
+            tag="weird",  # type: ignore[arg-type]
         )
 
 
 def test_study_entry_defaults() -> None:
     from datetime import date as date_
+
     from jw_core.ministry.field_report import StudyEntry
 
     s = StudyEntry(study_id="s1", student_id="maria", started_at=date_(2026, 4, 1))
@@ -126,14 +132,13 @@ def _enc_off(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_store_creates_db_and_inserts_hours(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     from datetime import date as date_
+
     from jw_core.ministry.field_report import FieldReportStore, HoursEntry
 
     _enc_off(monkeypatch)
     db = tmp_path / "fs.db"
     store = FieldReportStore(path=db)
-    e = store.add_hours(
-        HoursEntry(entry_id="", date=date_(2026, 5, 15), hours_decimal=2.5, tag="street")
-    )
+    e = store.add_hours(HoursEntry(entry_id="", date=date_(2026, 5, 15), hours_decimal=2.5, tag="street"))
     assert e.entry_id  # auto-assigned uuid
     assert db.exists()
 
@@ -146,6 +151,7 @@ def test_store_creates_db_and_inserts_hours(tmp_path: Path, monkeypatch: pytest.
 
 def test_store_list_hours_filters_by_month(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     from datetime import date as date_
+
     from jw_core.ministry.field_report import FieldReportStore, HoursEntry
 
     _enc_off(monkeypatch)
@@ -162,13 +168,12 @@ def test_store_list_hours_filters_by_month(tmp_path: Path, monkeypatch: pytest.M
 
 def test_store_log_study_and_close(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     from datetime import date as date_
+
     from jw_core.ministry.field_report import FieldReportStore, StudyEntry
 
     _enc_off(monkeypatch)
     store = FieldReportStore(path=tmp_path / "fs.db")
-    s = store.upsert_study(
-        StudyEntry(study_id="", student_id="maria", started_at=date_(2026, 4, 1))
-    )
+    s = store.upsert_study(StudyEntry(study_id="", student_id="maria", started_at=date_(2026, 4, 1)))
     assert s.study_id
     store.close_study(student_id="maria", closed_at=date_(2026, 5, 10))
     studies = store.list_studies()
@@ -177,6 +182,7 @@ def test_store_log_study_and_close(tmp_path: Path, monkeypatch: pytest.MonkeyPat
 
 def test_store_mark_met_today(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     from datetime import date as date_
+
     from jw_core.ministry.field_report import FieldReportStore, StudyEntry
 
     _enc_off(monkeypatch)
@@ -191,10 +197,9 @@ def test_store_mark_met_today(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
 
 def test_store_encrypts_note_when_key_set(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     import sqlite3
+    from datetime import date as date_
 
     from cryptography.fernet import Fernet  # type: ignore[import-not-found]
-
-    from datetime import date as date_
     from jw_core.ministry.field_report import FieldReportStore, HoursEntry
 
     monkeypatch.setenv("JW_PRIVACY_KEY", Fernet.generate_key().decode("ascii"))
@@ -255,6 +260,7 @@ def test_revisit_provider_protocol_is_structural() -> None:
 
 def _seed_may_2026(store) -> None:
     from datetime import date as date_
+
     from jw_core.ministry.field_report import HoursEntry, StudyEntry
 
     store.add_hours(HoursEntry(entry_id="", date=date_(2026, 5, 2), hours_decimal=2.0, tag="street"))
@@ -266,17 +272,13 @@ def _seed_may_2026(store) -> None:
 
     # 4 studies: 1 already closed in April; 2 started before; 1 started mid-May; 1 closed mid-May
     store.upsert_study(
-        StudyEntry(
-            study_id="", student_id="alpha", started_at=date_(2026, 3, 1), closed_at=date_(2026, 4, 15)
-        )
+        StudyEntry(study_id="", student_id="alpha", started_at=date_(2026, 3, 1), closed_at=date_(2026, 4, 15))
     )
     store.upsert_study(StudyEntry(study_id="", student_id="beta", started_at=date_(2026, 4, 1)))
     store.upsert_study(StudyEntry(study_id="", student_id="gamma", started_at=date_(2026, 4, 15)))
     store.upsert_study(StudyEntry(study_id="", student_id="delta", started_at=date_(2026, 5, 5)))
     store.upsert_study(
-        StudyEntry(
-            study_id="", student_id="epsilon", started_at=date_(2026, 4, 20), closed_at=date_(2026, 5, 12)
-        )
+        StudyEntry(study_id="", student_id="epsilon", started_at=date_(2026, 4, 20), closed_at=date_(2026, 5, 12))
     )
 
 
@@ -286,9 +288,7 @@ def test_aggregate_monthly_report_basic(tmp_path: Path, monkeypatch: pytest.Monk
 
     store = FieldReportStore(path=tmp_path / "fs.db")
     _seed_may_2026(store)
-    report = aggregate_monthly_report(
-        store, "2026-05", revisits=_FakeRevisits({"2026-05": 11})
-    )
+    report = aggregate_monthly_report(store, "2026-05", revisits=_FakeRevisits({"2026-05": 11}))
 
     # 2.0 + 1.5 + 3.75 + 0.5 = 7.75 hours
     assert report.total_hours == pytest.approx(7.75)
@@ -467,10 +467,10 @@ def test_render_pdf_raises_helpful_error_when_extra_missing(
 
     monkeypatch.setattr(builtins, "__import__", fake_import)
 
-    from jw_core.ministry import exporters as ex
-
     # Reload to retrigger lazy imports
     import importlib
+
+    from jw_core.ministry import exporters as ex
 
     importlib.reload(ex)
     with pytest.raises(RuntimeError, match=r"\[pdf\]"):

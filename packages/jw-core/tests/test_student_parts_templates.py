@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_core.data.student_parts_templates import (
     PART_TEMPLATES,
-    PartTemplate,
     find_template,
     time_target_seconds_for,
 )

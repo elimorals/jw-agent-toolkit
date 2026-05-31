@@ -48,14 +48,7 @@ def build_simple_deck(deck: SlideDeck) -> str:
 
 def build_marp_deck(deck: SlideDeck) -> str:
     """Marp Markdown — paste into a `.md` file and run `marp deck.md`."""
-    header = (
-        "---\n"
-        "marp: true\n"
-        f"theme: {deck.theme}\n"
-        "paginate: true\n"
-        f"lang: {deck.language}\n"
-        "---\n\n"
-    )
+    header = f"---\nmarp: true\ntheme: {deck.theme}\npaginate: true\nlang: {deck.language}\n---\n\n"
     parts: list[str] = [header]
     parts.append(f"# {deck.title}\n")
     if deck.subtitle:

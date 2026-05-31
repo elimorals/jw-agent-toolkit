@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import typer
-
 from jw_eval.cli import run_from_cli
 from jw_eval.models import LayerName
 from jw_eval.report import to_json, to_markdown
@@ -49,7 +48,5 @@ def eval_cmd(
         typer.echo(text)
 
     # Exit code = number of failures (caps at 125 to keep within POSIX bounds).
-    failures = sum(
-        1 for r in suite_report.results if r.verdict in {"fail", "error"}
-    )
+    failures = sum(1 for r in suite_report.results if r.verdict in {"fail", "error"})
     raise typer.Exit(code=min(failures, 125))

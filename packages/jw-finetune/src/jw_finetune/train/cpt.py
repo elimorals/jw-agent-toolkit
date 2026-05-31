@@ -52,9 +52,15 @@ def train_cpt(
         r=recipe.lora_rank,
         lora_alpha=recipe.lora_alpha,
         target_modules=[
-            "q_proj", "k_proj", "v_proj", "o_proj",
-            "gate_proj", "up_proj", "down_proj",
-            "embed_tokens", "lm_head",  # CPT trains the embedding layer too
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj",
+            "embed_tokens",
+            "lm_head",  # CPT trains the embedding layer too
         ],
         bias="none",
         use_gradient_checkpointing="unsloth",

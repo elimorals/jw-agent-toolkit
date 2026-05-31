@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
-
+from jw_agents.news_monitor import news_monitor
 from jw_core.news.models import NewsItem
 from jw_core.news.store import SeenStore
-
-from jw_agents.news_monitor import news_monitor
 
 
 def _item(channel: str, item_id: str, lang: str = "en") -> NewsItem:
@@ -42,7 +40,7 @@ async def test_news_monitor_returns_agent_result_with_findings(tmp_path: Path) -
         channels=["publications"],
         sources=[StubSource([_item("publications", "lff_E")], name="publications")],
         store=store,
-        now=datetime(2026, 5, 30, tzinfo=timezone.utc),
+        now=datetime(2026, 5, 30, tzinfo=UTC),
         update=False,
     )
     assert result.agent_name == "news_monitor"
@@ -55,14 +53,14 @@ async def test_news_monitor_returns_agent_result_with_findings(tmp_path: Path) -
 @pytest.mark.asyncio
 async def test_news_monitor_resolves_last_run(tmp_path: Path) -> None:
     store = SeenStore(path=tmp_path / "n.db")
-    store.set_last_run_at(datetime(2026, 5, 1, tzinfo=timezone.utc))
+    store.set_last_run_at(datetime(2026, 5, 1, tzinfo=UTC))
     result = await news_monitor(
         since="last_run",
         languages=["en"],
         channels=["publications"],
         sources=[StubSource([], name="publications")],
         store=store,
-        now=datetime(2026, 5, 30, tzinfo=timezone.utc),
+        now=datetime(2026, 5, 30, tzinfo=UTC),
         update=False,
     )
     assert result.metadata["since_resolved"] == "2026-05-01T00:00:00+00:00"

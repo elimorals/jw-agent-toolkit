@@ -45,9 +45,7 @@ def audit_telemetry_outflow() -> TelemetryAuditResult:
         )
         recommendations.append("unset JW_TELEMETRY_ENABLED to fully disable shape fingerprints")
     else:
-        findings.append(
-            {"severity": "info", "key": "JW_TELEMETRY_ENABLED", "value": "unset", "message": "OK"}
-        )
+        findings.append({"severity": "info", "key": "JW_TELEMETRY_ENABLED", "value": "unset", "message": "OK"})
 
     try:
         from jw_core.telemetry import get_telemetry

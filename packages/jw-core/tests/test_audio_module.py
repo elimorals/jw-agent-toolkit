@@ -13,8 +13,8 @@ from jw_core.audio.broadcasting import (
     index_vtt_file,
     parse_vtt,
 )
-from jw_core.audio.tts import get_tts_provider, list_tts_providers
 from jw_core.audio.transcription import estimate_real_time_factor
+from jw_core.audio.tts import get_tts_provider, list_tts_providers
 
 # ── TTS registry ─────────────────────────────────────────────────────────
 
@@ -98,12 +98,8 @@ def test_index_video_then_search() -> None:
 def test_index_overwrites_on_reindex() -> None:
     path = _tmp_index_path()
     with BroadcastingIndex(path) as idx:
-        idx.index_video(
-            IndexedVideo(video_id="v", segments=[VTTSegment(0.0, 1.0, "alpha")])
-        )
-        idx.index_video(
-            IndexedVideo(video_id="v", segments=[VTTSegment(0.0, 1.0, "beta")])
-        )
+        idx.index_video(IndexedVideo(video_id="v", segments=[VTTSegment(0.0, 1.0, "alpha")]))
+        idx.index_video(IndexedVideo(video_id="v", segments=[VTTSegment(0.0, 1.0, "beta")]))
         assert idx.stats() == {"videos": 1, "segments": 1}
 
 

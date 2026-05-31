@@ -58,8 +58,7 @@ def concordance_search(
         return []
     if not is_safe_query(query):
         raise ValueError(
-            "concordance_search does not support regex metacharacters. "
-            "Use phrases (\"...\") and AND/OR/NEAR instead."
+            'concordance_search does not support regex metacharacters. Use phrases ("...") and AND/OR/NEAR instead.'
         )
 
     sql = [

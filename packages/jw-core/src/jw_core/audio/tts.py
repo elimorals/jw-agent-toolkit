@@ -40,8 +40,7 @@ class TTSProvider(ABC):
     languages_supported: set[str] = set()
 
     @abstractmethod
-    def is_available(self) -> bool:
-        ...
+    def is_available(self) -> bool: ...
 
     @abstractmethod
     def synthesize(self, text: str, *, voice: str | None, language: str, output_path: Path) -> Path:
@@ -91,7 +90,18 @@ class SystemTTSProvider(TTSProvider):
 class EdgeTTSProvider(TTSProvider):
     name = "edge"
     languages_supported = {
-        "en", "es", "pt", "fr", "de", "it", "ja", "ko", "zh", "ru", "ar", "tr",
+        "en",
+        "es",
+        "pt",
+        "fr",
+        "de",
+        "it",
+        "ja",
+        "ko",
+        "zh",
+        "ru",
+        "ar",
+        "tr",
     }
 
     DEFAULT_VOICES: dict[str, str] = {
@@ -152,8 +162,7 @@ class PiperTTSProvider(TTSProvider):
         model_path = voice or os.getenv("JW_PIPER_MODEL")
         if not model_path:
             raise TTSError(
-                "Piper requires a voice model. Pass via `voice` parameter or "
-                "set JW_PIPER_MODEL=/path/to/voice.onnx"
+                "Piper requires a voice model. Pass via `voice` parameter or set JW_PIPER_MODEL=/path/to/voice.onnx"
             )
         try:
             subprocess.run(

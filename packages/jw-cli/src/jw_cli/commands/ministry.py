@@ -15,9 +15,6 @@ import asyncio
 import json
 
 import typer
-from rich.console import Console
-from rich.table import Table
-
 from jw_agents import (
     Revisit,
     RevisitStore,
@@ -28,6 +25,8 @@ from jw_agents import (
     reverse_citation_lookup,
 )
 from jw_core.data.objections import list_objections
+from rich.console import Console
+from rich.table import Table
 
 console = Console()
 
@@ -84,9 +83,7 @@ def quote_cmd(
     top_n: int = typer.Option(8, "--top-n"),
     min_confidence: float = typer.Option(0.4, "--min"),
 ) -> None:
-    result = asyncio.run(
-        reverse_citation_lookup(quote, language=language, top_n=top_n, min_confidence=min_confidence)
-    )
+    result = asyncio.run(reverse_citation_lookup(quote, language=language, top_n=top_n, min_confidence=min_confidence))
     console.print(json.dumps(result.to_dict(), indent=2, ensure_ascii=False))
 
 

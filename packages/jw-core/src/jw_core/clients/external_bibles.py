@@ -75,9 +75,7 @@ class ExternalBiblesClient:
         if not 1 <= book_num <= 66:
             raise ValueError("book_num must be 1..66")
         if translation not in SUPPORTED_TRANSLATIONS:
-            raise ValueError(
-                f"translation must be one of {list(SUPPORTED_TRANSLATIONS)}, got {translation!r}"
-            )
+            raise ValueError(f"translation must be one of {list(SUPPORTED_TRANSLATIONS)}, got {translation!r}")
         book_name = BOOKS[book_num - 1]["names"]["en"][0]
         slug = f"{book_name.replace(' ', '+')}+{chapter}:{verse}"
         params = {"translation": translation}

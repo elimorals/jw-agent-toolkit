@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_finetune.data.extract import (
     _derive_pub_code_from_title,
     _infer_kind_from_pub_code,

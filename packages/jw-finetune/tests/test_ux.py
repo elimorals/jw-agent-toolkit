@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-
 # ---------------------------------------------------------------------------
 # doctor
 # ---------------------------------------------------------------------------
@@ -48,39 +47,62 @@ def _make_workspace(tmp_path: Path) -> Path:
     ws.mkdir()
     # Tiny recipe yaml using actual Recipe defaults
     import yaml  # type: ignore[import-untyped]
-    recipe_yaml = yaml.safe_dump({
-        "name": "test-recipe",
-        "task": "sft",
-        "sources": [],
-        "languages": ["es"],
-        "publication_kinds": ["watchtower"],
-        "qa_style": "doctrinal",
-        "base_model": "unsloth/Qwen2.5-3B-bnb-4bit",
-        "lora_rank": 16, "lora_alpha": 32, "lora_dropout": 0.0,
-        "max_seq_len": 2048, "epochs": 2, "batch_size": 2,
-        "gradient_accumulation": 4, "learning_rate": 0.0002,
-        "warmup_ratio": 0.05, "weight_decay": 0.0,
-        "chat_template": "qwen-2.5", "use_rslora": False,
-        "packing": None, "train_on_responses_only": True,
-        "instruction_part": "", "response_part": "",
-        "use_multi_gpu": False, "embedding_learning_rate_ratio": 0.1,
-        "min_chunk_chars": 80, "max_chunk_chars": 1500,
-        "dedupe_threshold": 4, "synth_provider": "ollama",
-        "synth_model": None, "qa_per_chunk": 3, "eval_split": 0.05,
-        "output_dir": "./", "seed": 42, "extra": {},
-    })
+
+    recipe_yaml = yaml.safe_dump(
+        {
+            "name": "test-recipe",
+            "task": "sft",
+            "sources": [],
+            "languages": ["es"],
+            "publication_kinds": ["watchtower"],
+            "qa_style": "doctrinal",
+            "base_model": "unsloth/Qwen2.5-3B-bnb-4bit",
+            "lora_rank": 16,
+            "lora_alpha": 32,
+            "lora_dropout": 0.0,
+            "max_seq_len": 2048,
+            "epochs": 2,
+            "batch_size": 2,
+            "gradient_accumulation": 4,
+            "learning_rate": 0.0002,
+            "warmup_ratio": 0.05,
+            "weight_decay": 0.0,
+            "chat_template": "qwen-2.5",
+            "use_rslora": False,
+            "packing": None,
+            "train_on_responses_only": True,
+            "instruction_part": "",
+            "response_part": "",
+            "use_multi_gpu": False,
+            "embedding_learning_rate_ratio": 0.1,
+            "min_chunk_chars": 80,
+            "max_chunk_chars": 1500,
+            "dedupe_threshold": 4,
+            "synth_provider": "ollama",
+            "synth_model": None,
+            "qa_per_chunk": 3,
+            "eval_split": 0.05,
+            "output_dir": "./",
+            "seed": 42,
+            "extra": {},
+        }
+    )
     (ws / "recipe.yaml").write_text(recipe_yaml, encoding="utf-8")
     (ws / "dataset_qa.jsonl").write_text(
-        json.dumps({"messages": [{"role": "user", "content": "q?"},
-                                  {"role": "assistant", "content": "a."}]}) + "\n",
+        json.dumps({"messages": [{"role": "user", "content": "q?"}, {"role": "assistant", "content": "a."}]}) + "\n",
         encoding="utf-8",
     )
-    (ws / "eval-report.json").write_text(json.dumps({
-        "n_prompts": 3,
-        "citation_accuracy": 0.66,
-        "terminology_score": 0.33,
-        "answers": [],
-    }), encoding="utf-8")
+    (ws / "eval-report.json").write_text(
+        json.dumps(
+            {
+                "n_prompts": 3,
+                "citation_accuracy": 0.66,
+                "terminology_score": 0.33,
+                "answers": [],
+            }
+        ),
+        encoding="utf-8",
+    )
     return ws
 
 
@@ -90,8 +112,10 @@ def test_write_run_readme_creates_markdown(tmp_path: Path) -> None:
     ws = _make_workspace(tmp_path)
     export_dir = tmp_path / "export"
     out = write_run_readme(
-        workspace=ws, export_dir=export_dir,
-        export_format="gguf", quant="Q4_K_M",
+        workspace=ws,
+        export_dir=export_dir,
+        export_format="gguf",
+        quant="Q4_K_M",
     )
     assert out.exists()
     txt = out.read_text(encoding="utf-8")
@@ -149,7 +173,8 @@ def test_compare_checkpoints_with_fake_generator(tmp_path: Path) -> None:
         return f"Sin citar nada: {prompt}"
 
     result = compare_checkpoints(
-        ckpt_a, ckpt_b,
+        ckpt_a,
+        ckpt_b,
         ["¿Qué es el Reino?", "Explica Hechos 1:8"],
         language="es",
         generate_fn=fake_generate,

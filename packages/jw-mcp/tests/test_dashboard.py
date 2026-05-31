@@ -8,7 +8,6 @@ pytest.importorskip("fastapi")
 pytest.importorskip("starlette")
 
 from fastapi.testclient import TestClient
-
 from jw_mcp.rest_api import app
 
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_core.vision.maps import (
     BIBLICAL_JOURNEYS,
     get_journey,
@@ -17,7 +16,6 @@ from jw_core.vision.slides import (
     build_simple_deck,
     outline_to_deck,
 )
-
 
 # ── Maps ─────────────────────────────────────────────────────────────────
 

@@ -45,7 +45,7 @@ class EventStore:
         if self._task is not None:
             try:
                 await asyncio.wait_for(self._task, timeout=2)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self._task.cancel()
 
     async def subscribe(self) -> AsyncIterator[dict[str, Any]]:
@@ -86,7 +86,7 @@ class EventStore:
                 logger.warning("EventStore tail error: %s", e)
             try:
                 await asyncio.wait_for(self._stop.wait(), timeout=0.5)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
 
     async def _read_new_lines(self) -> None:

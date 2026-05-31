@@ -7,7 +7,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from jw_finetune.monitor.store import EventStore, synthesize_event
 
 
@@ -23,8 +22,10 @@ async def test_synthesize_event_basics() -> None:
 async def test_event_store_reads_existing_file(tmp_path: Path) -> None:
     events_path = tmp_path / "events.jsonl"
     events_path.write_text(
-        json.dumps({"kind": "step", "step": 1, "loss": 1.5}) + "\n"
-        + json.dumps({"kind": "step", "step": 2, "loss": 1.3}) + "\n",
+        json.dumps({"kind": "step", "step": 1, "loss": 1.5})
+        + "\n"
+        + json.dumps({"kind": "step", "step": 2, "loss": 1.3})
+        + "\n",
         encoding="utf-8",
     )
     store = EventStore(events_path)
@@ -74,8 +75,7 @@ async def test_event_store_subscribe_replays_buffer(tmp_path: Path) -> None:
 async def test_event_store_handles_malformed_lines(tmp_path: Path) -> None:
     events_path = tmp_path / "events.jsonl"
     events_path.write_text(
-        "not-json\n"
-        + json.dumps({"kind": "step", "loss": 0.5}) + "\n",
+        "not-json\n" + json.dumps({"kind": "step", "loss": 0.5}) + "\n",
         encoding="utf-8",
     )
     store = EventStore(events_path)

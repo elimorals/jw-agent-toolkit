@@ -51,9 +51,7 @@ def _check_python_version() -> CheckResult:
 def _check_uv() -> CheckResult:
     if shutil.which("uv"):
         try:
-            out = subprocess.run(
-                ["uv", "--version"], capture_output=True, text=True, timeout=2, check=False
-            )
+            out = subprocess.run(["uv", "--version"], capture_output=True, text=True, timeout=2, check=False)
             return CheckResult("uv", "ok", out.stdout.strip() or "installed")
         except Exception as e:  # noqa: BLE001
             return CheckResult("uv", "warn", str(e))
@@ -64,13 +62,14 @@ def _check_gpu() -> CheckResult:
     # NVIDIA
     try:
         import pynvml  # type: ignore[import-untyped]
+
         pynvml.nvmlInit()
         h = pynvml.nvmlDeviceGetHandleByIndex(0)
         name = pynvml.nvmlDeviceGetName(h)
         if isinstance(name, bytes):
             name = name.decode()
         mem = pynvml.nvmlDeviceGetMemoryInfo(h)
-        gb = round(mem.total / (1024 ** 3), 1)
+        gb = round(mem.total / (1024**3), 1)
         return CheckResult("gpu", "ok", f"NVIDIA {name} ({gb} GB)")
     except Exception:
         pass
@@ -121,10 +120,7 @@ def _check_jw_library() -> CheckResult:
     if home_docs.exists():
         backups = list(home_docs.glob("*.jwlibrary"))
         if backups:
-            return CheckResult(
-                "jw_library", "ok",
-                f"{len(backups)} backup file(s) in ~/Documents"
-            )
+            return CheckResult("jw_library", "ok", f"{len(backups)} backup file(s) in ~/Documents")
     return CheckResult("jw_library", "info", "no app / backups detected")
 
 

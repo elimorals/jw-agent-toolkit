@@ -72,8 +72,7 @@ class SessionMemory:
         if not entry.created_at_unix:
             entry.created_at_unix = time.time()
         cur = self._conn.execute(
-            "INSERT INTO memory (user_id, kind, text, metadata, created_at_unix) "
-            "VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO memory (user_id, kind, text, metadata, created_at_unix) VALUES (?, ?, ?, ?, ?)",
             (
                 entry.user_id,
                 entry.kind,

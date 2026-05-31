@@ -79,9 +79,7 @@ class OllamaFinetunedClient:
         try:
             import ollama  # type: ignore[import-untyped]
         except ImportError as e:
-            raise ImportError(
-                "ollama SDK required: pip install ollama"
-            ) from e
+            raise ImportError("ollama SDK required: pip install ollama") from e
         self.model = model
         self._client = ollama.Client(host=host)
 
@@ -128,9 +126,7 @@ class UnslothFinetunedClient:
         try:
             from unsloth import FastLanguageModel  # type: ignore[import-untyped]
         except ImportError as e:
-            raise ImportError(
-                "unsloth required: install with the [unsloth] extra"
-            ) from e
+            raise ImportError("unsloth required: install with the [unsloth] extra") from e
         self._FLM = FastLanguageModel
         self.checkpoint_dir = Path(checkpoint_dir)
         self.model_name = str(checkpoint_dir)
@@ -170,7 +166,7 @@ class UnslothFinetunedClient:
             temperature=req.temperature,
         )
         text = self._tokenizer.decode(  # type: ignore[union-attr]
-            out[0][inputs.shape[1]:],
+            out[0][inputs.shape[1] :],
             skip_special_tokens=True,
         )
         return GenerateResponse(

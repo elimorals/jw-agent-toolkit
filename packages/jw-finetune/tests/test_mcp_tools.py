@@ -54,9 +54,7 @@ def test_list_finetune_runs_empty(tmp_path: Path) -> None:
 def test_list_finetune_runs_with_runs(tmp_path: Path) -> None:
     run = tmp_path / "run-20260530-120000"
     run.mkdir()
-    (run / "dataset_qa.jsonl").write_text(
-        json.dumps({"messages": []}) + "\n", encoding="utf-8"
-    )
+    (run / "dataset_qa.jsonl").write_text(json.dumps({"messages": []}) + "\n", encoding="utf-8")
     (run / "events.jsonl").write_text("", encoding="utf-8")
 
     mcp = FakeMCP()
@@ -81,10 +79,7 @@ def test_get_finetune_events_returns_last_n(tmp_path: Path) -> None:
     run = tmp_path / "run-20260530-120000"
     run.mkdir()
     events_path = run / "events.jsonl"
-    lines = "\n".join([
-        json.dumps({"kind": "step", "step": i, "loss": 1.0 / (i + 1)})
-        for i in range(10)
-    ]) + "\n"
+    lines = "\n".join([json.dumps({"kind": "step", "step": i, "loss": 1.0 / (i + 1)}) for i in range(10)]) + "\n"
     events_path.write_text(lines, encoding="utf-8")
 
     mcp = FakeMCP()
@@ -116,6 +111,7 @@ def test_chat_with_finetune_checkpoint_missing_run(tmp_path: Path) -> None:
     mcp = FakeMCP()
     register_jw_finetune_tools(mcp, workspace_root=tmp_path)
     out = mcp.tools["chat_with_finetune_checkpoint"](
-        run_id="nonexistent", prompt="hello",
+        run_id="nonexistent",
+        prompt="hello",
     )
     assert "error" in out

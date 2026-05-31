@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import pytest
-from pydantic import ValidationError
-
 from jw_agents.study_progress import (
     GoalKind,
     LessonRow,
     LessonStatus,
     StudentGoal,
 )
+from pydantic import ValidationError
 
 
 def test_lesson_status_enum_values() -> None:
@@ -146,10 +145,14 @@ def test_store_encrypted_notes_round_trip(tmp_path: Path) -> None:
 def test_store_list_for_student(tmp_path: Path) -> None:
     store = StudentProgressStore(db_path=tmp_path / "p.db")
     for n in (1, 2, 3):
-        store.upsert(LessonRow(
-            student_id="demo_user", book_pub="lff", lesson=n,
-            updated_at_iso="2026-05-30T00:00:00",
-        ))
+        store.upsert(
+            LessonRow(
+                student_id="demo_user",
+                book_pub="lff",
+                lesson=n,
+                updated_at_iso="2026-05-30T00:00:00",
+            )
+        )
     rows = store.list_for_student("demo_user")
     assert [r.lesson for r in rows] == [1, 2, 3]
 
@@ -161,7 +164,9 @@ from jw_agents.study_progress import scan_lesson_for_crisis, set_goal_for_studen
 
 def test_scan_lesson_for_crisis_hits() -> None:
     row = LessonRow(
-        student_id="demo_user", book_pub="lff", lesson=1,
+        student_id="demo_user",
+        book_pub="lff",
+        lesson=1,
         notes="Mencionó suicidio en la última visita",
         updated_at_iso="2026-05-30T00:00:00",
     )
@@ -172,13 +177,19 @@ def test_scan_lesson_for_crisis_hits() -> None:
 def test_set_goal_for_student_appends(tmp_path: Path) -> None:
     store = StudentProgressStore(db_path=tmp_path / "p.db")
     row = LessonRow(
-        student_id="demo_user", book_pub="lff", lesson=1,
+        student_id="demo_user",
+        book_pub="lff",
+        lesson=1,
         updated_at_iso="2026-05-30T00:00:00",
     )
     store.upsert(row)
     updated = set_goal_for_student(
-        store, "demo_user", "lff", 1,
-        kind=GoalKind.BAPTISM, target_iso="2026-12-31T00:00:00",
+        store,
+        "demo_user",
+        "lff",
+        1,
+        kind=GoalKind.BAPTISM,
+        target_iso="2026-12-31T00:00:00",
     )
     assert any(g.kind == GoalKind.BAPTISM for g in updated.goals)
     assert updated.baptism_target_iso == "2026-12-31T00:00:00"

@@ -11,11 +11,10 @@ from __future__ import annotations
 import asyncio
 
 import typer
+from jw_agents import workbook_helper
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-
-from jw_agents import workbook_helper
 
 console = Console()
 

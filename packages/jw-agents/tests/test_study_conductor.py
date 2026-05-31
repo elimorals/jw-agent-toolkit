@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import pytest
-
 from jw_agents.study_conductor import (
     AnticipationQuestion,
     LessonPrep,
@@ -18,13 +17,13 @@ class _FakeLesson:
     chapter: int = 1
     language: str = "es"
     title: str = "¿Existe alguien que se preocupe por usted?"
-    paragraphs: list[str] = field(default_factory=lambda: [
-        "Jehová es un Padre amoroso (1 Pedro 5:7).",
-        "Él se preocupa por usted más de lo que imagina.",
-    ])
-    scripture_refs: dict[int, list[str]] = field(default_factory=lambda: {
-        1: ["1 Pedro 5:7"], 2: []
-    })
+    paragraphs: list[str] = field(
+        default_factory=lambda: [
+            "Jehová es un Padre amoroso (1 Pedro 5:7).",
+            "Él se preocupa por usted más de lo que imagina.",
+        ]
+    )
+    scripture_refs: dict[int, list[str]] = field(default_factory=lambda: {1: ["1 Pedro 5:7"], 2: []})
     source: str = "jwpub_local"
     citation_url: str = "https://wol.jw.org/es/wol/publication/r4/lp-s/lff/1"
 
@@ -66,6 +65,9 @@ def test_prepare_lesson_unknown_pub_warns(monkeypatch: pytest.MonkeyPatch) -> No
 
 def test_anticipation_question_dataclass() -> None:
     q = AnticipationQuestion(
-        paragraph_index=1, text="hi", template_id="es.fact", related_verses=[],
+        paragraph_index=1,
+        text="hi",
+        template_id="es.fact",
+        related_verses=[],
     )
     assert q.paragraph_index == 1

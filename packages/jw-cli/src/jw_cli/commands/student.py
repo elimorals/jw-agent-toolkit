@@ -14,11 +14,10 @@ import asyncio
 import json
 
 import typer
+from jw_agents import student_part_helper
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-
-from jw_agents import student_part_helper
 
 console = Console()
 
@@ -40,10 +39,10 @@ def student_command(
     kind: str = typer.Argument(..., help="bible_reading | conversation | revisit | study"),
     topic_or_ref: str = typer.Argument(..., help="Bible reference, topic, or 'this week'"),
     language: str = typer.Option("en", "--lang", "-l", help="ISO language (en/es/pt)"),
-    audience: str = typer.Option("default", "--audience", "-a",
-                                 help="default | new | religious | atheist"),
-    point: int | None = typer.Option(None, "--point", "-p",
-                                     help="Override oratory point 1..50 (default: auto by month)"),
+    audience: str = typer.Option("default", "--audience", "-a", help="default | new | religious | atheist"),
+    point: int | None = typer.Option(
+        None, "--point", "-p", help="Override oratory point 1..50 (default: auto by month)"
+    ),
     as_json: bool = typer.Option(False, "--json", help="Emit JSON instead of pretty Rich output"),
 ) -> None:
     """Compose a student-part script."""

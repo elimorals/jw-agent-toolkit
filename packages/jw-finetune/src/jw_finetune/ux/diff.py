@@ -52,24 +52,29 @@ def compare_checkpoints(
     from jw_finetune.eval.refs import score_citation_accuracy
 
     if generate_fn is None:
+
         def _default_generate(ckpt: Path, prompt: str) -> str:
             from jw_finetune.eval.runner import run_eval
+
             return run_eval(ckpt, [prompt], language=language).answers[0]
+
         generate_fn = _default_generate
 
     rows: list[CheckpointDiffRow] = []
     for prompt in prompts:
         ans_a = generate_fn(checkpoint_a, prompt)
         ans_b = generate_fn(checkpoint_b, prompt)
-        rows.append(CheckpointDiffRow(
-            prompt=prompt,
-            answer_a=ans_a,
-            answer_b=ans_b,
-            citation_a=score_citation_accuracy([ans_a]),
-            citation_b=score_citation_accuracy([ans_b]),
-            terminology_a=score_terminology([ans_a], language=language),
-            terminology_b=score_terminology([ans_b], language=language),
-        ))
+        rows.append(
+            CheckpointDiffRow(
+                prompt=prompt,
+                answer_a=ans_a,
+                answer_b=ans_b,
+                citation_a=score_citation_accuracy([ans_a]),
+                citation_b=score_citation_accuracy([ans_b]),
+                terminology_a=score_terminology([ans_a], language=language),
+                terminology_b=score_terminology([ans_b], language=language),
+            )
+        )
 
     n = max(1, len(rows))
     return CheckpointDiffResult(

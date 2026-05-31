@@ -18,7 +18,6 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
 
 from jw_finetune.eval.doctrinal import score_terminology
 from jw_finetune.eval.refs import score_citation_accuracy
@@ -39,28 +38,27 @@ def make_citation_reward(expect_at_least: int = 1) -> Callable[[list[str], list[
     Signature matches trl's GRPOTrainer reward_funcs API:
     `fn(prompts, completions) -> list[float]`.
     """
+
     def _reward(prompts: list[str], completions: list[str]) -> list[float]:
-        return [
-            1.0 if score_citation_accuracy([c], expect_at_least=expect_at_least) > 0 else 0.0
-            for c in completions
-        ]
+        return [1.0 if score_citation_accuracy([c], expect_at_least=expect_at_least) > 0 else 0.0 for c in completions]
+
     _reward.__name__ = f"citation_reward_min{expect_at_least}"
     return _reward
 
 
 def make_terminology_reward(language: str = "es") -> Callable[[list[str], list[str]], list[float]]:
     """Reward = 1.0 if completion includes >= 1 JW-specific term, else 0.0."""
+
     def _reward(prompts: list[str], completions: list[str]) -> list[float]:
-        return [
-            1.0 if score_terminology([c], language=language) > 0 else 0.0
-            for c in completions
-        ]
+        return [1.0 if score_terminology([c], language=language) > 0 else 0.0 for c in completions]
+
     _reward.__name__ = f"terminology_reward_{language}"
     return _reward
 
 
 def make_length_penalty(min_chars: int = 30, max_chars: int = 1500) -> Callable:
     """Reward = 1.0 if length is in range; linear penalty outside."""
+
     def _reward(prompts: list[str], completions: list[str]) -> list[float]:
         out = []
         for c in completions:
@@ -74,6 +72,7 @@ def make_length_penalty(min_chars: int = 30, max_chars: int = 1500) -> Callable:
                 excess = n - max_chars
                 out.append(max(0.0, 1.0 - excess / max_chars))
         return out
+
     _reward.__name__ = "length_penalty"
     return _reward
 
@@ -88,10 +87,13 @@ def make_apocrypha_penalty(
     canonical scripture. JW doctrine excludes the apocrypha; this reward
     discourages drift during RL.
     """
+
     def _reward(prompts: list[str], completions: list[str]) -> list[float]:
         try:
             from jw_agents.apocrypha_detector import (
-                _detect_framings, _extract_candidates, _verdict,
+                _detect_framings,
+                _extract_candidates,
+                _verdict,
             )
         except ImportError:
             return [1.0] * len(completions)
@@ -110,12 +112,14 @@ def make_apocrypha_penalty(
                     break
             out.append(0.0 if penalized else 1.0)
         return out
+
     _reward.__name__ = "apocrypha_penalty"
     return _reward
 
 
 def composite_reward(
-    reward_fns: list[Callable], weights: list[float] | None = None,
+    reward_fns: list[Callable],
+    weights: list[float] | None = None,
 ) -> Callable[[list[str], list[str]], list[float]]:
     """Weighted sum of multiple reward functions."""
     if weights is None:
@@ -130,6 +134,7 @@ def composite_reward(
             for i, s in enumerate(scores):
                 totals[i] += w * s
         return totals
+
     _reward.__name__ = "composite_reward"
     return _reward
 
@@ -198,8 +203,13 @@ def train_grpo(
         r=recipe.lora_rank,
         lora_alpha=recipe.lora_alpha,
         target_modules=[
-            "q_proj", "k_proj", "v_proj", "o_proj",
-            "gate_proj", "up_proj", "down_proj",
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj",
         ],
         bias="none",
         use_gradient_checkpointing="unsloth",

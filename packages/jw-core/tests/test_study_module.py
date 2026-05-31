@@ -8,11 +8,11 @@ from pathlib import Path
 
 from jw_core.study.flashcards import Flashcard, FlashcardDeck, review_card, schedule_next_review
 from jw_core.study.originals import (
+    StrongEntry,
     get_strong_entry,
     list_known_strongs,
     register_strong_dump,
 )
-from jw_core.study.originals import StrongEntry
 from jw_core.study.personal_notes import PersonalNote, PersonalNoteStore, notes_to_rag_chunks
 from jw_core.study.reading_plan import (
     READING_PLANS,
@@ -166,14 +166,16 @@ def test_nephesh_has_spanish() -> None:
 
 
 def test_register_dump_overrides() -> None:
-    register_strong_dump([
-        StrongEntry(
-            strong_number="H99999",
-            transliteration="test",
-            original="!",
-            glosses={"en": ["test gloss"]},
-        )
-    ])
+    register_strong_dump(
+        [
+            StrongEntry(
+                strong_number="H99999",
+                transliteration="test",
+                original="!",
+                glosses={"en": ["test gloss"]},
+            )
+        ]
+    )
     entry = get_strong_entry("H99999")
     assert entry is not None and entry.transliteration == "test"
 

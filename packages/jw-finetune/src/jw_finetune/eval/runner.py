@@ -50,12 +50,8 @@ def run_eval(
             return_tensors="pt",
             add_generation_prompt=True,
         ).to(model.device)
-        out = model.generate(
-            inputs, max_new_tokens=max_new_tokens, do_sample=False
-        )
-        text = tokenizer.decode(
-            out[0][inputs.shape[1]:], skip_special_tokens=True
-        )
+        out = model.generate(inputs, max_new_tokens=max_new_tokens, do_sample=False)
+        text = tokenizer.decode(out[0][inputs.shape[1] :], skip_special_tokens=True)
         answers.append(text)
 
     return EvalResult(

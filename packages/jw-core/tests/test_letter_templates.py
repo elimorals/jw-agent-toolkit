@@ -2,11 +2,8 @@
 
 from __future__ import annotations
 
-import pytest
-
 from jw_core.data.letter_templates import (
     AUDIENCES,
-    TOPIC_FAMILIES,
     LetterTemplate,
     get_template,
     list_audiences,
@@ -92,8 +89,14 @@ def test_list_audiences_includes_default_first() -> None:
 def test_list_topic_families_covers_8_documented() -> None:
     fams = set(list_topic_families())
     assert {
-        "family", "suffering", "hope", "science",
-        "peace", "identity", "addictions", "generic",
+        "family",
+        "suffering",
+        "hope",
+        "science",
+        "peace",
+        "identity",
+        "addictions",
+        "generic",
     } <= fams
 
 
@@ -125,7 +128,7 @@ def test_phone_fallback_chain() -> None:
     assert t is PHONE_TEMPLATES[("default", "generic")]
 
 
-from jw_core.data.cart_templates import CART_TEMPLATES, get_cart_template
+from jw_core.data.cart_templates import get_cart_template
 
 
 def test_cart_template_has_time_target_30s() -> None:

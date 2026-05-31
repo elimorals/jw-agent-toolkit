@@ -5,9 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from typer.testing import CliRunner
-
 from jw_cli.commands.citations import citations_app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 
@@ -15,9 +14,7 @@ runner = CliRunner()
 def test_cli_structural_with_urls(tmp_path: Path) -> None:
     urls_file = tmp_path / "u.txt"
     urls_file.write_text("https://wol.jw.org/es/wol/d/r4/lp-s/1\n", encoding="utf-8")
-    result = runner.invoke(
-        citations_app, ["check", "--urls", str(urls_file), "--report", "json"]
-    )
+    result = runner.invoke(citations_app, ["check", "--urls", str(urls_file), "--report", "json"])
     assert result.exit_code == 0, result.stdout
     data = json.loads(result.stdout)
     assert data["mode"] == "structural"

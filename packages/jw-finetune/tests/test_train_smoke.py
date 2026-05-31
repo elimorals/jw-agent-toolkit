@@ -8,7 +8,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_finetune.data.models import SourceSpec
 from jw_finetune.recipes.base import Recipe
 
@@ -16,6 +15,7 @@ from jw_finetune.recipes.base import Recipe
 def _has_unsloth() -> bool:
     try:
         import unsloth  # noqa: F401  # type: ignore[import-untyped]
+
         return True
     except ImportError:
         return False

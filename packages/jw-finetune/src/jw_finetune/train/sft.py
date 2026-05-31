@@ -27,15 +27,15 @@ logger = logging.getLogger(__name__)
 # used by train_on_responses_only. Auto-applied when recipe leaves the
 # instruction/response fields empty.
 _RESPONSES_ONLY_PARTS: dict[str, tuple[str, str]] = {
-    "chatml":   ("<|im_start|>user\n", "<|im_start|>assistant\n"),
+    "chatml": ("<|im_start|>user\n", "<|im_start|>assistant\n"),
     "qwen-2.5": ("<|im_start|>user\n", "<|im_start|>assistant\n"),
-    "qwen-3":   ("<|im_start|>user\n", "<|im_start|>assistant\n"),
-    "llama-3":  ("<|start_header_id|>user<|end_header_id|>\n\n", "<|start_header_id|>assistant<|end_header_id|>\n\n"),
+    "qwen-3": ("<|im_start|>user\n", "<|im_start|>assistant\n"),
+    "llama-3": ("<|start_header_id|>user<|end_header_id|>\n\n", "<|start_header_id|>assistant<|end_header_id|>\n\n"),
     "llama-3.1": ("<|start_header_id|>user<|end_header_id|>\n\n", "<|start_header_id|>assistant<|end_header_id|>\n\n"),
-    "gemma":    ("<start_of_turn>user\n", "<start_of_turn>model\n"),
-    "gemma-3":  ("<start_of_turn>user\n", "<start_of_turn>model\n"),
-    "phi-4":    ("<|im_start|>user<|im_sep|>", "<|im_start|>assistant<|im_sep|>"),
-    "mistral":  ("[INST] ", " [/INST]"),
+    "gemma": ("<start_of_turn>user\n", "<start_of_turn>model\n"),
+    "gemma-3": ("<start_of_turn>user\n", "<start_of_turn>model\n"),
+    "phi-4": ("<|im_start|>user<|im_sep|>", "<|im_start|>assistant<|im_sep|>"),
+    "mistral": ("[INST] ", " [/INST]"),
 }
 
 
@@ -104,8 +104,13 @@ def train_sft(
         lora_alpha=recipe.lora_alpha,
         lora_dropout=recipe.lora_dropout,
         target_modules=[
-            "q_proj", "k_proj", "v_proj", "o_proj",
-            "gate_proj", "up_proj", "down_proj",
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj",
         ],
         bias="none",
         use_gradient_checkpointing="unsloth",
@@ -122,9 +127,7 @@ def train_sft(
 
     eval_ds = None
     if eval_dataset_path and eval_dataset_path.exists():
-        eval_ds = load_dataset(
-            "json", data_files=str(eval_dataset_path), split="train"
-        )
+        eval_ds = load_dataset("json", data_files=str(eval_dataset_path), split="train")
         try:
             eval_ds = standardize_sharegpt(eval_ds)
         except Exception:  # noqa: BLE001

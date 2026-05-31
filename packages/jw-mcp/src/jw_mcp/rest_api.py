@@ -38,14 +38,11 @@ try:
     from fastapi.middleware.cors import CORSMiddleware
     from pydantic import BaseModel
 except ImportError as e:  # pragma: no cover
-    raise ImportError(
-        "FastAPI is required for the REST API. `pip install fastapi uvicorn`"
-    ) from e
+    raise ImportError("FastAPI is required for the REST API. `pip install fastapi uvicorn`") from e
 
 from jw_agents import (
     apologetics as apologetics_agent,
 )
-from jw_mcp.dashboard import router as dashboard_router
 from jw_agents.conversation_assistant import conversation_assistant
 from jw_agents.workbook_helper import workbook_helper
 from jw_core.clients.cdn import CDNClient
@@ -63,6 +60,8 @@ from jw_core.languages import get_language
 from jw_core.parsers.daily_text import parse_daily_text
 from jw_core.parsers.reference import parse_reference
 from jw_core.parsers.verse import get_verse
+
+from jw_mcp.dashboard import router as dashboard_router
 
 logger = logging.getLogger("jw-rest")
 app = FastAPI(title="jw-agent-toolkit REST", version="0.1.0")
@@ -223,9 +222,7 @@ async def post_daily(req: DailyTextRequest) -> dict[str, Any]:
 @app.post("/api/v1/search")
 async def post_search(req: SearchRequest) -> dict[str, Any]:
     lang = get_language(req.language)
-    data = await _get_cdn().search(
-        req.query, filter_type=req.filter_type, language=lang.jw_code, limit=req.limit
-    )
+    data = await _get_cdn().search(req.query, filter_type=req.filter_type, language=lang.jw_code, limit=req.limit)
     return {"query": req.query, "results": data}
 
 

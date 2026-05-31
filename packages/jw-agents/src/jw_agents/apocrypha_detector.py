@@ -16,11 +16,11 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from jw_agents.base import AgentResult, Citation, Finding
-from jw_agents.reverse_citation_lookup import _bigram_overlap, _normalize
 from jw_core.clients.cdn import CDNClient
 from jw_core.clients.wol import WOLClient
 
+from jw_agents.base import AgentResult, Citation, Finding
+from jw_agents.reverse_citation_lookup import _bigram_overlap, _normalize
 
 _QUOTE_RE = re.compile(r'["“”«»]([^"“”«»]{20,500})["“”«»]')
 
@@ -128,8 +128,9 @@ async def _best_overlap(
         data = await cdn.search(query, filter_type="publications", language=language, limit=10)
     except Exception:
         return ("", 0.0, "")
-    from jw_agents.research_topic import _flatten_search, _wol_url_from
     from jw_core.parsers.article import parse_article
+
+    from jw_agents.research_topic import _flatten_search, _wol_url_from
 
     best_url = ""
     best_score = 0.0

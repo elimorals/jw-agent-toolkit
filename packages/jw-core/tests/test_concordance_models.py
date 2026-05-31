@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_core.concordance.models import ConcordanceHit, IndexEntry
 
 

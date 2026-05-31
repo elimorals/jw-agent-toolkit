@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
-
 from jw_core.news.digest import (
     build_digest,
     collect_items,
@@ -71,7 +70,7 @@ def test_render_markdown_is_byte_stable() -> None:
     md1 = render_markdown(
         new_items=items,
         retired=[],
-        generated_at=datetime(2026, 5, 30, 8, 0, tzinfo=timezone.utc),
+        generated_at=datetime(2026, 5, 30, 8, 0, tzinfo=UTC),
         since=None,
         languages=["en", "es"],
         channels=["publications", "broadcasting", "programs"],
@@ -80,7 +79,7 @@ def test_render_markdown_is_byte_stable() -> None:
     md2 = render_markdown(
         new_items=list(reversed(items)),  # order shouldn't matter
         retired=[],
-        generated_at=datetime(2026, 5, 30, 8, 0, tzinfo=timezone.utc),
+        generated_at=datetime(2026, 5, 30, 8, 0, tzinfo=UTC),
         since=None,
         languages=["en", "es"],
         channels=["publications", "broadcasting", "programs"],
@@ -93,7 +92,7 @@ def test_render_markdown_contains_urls() -> None:
     md = render_markdown(
         new_items=[_item("publications", "w_E_202606", "en", "WT June")],
         retired=[],
-        generated_at=datetime(2026, 5, 30, tzinfo=timezone.utc),
+        generated_at=datetime(2026, 5, 30, tzinfo=UTC),
         since=None,
         languages=["en"],
         channels=["publications"],

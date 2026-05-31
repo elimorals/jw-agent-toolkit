@@ -20,6 +20,7 @@ class FakeEmbedder:
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         import hashlib
+
         out = []
         for t in texts:
             h = hashlib.md5(t.encode("utf-8")).digest()
@@ -60,13 +61,17 @@ def test_evaluate_similarity_perfect_match() -> None:
 
 def test_evaluate_similarity_handles_generator_failure() -> None:
     """If generate_fn raises, the prompt gets an empty answer."""
+
     def broken(p: str) -> str:
         if "fail" in p:
             raise RuntimeError("boom")
         return "ok"
+
     gold = [("works", "ok"), ("fail-please", "ok")]
     result = evaluate_similarity(
-        gold, generate_fn=broken, embedder=FakeEmbedder(),
+        gold,
+        generate_fn=broken,
+        embedder=FakeEmbedder(),
     )
     assert result.n_prompts == 2
     # One should have lower similarity (empty answer)
@@ -76,7 +81,9 @@ def test_evaluate_similarity_handles_generator_failure() -> None:
 
 def test_evaluate_similarity_empty_gold() -> None:
     result = evaluate_similarity(
-        [], generate_fn=lambda p: "x", embedder=FakeEmbedder(),
+        [],
+        generate_fn=lambda p: "x",
+        embedder=FakeEmbedder(),
     )
     assert result.n_prompts == 0
     assert result.mean_similarity == 0.0
@@ -85,11 +92,14 @@ def test_evaluate_similarity_empty_gold() -> None:
 def test_load_gold_set(tmp_path: Path) -> None:
     p = tmp_path / "gold.jsonl"
     p.write_text(
-        json.dumps({"prompt": "Q1", "answer": "A1"}) + "\n"
-        + json.dumps({"question": "Q2", "gold": "A2"}) + "\n"
+        json.dumps({"prompt": "Q1", "answer": "A1"})
+        + "\n"
+        + json.dumps({"question": "Q2", "gold": "A2"})
+        + "\n"
         + "\n"  # blank line
         + "not-json\n"  # malformed
-        + json.dumps({"prompt": "Q3", "answer": "A3"}) + "\n",
+        + json.dumps({"prompt": "Q3", "answer": "A3"})
+        + "\n",
         encoding="utf-8",
     )
     pairs = load_gold_set(p)

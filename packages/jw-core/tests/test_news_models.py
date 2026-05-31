@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
-
 from jw_core.news.models import DigestReport, NewsItem, SeenRecord
 
 
@@ -33,7 +32,7 @@ def test_news_item_rejects_unknown_channel() -> None:
 
 
 def test_seen_record_roundtrip() -> None:
-    now = datetime(2026, 5, 30, 8, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 5, 30, 8, 0, tzinfo=UTC)
     record = SeenRecord(
         channel="publications",
         item_id="abc",
@@ -52,7 +51,7 @@ def test_digest_report_stats() -> None:
         NewsItem(channel="broadcasting", item_id="c", title="C", language="en", url="u"),
     ]
     report = DigestReport(
-        generated_at=datetime(2026, 5, 30, tzinfo=timezone.utc),
+        generated_at=datetime(2026, 5, 30, tzinfo=UTC),
         since=None,
         languages=["en", "es"],
         channels=["publications", "broadcasting"],

@@ -18,16 +18,11 @@ from jw_cli.commands import (
     citations,
     daily,
     download,
-    eval as eval_module,
-    export as export_module,
-    grep as grep_module,
     jwpub,
     languages,
-    letter as letter_module,
     life,
     ministry,
     news,
-    report as report_module,
     search,
     song,
     student,
@@ -35,6 +30,21 @@ from jw_cli.commands import (
     topic,
     verse,
     workbook,
+)
+from jw_cli.commands import (
+    eval as eval_module,
+)
+from jw_cli.commands import (
+    export as export_module,
+)
+from jw_cli.commands import (
+    grep as grep_module,
+)
+from jw_cli.commands import (
+    letter as letter_module,
+)
+from jw_cli.commands import (
+    report as report_module,
 )
 
 app = typer.Typer(

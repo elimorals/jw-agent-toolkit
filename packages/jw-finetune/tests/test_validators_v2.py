@@ -12,8 +12,7 @@ def test_bible_ref_full_name_es() -> None:
 
 def test_bible_ref_abbrev_es() -> None:
     # WBTS abbreviation forms
-    assert validators.is_valid_bible_ref("Mt 24:14") or \
-           validators.is_valid_bible_ref("Mat 24:14")
+    assert validators.is_valid_bible_ref("Mt 24:14") or validators.is_valid_bible_ref("Mat 24:14")
 
 
 def test_bible_ref_with_book_prefix_es() -> None:

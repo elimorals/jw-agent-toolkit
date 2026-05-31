@@ -9,7 +9,6 @@ for each language. When JW renames a book this is the file to update.
 
 from __future__ import annotations
 
-
 # 66 entries, indexed by book_num - 1.
 # Format: dict[language] -> list[name + abbrevs]
 
@@ -518,8 +517,6 @@ def merge_into(books: list[dict]) -> None:
     """In-place expand each BOOKS entry's `names` with Tier-1 languages."""
     for lang, entries in NAMES_BY_LANG.items():
         if len(entries) != 66:
-            raise RuntimeError(
-                f"books_tier1: {lang} has {len(entries)} entries, expected 66"
-            )
+            raise RuntimeError(f"books_tier1: {lang} has {len(entries)} entries, expected 66")
         for book_idx, names in enumerate(entries):
             books[book_idx]["names"][lang] = names  # type: ignore[index]

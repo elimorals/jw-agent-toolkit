@@ -22,9 +22,9 @@ from jw_core.data.cart_templates import get_cart_template
 from jw_core.data.letter_templates import (
     AUDIENCES,
     LetterTemplate,
+    resolve_topic_family,
 )
 from jw_core.data.letter_templates import get_template as get_letter_template
-from jw_core.data.letter_templates import resolve_topic_family
 from jw_core.data.phone_templates import get_phone_template
 from jw_core.parsers.reference import parse_reference
 
@@ -108,17 +108,12 @@ async def letter_composer(
     # Resolve language (fallback en).
     lang = language.lower() if language else "en"
     if lang not in _SUPPORTED_LANGS:
-        result.warnings.append(
-            f"Unsupported language {language!r}; using English fallback."
-        )
+        result.warnings.append(f"Unsupported language {language!r}; using English fallback.")
         lang = "en"
 
     # Resolve audience (fallback default).
     if audience not in AUDIENCES:
-        result.warnings.append(
-            f"Unknown audience {audience!r}; using 'default'. "
-            f"Available: {AUDIENCES}"
-        )
+        result.warnings.append(f"Unknown audience {audience!r}; using 'default'. Available: {AUDIENCES}")
         eff_audience = "default"
     else:
         eff_audience = audience
@@ -172,9 +167,7 @@ async def letter_composer(
     # Optional 5th: topic anchor from the Publications Index.
     if topic is not None:
         try:
-            hits = await topic.search_subjects(
-                topic_or_question, language=lang.upper()[0], limit=1
-            )
+            hits = await topic.search_subjects(topic_or_question, language=lang.upper()[0], limit=1)
         except Exception as exc:  # noqa: BLE001
             result.warnings.append(f"Topic Index search failed: {exc}")
             hits = []

@@ -12,6 +12,7 @@ from jw_core.concordance.indexer import (
     index_nwt_chapter,
 )
 from jw_core.concordance.store import ConcordanceStore
+
 from tests.fixtures.concordance import build_minimal_epub
 
 

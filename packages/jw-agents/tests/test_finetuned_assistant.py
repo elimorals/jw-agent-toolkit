@@ -7,12 +7,10 @@ from typing import Any
 
 from jw_agents.finetuned_assistant import finetuned_assistant
 from jw_agents.finetuned_model import (
-    FinetunedModelClient,
     GenerateRequest,
     GenerateResponse,
     build_client,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fake client
@@ -77,14 +75,16 @@ def test_assistant_without_rag() -> None:
 
 def test_assistant_with_rag_hits() -> None:
     hits = [
-        _Hit(_Chunk("El Reino es el gobierno celestial de Dios.",
-                    {"pub_code": "w24", "section_ref": "w24 12 p.7",
-                     "kind": "watchtower"}),
-             0.95),
-        _Hit(_Chunk("Daniel 2:44 lo profetiza.",
-                    {"pub_code": "nwt", "section_ref": "Dan 2:44",
-                     "kind": "bible"}),
-             0.88),
+        _Hit(
+            _Chunk(
+                "El Reino es el gobierno celestial de Dios.",
+                {"pub_code": "w24", "section_ref": "w24 12 p.7", "kind": "watchtower"},
+            ),
+            0.95,
+        ),
+        _Hit(
+            _Chunk("Daniel 2:44 lo profetiza.", {"pub_code": "nwt", "section_ref": "Dan 2:44", "kind": "bible"}), 0.88
+        ),
     ]
     result = finetuned_assistant(
         "¿Qué es el Reino?",
@@ -130,11 +130,13 @@ def test_assistant_handles_client_error() -> None:
 
 def test_build_client_unknown_backend_raises() -> None:
     import pytest
+
     with pytest.raises(ValueError, match="Unknown backend"):
         build_client(backend="totally-fake")
 
 
 def test_build_client_unsloth_requires_checkpoint() -> None:
     import pytest
+
     with pytest.raises(ValueError, match="checkpoint_dir"):
         build_client(backend="unsloth", checkpoint_dir=None)

@@ -8,8 +8,6 @@ from datetime import date as _date
 from pathlib import Path
 
 import typer
-from rich.console import Console
-
 from jw_core.ministry.exporters import render_csv, render_markdown
 from jw_core.ministry.field_report import (
     FieldReportStore,
@@ -17,6 +15,7 @@ from jw_core.ministry.field_report import (
     StudyEntry,
     aggregate_monthly_report,
 )
+from rich.console import Console
 
 console = Console()
 report_app = typer.Typer(name="report", help="Informe mensual de precursor (local).")
@@ -85,9 +84,7 @@ def log_hours_cmd(
     _warn_no_encryption()
     d = _date.fromisoformat(date) if date else _today()
     with FieldReportStore() as store:
-        e = store.add_hours(
-            HoursEntry(entry_id="", date=d, hours_decimal=hours, tag=tag or None, note=note)
-        )
+        e = store.add_hours(HoursEntry(entry_id="", date=d, hours_decimal=hours, tag=tag or None, note=note))
     console.print(f"[green]+ {e.hours_decimal}h[/green] el {e.date} (tag={e.tag}) id={e.entry_id[:8]}")
 
 

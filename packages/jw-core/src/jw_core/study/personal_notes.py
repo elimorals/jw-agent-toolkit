@@ -179,7 +179,6 @@ class PersonalNoteStore:
     def __exit__(self, *args: object) -> None:
         self.close()
 
-
     def _row_to_note(self, row: sqlite3.Row) -> PersonalNote:
         return PersonalNote(
             note_id=row["note_id"],

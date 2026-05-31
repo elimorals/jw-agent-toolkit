@@ -17,7 +17,6 @@ passed in. Idempotent for fixed `today`.
 from __future__ import annotations
 
 from datetime import date
-from typing import Any
 
 from jw_core.clients.wol import WOLClient
 from jw_core.data.books import BOOKS
@@ -75,14 +74,17 @@ async def student_part_helper(
     # 2. Resolve audience (fall back if unknown).
     audience_used = audience if audience in _KNOWN_AUDIENCES else "default"
     if audience_used != audience:
-        result.warnings.append(
-            f"Audience {audience!r} unsupported; using 'default'."
-        )
+        result.warnings.append(f"Audience {audience!r} unsupported; using 'default'.")
     result.metadata["audience_used"] = audience_used
 
     # 3. Resolve scripture / topic / 'this week'.
     verse_display, verse_url, topic_label = await _resolve_topic(
-        topic_or_ref, language, kind, wol, today, result,
+        topic_or_ref,
+        language,
+        kind,
+        wol,
+        today,
+        result,
     )
 
     # 4. Pick template.
@@ -159,8 +161,7 @@ def _resolve_oratory_point(
     if kind not in point.applies_to:
         applicable = ", ".join(str(p.number) for p in points_applicable_to(kind)[:5])
         result.warnings.append(
-            f"Oratory point {point.number} does not naturally apply to {kind!r}; "
-            f"consider one of: {applicable}…"
+            f"Oratory point {point.number} does not naturally apply to {kind!r}; consider one of: {applicable}…"
         )
     return point
 
@@ -184,9 +185,7 @@ async def _resolve_topic(
     """
     if topic_or_ref.strip().lower() == "this week":
         if wol is None:
-            result.warnings.append(
-                "'this week' requires a WOLClient (workbook scraper) — using free topic instead."
-            )
+            result.warnings.append("'this week' requires a WOLClient (workbook scraper) — using free topic instead.")
             return ("", "", topic_or_ref)
         # Lazy import to keep workbook off the import path of every consumer.
         try:
@@ -205,9 +204,7 @@ async def _resolve_topic(
                 ref = parse_reference(str(f.metadata["reference"]))
                 if ref is not None:
                     return (ref.display(), ref.wol_url(lang=language), "")
-        result.warnings.append(
-            f"workbook did not contain an assignment of kind={kind!r} for this week."
-        )
+        result.warnings.append(f"workbook did not contain an assignment of kind={kind!r} for this week.")
         return ("", "", topic_or_ref)
 
     ref = parse_reference(topic_or_ref)
@@ -250,7 +247,7 @@ def _build_placeholders(
     display = verse_display or topic or "—"
     return {
         "verse_display": display,
-        "verse_text": "",          # filled only when wol fetch was done; v1: empty.
+        "verse_text": "",  # filled only when wol fetch was done; v1: empty.
         "topic": topic or "—",
         "oratory_phrase": key_phrase(point, language),
         "oratory_brief": brief(point, language),

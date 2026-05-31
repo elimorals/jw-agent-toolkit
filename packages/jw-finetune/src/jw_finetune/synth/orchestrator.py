@@ -15,7 +15,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
-
 from jw_rag.chunker import Chunk
 
 from jw_finetune.data.formats import QAPair
@@ -40,9 +39,7 @@ class SynthResult:
     pairs: list[QAPair] = field(default_factory=list)
     rejected: int = 0
     parse_error: bool = False
-    usage: dict[str, int] = field(
-        default_factory=lambda: {"input_tokens": 0, "output_tokens": 0}
-    )
+    usage: dict[str, int] = field(default_factory=lambda: {"input_tokens": 0, "output_tokens": 0})
 
 
 _env_singleton: Environment | None = None

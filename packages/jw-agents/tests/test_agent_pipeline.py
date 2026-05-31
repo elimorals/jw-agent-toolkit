@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 import pytest
-
 from jw_agents.base import AgentResult, Citation, Finding
 from jw_agents.finetuned_model import GenerateRequest, GenerateResponse
 
@@ -19,7 +17,9 @@ class FakeFinetunedClient:
 
     def generate(self, req: GenerateRequest) -> GenerateResponse:
         return GenerateResponse(
-            text=self.text, backend=self.backend, model=self.model,
+            text=self.text,
+            backend=self.backend,
+            model=self.model,
             usage={"input_tokens": 5, "output_tokens": 20},
         )
 
@@ -29,15 +29,19 @@ async def test_findings_to_context_extracts_excerpts() -> None:
     from jw_agents.agent_pipeline import _findings_to_context
 
     result = AgentResult(query="x", agent_name="x")
-    result.findings.append(Finding(
-        summary="resumen corto",
-        excerpt="excerpt completo del párrafo del estudio",
-        citation=Citation(url="http://wol/x", title="w24 12 p.7", kind="article"),
-    ))
-    result.findings.append(Finding(
-        summary="otro resumen",
-        citation=Citation(url="http://wol/y", title="g23 5 p.3", kind="article"),
-    ))
+    result.findings.append(
+        Finding(
+            summary="resumen corto",
+            excerpt="excerpt completo del párrafo del estudio",
+            citation=Citation(url="http://wol/x", title="w24 12 p.7", kind="article"),
+        )
+    )
+    result.findings.append(
+        Finding(
+            summary="otro resumen",
+            citation=Citation(url="http://wol/y", title="g23 5 p.3", kind="article"),
+        )
+    )
     ctx = _findings_to_context(result)
     assert len(ctx) == 2
     assert "[w24 12 p.7]" in ctx[0]
@@ -52,6 +56,7 @@ async def test_verse_explainer_with_finetuned_calls_client(monkeypatch) -> None:
     # `jw_agents.verse_explainer` is shadowed by the function in __init__.py;
     # access the module via sys.modules.
     import sys
+
     ve_mod = sys.modules["jw_agents.verse_explainer"]
     from jw_agents import agent_pipeline
 
@@ -60,22 +65,26 @@ async def test_verse_explainer_with_finetuned_calls_client(monkeypatch) -> None:
     class CaptureClient:
         backend = "capture"
         model = "x"
+
         def generate(self, req: GenerateRequest) -> GenerateResponse:
             captured_client_calls.append(req.prompt)
             return GenerateResponse(
                 text="generated answer here.",
-                backend=self.backend, model=self.model,
+                backend=self.backend,
+                model=self.model,
                 usage={"input_tokens": 1, "output_tokens": 1},
             )
 
     # Fake verse_explainer that returns a known AgentResult
     async def fake_verse_explainer(text, **kw):
         ar = AgentResult(query=text, agent_name="verse_explainer")
-        ar.findings.append(Finding(
-            summary="El versículo habla del amor de Dios.",
-            excerpt="«Porque tanto amó Dios al mundo...»",
-            citation=Citation(url="http://wol/jn3", title="Juan 3:16", kind="verse"),
-        ))
+        ar.findings.append(
+            Finding(
+                summary="El versículo habla del amor de Dios.",
+                excerpt="«Porque tanto amó Dios al mundo...»",
+                citation=Citation(url="http://wol/jn3", title="Juan 3:16", kind="verse"),
+            )
+        )
         return ar
 
     monkeypatch.setattr(ve_mod, "verse_explainer", fake_verse_explainer)
@@ -97,13 +106,16 @@ async def test_verse_explainer_with_finetuned_calls_client(monkeypatch) -> None:
 @pytest.mark.asyncio
 async def test_verse_explainer_with_finetuned_handles_client_error(monkeypatch) -> None:
     import sys
+
     ve_mod = sys.modules["jw_agents.verse_explainer"]
     from jw_agents import agent_pipeline
 
     class BrokenClient:
         backend = "broken"
         model = "x"
-        def generate(self, req): raise RuntimeError("model down")
+
+        def generate(self, req):
+            raise RuntimeError("model down")
 
     async def fake_verse_explainer(text, **kw):
         return AgentResult(query=text, agent_name="verse_explainer")
@@ -122,15 +134,18 @@ async def test_verse_explainer_with_finetuned_handles_client_error(monkeypatch) 
 @pytest.mark.asyncio
 async def test_conversation_assistant_with_finetuned(monkeypatch) -> None:
     import sys
+
     ca_mod = sys.modules["jw_agents.conversation_assistant"]
     from jw_agents import agent_pipeline
 
     async def fake_ca(text, **kw):
         ar = AgentResult(query=text, agent_name="conversation_assistant")
-        ar.findings.append(Finding(
-            summary="Texto sobre la Trinidad",
-            citation=Citation(url="http://wol/x", title="bh ch.4", kind="article"),
-        ))
+        ar.findings.append(
+            Finding(
+                summary="Texto sobre la Trinidad",
+                citation=Citation(url="http://wol/x", title="bh ch.4", kind="article"),
+            )
+        )
         return ar
 
     monkeypatch.setattr(ca_mod, "conversation_assistant", fake_ca)

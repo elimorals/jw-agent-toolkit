@@ -7,9 +7,8 @@ import json
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
-
 from jw_cli.main import app
+from typer.testing import CliRunner
 
 RUNNER = CliRunner()
 

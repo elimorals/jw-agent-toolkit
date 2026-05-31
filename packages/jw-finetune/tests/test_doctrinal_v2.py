@@ -27,9 +27,7 @@ def test_proportional_rewards_depth() -> None:
 
 def test_proportional_caps_at_soft_cap() -> None:
     """4+ terms → 1.0 regardless of how many more."""
-    very_deep = [
-        "Jehová Reino publicador anciano atalaya espíritu santo memorial estudio bíblico"
-    ]
+    very_deep = ["Jehová Reino publicador anciano atalaya espíritu santo memorial estudio bíblico"]
     s = score_terminology_proportional(very_deep, language="es", soft_cap=4)
     assert abs(s - 1.0) < 1e-6
 

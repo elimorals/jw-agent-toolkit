@@ -34,9 +34,9 @@ import logging
 import sqlite3
 import tempfile
 import zipfile
+from collections.abc import Iterator
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import Iterator
 
 from pydantic import BaseModel, Field
 
@@ -254,9 +254,7 @@ def notes_for_chapter(
     return [
         n
         for n in backup.notes
-        if n.location is not None
-        and n.location.book_number == book_num
-        and n.location.chapter_number == chapter
+        if n.location is not None and n.location.book_number == book_num and n.location.chapter_number == chapter
     ]
 
 
@@ -350,9 +348,7 @@ def _read_user_data(
 
 
 def _list_tables(conn: sqlite3.Connection) -> set[str]:
-    rows = conn.execute(
-        "SELECT name FROM sqlite_master WHERE type='table'"
-    ).fetchall()
+    rows = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
     return {r[0] for r in rows}
 
 

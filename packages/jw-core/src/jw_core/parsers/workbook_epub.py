@@ -78,7 +78,9 @@ def parse_week_from_epub_document(
     week_of = _infer_monday(document.title, year=year, language=language)
     if epub_path is not None:
         sections = _split_sections_from_xhtml(
-            epub_path, document.id, language=language,
+            epub_path,
+            document.id,
+            language=language,
         )
     else:
         sections = _split_sections(document.paragraphs, language=language)
@@ -127,9 +129,7 @@ def _split_sections_from_xhtml(
             if current_assignment is not None and current_section is not None:
                 current_section.assignments.append(current_assignment)
                 current_assignment = None
-            current_section = WorkbookSection(
-                name=section_match[0], heading=section_match[1], assignments=[]
-            )
+            current_section = WorkbookSection(name=section_match[0], heading=section_match[1], assignments=[])
             sections.append(current_section)
             continue
         if current_section is None:
@@ -150,11 +150,7 @@ def _split_sections_from_xhtml(
             continue
         # Body content under current assignment.
         if current_assignment is not None:
-            current_assignment.body = (
-                f"{current_assignment.body}\n{text}".strip()
-                if current_assignment.body
-                else text
-            )
+            current_assignment.body = f"{current_assignment.body}\n{text}".strip() if current_assignment.body else text
     if current_assignment is not None and current_section is not None:
         current_section.assignments.append(current_assignment)
     return sections
@@ -286,9 +282,7 @@ def _split_sections(paragraphs: list[str], *, language: str) -> list[WorkbookSec
                 current_assignment = _new_assignment(ptext, mm)
             elif current_assignment is not None:
                 current_assignment.body = (
-                    f"{current_assignment.body}\n{ptext}".strip()
-                    if current_assignment.body
-                    else ptext
+                    f"{current_assignment.body}\n{ptext}".strip() if current_assignment.body else ptext
                 )
     if current_assignment is not None:
         current_assignments.append(current_assignment)

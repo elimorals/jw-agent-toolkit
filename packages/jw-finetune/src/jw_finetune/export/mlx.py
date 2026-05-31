@@ -27,9 +27,13 @@ def export_mlx(
         shutil.rmtree(output_dir)
 
     cmd = [
-        sys.executable, "-m", "mlx_lm.convert",
-        "--hf-path", str(checkpoint_dir),
-        "--mlx-path", str(output_dir),
+        sys.executable,
+        "-m",
+        "mlx_lm.convert",
+        "--hf-path",
+        str(checkpoint_dir),
+        "--mlx-path",
+        str(output_dir),
     ]
     if quant:
         bits = "4" if quant.lower().startswith("q4") else "8"

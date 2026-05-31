@@ -58,6 +58,7 @@ def _get_or_load_model(checkpoint_dir: Path) -> tuple[Any, Any]:
         oldest = next(iter(_LOADED_MODEL_CACHE))
         _LOADED_MODEL_CACHE.pop(oldest, None)
     from unsloth import FastLanguageModel  # type: ignore[import-untyped]
+
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=str(checkpoint_dir),
         max_seq_length=2048,
@@ -181,17 +182,17 @@ def _list_runs(workspace_root: Path) -> list[dict[str, Any]]:
         ckpt_root = d / "checkpoints"
         ckpts = []
         if ckpt_root.is_dir():
-            ckpts = sorted(
-                c.name for c in ckpt_root.iterdir() if c.is_dir()
-            )
-        out.append({
-            "run_id": d.name,
-            "has_recipe": recipe_path.exists(),
-            "task": "sft" if sft.exists() else ("cpt" if cpt.exists() else "unknown"),
-            "dataset_path": str((sft if sft.exists() else cpt).name) if (sft.exists() or cpt.exists()) else "",
-            "checkpoints": ckpts,
-            "events_size_bytes": (d / "events.jsonl").stat().st_size if (d / "events.jsonl").exists() else 0,
-        })
+            ckpts = sorted(c.name for c in ckpt_root.iterdir() if c.is_dir())
+        out.append(
+            {
+                "run_id": d.name,
+                "has_recipe": recipe_path.exists(),
+                "task": "sft" if sft.exists() else ("cpt" if cpt.exists() else "unknown"),
+                "dataset_path": str((sft if sft.exists() else cpt).name) if (sft.exists() or cpt.exists()) else "",
+                "checkpoints": ckpts,
+                "events_size_bytes": (d / "events.jsonl").stat().st_size if (d / "events.jsonl").exists() else 0,
+            }
+        )
     return out
 
 
@@ -224,11 +225,13 @@ def _validated_recipe_from_payload(payload: dict[str, Any]) -> tuple[Recipe, lis
     src_raw = payload.pop("sources", []) or []
     sources = []
     for s in src_raw:
-        sources.append(SourceSpec(
-            kind=s.get("kind", "jwpub"),
-            path=s.get("path", ""),
-            language=s.get("language", "es"),
-        ))
+        sources.append(
+            SourceSpec(
+                kind=s.get("kind", "jwpub"),
+                path=s.get("path", ""),
+                language=s.get("language", "es"),
+            )
+        )
     payload["sources"] = sources
     recipe = Recipe(**payload)
     return recipe, validate_recipe(recipe)
@@ -253,16 +256,18 @@ def attach_studio_routes(app: Any, workspace_root: Path) -> None:
         items = []
         for name in list_presets():
             r = get_preset(name)
-            items.append({
-                "name": name,
-                "task": r.task,
-                "languages": r.languages,
-                "publication_kinds": r.publication_kinds,
-                "qa_style": r.qa_style,
-                "base_model": r.base_model,
-                "epochs": r.epochs,
-                "lora_rank": r.lora_rank,
-            })
+            items.append(
+                {
+                    "name": name,
+                    "task": r.task,
+                    "languages": r.languages,
+                    "publication_kinds": r.publication_kinds,
+                    "qa_style": r.qa_style,
+                    "base_model": r.base_model,
+                    "epochs": r.epochs,
+                    "lora_rank": r.lora_rank,
+                }
+            )
         return JSONResponse({"presets": items})
 
     @app.get("/api/models")
@@ -287,11 +292,13 @@ def attach_studio_routes(app: Any, workspace_root: Path) -> None:
                 recipe_dict = asdict(r)
             except Exception as e:  # noqa: BLE001
                 recipe_dict = {"_error": f"failed to read recipe: {e}"}
-        return JSONResponse({
-            "run_id": run_id,
-            "recipe": recipe_dict,
-            "dataset": _read_dataset_preview(run_dir, limit=5),
-        })
+        return JSONResponse(
+            {
+                "run_id": run_id,
+                "recipe": recipe_dict,
+                "dataset": _read_dataset_preview(run_dir, limit=5),
+            }
+        )
 
     @app.get("/api/dataset/{run_id}")
     async def api_dataset(run_id: str, limit: int = 20) -> Any:
@@ -341,25 +348,24 @@ def attach_studio_routes(app: Any, workspace_root: Path) -> None:
                 return_tensors="pt",
                 add_generation_prompt=True,
             ).to(model.device)
-            out = model.generate(
-                inputs, max_new_tokens=max_new_tokens, do_sample=False
-            )
-            answer = tokenizer.decode(
-                out[0][inputs.shape[1]:], skip_special_tokens=True
-            )
+            out = model.generate(inputs, max_new_tokens=max_new_tokens, do_sample=False)
+            answer = tokenizer.decode(out[0][inputs.shape[1] :], skip_special_tokens=True)
         except Exception as e:  # noqa: BLE001
             raise HTTPException(500, f"generation error: {e}")
         # Score using the JW-specific evals.
         from jw_finetune.eval.doctrinal import score_terminology
         from jw_finetune.eval.refs import score_citation_accuracy
+
         lang = payload.get("language", "es")
-        return JSONResponse({
-            "ok": True,
-            "answer": answer,
-            "citation_accuracy": score_citation_accuracy([answer]),
-            "terminology_score": score_terminology([answer], language=lang),
-            "cached": True,
-        })
+        return JSONResponse(
+            {
+                "ok": True,
+                "answer": answer,
+                "citation_accuracy": score_citation_accuracy([answer]),
+                "terminology_score": score_terminology([answer], language=lang),
+                "cached": True,
+            }
+        )
 
 
 def _templates_dir() -> Path:

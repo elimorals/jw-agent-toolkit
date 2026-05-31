@@ -5,11 +5,9 @@ from __future__ import annotations
 import asyncio
 
 import pytest
-
 from jw_core.clients.external_bibles import (
     SUPPORTED_TRANSLATIONS,
     ExternalBiblesClient,
-    ExternalBiblesError,
     ExternalVerse,
 )
 

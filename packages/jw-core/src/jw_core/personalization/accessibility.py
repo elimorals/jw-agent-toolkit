@@ -84,7 +84,7 @@ def increase_legibility(text: str) -> str:
 
     Reduces orphan lines on flexible layouts (mobile readers, ePub).
     """
-    short_words = {"a", "el", "la", "los", "las", "y", "o", "of", "the", "a", "an", "and", "or"}
+    short_words = {"a", "el", "la", "los", "las", "y", "o", "of", "the", "an", "and", "or"}
     out = []
     for word in text.split(" "):
         out.append(word)

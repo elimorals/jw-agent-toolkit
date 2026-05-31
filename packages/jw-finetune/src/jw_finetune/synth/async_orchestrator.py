@@ -111,7 +111,8 @@ async def synthesize_chunks_async(
             # Save to cache if any pairs survived.
             if cache is not None:
                 cache.put(
-                    key, pairs,
+                    key,
+                    pairs,
                     chunk_id=chunk.id,
                     qa_style=qa_style,
                     language=language,
@@ -119,10 +120,7 @@ async def synthesize_chunks_async(
                 )
             return pairs
 
-    pending = [
-        asyncio.create_task(_process_one(i, c))
-        for i, c in enumerate(chunks_list)
-    ]
+    pending = [asyncio.create_task(_process_one(i, c)) for i, c in enumerate(chunks_list)]
     completed = 0
     for coro in asyncio.as_completed(pending):
         try:

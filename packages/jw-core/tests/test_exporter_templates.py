@@ -5,14 +5,13 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_core.exporters.errors import ExportError
+from jw_core.exporters.ir import StudySection, StudySheet
 from jw_core.exporters.templates_resolver import (
     list_builtin_templates,
     render_html,
     resolve_template_path,
 )
-from jw_core.exporters.ir import StudySection, StudySheet
 
 
 def _sheet() -> StudySheet:

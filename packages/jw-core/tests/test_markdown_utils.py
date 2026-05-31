@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_core.integrations.markdown import (
     ConversionStats,
-    LinkifyResult,
     convert_jw_links_in_text,
     convert_jwpub_bible_url,
     convert_jwpub_publication_url,
@@ -16,7 +14,6 @@ from jw_core.integrations.markdown import (
     render_verse_block,
 )
 from jw_core.parsers.reference import parse_reference
-
 
 # ── parse_jwlibrary_url ─────────────────────────────────────────────────
 

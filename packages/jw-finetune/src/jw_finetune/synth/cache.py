@@ -47,8 +47,13 @@ def _hash_key(
 ) -> str:
     h = hashlib.sha256()
     for part in (
-        chunk_id, chunk_text, qa_style, language,
-        str(n_pairs), provider_name, provider_model,
+        chunk_id,
+        chunk_text,
+        qa_style,
+        language,
+        str(n_pairs),
+        provider_name,
+        provider_model,
     ):
         h.update(part.encode("utf-8"))
         h.update(b"\x00")
@@ -78,16 +83,12 @@ class SynthCache:
                     created_ts REAL NOT NULL
                 )
             """)
-            db.execute(
-                "CREATE INDEX IF NOT EXISTS idx_synth_chunk ON synth_results(chunk_id)"
-            )
+            db.execute("CREATE INDEX IF NOT EXISTS idx_synth_chunk ON synth_results(chunk_id)")
             db.commit()
 
     def get(self, key: str) -> list[QAPair] | None:
         with closing(sqlite3.connect(str(self.path))) as db:
-            row = db.execute(
-                "SELECT pairs_json FROM synth_results WHERE key = ?", (key,)
-            ).fetchone()
+            row = db.execute("SELECT pairs_json FROM synth_results WHERE key = ?", (key,)).fetchone()
         if not row:
             return None
         try:
@@ -117,16 +118,19 @@ class SynthCache:
         n_rejected: int = 0,
     ) -> None:
         pairs_list = list(pairs)
-        payload = json.dumps([
-            {
-                "question": p.question,
-                "answer": p.answer,
-                "source_chunk_id": p.source_chunk_id,
-                "language": p.language,
-                "metadata": dict(p.metadata),
-            }
-            for p in pairs_list
-        ], ensure_ascii=False)
+        payload = json.dumps(
+            [
+                {
+                    "question": p.question,
+                    "answer": p.answer,
+                    "source_chunk_id": p.source_chunk_id,
+                    "language": p.language,
+                    "metadata": dict(p.metadata),
+                }
+                for p in pairs_list
+            ],
+            ensure_ascii=False,
+        )
         with closing(sqlite3.connect(str(self.path))) as db:
             db.execute(
                 "INSERT OR REPLACE INTO synth_results "
@@ -134,8 +138,15 @@ class SynthCache:
                 "pairs_json, n_pairs, n_rejected, created_ts) "
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
-                    key, chunk_id, qa_style, language, provider,
-                    payload, len(pairs_list), n_rejected, time.time(),
+                    key,
+                    chunk_id,
+                    qa_style,
+                    language,
+                    provider,
+                    payload,
+                    len(pairs_list),
+                    n_rejected,
+                    time.time(),
                 ),
             )
             db.commit()
@@ -143,8 +154,7 @@ class SynthCache:
     def stats(self) -> dict[str, int]:
         with closing(sqlite3.connect(str(self.path))) as db:
             row = db.execute(
-                "SELECT COUNT(*), COALESCE(SUM(n_pairs), 0), "
-                "COALESCE(SUM(n_rejected), 0) FROM synth_results"
+                "SELECT COUNT(*), COALESCE(SUM(n_pairs), 0), COALESCE(SUM(n_rejected), 0) FROM synth_results"
             ).fetchone()
         return {
             "entries": row[0],

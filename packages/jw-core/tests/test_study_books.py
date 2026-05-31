@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_core.data.study_books import (
     CURRENT_STUDY_BOOK,
     REGISTRY,
-    StudyBook,
     get_book,
     list_supported_languages,
 )

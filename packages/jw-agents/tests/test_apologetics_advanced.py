@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 from jw_agents.apocrypha_detector import (
+    ApocryphaCandidate,
     _detect_framings,
     _extract_candidates,
     _verdict,
-    ApocryphaCandidate,
 )
 from jw_agents.fact_checker import _judge
-
 
 # ── fact_checker._judge tests ────────────────────────────────────────────
 

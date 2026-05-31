@@ -100,11 +100,7 @@ class _BibleAddress:
     verse: int
 
     def encode(self) -> str:
-        return (
-            f"{self.book:0{_BOOK_PAD}d}"
-            f"{self.chapter:0{_CHAPTER_PAD}d}"
-            f"{self.verse:0{_VERSE_PAD}d}"
-        )
+        return f"{self.book:0{_BOOK_PAD}d}{self.chapter:0{_CHAPTER_PAD}d}{self.verse:0{_VERSE_PAD}d}"
 
 
 def _validate_book(book: int) -> None:
@@ -190,9 +186,7 @@ def build_bible_url(
         if final_end_chapter == chapter and final_end_verse < start_verse:
             raise JWLibraryError("verse_end precedes verse_start within same chapter")
 
-    end = _BibleAddress(
-        book=final_end_book, chapter=final_end_chapter, verse=final_end_verse
-    )
+    end = _BibleAddress(book=final_end_book, chapter=final_end_chapter, verse=final_end_verse)
     if start.encode() == end.encode():
         return _wrap_bible_token(start.encode(), wtlocale)
     return _wrap_bible_token(f"{start.encode()}-{end.encode()}", wtlocale)
@@ -373,9 +367,7 @@ def open_jw_library(
 
     cmd = _build_open_command(url, plat)
     if plat in {"darwin", "linux"} and not shutil.which(cmd.argv[0]):
-        raise JWLibraryError(
-            f"Required URL opener {cmd.argv[0]!r} not found on PATH"
-        )
+        raise JWLibraryError(f"Required URL opener {cmd.argv[0]!r} not found on PATH")
 
     env = {**os.environ, **cmd.env} if cmd.env else None
     logger.info("Dispatching jwlibrary:// deep link via %s", cmd.argv[0])

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_finetune.data.extract import extract_from_wol_article
 
 
@@ -75,6 +74,7 @@ async def test_extract_from_wol_article_one_shot_client_is_closed() -> None:
 
     # Monkeypatch the imported WOLClient symbol via sys.modules
     import jw_core.clients.wol as wol_mod
+
     orig = wol_mod.WOLClient
     wol_mod.WOLClient = _Stub  # type: ignore[assignment]
     try:

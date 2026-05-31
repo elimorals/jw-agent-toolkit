@@ -5,10 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import yaml  # type: ignore[import-untyped]
-from typer.testing import CliRunner
-
 from jw_finetune.cli import app
-
+from typer.testing import CliRunner
 
 runner = CliRunner()
 
@@ -32,9 +30,7 @@ def test_presets_command() -> None:
 
 def test_init_writes_yaml(tmp_path: Path) -> None:
     out = tmp_path / "r.yaml"
-    r = runner.invoke(
-        app, ["init", "--preset", "doctrinal-qa-es-sft", "--out", str(out)]
-    )
+    r = runner.invoke(app, ["init", "--preset", "doctrinal-qa-es-sft", "--out", str(out)])
     assert r.exit_code == 0, r.stdout
     assert out.exists()
     parsed = yaml.safe_load(out.read_text(encoding="utf-8"))
@@ -44,9 +40,7 @@ def test_init_writes_yaml(tmp_path: Path) -> None:
 
 def test_init_unknown_preset_fails(tmp_path: Path) -> None:
     out = tmp_path / "r.yaml"
-    r = runner.invoke(
-        app, ["init", "--preset", "nonexistent", "--out", str(out)]
-    )
+    r = runner.invoke(app, ["init", "--preset", "nonexistent", "--out", str(out)])
     assert r.exit_code != 0
 
 
@@ -60,8 +54,10 @@ def test_prepare_without_source_fails(tmp_path: Path) -> None:
         app,
         [
             "prepare",
-            "--recipe", "doctrinal-qa-es-sft",
-            "--workspace", str(tmp_path),
+            "--recipe",
+            "doctrinal-qa-es-sft",
+            "--workspace",
+            str(tmp_path),
         ],
     )
     assert r.exit_code != 0
@@ -80,9 +76,12 @@ def test_export_unknown_format_fails(tmp_path: Path) -> None:
         app,
         [
             "export",
-            "--checkpoint", str(ckpt),
-            "--format", "weird-format",
-            "--out", str(tmp_path / "out"),
+            "--checkpoint",
+            str(ckpt),
+            "--format",
+            "weird-format",
+            "--out",
+            str(tmp_path / "out"),
         ],
     )
     assert r.exit_code != 0

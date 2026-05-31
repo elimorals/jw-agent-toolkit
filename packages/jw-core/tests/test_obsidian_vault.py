@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-
 from jw_core.integrations.obsidian_vault import (
     VaultSyncStateStore,
     export_backup_to_vault,
@@ -18,7 +17,6 @@ from jw_core.integrations.obsidian_vault import (
     iter_vault_notes,
     parse_markdown_note,
 )
-
 
 # ── Fixture: minimal vault ─────────────────────────────────────────────
 
@@ -101,14 +99,14 @@ class _FakeStore:
 def test_parse_md_with_frontmatter(tmp_path: Path) -> None:
     p = tmp_path / "note.md"
     p.write_text(
-        '---\n'
+        "---\n"
         'title: "My note"\n'
-        'tags:\n'
-        '  - ministry\n'
-        '  - personal\n'
-        'pinned: true\n'
-        '---\n'
-        '# Real Title\n\nBody text here.\n',
+        "tags:\n"
+        "  - ministry\n"
+        "  - personal\n"
+        "pinned: true\n"
+        "---\n"
+        "# Real Title\n\nBody text here.\n",
         encoding="utf-8",
     )
     note = parse_markdown_note(p)
@@ -123,7 +121,7 @@ def test_parse_md_with_frontmatter(tmp_path: Path) -> None:
 def test_parse_md_inline_list(tmp_path: Path) -> None:
     p = tmp_path / "n.md"
     p.write_text(
-        '---\ntags: [a, b, c]\n---\n# T\nbody',
+        "---\ntags: [a, b, c]\n---\n# T\nbody",
         encoding="utf-8",
     )
     note = parse_markdown_note(p)
@@ -238,14 +236,12 @@ def test_index_vault_tag_filter(tmp_path: Path) -> None:
     _seed_vault(
         vault,
         {
-            "with-tag.md": '---\ntags:\n  - ministry\n---\n# A\nbody is long enough here.',
+            "with-tag.md": "---\ntags:\n  - ministry\n---\n# A\nbody is long enough here.",
             "no-tag.md": "# B\nbody is long enough here too.",
         },
     )
     store = _FakeStore(tmp_path / "store")
-    report = index_vault_to_rag(
-        vault, store, state_path=tmp_path / "state.json", require_tag="ministry"
-    )
+    report = index_vault_to_rag(vault, store, state_path=tmp_path / "state.json", require_tag="ministry")
     assert report.indexed == 1
     assert report.skipped == 1
 

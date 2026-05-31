@@ -5,7 +5,6 @@ from __future__ import annotations
 from jw_core.languages import SIGN_LANGUAGES, all_languages, get_language
 from jw_core.translation import mask_references, render_reference, restore_references
 
-
 # ── Registry ────────────────────────────────────────────────────────────
 
 

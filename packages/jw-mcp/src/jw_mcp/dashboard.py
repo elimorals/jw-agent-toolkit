@@ -16,11 +16,10 @@ Shows:
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date
 
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
-
 from jw_core.audio.tts import list_tts_providers
 from jw_core.calendar.events import upcoming_for_user
 from jw_core.calendar.memorial import countdown_to_memorial
@@ -66,14 +65,12 @@ def dashboard() -> str:
     cal_items = [f"{e.start_iso} · {e.kind} · {e.title}" for e in upcoming[:8]]
     memorial = countdown_to_memorial(today=today)
     cal_lead = (
-        f"<p><strong>Memorial:</strong> {memorial['memorial_iso']} "
-        f"({memorial['days_remaining']} days remaining)</p>"
+        f"<p><strong>Memorial:</strong> {memorial['memorial_iso']} ({memorial['days_remaining']} days remaining)</p>"
     )
 
     # TTS providers
     tts_items = [
-        f"{p['name']} — {'available' if p['available'] else 'not installed'} "
-        f"({', '.join(p['languages'][:5])})"
+        f"{p['name']} — {'available' if p['available'] else 'not installed'} ({', '.join(p['languages'][:5])})"
         for p in list_tts_providers()
     ]
 

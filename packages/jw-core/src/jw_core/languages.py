@@ -40,7 +40,14 @@ _REGISTRY: dict[str, Language] = {
     "ru": Language(iso="ru", jw_code="U", lp_tag="lp-u", display="Russian", wol_resource="r8", default_bible="nwt"),
     "ja": Language(iso="ja", jw_code="J", lp_tag="lp-j", display="Japanese", wol_resource="r7", default_bible="nwt"),
     "ko": Language(iso="ko", jw_code="KO", lp_tag="lp-ko", display="Korean", wol_resource="r46", default_bible="nwt"),
-    "zh": Language(iso="zh", jw_code="CHS", lp_tag="lp-chs", display="Chinese (Simplified)", wol_resource="r23", default_bible="nwt"),
+    "zh": Language(
+        iso="zh",
+        jw_code="CHS",
+        lp_tag="lp-chs",
+        display="Chinese (Simplified)",
+        wol_resource="r23",
+        default_bible="nwt",
+    ),
 }
 
 # Sign-language registry (subset). VISION.md item: "Lenguas de señas (LSM/ASE)
@@ -108,8 +115,8 @@ def get_book_language(jw_or_iso: str) -> str:
     when no mapping exists.
     """
     from jw_core.data.book_locales import (
-        SIGN_LANGUAGE_BASE_MAP,
         ISO_TO_JW_CODE,
+        SIGN_LANGUAGE_BASE_MAP,
     )
 
     if not jw_or_iso:

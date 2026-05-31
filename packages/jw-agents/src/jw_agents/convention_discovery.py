@@ -102,10 +102,7 @@ async def convention_discovery(
             existing = None
             if store is not None:
                 existing = next(
-                    (
-                        e for e in store.list_all(kind="convention")
-                        if e.start_iso.startswith(str(listing.year))
-                    ),
+                    (e for e in store.list_all(kind="convention") if e.start_iso.startswith(str(listing.year))),
                     None,
                 )
                 if existing is None:

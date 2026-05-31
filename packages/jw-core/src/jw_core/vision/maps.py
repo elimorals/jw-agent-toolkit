@@ -176,10 +176,7 @@ def get_journey(key: str, *, language: str = "en") -> dict[str, object] | None:
 
 
 def list_journeys(language: str = "en") -> list[dict[str, str]]:
-    return [
-        {"key": j.key, "title": j.title.get(language, j.title["en"])}
-        for j in BIBLICAL_JOURNEYS.values()
-    ]
+    return [{"key": j.key, "title": j.title.get(language, j.title["en"])} for j in BIBLICAL_JOURNEYS.values()]
 
 
 def locations_near(

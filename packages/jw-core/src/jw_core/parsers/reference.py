@@ -20,6 +20,8 @@ import re
 import unicodedata
 from functools import lru_cache
 
+from pydantic import ValidationError as _ValidationError
+
 from jw_core.data.books import BOOKS
 from jw_core.models import BibleRef
 
@@ -118,8 +120,8 @@ class ReferenceParser:
             book_num, lang, canonical = entry
             verse_start_raw = m.group("verse_start")
             verse_end_raw = m.group("verse_end")
-            refs.append(
-                BibleRef(
+            try:
+                ref = BibleRef(
                     book_num=book_num,
                     book_canonical=canonical,
                     chapter=int(m.group("chapter")),
@@ -128,7 +130,12 @@ class ReferenceParser:
                     detected_language=lang,
                     raw_match=normalized[m.start() : m.end()].strip(),
                 )
-            )
+            except _ValidationError:
+                # Regex matched but the numbers fall outside the valid
+                # BibleRef bounds (e.g. chapter=0 from a fuzzed input).
+                # Skip silently — the contract is "return refs or []".
+                continue
+            refs.append(ref)
         return refs
 
     def parse_one(self, text: str) -> BibleRef | None:

@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_core.concordance.models import IndexEntry
 from jw_core.concordance.store import ConcordanceStore, default_db_path
 

@@ -68,7 +68,5 @@ def export_gguf(
             quantization_method=_normalize_quant(quant),
         )
 
-    logger.info(
-        "GGUF exported to %s (quant=%s)", output_dir, quant
-    )
+    logger.info("GGUF exported to %s (quant=%s)", output_dir, quant)
     return output_dir

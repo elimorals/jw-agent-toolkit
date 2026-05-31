@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import pytest
-
-from jw_core.clients.pub_media import PubMediaError, PubMediaFile, Publication
+from jw_core.clients.pub_media import Publication, PubMediaError, PubMediaFile
 from jw_core.news.sources import (
     BroadcastingSource,
     ProgramsSource,
@@ -65,10 +64,12 @@ def _pub(pub_code: str, language: str = "E", files: list[PubMediaFile] | None = 
 
 @pytest.mark.asyncio
 async def test_publications_source_yields_one_item_per_file() -> None:
-    stub = StubPubMedia({
-        ("lff", "E", None): _pub("lff", files=[_file("https://x/lff_E.epub", "EPUB", "E")]),
-        ("lff", "S", None): _pub("lff", files=[_file("https://x/lff_S.epub", "EPUB", "S")]),
-    })
+    stub = StubPubMedia(
+        {
+            ("lff", "E", None): _pub("lff", files=[_file("https://x/lff_E.epub", "EPUB", "E")]),
+            ("lff", "S", None): _pub("lff", files=[_file("https://x/lff_S.epub", "EPUB", "S")]),
+        }
+    )
     src = PublicationsSource(client=stub, seeds=[("lff", False)])
     items = await src.fetch(languages=["en", "es"], since=None)
     assert len(items) == 2
@@ -79,9 +80,11 @@ async def test_publications_source_yields_one_item_per_file() -> None:
 
 @pytest.mark.asyncio
 async def test_publications_source_skips_when_404() -> None:
-    stub = StubPubMedia({
-        ("lff", "E", None): _pub("lff", files=[_file("https://x/lff_E.epub")]),
-    })
+    stub = StubPubMedia(
+        {
+            ("lff", "E", None): _pub("lff", files=[_file("https://x/lff_E.epub")]),
+        }
+    )
     src = PublicationsSource(client=stub, seeds=[("lff", False), ("nonexistent", False)])
     items = await src.fetch(languages=["en"], since=None)
     # nonexistent → PubMediaError caught, no item emitted, warning attached
@@ -91,10 +94,12 @@ async def test_publications_source_skips_when_404() -> None:
 
 @pytest.mark.asyncio
 async def test_publications_source_periodical_uses_issue() -> None:
-    now = datetime(2026, 6, 15, tzinfo=timezone.utc)
-    stub = StubPubMedia({
-        ("w", "E", 202606): _pub("w", files=[_file("https://x/w_E_202606.epub", "EPUB", "E")]),
-    })
+    now = datetime(2026, 6, 15, tzinfo=UTC)
+    stub = StubPubMedia(
+        {
+            ("w", "E", 202606): _pub("w", files=[_file("https://x/w_E_202606.epub", "EPUB", "E")]),
+        }
+    )
     src = PublicationsSource(client=stub, seeds=[("w", True)], now=lambda: now)
     items = await src.fetch(languages=["en"], since=None)
     assert {i.item_id for i in items} == {"w_E_202606"}
@@ -125,12 +130,14 @@ async def test_broadcasting_source_basic() -> None:
 
 @pytest.mark.asyncio
 async def test_programs_source_emits_workbook_and_watchtower() -> None:
-    now = datetime(2026, 6, 1, tzinfo=timezone.utc)
-    stub = StubPubMedia({
-        ("mwb", "E", 202606): _pub("mwb", files=[_file("https://x/mwb_E_202606.epub")]),
-        ("w",   "E", 202606): _pub("w",   files=[_file("https://x/w_E_202606.epub")]),
-        # 202607 + 202608 don't exist yet → 404
-    })
+    now = datetime(2026, 6, 1, tzinfo=UTC)
+    stub = StubPubMedia(
+        {
+            ("mwb", "E", 202606): _pub("mwb", files=[_file("https://x/mwb_E_202606.epub")]),
+            ("w", "E", 202606): _pub("w", files=[_file("https://x/w_E_202606.epub")]),
+            # 202607 + 202608 don't exist yet → 404
+        }
+    )
     src = ProgramsSource(client=stub, now=lambda: now)
     items = await src.fetch(languages=["en"], since=None)
     ids = {i.item_id for i in items}

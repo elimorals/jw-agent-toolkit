@@ -14,31 +14,30 @@ import json
 import os
 import secrets
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
 
-from pydantic import BaseModel, Field
-
 from jw_core.privacy.encryption import FieldEncryptor, derive_key_from_password
+from pydantic import BaseModel, Field
 
 
 class LessonStatus(str, Enum):
     NOT_STARTED = "not_started"
     IN_PROGRESS = "in_progress"
-    COMPLETED   = "completed"
-    SKIPPED     = "skipped"
+    COMPLETED = "completed"
+    SKIPPED = "skipped"
 
 
 class GoalKind(str, Enum):
-    ATTEND_MEETINGS         = "attend_meetings"
-    DROP_ADDICTION_SMOKING  = "drop_addiction_smoking"
-    DROP_ADDICTION_ALCOHOL  = "drop_addiction_alcohol"
-    DROP_ADDICTION_OTHER    = "drop_addiction_other"
-    PRAY_DAILY              = "pray_daily"
-    FAMILY_WORSHIP          = "family_worship"
-    BAPTISM                 = "baptism"
-    OTHER                   = "other"
+    ATTEND_MEETINGS = "attend_meetings"
+    DROP_ADDICTION_SMOKING = "drop_addiction_smoking"
+    DROP_ADDICTION_ALCOHOL = "drop_addiction_alcohol"
+    DROP_ADDICTION_OTHER = "drop_addiction_other"
+    PRAY_DAILY = "pray_daily"
+    FAMILY_WORSHIP = "family_worship"
+    BAPTISM = "baptism"
+    OTHER = "other"
 
 
 class StudentGoal(BaseModel):
@@ -68,7 +67,7 @@ class LessonRow(BaseModel):
 
 class PrivacyState(str, Enum):
     CREATED = "created"
-    LOADED  = "loaded"
+    LOADED = "loaded"
 
 
 def default_salt_path() -> Path:
@@ -91,9 +90,7 @@ def load_or_create_salt(path: Path) -> PrivacyState:
     return PrivacyState.CREATED
 
 
-def derive_encryptor_for_passphrase(
-    passphrase: str, *, salt_path: Path | None = None
-) -> FieldEncryptor:
+def derive_encryptor_for_passphrase(passphrase: str, *, salt_path: Path | None = None) -> FieldEncryptor:
     """Derive a FieldEncryptor from passphrase + persistent salt."""
 
     salt_path = salt_path or default_salt_path()
@@ -155,7 +152,7 @@ class StudentProgressStore:
 
     def upsert(self, row: LessonRow) -> LessonRow:
         if not row.updated_at_iso:
-            row.updated_at_iso = datetime.now(timezone.utc).isoformat()
+            row.updated_at_iso = datetime.now(UTC).isoformat()
         encrypted_notes = self._encrypt_notes(row.notes)
         goals_json = json.dumps([g.model_dump() for g in row.goals])
         self._conn.execute(
@@ -176,9 +173,14 @@ class StudentProgressStore:
                 updated_at_iso=excluded.updated_at_iso
             """,
             {
-                "sid": row.student_id, "pub": row.book_pub, "lesson": row.lesson,
-                "status": row.status.value, "notes": encrypted_notes, "goals": goals_json,
-                "started": row.started_at_iso, "completed": row.completed_at_iso,
+                "sid": row.student_id,
+                "pub": row.book_pub,
+                "lesson": row.lesson,
+                "status": row.status.value,
+                "notes": encrypted_notes,
+                "goals": goals_json,
+                "started": row.started_at_iso,
+                "completed": row.completed_at_iso,
                 "attended": row.attended_meetings_count,
                 "baptism": row.baptism_target_iso,
                 "updated": row.updated_at_iso,
@@ -195,9 +197,7 @@ class StudentProgressStore:
         row = cur.fetchone()
         return self._row_to_model(row) if row else None
 
-    def list_for_student(
-        self, student_id: str, book_pub: str | None = None
-    ) -> list[LessonRow]:
+    def list_for_student(self, student_id: str, book_pub: str | None = None) -> list[LessonRow]:
         if book_pub:
             cur = self._conn.execute(
                 "SELECT * FROM lessons WHERE student_id=? AND book_pub=? ORDER BY lesson",
@@ -240,7 +240,7 @@ def scan_lesson_for_crisis(row: LessonRow, *, language: str) -> list[str]:
 
 
 def set_goal_for_student(
-    store: "StudentProgressStore",
+    store: StudentProgressStore,
     student_id: str,
     book_pub: str,
     lesson: int,
@@ -254,10 +254,12 @@ def set_goal_for_student(
     row = store.get(student_id, book_pub, lesson)
     if row is None:
         row = LessonRow(
-            student_id=student_id, book_pub=book_pub, lesson=lesson,
-            updated_at_iso=datetime.now(timezone.utc).isoformat(),
+            student_id=student_id,
+            book_pub=book_pub,
+            lesson=lesson,
+            updated_at_iso=datetime.now(UTC).isoformat(),
         )
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     # Replace existing goal of same kind; otherwise append.
     goals = [g for g in row.goals if g.kind != kind]
     goals.append(StudentGoal(kind=kind, set_at_iso=now, target_iso=target_iso, note=note))

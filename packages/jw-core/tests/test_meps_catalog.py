@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_core.integrations import meps_catalog as mod
 from jw_core.integrations.meps_catalog import (
     MepsCatalog,
@@ -118,12 +117,8 @@ def test_index_jwpub_is_idempotent(tmp_path: Path, patched_parse) -> None:
 
 
 def test_index_jwpub_handles_multi_language(tmp_path: Path, patched_parse) -> None:
-    patched_parse.append(
-        _fake_meta(language_index=0, documents=[_doc(document_id=1, title="EN")])
-    )
-    patched_parse.append(
-        _fake_meta(language_index=4, title="La Verdad", documents=[_doc(document_id=2, title="ES")])
-    )
+    patched_parse.append(_fake_meta(language_index=0, documents=[_doc(document_id=1, title="EN")]))
+    patched_parse.append(_fake_meta(language_index=4, title="La Verdad", documents=[_doc(document_id=2, title="ES")]))
     with MepsCatalog(db_path=tmp_path / "catalog.db") as cat:
         cat.index_jwpub("/en.jwpub")
         cat.index_jwpub("/es.jwpub")
@@ -135,9 +130,8 @@ def test_index_jwpub_handles_multi_language(tmp_path: Path, patched_parse) -> No
 
 def test_index_jwpub_rejects_missing_symbol(tmp_path: Path, patched_parse) -> None:
     patched_parse.append(_fake_meta(symbol="", documents=[]))
-    with MepsCatalog(db_path=tmp_path / "catalog.db") as cat:
-        with pytest.raises(ValueError, match="symbol"):
-            cat.index_jwpub("/broken.jwpub")
+    with MepsCatalog(db_path=tmp_path / "catalog.db") as cat, pytest.raises(ValueError, match="symbol"):
+        cat.index_jwpub("/broken.jwpub")
 
 
 # ── find_documents / list_publications ──────────────────────────────────
@@ -178,15 +172,9 @@ def test_find_documents_by_meps_id(tmp_path: Path, patched_parse) -> None:
 # ── resolve_docid ──────────────────────────────────────────────────────
 
 
-def test_resolve_docid_prefers_english_when_no_language(
-    tmp_path: Path, patched_parse
-) -> None:
-    patched_parse.append(
-        _fake_meta(language_index=4, documents=[_doc(document_id=99, title="ES")])
-    )
-    patched_parse.append(
-        _fake_meta(language_index=0, documents=[_doc(document_id=10, title="EN")])
-    )
+def test_resolve_docid_prefers_english_when_no_language(tmp_path: Path, patched_parse) -> None:
+    patched_parse.append(_fake_meta(language_index=4, documents=[_doc(document_id=99, title="ES")]))
+    patched_parse.append(_fake_meta(language_index=0, documents=[_doc(document_id=10, title="EN")]))
     with MepsCatalog(db_path=tmp_path / "catalog.db") as cat:
         cat.index_jwpub("/es.jwpub")
         cat.index_jwpub("/en.jwpub")

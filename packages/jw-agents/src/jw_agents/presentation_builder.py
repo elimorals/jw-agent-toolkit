@@ -17,7 +17,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from jw_core.clients.topic_index import TopicIndexClient
-from jw_core.data.locale_context import context_for_presentation, get_locale
+from jw_core.data.locale_context import context_for_presentation
 from jw_core.parsers.reference import parse_reference
 
 from jw_agents.base import AgentResult, Citation, Finding
@@ -165,9 +165,7 @@ async def presentation_builder(
     profile = PROFILES.get(audience.lower())
     result = AgentResult(query=audience, agent_name="presentation_builder")
     if profile is None:
-        result.warnings.append(
-            f"Unknown audience profile {audience!r}. Available: {sorted(PROFILES.keys())}"
-        )
+        result.warnings.append(f"Unknown audience profile {audience!r}. Available: {sorted(PROFILES.keys())}")
         return result
 
     locale_payload: dict[str, object] = {}

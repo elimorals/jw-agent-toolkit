@@ -104,8 +104,15 @@ def test_seed_integrity() -> None:
 
     # Heuristic anti-lyrics tokens — flag obvious copy-paste from a lyric sheet.
     FORBIDDEN_TOKENS = [
-        "verse 1", "estrofa", "estribillo", "refrão", "refrain",
-        "chorus", "stanza", "©", "copyright watch tower",
+        "verse 1",
+        "estrofa",
+        "estribillo",
+        "refrão",
+        "refrain",
+        "chorus",
+        "stanza",
+        "©",
+        "copyright watch tower",
     ]
 
     parallel_numbers: dict[str, set[int]] = {}
@@ -118,9 +125,7 @@ def test_seed_integrity() -> None:
             assert len(s.title) <= 200, f"{lang}/#{s.number}: title too long"
             lower_blob = (s.title + " " + s.theme).lower()
             for tok in FORBIDDEN_TOKENS:
-                assert tok not in lower_blob, (
-                    f"{lang}/#{s.number}: forbidden token {tok!r}"
-                )
+                assert tok not in lower_blob, f"{lang}/#{s.number}: forbidden token {tok!r}"
             # Every scripture must parse cleanly.
             assert s.resolved_scriptures() or not s.scriptures, (
                 f"{lang}/#{s.number}: scriptures {s.scriptures} all unparseable"
@@ -191,7 +196,6 @@ def test_enrich_handles_unknown_song_gracefully() -> None:
 
 def test_enrich_no_workbook_week_finding_is_noop() -> None:
     from jw_agents.base import AgentResult
-
     from jw_core.songs.integration import enrich_with_songs
 
     result = AgentResult(query="x", agent_name="other")
@@ -201,9 +205,8 @@ def test_enrich_no_workbook_week_finding_is_noop() -> None:
 
 
 def test_cli_song_number_renders_table() -> None:
-    from typer.testing import CliRunner
-
     from jw_cli.main import app
+    from typer.testing import CliRunner
 
     runner = CliRunner()
     result = runner.invoke(app, ["song", "5", "--lang", "es"])
@@ -213,9 +216,8 @@ def test_cli_song_number_renders_table() -> None:
 
 
 def test_cli_song_unknown_number_reports_error() -> None:
-    from typer.testing import CliRunner
-
     from jw_cli.main import app
+    from typer.testing import CliRunner
 
     runner = CliRunner()
     result = runner.invoke(app, ["song", "999", "--lang", "en"])

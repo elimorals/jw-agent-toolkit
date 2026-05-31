@@ -7,7 +7,6 @@ import zipfile
 from pathlib import Path
 
 import pytest
-
 from jw_core.exporters.errors import MissingDependencyError
 from jw_core.exporters.ir import CitationIR, StudySection, StudySheet
 
@@ -23,9 +22,7 @@ def _sheet() -> StudySheet:
                 heading="Jehová es uno",
                 body="La Biblia es clara.",
                 excerpt="Deut 6:4",
-                citations=[
-                    CitationIR(url="https://wol.jw.org/x", short_label="Folleto Trinidad")
-                ],
+                citations=[CitationIR(url="https://wol.jw.org/x", short_label="Folleto Trinidad")],
             )
         ],
         footer_note="Generado por jw-agent-toolkit.",
@@ -91,9 +88,7 @@ def test_export_docx_creates_parent_dirs(tmp_path: Path) -> None:
     assert out.exists()
 
 
-def test_missing_dependency_when_pythondocx_absent(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_missing_dependency_when_pythondocx_absent(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     import builtins
 
     real_import = builtins.__import__

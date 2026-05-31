@@ -16,13 +16,14 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-from jw_agents.base import AgentResult, Citation, Finding
 from jw_core.data.study_prompts import render_template
 from jw_core.study.lesson_extractor import (
     LessonContent,
     LessonExtractionError,
     extract_lesson,
 )
+
+from jw_agents.base import AgentResult, Citation, Finding
 
 AGENT_NAME = "study_conductor"
 
@@ -124,26 +125,32 @@ def _generate_anticipation_questions(content: LessonContent) -> list[Anticipatio
 
     out: list[AnticipationQuestion] = []
     for idx, _para in enumerate(content.paragraphs, start=1):
-        out.append(AnticipationQuestion(
-            paragraph_index=idx,
-            text=render_template(content.language, "fact", n=idx),
-            template_id=f"{content.language}.fact",
-            related_verses=[],
-        ))
-        out.append(AnticipationQuestion(
-            paragraph_index=idx,
-            text=render_template(content.language, "application", n=idx),
-            template_id=f"{content.language}.application",
-            related_verses=[],
-        ))
+        out.append(
+            AnticipationQuestion(
+                paragraph_index=idx,
+                text=render_template(content.language, "fact", n=idx),
+                template_id=f"{content.language}.fact",
+                related_verses=[],
+            )
+        )
+        out.append(
+            AnticipationQuestion(
+                paragraph_index=idx,
+                text=render_template(content.language, "application", n=idx),
+                template_id=f"{content.language}.application",
+                related_verses=[],
+            )
+        )
         refs = content.scripture_refs.get(idx, [])
         for ref in refs:
-            out.append(AnticipationQuestion(
-                paragraph_index=idx,
-                text=render_template(content.language, "scripture", n=idx, ref=ref),
-                template_id=f"{content.language}.scripture",
-                related_verses=[ref],
-            ))
+            out.append(
+                AnticipationQuestion(
+                    paragraph_index=idx,
+                    text=render_template(content.language, "scripture", n=idx, ref=ref),
+                    template_id=f"{content.language}.scripture",
+                    related_verses=[ref],
+                )
+            )
     return out
 
 

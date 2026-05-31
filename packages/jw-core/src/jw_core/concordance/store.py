@@ -24,9 +24,7 @@ from jw_core.concordance.models import IndexEntry, SourceKind
 def default_db_path() -> Path:
     """Resolve the on-disk DB location, honouring JW_CONCORDANCE_DB."""
 
-    return Path(
-        os.getenv("JW_CONCORDANCE_DB", "~/.jw-agent-toolkit/concordance.db")
-    ).expanduser()
+    return Path(os.getenv("JW_CONCORDANCE_DB", "~/.jw-agent-toolkit/concordance.db")).expanduser()
 
 
 _SCHEMA = """
@@ -162,8 +160,7 @@ class ConcordanceStore:
 
     def is_known_source(self, kind: SourceKind, path: str, sha256: str) -> bool:
         row = self._conn.execute(
-            "SELECT 1 FROM concordance_sources "
-            "WHERE source_kind = ? AND source_path = ? AND source_sha256 = ? LIMIT 1",
+            "SELECT 1 FROM concordance_sources WHERE source_kind = ? AND source_path = ? AND source_sha256 = ? LIMIT 1",
             (kind, path, sha256),
         ).fetchone()
         return row is not None

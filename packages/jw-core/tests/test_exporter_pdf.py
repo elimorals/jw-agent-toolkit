@@ -9,7 +9,6 @@ import importlib.util
 from pathlib import Path
 
 import pytest
-
 from jw_core.exporters.errors import MissingDependencyError
 from jw_core.exporters.ir import CitationIR, StudySection, StudySheet
 

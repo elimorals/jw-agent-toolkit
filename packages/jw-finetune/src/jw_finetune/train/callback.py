@@ -28,6 +28,7 @@ try:
     from jw_core.observability.logging_setup import (  # type: ignore[import-not-found]
         log_event as _toolkit_log_event,
     )
+
     _HAS_TOOLKIT_OBS = True
 except ImportError:
     _toolkit_log_event = None  # type: ignore[assignment]
@@ -37,6 +38,7 @@ except ImportError:
 # Subclass TrainerCallback when available so we inherit any new hooks.
 try:
     from transformers import TrainerCallback  # type: ignore[import-not-found]
+
     _CALLBACK_BASE: type = TrainerCallback
 except ImportError:
     _CALLBACK_BASE = object
@@ -89,11 +91,13 @@ class JWMonitorCallback(_CALLBACK_BASE):  # type: ignore[misc, valid-type]
         logs: dict[str, Any] | None = None,
         **kw: Any,
     ) -> None:
-        self._emit({
-            "kind": "log",
-            "step": getattr(state, "global_step", -1),
-            **(logs or {}),
-        })
+        self._emit(
+            {
+                "kind": "log",
+                "step": getattr(state, "global_step", -1),
+                **(logs or {}),
+            }
+        )
 
     def on_evaluate(self, args: Any, state: Any, control: Any, **kw: Any) -> None:
         metrics = kw.get("metrics") or {}

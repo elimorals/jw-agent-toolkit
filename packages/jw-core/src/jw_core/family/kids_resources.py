@@ -13,7 +13,7 @@ Age bands follow the publication's own segmentation:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -29,7 +29,11 @@ class KidsLesson:
 GREAT_TEACHER_LESSONS: list[KidsLesson] = [
     KidsLesson(
         chapter=1,
-        title={"en": "A Teacher Greater Than Any Other", "es": "Un Maestro como ningún otro", "pt": "Um Mestre como nenhum outro"},
+        title={
+            "en": "A Teacher Greater Than Any Other",
+            "es": "Un Maestro como ningún otro",
+            "pt": "Um Mestre como nenhum outro",
+        },
         topic="jesus",
         age_bands=("younger", "middle"),
         scripture_anchors=("John 1:14", "Matthew 28:18"),
@@ -43,21 +47,33 @@ GREAT_TEACHER_LESSONS: list[KidsLesson] = [
     ),
     KidsLesson(
         chapter=8,
-        title={"en": "Why Should We Obey God?", "es": "¿Por qué debemos obedecer a Dios?", "pt": "Por que devemos obedecer a Deus?"},
+        title={
+            "en": "Why Should We Obey God?",
+            "es": "¿Por qué debemos obedecer a Dios?",
+            "pt": "Por que devemos obedecer a Deus?",
+        },
         topic="obedience",
         age_bands=("middle", "older"),
         scripture_anchors=("Ecclesiastes 12:13", "1 Samuel 15:22"),
     ),
     KidsLesson(
         chapter=10,
-        title={"en": "Why Did Jesus Die for Us?", "es": "¿Por qué murió Jesús por nosotros?", "pt": "Por que Jesus morreu por nós?"},
+        title={
+            "en": "Why Did Jesus Die for Us?",
+            "es": "¿Por qué murió Jesús por nosotros?",
+            "pt": "Por que Jesus morreu por nós?",
+        },
         topic="ransom",
         age_bands=("middle", "older"),
         scripture_anchors=("John 3:16", "Romans 5:12"),
     ),
     KidsLesson(
         chapter=13,
-        title={"en": "How Can You Show Love?", "es": "¿Cómo puedes demostrar amor?", "pt": "Como você pode mostrar amor?"},
+        title={
+            "en": "How Can You Show Love?",
+            "es": "¿Cómo puedes demostrar amor?",
+            "pt": "Como você pode mostrar amor?",
+        },
         topic="love",
         age_bands=("younger", "middle"),
         scripture_anchors=("1 John 4:8", "John 13:34-35"),
@@ -71,7 +87,11 @@ GREAT_TEACHER_LESSONS: list[KidsLesson] = [
     ),
     KidsLesson(
         chapter=29,
-        title={"en": "How to Be Truly Happy", "es": "Cómo ser verdaderamente feliz", "pt": "Como ser verdadeiramente feliz"},
+        title={
+            "en": "How to Be Truly Happy",
+            "es": "Cómo ser verdaderamente feliz",
+            "pt": "Como ser verdadeiramente feliz",
+        },
         topic="happiness",
         age_bands=("younger", "middle", "older"),
         scripture_anchors=("Acts 20:35", "Psalm 144:15"),
@@ -85,7 +105,11 @@ GREAT_TEACHER_LESSONS: list[KidsLesson] = [
     ),
     KidsLesson(
         chapter=46,
-        title={"en": "Why God Allows Suffering", "es": "Por qué Dios permite el sufrimiento", "pt": "Por que Deus permite o sofrimento"},
+        title={
+            "en": "Why God Allows Suffering",
+            "es": "Por qué Dios permite el sufrimiento",
+            "pt": "Por que Deus permite o sofrimento",
+        },
         topic="suffering",
         age_bands=("older",),
         scripture_anchors=("James 1:13", "Romans 5:12"),

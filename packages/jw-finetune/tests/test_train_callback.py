@@ -45,7 +45,12 @@ def test_callback_full_sequence(tmp_path: Path) -> None:
     events = _read_events(cb.events_path)
     kinds = [e["kind"] for e in events]
     assert kinds == [
-        "train_begin", "step", "log", "evaluate", "save", "train_end",
+        "train_begin",
+        "step",
+        "log",
+        "evaluate",
+        "save",
+        "train_end",
     ]
     # Each event has elapsed >= 0
     assert all(e["elapsed"] >= 0 for e in events)

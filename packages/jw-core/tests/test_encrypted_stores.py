@@ -7,10 +7,11 @@ original values.
 
 from __future__ import annotations
 
-import pytest
 import sqlite3
 import tempfile
 from pathlib import Path
+
+import pytest
 
 cryptography = pytest.importorskip("cryptography")
 

@@ -42,10 +42,7 @@ def write_raw_jsonl(chunks: Iterable[Chunk], path: Path) -> int:
         for c in chunks:
             md = dict(c.metadata)
             md["source_id"] = c.source_id
-            f.write(
-                json.dumps({"text": c.text, "metadata": md}, ensure_ascii=False)
-                + "\n"
-            )
+            f.write(json.dumps({"text": c.text, "metadata": md}, ensure_ascii=False) + "\n")
             count += 1
     return count
 

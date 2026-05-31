@@ -28,9 +28,7 @@ class _TelegramResponder:
 
     async def typing(self) -> None:
         try:
-            await self.context.bot.send_chat_action(
-                chat_id=self.update.effective_chat.id, action="typing"
-            )
+            await self.context.bot.send_chat_action(chat_id=self.update.effective_chat.id, action="typing")
         except Exception:
             pass
 
@@ -57,7 +55,5 @@ def build_telegram_handler() -> Any:
     try:
         from telegram.ext import MessageHandler, filters
     except ImportError as e:  # pragma: no cover
-        raise ImportError(
-            "`python-telegram-bot>=21` is required. `pip install python-telegram-bot`"
-        ) from e
+        raise ImportError("`python-telegram-bot>=21` is required. `pip install python-telegram-bot`") from e
     return MessageHandler(filters.TEXT & ~filters.COMMAND | filters.COMMAND, _handle)

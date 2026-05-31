@@ -10,12 +10,10 @@ from jw_core.family.family_worship import (
 )
 from jw_core.family.kids_resources import (
     GREAT_TEACHER_LESSONS,
-    LESSON_BY_TOPIC,
     list_lessons_for_age,
     pick_lesson_by_topic,
 )
 from jw_core.family.quiz import generate_quiz, quiz_pool_for_age
-
 
 # ── Lessons ──────────────────────────────────────────────────────────────
 

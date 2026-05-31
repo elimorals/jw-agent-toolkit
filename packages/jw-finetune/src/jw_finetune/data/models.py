@@ -13,15 +13,15 @@ from typing import Literal
 
 PublicationKind = Literal[
     "watchtower",  # w / wp (Atalaya — edición estudio o pública)
-    "awake",       # g (¡Despertad!)
-    "book",        # libros (lff, jy, sjj, bh, rr, ...)
-    "brochure",    # folletos
-    "bible",       # NWT u otra traducción
-    "article",     # artículo WOL suelto
-    "workbook",    # mwb (Vida y Ministerio Cristianos)
-    "broadcast",   # transcripción JW Broadcasting (futuro)
-    "user-note",   # JW Library user note (personal-study preset)
-    "objection",   # objection catalog entry
+    "awake",  # g (¡Despertad!)
+    "book",  # libros (lff, jy, sjj, bh, rr, ...)
+    "brochure",  # folletos
+    "bible",  # NWT u otra traducción
+    "article",  # artículo WOL suelto
+    "workbook",  # mwb (Vida y Ministerio Cristianos)
+    "broadcast",  # transcripción JW Broadcasting (futuro)
+    "user-note",  # JW Library user note (personal-study preset)
+    "objection",  # objection catalog entry
     "other",
 ]
 

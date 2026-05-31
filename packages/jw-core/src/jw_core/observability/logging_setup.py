@@ -34,30 +34,35 @@ class _JsonFormatter(logging.Formatter):
             payload["exc_info"] = self.formatException(record.exc_info)
         # Pick up any extra structured fields the caller attached.
         for k, v in record.__dict__.items():
-            if k in payload or k.startswith("_") or k in {
-                "args",
-                "asctime",
-                "created",
-                "exc_info",
-                "exc_text",
-                "filename",
-                "funcName",
-                "levelname",
-                "levelno",
-                "lineno",
-                "module",
-                "msecs",
-                "message",
-                "msg",
-                "name",
-                "pathname",
-                "process",
-                "processName",
-                "relativeCreated",
-                "stack_info",
-                "thread",
-                "threadName",
-            }:
+            if (
+                k in payload
+                or k.startswith("_")
+                or k
+                in {
+                    "args",
+                    "asctime",
+                    "created",
+                    "exc_info",
+                    "exc_text",
+                    "filename",
+                    "funcName",
+                    "levelname",
+                    "levelno",
+                    "lineno",
+                    "module",
+                    "msecs",
+                    "message",
+                    "msg",
+                    "name",
+                    "pathname",
+                    "process",
+                    "processName",
+                    "relativeCreated",
+                    "stack_info",
+                    "thread",
+                    "threadName",
+                }
+            ):
                 continue
             payload[k] = v
         return json.dumps(payload, ensure_ascii=False)

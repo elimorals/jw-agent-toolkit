@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from typer.testing import CliRunner
-
 from jw_cli.main import app
-
+from typer.testing import CliRunner
 
 runner = CliRunner()
 
@@ -28,23 +26,29 @@ def test_study_lesson_renders_prep(monkeypatch) -> None:
     from jw_agents.study_conductor import AnticipationQuestion, LessonPrep
 
     prep = LessonPrep(
-        pub_code="lff", chapter=1, language="es",
+        pub_code="lff",
+        chapter=1,
+        language="es",
         title="¿Existe alguien que se preocupe por usted?",
         summary="Jehová es un Padre amoroso.",
         questions=[
-            AnticipationQuestion(1, "¿Qué punto principal enseña el párrafo 1?",
-                                 "es.fact", []),
+            AnticipationQuestion(1, "¿Qué punto principal enseña el párrafo 1?", "es.fact", []),
         ],
-        key_verses=["1 Pedro 5:7"], supporting_topics=["Jehová"], source="jwpub_local",
+        key_verses=["1 Pedro 5:7"],
+        supporting_topics=["Jehová"],
+        source="jwpub_local",
     )
     fake_result = AgentResult(
         query="prepare_lesson",
         agent_name="study_conductor",
-        findings=[Finding(
-            summary="L1", excerpt="Jehová...",
-            citation=Citation(url="https://wol.jw.org/x", title="L1", kind="chapter"),
-            metadata={"source": "jwpub_chapter", "payload": prep},
-        )],
+        findings=[
+            Finding(
+                summary="L1",
+                excerpt="Jehová...",
+                citation=Citation(url="https://wol.jw.org/x", title="L1", kind="chapter"),
+                metadata={"source": "jwpub_chapter", "payload": prep},
+            )
+        ],
     )
     monkeypatch.setattr(
         "jw_cli.commands.study.prepare_lesson",
@@ -62,14 +66,25 @@ def test_study_log_writes_and_reads(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("JW_STUDY_PASSPHRASE", "hunter2")
     # Pre-create salt so consent prompt is skipped.
     from jw_agents.study_progress import load_or_create_salt
+
     load_or_create_salt(tmp_path / "salt.bin")
 
-    result = runner.invoke(app, [
-        "study", "log", "demo_user", "lff", "1",
-        "--status", "in_progress",
-        "--note", "buena receptividad",
-        "--goal", "attend_meetings",
-    ])
+    result = runner.invoke(
+        app,
+        [
+            "study",
+            "log",
+            "demo_user",
+            "lff",
+            "1",
+            "--status",
+            "in_progress",
+            "--note",
+            "buena receptividad",
+            "--goal",
+            "attend_meetings",
+        ],
+    )
     assert result.exit_code == 0, result.stdout
     assert "demo_user" in result.stdout
     assert "in_progress" in result.stdout
@@ -80,6 +95,7 @@ def test_study_log_rejects_bad_student_id(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("JW_STUDY_SALT", str(tmp_path / "salt.bin"))
     monkeypatch.setenv("JW_STUDY_PASSPHRASE", "hunter2")
     from jw_agents.study_progress import load_or_create_salt
+
     load_or_create_salt(tmp_path / "salt.bin")
     result = runner.invoke(app, ["study", "log", "Amelia García", "lff", "1"])
     assert result.exit_code != 0
@@ -90,11 +106,20 @@ def test_study_log_warns_on_crisis_keyword(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("JW_STUDY_SALT", str(tmp_path / "salt.bin"))
     monkeypatch.setenv("JW_STUDY_PASSPHRASE", "hunter2")
     from jw_agents.study_progress import load_or_create_salt
+
     load_or_create_salt(tmp_path / "salt.bin")
-    result = runner.invoke(app, [
-        "study", "log", "demo_user", "lff", "1",
-        "--note", "Mencionó suicidio en la visita",
-    ])
+    result = runner.invoke(
+        app,
+        [
+            "study",
+            "log",
+            "demo_user",
+            "lff",
+            "1",
+            "--note",
+            "Mencionó suicidio en la visita",
+        ],
+    )
     assert result.exit_code == 0
     assert "crisis" in result.stdout.lower() or "anciano" in result.stdout.lower()
 
@@ -104,6 +129,7 @@ def test_study_progress_shows_lifecycle(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("JW_STUDY_SALT", str(tmp_path / "salt.bin"))
     monkeypatch.setenv("JW_STUDY_PASSPHRASE", "hunter2")
     from jw_agents.study_progress import load_or_create_salt
+
     load_or_create_salt(tmp_path / "salt.bin")
 
     # Seed two lessons

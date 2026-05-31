@@ -134,14 +134,10 @@ class JWHubClient:
             raise HubError(f"hub.jw.org request failed: {e}") from e
         ct = resp.headers.get("content-type", "")
         if resp.status_code == 401 or resp.status_code == 403:
-            raise HubAuthError(
-                f"hub.jw.org returned {resp.status_code}. The session cookie may have expired."
-            )
+            raise HubAuthError(f"hub.jw.org returned {resp.status_code}. The session cookie may have expired.")
         if "html" in ct.lower() and resp.status_code == 200:
             # SPA wrapper instead of JSON — endpoint missing or auth missing.
-            raise HubError(
-                f"Endpoint {path!r} returned HTML; the API location may have moved."
-            )
+            raise HubError(f"Endpoint {path!r} returned HTML; the API location may have moved.")
         if resp.status_code >= 400:
             raise HubError(f"hub.jw.org {resp.status_code}: {resp.text[:200]}")
         try:

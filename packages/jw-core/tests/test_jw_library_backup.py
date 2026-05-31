@@ -14,13 +14,11 @@ import zipfile
 from pathlib import Path
 
 import pytest
-
 from jw_core.parsers.jw_library_backup import (
     JWLibraryBackupError,
     notes_for_chapter,
     parse_jw_library_backup,
 )
-
 
 # ── Fixture: build a backup archive from a dict spec ────────────────────
 
@@ -190,9 +188,7 @@ def _build_backup(
                     ],
                 )
         if "Tag" not in skip:
-            conn.execute(
-                "CREATE TABLE Tag (TagId INTEGER PRIMARY KEY, Type INTEGER, Name TEXT)"
-            )
+            conn.execute("CREATE TABLE Tag (TagId INTEGER PRIMARY KEY, Type INTEGER, Name TEXT)")
             for t in tags or []:
                 conn.execute(
                     "INSERT INTO Tag VALUES (?,?,?)",

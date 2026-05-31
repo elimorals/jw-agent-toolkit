@@ -39,7 +39,7 @@ def _expand_paths(paths: list[Path], recursive: bool) -> list[Path]:
 
 
 def grep_cmd(
-    query: str = typer.Argument("", help="FTS5 query — use \"...\" for phrases"),
+    query: str = typer.Argument("", help='FTS5 query — use "..." for phrases'),
     language: str | None = typer.Option(None, "--language", "-l", help="ISO code (en/es/pt/...)"),
     source_kind: str | None = typer.Option(None, "--kind", help="'nwt' | 'jwpub' | 'epub'"),
     max_results: int = typer.Option(50, "--max", "-n", help="Cap result count"),
@@ -82,9 +82,7 @@ def grep_cmd(
                     if parsed is None:
                         console.print(f"[yellow]Could not parse '{raw}' — skipping[/yellow]")
                         continue
-                    url, html = await clients.wol.get_bible_chapter(
-                        parsed.book_num, parsed.chapter, language=language
-                    )
+                    url, html = await clients.wol.get_bible_chapter(parsed.book_num, parsed.chapter, language=language)
                     chapters.append(
                         nwt_chapter_from_html(
                             html,

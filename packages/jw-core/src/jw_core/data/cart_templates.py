@@ -22,20 +22,14 @@ _CART_TIME = 30
 
 _DEFAULT_GENERIC = LetterTemplate(
     opener=_t(
-        en="Have you ever wondered what the Bible really teaches about "
-           "the future?",
-        es="¿Se ha preguntado alguna vez qué enseña realmente la Biblia "
-           "sobre el futuro?",
-        pt="O senhor já se perguntou o que a Bíblia realmente ensina "
-           "sobre o futuro?",
+        en="Have you ever wondered what the Bible really teaches about the future?",
+        es="¿Se ha preguntado alguna vez qué enseña realmente la Biblia sobre el futuro?",
+        pt="O senhor já se perguntou o que a Bíblia realmente ensina sobre o futuro?",
     ),
     bridge=_t(
-        en="Many say 'I'm not religious' — that's fine. The Bible has "
-           "practical thoughts, not just religious ones.",
-        es="Muchos dicen: «No soy religioso». Está bien. La Biblia "
-           "tiene pensamientos prácticos, no solo religiosos.",
-        pt="Muitos dizem: «Não sou religioso». Tudo bem. A Bíblia tem "
-           "pensamentos práticos, não só religiosos.",
+        en="Many say 'I'm not religious' — that's fine. The Bible has practical thoughts, not just religious ones.",
+        es="Muchos dicen: «No soy religioso». Está bien. La Biblia tiene pensamientos prácticos, no solo religiosos.",
+        pt="Muitos dizem: «Não sou religioso». Tudo bem. A Bíblia tem pensamentos práticos, não só religiosos.",
     ),
     closing=_t(
         en="Feel free to take this — no obligation.",
@@ -52,10 +46,8 @@ _DEFAULT_GENERIC = LetterTemplate(
 _NEW_GENERIC = LetterTemplate(
     opener=_t(
         en="Hi — have you seen what the Bible really says about hope?",
-        es="Hola, ¿ha visto lo que dice realmente la Biblia sobre la "
-           "esperanza?",
-        pt="Olá, o senhor já viu o que a Bíblia realmente diz sobre a "
-           "esperança?",
+        es="Hola, ¿ha visto lo que dice realmente la Biblia sobre la esperanza?",
+        pt="Olá, o senhor já viu o que a Bíblia realmente diz sobre a esperança?",
     ),
     bridge=_t(
         en="It's free to look. One verse at a time.",
@@ -76,12 +68,9 @@ _NEW_GENERIC = LetterTemplate(
 
 _RELIGIOUS_GENERIC = LetterTemplate(
     opener=_t(
-        en="As a believer, have you ever asked what Jesus really meant "
-           "in a particular verse?",
-        es="Como creyente, ¿se ha preguntado qué quiso decir Jesús "
-           "realmente en algún versículo?",
-        pt="Como crente, o senhor já se perguntou o que Jesus realmente "
-           "quis dizer em algum versículo?",
+        en="As a believer, have you ever asked what Jesus really meant in a particular verse?",
+        es="Como creyente, ¿se ha preguntado qué quiso decir Jesús realmente en algún versículo?",
+        pt="Como crente, o senhor já se perguntou o que Jesus realmente quis dizer em algum versículo?",
     ),
     bridge=_t(
         en="Sometimes the original wording opens a window.",
@@ -107,12 +96,9 @@ _ATHEIST_GENERIC = LetterTemplate(
         pt="Se o senhor não lê a Bíblia, o que faria mudar de ideia?",
     ),
     bridge=_t(
-        en="Honest answer: evidence and reasoning. That's what these "
-           "publications focus on.",
-        es="Respuesta honesta: evidencia y razonamiento. En eso se "
-           "enfocan estas publicaciones.",
-        pt="Resposta honesta: evidência e raciocínio. É nisso que estas "
-           "publicações se concentram.",
+        en="Honest answer: evidence and reasoning. That's what these publications focus on.",
+        es="Respuesta honesta: evidencia y razonamiento. En eso se enfocan estas publicaciones.",
+        pt="Resposta honesta: evidência e raciocínio. É nisso que estas publicações se concentram.",
     ),
     closing=_t(
         en="Take a copy — judge for yourself.",
@@ -175,10 +161,8 @@ _YOUNG_GENERIC = LetterTemplate(
 _PARENTS_GENERIC = LetterTemplate(
     opener=_t(
         en="As a parent, have you ever wished for clearer guidance?",
-        es="Como persona con responsabilidades de crianza, ¿ha deseado "
-           "alguna vez una guía más clara?",
-        pt="Como pessoa que cria filhos, o senhor já desejou uma "
-           "orientação mais clara?",
+        es="Como persona con responsabilidades de crianza, ¿ha deseado alguna vez una guía más clara?",
+        pt="Como pessoa que cria filhos, o senhor já desejou uma orientação mais clara?",
     ),
     bridge=_t(
         en="Bible principles are remarkably practical.",
@@ -198,13 +182,13 @@ _PARENTS_GENERIC = LetterTemplate(
 
 
 CART_TEMPLATES: dict[tuple[str, str], LetterTemplate] = {
-    ("default", "generic"):   _DEFAULT_GENERIC,
-    ("new", "generic"):       _NEW_GENERIC,
+    ("default", "generic"): _DEFAULT_GENERIC,
+    ("new", "generic"): _NEW_GENERIC,
     ("religious", "generic"): _RELIGIOUS_GENERIC,
-    ("atheist", "generic"):   _ATHEIST_GENERIC,
-    ("grieving", "generic"):  _GRIEVING_GENERIC,
-    ("young", "generic"):     _YOUNG_GENERIC,
-    ("parents", "generic"):   _PARENTS_GENERIC,
+    ("atheist", "generic"): _ATHEIST_GENERIC,
+    ("grieving", "generic"): _GRIEVING_GENERIC,
+    ("young", "generic"): _YOUNG_GENERIC,
+    ("parents", "generic"): _PARENTS_GENERIC,
 }
 
 

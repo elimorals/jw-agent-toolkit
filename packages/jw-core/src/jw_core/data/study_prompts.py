@@ -15,22 +15,22 @@ from typing import Any
 
 ANTICIPATION_TEMPLATES: dict[str, dict[str, str]] = {
     "es": {
-        "fact":        "¿Qué punto principal enseña el párrafo {n}?",
+        "fact": "¿Qué punto principal enseña el párrafo {n}?",
         "application": "¿Cómo aplicaría usted personalmente lo del párrafo {n}?",
-        "scripture":   "Lea {ref}. ¿Cómo apoya esto la idea del párrafo {n}?",
-        "feeling":     "¿Cómo se siente respecto a lo que dice el párrafo {n}?",
+        "scripture": "Lea {ref}. ¿Cómo apoya esto la idea del párrafo {n}?",
+        "feeling": "¿Cómo se siente respecto a lo que dice el párrafo {n}?",
     },
     "en": {
-        "fact":        "What main point does paragraph {n} teach?",
+        "fact": "What main point does paragraph {n} teach?",
         "application": "How would you personally apply paragraph {n}?",
-        "scripture":   "Read {ref}. How does it support the idea in paragraph {n}?",
-        "feeling":     "How do you feel about what paragraph {n} says?",
+        "scripture": "Read {ref}. How does it support the idea in paragraph {n}?",
+        "feeling": "How do you feel about what paragraph {n} says?",
     },
     "pt": {
-        "fact":        "Qual é o ponto principal do parágrafo {n}?",
+        "fact": "Qual é o ponto principal do parágrafo {n}?",
         "application": "Como você aplicaria pessoalmente o parágrafo {n}?",
-        "scripture":   "Leia {ref}. Como isso apoia a ideia do parágrafo {n}?",
-        "feeling":     "Como você se sente sobre o que o parágrafo {n} diz?",
+        "scripture": "Leia {ref}. Como isso apoia a ideia do parágrafo {n}?",
+        "feeling": "Como você se sente sobre o que o parágrafo {n} diz?",
     },
 }
 

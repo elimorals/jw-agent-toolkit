@@ -24,9 +24,7 @@ def export_merged(
         dtype=None,
     )
     output_dir.mkdir(parents=True, exist_ok=True)
-    model.save_pretrained_merged(
-        str(output_dir), tokenizer, save_method="merged_16bit"
-    )
+    model.save_pretrained_merged(str(output_dir), tokenizer, save_method="merged_16bit")
     logger.info("Merged 16-bit safetensors exported to %s", output_dir)
     return output_dir
 

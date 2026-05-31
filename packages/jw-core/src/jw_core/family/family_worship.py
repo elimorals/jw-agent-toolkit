@@ -17,7 +17,6 @@ from dataclasses import dataclass, field
 from datetime import date, timedelta
 
 from jw_core.family.kids_resources import (
-    GREAT_TEACHER_LESSONS,
     LESSON_BY_TOPIC,
     KidsLesson,
 )
@@ -102,7 +101,7 @@ def plan_family_worship(
         topic = topics[i % len(topics)]
         candidates = LESSON_BY_TOPIC.get(topic, [])
         lesson = candidates[0] if candidates else None
-        theme = (lesson.title.get(language, lesson.title["en"]) if lesson else topic.title())
+        theme = lesson.title.get(language, lesson.title["en"]) if lesson else topic.title()
         main_scripture = lesson.scripture_anchors[0] if (lesson and lesson.scripture_anchors) else ""
         secondary = list(lesson.scripture_anchors[1:3]) if lesson else []
         activity = _ACTIVITY_TEMPLATES.get(language, _ACTIVITY_TEMPLATES["en"]).get(age_band, "")

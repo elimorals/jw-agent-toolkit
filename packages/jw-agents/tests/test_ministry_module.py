@@ -4,14 +4,12 @@ from __future__ import annotations
 
 import asyncio
 import tempfile
-from datetime import datetime
 from pathlib import Path
 
 from jw_agents.presentation_builder import PROFILES, list_audiences, presentation_builder
-from jw_agents.revisit_tracker import Revisit, RevisitStore, plan_next_visit
 from jw_agents.reverse_citation_lookup import _bigram_overlap, _normalize
+from jw_agents.revisit_tracker import Revisit, RevisitStore, plan_next_visit
 from jw_core.data.objections import CATALOG, find_objection, list_objections
-
 
 # ── Objection catalog tests ──────────────────────────────────────────────
 

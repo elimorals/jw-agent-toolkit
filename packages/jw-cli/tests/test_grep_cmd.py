@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from jw_cli.main import app
 from typer.testing import CliRunner
 
-from jw_cli.main import app
 from tests.fixtures.concordance import build_minimal_epub  # type: ignore[import-not-found]
 
 runner = CliRunner()

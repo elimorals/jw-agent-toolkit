@@ -18,9 +18,7 @@ class OllamaProvider:
         try:
             import ollama  # type: ignore[import-untyped]
         except ImportError as e:
-            raise ImportError(
-                "ollama SDK required: install with `--extra synth`"
-            ) from e
+            raise ImportError("ollama SDK required: install with `--extra synth`") from e
         self.model = model
         self._client = ollama.Client(host=host)
 

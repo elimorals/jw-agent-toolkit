@@ -5,7 +5,6 @@ from __future__ import annotations
 import dataclasses
 
 import pytest
-
 from jw_finetune.data.models import ParagraphRecord, SourceSpec
 
 

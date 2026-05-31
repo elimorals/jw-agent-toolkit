@@ -25,11 +25,10 @@ from __future__ import annotations
 import logging
 import os
 import sqlite3
-from contextlib import closing
+from collections.abc import Iterator
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Iterator
 
 from jw_core.parsers.jwpub import parse_jwpub_metadata
 
@@ -162,7 +161,7 @@ class MepsCatalog:
         if not meta.symbol:
             raise ValueError(f"JWPUB missing publication symbol: {jwpub_path!r}")
         conn = self._open()
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
 
         # Upsert publication row.
         conn.execute(

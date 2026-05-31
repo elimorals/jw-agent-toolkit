@@ -5,8 +5,8 @@ from __future__ import annotations
 import asyncio
 
 from jw_mcp.bots.protocols import (
-    BotMessage,
     _HELP_TEXT,
+    BotMessage,
     _summarize_findings,
 )
 

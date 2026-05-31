@@ -23,17 +23,15 @@ The envelope is forward-compatible (`schema_version` + `stores` dict).
 
 from __future__ import annotations
 
-import io
 import json
 import logging
 import sqlite3
-import tarfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from jw_core.privacy.encryption import FieldEncryptor, EncryptionError, generate_key
+from jw_core.privacy.encryption import EncryptionError, FieldEncryptor
 
 logger = logging.getLogger(__name__)
 

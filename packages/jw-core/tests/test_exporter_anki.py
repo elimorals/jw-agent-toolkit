@@ -7,7 +7,6 @@ import zipfile
 from pathlib import Path
 
 import pytest
-
 from jw_core.exporters.errors import MissingDependencyError
 from jw_core.exporters.ir import CitationIR, StudySection, StudySheet
 
@@ -53,7 +52,7 @@ def test_export_apkg_writes_valid_zip(tmp_path: Path) -> None:
     reason="genanki not installed (install jw-core[anki])",
 )
 def test_export_apkg_default_one_note_per_section(tmp_path: Path) -> None:
-    from jw_core.exporters.anki import build_deck, export_apkg
+    from jw_core.exporters.anki import build_deck
 
     deck = build_deck(_sheet(), per_citation_cards=False)
     assert len(deck.notes) == 2  # one per section
@@ -125,9 +124,7 @@ def test_export_apkg_creates_parent_dirs(tmp_path: Path) -> None:
     assert out.exists()
 
 
-def test_missing_dependency_when_genanki_absent(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_missing_dependency_when_genanki_absent(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     import builtins
 
     real_import = builtins.__import__

@@ -216,9 +216,11 @@ def load_strong_json(path: Path | str, *, language: str = "en") -> int:
 
 def load_strong_dir(dir_path: Path | str | None = None, *, language: str = "en") -> int:
     """Load every `*.json` in `dir_path` (default `~/.jw-agent-toolkit/strongs/`)."""
-    dir_p = Path(dir_path).expanduser() if dir_path else Path(
-        os.getenv("JW_STRONG_DIR", "~/.jw-agent-toolkit/strongs/")
-    ).expanduser()
+    dir_p = (
+        Path(dir_path).expanduser()
+        if dir_path
+        else Path(os.getenv("JW_STRONG_DIR", "~/.jw-agent-toolkit/strongs/")).expanduser()
+    )
     if not dir_p.exists():
         return 0
     total = 0

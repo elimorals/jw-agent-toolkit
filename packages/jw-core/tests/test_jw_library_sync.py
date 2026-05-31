@@ -9,8 +9,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import pytest
-
 from jw_core.integrations.jw_library_sync import (
     SyncEntry,
     SyncStateStore,
@@ -18,7 +16,6 @@ from jw_core.integrations.jw_library_sync import (
     sync_backup_to_rag,
 )
 from jw_core.parsers.jw_library_backup import parse_jw_library_backup
-
 
 # ── Fixture builder ─────────────────────────────────────────────────────
 
@@ -47,17 +44,51 @@ def _build_backup(
     for loc in locations or []:
         conn.execute(
             "INSERT INTO Location VALUES (?,?,?,?,?,?,?,?,?,?)",
-            [loc.get(k) for k in ("LocationId", "BookNumber", "ChapterNumber", "DocumentId", "Track", "IssueTagNumber", "KeySymbol", "MepsLanguage", "Type", "Title")],
+            [
+                loc.get(k)
+                for k in (
+                    "LocationId",
+                    "BookNumber",
+                    "ChapterNumber",
+                    "DocumentId",
+                    "Track",
+                    "IssueTagNumber",
+                    "KeySymbol",
+                    "MepsLanguage",
+                    "Type",
+                    "Title",
+                )
+            ],
         )
     for n in notes or []:
         conn.execute(
             "INSERT INTO Note VALUES (?,?,?,?,?,?,?,?,?,?)",
-            [n.get("NoteId"), n.get("Guid", ""), n.get("UserMarkId"), n.get("LocationId"), n.get("Title", ""), n.get("Content", ""), n.get("LastModified", ""), n.get("Created", ""), n.get("BlockType"), n.get("BlockIdentifier")],
+            [
+                n.get("NoteId"),
+                n.get("Guid", ""),
+                n.get("UserMarkId"),
+                n.get("LocationId"),
+                n.get("Title", ""),
+                n.get("Content", ""),
+                n.get("LastModified", ""),
+                n.get("Created", ""),
+                n.get("BlockType"),
+                n.get("BlockIdentifier"),
+            ],
         )
     for b in bookmarks or []:
         conn.execute(
             "INSERT INTO Bookmark VALUES (?,?,?,?,?,?,?,?)",
-            [b.get("BookmarkId"), b.get("LocationId"), b.get("PublicationLocationId"), b.get("Slot", 0), b.get("Title", ""), b.get("Snippet", ""), b.get("BlockType"), b.get("BlockIdentifier")],
+            [
+                b.get("BookmarkId"),
+                b.get("LocationId"),
+                b.get("PublicationLocationId"),
+                b.get("Slot", 0),
+                b.get("Title", ""),
+                b.get("Snippet", ""),
+                b.get("BlockType"),
+                b.get("BlockIdentifier"),
+            ],
         )
     for f in input_fields or []:
         conn.execute(
@@ -109,8 +140,7 @@ class _FakeStore:
 
     def add(self, chunks: list[Any]) -> None:
         recorded = [
-            _StoredChunk(id=c.id, text=c.text, source_id=c.source_id, metadata=dict(c.metadata))
-            for c in chunks
+            _StoredChunk(id=c.id, text=c.text, source_id=c.source_id, metadata=dict(c.metadata)) for c in chunks
         ]
         self.chunks.extend(recorded)
         self.add_log.append(recorded)
@@ -136,7 +166,9 @@ def test_state_store_roundtrip(tmp_path: Path) -> None:
     loaded = store.load("bkA")
     assert loaded.backup_id == "bkA"
     assert loaded.notes == {}
-    loaded.notes["g1"] = SyncEntry(item_id="g1", source_id="jwlib:note:1", last_modified="2024-11-15", content_hash="h1")
+    loaded.notes["g1"] = SyncEntry(
+        item_id="g1", source_id="jwlib:note:1", last_modified="2024-11-15", content_hash="h1"
+    )
     store.save(loaded)
 
     again = SyncStateStore(path).load("bkA")
@@ -173,7 +205,9 @@ def test_first_sync_marks_everything_new(tmp_path: Path) -> None:
     archive = _build_backup(
         tmp_path,
         locations=[{"LocationId": 1, "BookNumber": 43, "ChapterNumber": 3, "Type": 2}],
-        notes=[{"NoteId": 1, "Guid": "g1", "LocationId": 1, "Title": "t1", "Content": "c1", "LastModified": "2024-11-15"}],
+        notes=[
+            {"NoteId": 1, "Guid": "g1", "LocationId": 1, "Title": "t1", "Content": "c1", "LastModified": "2024-11-15"}
+        ],
         bookmarks=[{"BookmarkId": 1, "LocationId": 1, "Title": "Juan 3:16", "Snippet": "snippet"}],
         input_fields=[{"LocationId": 1, "TextTag": "q1", "Value": "respuesta"}],
     )
@@ -191,7 +225,9 @@ def test_unchanged_second_sync_is_noop(tmp_path: Path) -> None:
     archive = _build_backup(
         tmp_path,
         locations=[{"LocationId": 1, "BookNumber": 43, "ChapterNumber": 3, "Type": 2}],
-        notes=[{"NoteId": 1, "Guid": "g1", "LocationId": 1, "Title": "t1", "Content": "c1", "LastModified": "2024-11-15"}],
+        notes=[
+            {"NoteId": 1, "Guid": "g1", "LocationId": 1, "Title": "t1", "Content": "c1", "LastModified": "2024-11-15"}
+        ],
     )
     store_path = tmp_path / "store"
     store_path.mkdir()
@@ -208,14 +244,32 @@ def test_modified_note_is_updated_in_place(tmp_path: Path) -> None:
     archive_v1 = _build_backup(
         tmp_path / "v1",
         locations=[{"LocationId": 1, "BookNumber": 43, "ChapterNumber": 3, "Type": 2}],
-        notes=[{"NoteId": 1, "Guid": "g1", "LocationId": 1, "Title": "v1", "Content": "first body", "LastModified": "2024-11-15"}],
+        notes=[
+            {
+                "NoteId": 1,
+                "Guid": "g1",
+                "LocationId": 1,
+                "Title": "v1",
+                "Content": "first body",
+                "LastModified": "2024-11-15",
+            }
+        ],
     )
     archive_v2 = _build_backup(
         tmp_path / "v2",
         archive_name="demo-v2.jwlibrary",
         hash_="deadbeef",  # same hash → same backup_id, so state carries over
         locations=[{"LocationId": 1, "BookNumber": 43, "ChapterNumber": 3, "Type": 2}],
-        notes=[{"NoteId": 1, "Guid": "g1", "LocationId": 1, "Title": "v2", "Content": "REVISED body", "LastModified": "2024-11-20"}],
+        notes=[
+            {
+                "NoteId": 1,
+                "Guid": "g1",
+                "LocationId": 1,
+                "Title": "v2",
+                "Content": "REVISED body",
+                "LastModified": "2024-11-20",
+            }
+        ],
     )
     store = _FakeStore(tmp_path / "store")
     state_path = tmp_path / "state.json"
@@ -235,8 +289,22 @@ def test_deleted_note_is_removed_from_store(tmp_path: Path) -> None:
         tmp_path / "v1",
         locations=[{"LocationId": 1, "BookNumber": 43, "ChapterNumber": 3, "Type": 2}],
         notes=[
-            {"NoteId": 1, "Guid": "g1", "LocationId": 1, "Title": "keep", "Content": "kept note body", "LastModified": "2024-11-15"},
-            {"NoteId": 2, "Guid": "g2", "LocationId": 1, "Title": "drop", "Content": "dropped note body", "LastModified": "2024-11-15"},
+            {
+                "NoteId": 1,
+                "Guid": "g1",
+                "LocationId": 1,
+                "Title": "keep",
+                "Content": "kept note body",
+                "LastModified": "2024-11-15",
+            },
+            {
+                "NoteId": 2,
+                "Guid": "g2",
+                "LocationId": 1,
+                "Title": "drop",
+                "Content": "dropped note body",
+                "LastModified": "2024-11-15",
+            },
         ],
     )
     archive_v2 = _build_backup(
@@ -244,7 +312,14 @@ def test_deleted_note_is_removed_from_store(tmp_path: Path) -> None:
         archive_name="demo-v2.jwlibrary",
         locations=[{"LocationId": 1, "BookNumber": 43, "ChapterNumber": 3, "Type": 2}],
         notes=[
-            {"NoteId": 1, "Guid": "g1", "LocationId": 1, "Title": "keep", "Content": "kept note body", "LastModified": "2024-11-15"},
+            {
+                "NoteId": 1,
+                "Guid": "g1",
+                "LocationId": 1,
+                "Title": "keep",
+                "Content": "kept note body",
+                "LastModified": "2024-11-15",
+            },
         ],
     )
     store = _FakeStore(tmp_path / "store")
@@ -277,7 +352,14 @@ def test_short_notes_below_min_chars_skipped(tmp_path: Path) -> None:
         locations=[{"LocationId": 1, "BookNumber": 43, "ChapterNumber": 3, "Type": 2}],
         notes=[
             {"NoteId": 1, "Guid": "g1", "LocationId": 1, "Title": "", "Content": "x", "LastModified": "x"},
-            {"NoteId": 2, "Guid": "g2", "LocationId": 1, "Title": "ok", "Content": "this is long enough", "LastModified": "x"},
+            {
+                "NoteId": 2,
+                "Guid": "g2",
+                "LocationId": 1,
+                "Title": "ok",
+                "Content": "this is long enough",
+                "LastModified": "x",
+            },
         ],
     )
     store = _FakeStore(tmp_path / "store")
@@ -291,7 +373,16 @@ def test_include_bookmarks_false_skips_them(tmp_path: Path) -> None:
     archive = _build_backup(
         tmp_path,
         locations=[{"LocationId": 1, "BookNumber": 43, "ChapterNumber": 3, "Type": 2}],
-        notes=[{"NoteId": 1, "Guid": "g1", "LocationId": 1, "Title": "n", "Content": "content body here", "LastModified": ""}],
+        notes=[
+            {
+                "NoteId": 1,
+                "Guid": "g1",
+                "LocationId": 1,
+                "Title": "n",
+                "Content": "content body here",
+                "LastModified": "",
+            }
+        ],
         bookmarks=[{"BookmarkId": 1, "LocationId": 1, "Title": "skip me", "Snippet": "definitely long enough text"}],
     )
     store = _FakeStore(tmp_path / "store")

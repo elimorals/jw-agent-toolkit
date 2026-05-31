@@ -5,8 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_mcp.tools.concordance import concordance_build_index_tool, concordance_search_tool
+
 from tests.fixtures.concordance import build_minimal_epub  # type: ignore[import-not-found]
 
 

@@ -38,9 +38,7 @@ def create_app(events_path: Path) -> Any:  # FastAPI not type-imported at top
         from fastapi.responses import HTMLResponse, JSONResponse  # type: ignore[import-not-found]
         from fastapi.staticfiles import StaticFiles  # type: ignore[import-not-found]
     except ImportError as e:
-        raise ImportError(
-            "fastapi required: install with `--extra monitor`"
-        ) from e
+        raise ImportError("fastapi required: install with `--extra monitor`") from e
 
     store = EventStore(events_path)
 
@@ -81,9 +79,7 @@ def create_app(events_path: Path) -> Any:  # FastAPI not type-imported at top
             logger.warning("WS error: %s", e)
 
     if _static_dir().exists():
-        app.mount(
-            "/static", StaticFiles(directory=str(_static_dir())), name="static"
-        )
+        app.mount("/static", StaticFiles(directory=str(_static_dir())), name="static")
 
     return app
 
@@ -93,9 +89,7 @@ def run(events_path: Path, *, host: str = "127.0.0.1", port: int = 7860) -> None
     try:
         import uvicorn  # type: ignore[import-not-found]
     except ImportError as e:
-        raise ImportError(
-            "uvicorn required: install with `--extra monitor`"
-        ) from e
+        raise ImportError("uvicorn required: install with `--extra monitor`") from e
 
     app = create_app(events_path)
     uvicorn.run(app, host=host, port=port, log_level="info")

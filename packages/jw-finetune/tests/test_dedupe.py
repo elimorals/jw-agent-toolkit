@@ -8,8 +8,11 @@ from jw_finetune.data.models import ParagraphRecord
 
 def _rec(text: str) -> ParagraphRecord:
     return ParagraphRecord(
-        text=text, pub_code="w24", language="es",
-        kind="watchtower", source_path="x",
+        text=text,
+        pub_code="w24",
+        language="es",
+        kind="watchtower",
+        source_path="x",
     )
 
 
@@ -37,7 +40,7 @@ def test_simhash_empty_returns_zero() -> None:
 
 
 def test_hamming_zero_for_equal() -> None:
-    assert hamming_distance(0xdeadbeef, 0xdeadbeef) == 0
+    assert hamming_distance(0xDEADBEEF, 0xDEADBEEF) == 0
 
 
 def test_deduplicate_removes_near_duplicates() -> None:

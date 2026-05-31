@@ -24,13 +24,9 @@ class AnthropicProvider:
         try:
             import anthropic  # type: ignore[import-untyped]
         except ImportError as e:
-            raise ImportError(
-                "anthropic SDK required: install with `--extra synth`"
-            ) from e
+            raise ImportError("anthropic SDK required: install with `--extra synth`") from e
         self.model = model
-        self._client = anthropic.Anthropic(
-            api_key=api_key or os.environ.get("ANTHROPIC_API_KEY")
-        )
+        self._client = anthropic.Anthropic(api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"))
 
     def generate(self, req: LLMRequest) -> LLMResponse:
         resp = self._client.messages.create(
@@ -40,9 +36,7 @@ class AnthropicProvider:
             system=req.system,
             messages=[{"role": "user", "content": req.user}],
         )
-        text = "".join(
-            b.text for b in resp.content if getattr(b, "type", None) == "text"
-        )
+        text = "".join(b.text for b in resp.content if getattr(b, "type", None) == "text")
         return LLMResponse(
             text=text,
             provider=self.name,

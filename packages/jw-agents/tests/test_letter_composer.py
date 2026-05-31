@@ -8,7 +8,6 @@ from __future__ import annotations
 import asyncio
 
 import pytest
-
 from jw_agents.letter_composer import letter_composer
 
 

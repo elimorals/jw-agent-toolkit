@@ -15,8 +15,7 @@ should be verified against jw.org.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
-
+from datetime import date
 
 # Verified from jw.org annual announcements.
 MEMORIAL_DATES: dict[int, str] = {

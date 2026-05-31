@@ -15,6 +15,7 @@ Communicates via stdio (default MCP transport).
 from __future__ import annotations
 
 import logging
+from datetime import date as _date
 from typing import Any
 
 from fastmcp import FastMCP
@@ -36,7 +37,6 @@ from jw_agents import (
 from jw_agents import (
     workbook_helper as workbook_helper_agent,
 )
-from jw_agents import workbook_helper as _workbook_helper_agent
 from jw_agents.audio_helper import (
     read_article_aloud as _read_article_aloud,
 )
@@ -47,11 +47,11 @@ from jw_agents.audio_helper import (
     search_broadcasting as _search_broadcasting,
 )
 from jw_agents.conversation_assistant import conversation_assistant as conversation_assistant_agent
+from jw_agents.news_monitor import news_monitor as news_monitor_agent
 from jw_agents.presentation_builder import list_audiences as _list_audiences
 from jw_agents.presentation_builder import presentation_builder as presentation_builder_agent
 from jw_agents.reverse_citation_lookup import reverse_citation_lookup as reverse_citation_lookup_agent
 from jw_agents.revisit_tracker import Revisit, RevisitStore, plan_next_visit
-from jw_agents.news_monitor import news_monitor as news_monitor_agent
 from jw_agents.study_conductor import prepare_lesson as prepare_lesson_agent
 from jw_core.audio.broadcasting import BroadcastingIndex, index_vtt_file
 from jw_core.audio.tts import list_tts_providers
@@ -61,8 +61,6 @@ from jw_core.clients.pub_media import PubMediaClient, PubMediaError
 from jw_core.clients.topic_index import TopicIndexClient, TopicIndexError
 from jw_core.clients.wol import WOLClient
 from jw_core.data.objections import list_objections
-from jw_core.songs import SongLookupError, get_registry as _get_song_registry
-from jw_core.songs.integration import enrich_with_songs as _enrich_with_songs
 from jw_core.integrations.jw_library import (
     JWLibraryError,
     build_bible_url,
@@ -88,7 +86,6 @@ from jw_core.integrations.obsidian_vault import (
     export_backup_to_vault,
     index_vault_to_rag,
 )
-from datetime import date as _date
 from jw_core.languages import get_language
 from jw_core.ministry.exporters import render_csv, render_markdown
 from jw_core.ministry.field_report import (
@@ -113,6 +110,9 @@ from jw_core.parsers.study_notes import (
     study_notes_for_verse,
 )
 from jw_core.parsers.verse import get_verse as _get_verse_from_html
+from jw_core.songs import SongLookupError
+from jw_core.songs import get_registry as _get_song_registry
+from jw_core.songs.integration import enrich_with_songs as _enrich_with_songs
 from jw_rag import FakeEmbedder, VectorStore
 
 logging.basicConfig(
@@ -2268,16 +2268,31 @@ def prepare_lesson(
 # Student progress (encrypted-at-rest) tools ------------------------------
 
 import os as _os_study
-from datetime import datetime as _dt_study, timezone as _tz_study
+from datetime import UTC
+from datetime import datetime as _dt_study
 
 from jw_agents.study_progress import (
     GoalKind as _GoalKind,
+)
+from jw_agents.study_progress import (
     LessonRow as _LessonRow,
+)
+from jw_agents.study_progress import (
     LessonStatus as _LessonStatus,
+)
+from jw_agents.study_progress import (
     StudentGoal as _StudentGoal,
+)
+from jw_agents.study_progress import (
     StudentProgressStore as _StudentProgressStore,
+)
+from jw_agents.study_progress import (
     default_salt_path as _default_salt_path,
+)
+from jw_agents.study_progress import (
     derive_encryptor_for_passphrase as _derive_enc,
+)
+from jw_agents.study_progress import (
     set_goal_for_student as _set_goal_for_student,
 )
 
@@ -2308,7 +2323,7 @@ def log_student_progress(
     store = store_or_err
 
     try:
-        now = _dt_study.now(_tz_study.utc).isoformat()
+        now = _dt_study.now(UTC).isoformat()
         row = _LessonRow(
             student_id=student_id,
             book_pub=book_pub,
@@ -2544,9 +2559,10 @@ def field_monthly_report(
 
 from jw_mcp.tools.concordance import (  # noqa: E402
     concordance_build_index_tool as _concordance_build_index_tool,
+)
+from jw_mcp.tools.concordance import (
     concordance_search_tool as _concordance_search_tool,
 )
-
 
 mcp.tool(name="concordance_build_index")(_concordance_build_index_tool)
 mcp.tool(name="concordance_search")(_concordance_search_tool)
@@ -2794,7 +2810,6 @@ async def life_topic_info(
 # Phase 22 — Doctrinal regression eval suite
 # ────────────────────────────────────────────────────────────────────────
 
-from pathlib import Path as _Path  # noqa: E402
 
 from jw_eval.cli import run_from_cli as _eval_run  # noqa: E402
 from jw_eval.models import LayerName as _LayerName  # noqa: E402
@@ -2802,7 +2817,7 @@ from jw_eval.models import LayerName as _LayerName  # noqa: E402
 
 @mcp.tool()
 def run_eval_suite(
-    layers: list[int] = [1],
+    layers: list[int] | None = None,
     cases_root: str = "packages/jw-eval/fixtures/golden_qa",
     snapshots_root: str = "packages/jw-eval/fixtures/wol_snapshots",
     live: bool = False,
@@ -2810,6 +2825,8 @@ def run_eval_suite(
 ) -> dict:
     """Run the jw-eval doctrinal regression suite. Returns the SuiteReport as a dict."""
 
+    if layers is None:
+        layers = [1]
     layer_names: list[_LayerName] = [f"l{n}" for n in layers]  # type: ignore[misc]
     report = _eval_run(
         cases_root=_Path(cases_root),

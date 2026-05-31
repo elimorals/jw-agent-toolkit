@@ -32,7 +32,7 @@ def _tag_label(tag: str) -> str:
     return _TAG_LABELS_ES.get(tag, tag)
 
 
-def render_markdown(report: "MonthlyReport") -> str:
+def render_markdown(report: MonthlyReport) -> str:
     """Render a human-friendly markdown report (in Spanish)."""
 
     lines: list[str] = []
@@ -52,9 +52,7 @@ def render_markdown(report: "MonthlyReport") -> str:
         lines.append("| Modalidad | Tag | Horas |")
         lines.append("|---|---|---:|")
         for tag in sorted(report.breakdown_by_tag, key=lambda t: -report.breakdown_by_tag[t]):
-            lines.append(
-                f"| {_tag_label(tag)} | `{tag}` | {report.breakdown_by_tag[tag]:.2f} |"
-            )
+            lines.append(f"| {_tag_label(tag)} | `{tag}` | {report.breakdown_by_tag[tag]:.2f} |")
         lines.append("")
     lines.append("---")
     lines.append("")
@@ -66,7 +64,7 @@ def render_markdown(report: "MonthlyReport") -> str:
     return "\n".join(lines)
 
 
-def render_csv(report: "MonthlyReport") -> str:
+def render_csv(report: MonthlyReport) -> str:
     """Render the report as a long-form CSV (mes, metrica, valor)."""
 
     buf = io.StringIO()
@@ -88,7 +86,7 @@ def render_csv(report: "MonthlyReport") -> str:
 from jw_core.ministry.field_report import MonthlyReport  # noqa: E402
 
 
-def render_pdf(report: "MonthlyReport", *, out_path: Path) -> Path:
+def render_pdf(report: MonthlyReport, *, out_path: Path) -> Path:
     """Render the report to PDF (requires the ``[pdf]`` extra)."""
 
     try:
@@ -96,8 +94,7 @@ def render_pdf(report: "MonthlyReport", *, out_path: Path) -> Path:
         from weasyprint import HTML
     except ImportError as exc:  # noqa: BLE001
         raise RuntimeError(
-            "PDF rendering requires the [pdf] extra. Install with "
-            "`uv pip install -e 'packages/jw-core[pdf]'`."
+            "PDF rendering requires the [pdf] extra. Install with `uv pip install -e 'packages/jw-core[pdf]'`."
         ) from exc
 
     templates_dir = Path(__file__).parent / "templates"
@@ -106,9 +103,7 @@ def render_pdf(report: "MonthlyReport", *, out_path: Path) -> Path:
         autoescape=select_autoescape(["html", "xml"]),
     )
     tpl = env.get_template("monthly_report.html.j2")
-    breakdown = sorted(
-        report.breakdown_by_tag.items(), key=lambda kv: -kv[1]
-    )
+    breakdown = sorted(report.breakdown_by_tag.items(), key=lambda kv: -kv[1])
     html = tpl.render(
         report=report,
         breakdown=breakdown,

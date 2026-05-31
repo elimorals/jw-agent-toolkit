@@ -53,7 +53,7 @@ def _infer_kind_from_pub_code(pub_code: str) -> PublicationKind:
         return "other"
     for prefix, kind in _PUBCODE_KIND_PREFIXES:
         if pc == prefix or pc.startswith(prefix):
-            tail = pc[len(prefix):]
+            tail = pc[len(prefix) :]
             if not tail or tail[0].isdigit() or tail[0] in "_-":
                 return kind
     return "other"
@@ -196,9 +196,7 @@ def extract_from_jwpub(
 
     meta = parse_jwpub(p)
     if not meta.decrypted_text_available:
-        logger.warning(
-            "JWPUB %s could not be decrypted; no paragraphs yielded.", p
-        )
+        logger.warning("JWPUB %s could not be decrypted; no paragraphs yielded.", p)
         return
 
     pub_code = meta.symbol or "unknown"
@@ -219,10 +217,7 @@ def extract_from_jwpub(
                 kind=kind,
                 source_path=str(p),
                 doc_id=str(doc.meps_document_id),
-                section_ref=(
-                    f"{pub_code} {doc.title or doc.toc_title or doc.document_id}"
-                    f" p.{i + 1}"
-                ),
+                section_ref=(f"{pub_code} {doc.title or doc.toc_title or doc.document_id} p.{i + 1}"),
                 paragraph_pid=None,
                 extra={
                     "chapter_number": str(doc.chapter_number or 0),

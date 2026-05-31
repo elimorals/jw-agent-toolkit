@@ -21,9 +21,7 @@ def _require_textual() -> None:
     try:
         import textual  # noqa: F401  # type: ignore[import-not-found]
     except ImportError as e:
-        raise ImportError(
-            "textual required: install with `--extra tui`"
-        ) from e
+        raise ImportError("textual required: install with `--extra tui`") from e
 
 
 def _build_jw_library_theme() -> Any:
@@ -32,13 +30,13 @@ def _build_jw_library_theme() -> Any:
 
     return Theme(
         name="jw-library",
-        primary="#A78BB8",     # lavender — brand accent (icon, active tab)
-        secondary="#7B6A92",   # muted purple
-        accent="#C8AAD9",      # light lilac — highlights / hover
+        primary="#A78BB8",  # lavender — brand accent (icon, active tab)
+        secondary="#7B6A92",  # muted purple
+        accent="#C8AAD9",  # light lilac — highlights / hover
         foreground="#F2F2F2",  # body text
         background="#1F1730",  # deep eggplant — screen background
-        surface="#352940",     # cards / containers
-        panel="#42344E",       # sunken panels
+        surface="#352940",  # cards / containers
+        panel="#42344E",  # sunken panels
         success="#7BC97E",
         warning="#F2C94C",
         error="#EB5757",
@@ -58,7 +56,13 @@ def build_wizard_app() -> Any:
     from textual.binding import Binding  # type: ignore[import-not-found]
     from textual.containers import Horizontal, Vertical  # type: ignore[import-not-found]
     from textual.widgets import (  # type: ignore[import-not-found]
-        Button, ContentSwitcher, Footer, Header, Input, Label, Static,
+        Button,
+        ContentSwitcher,
+        Footer,
+        Header,
+        Input,
+        Label,
+        Static,
     )
 
     class WizardApp(App):  # type: ignore[misc]
@@ -236,11 +240,7 @@ def build_wizard_app() -> Any:
             self._render()
 
         def action_delete_source(self) -> None:
-            if (
-                self.state.step == "sources"
-                and self.state.recipe is not None
-                and self.state.recipe.sources
-            ):
+            if self.state.step == "sources" and self.state.recipe is not None and self.state.recipe.sources:
                 self.state.remove_source(len(self.state.recipe.sources) - 1)
                 self._render_sources()
 
@@ -327,9 +327,7 @@ def build_wizard_app() -> Any:
             path = self._input_value("#source_path")
             if not path:
                 return
-            default_lang = (
-                self.state.recipe.languages[0] if self.state.recipe.languages else "es"
-            )
+            default_lang = self.state.recipe.languages[0] if self.state.recipe.languages else "es"
             lang = self._input_value("#source_lang") or default_lang
             self.state.add_source(_detect_source_kind(path), path, lang)
             self._set_input("#source_path", "")
@@ -367,9 +365,7 @@ def build_wizard_app() -> Any:
             for i, name in enumerate(presets, start=1):
                 r = get_preset(name)
                 marker = "▸" if name == current else " "
-                lines.append(
-                    f"  {marker} [{i}] {name}  ({r.task}, {','.join(r.languages)})"
-                )
+                lines.append(f"  {marker} [{i}] {name}  ({r.task}, {','.join(r.languages)})")
             lines += [
                 "",
                 f"Pulsa 1-{len(presets)} para elegir · Ctrl+N: siguiente (default = primero) · Ctrl+Q: salir",
@@ -379,15 +375,11 @@ def build_wizard_app() -> Any:
         def _render_sources(self) -> None:
             body = self.query_one("#sources_view", Static)
             if self.state.recipe is None or not self.state.recipe.sources:
-                body.update(
-                    "(sin fuentes — escribe una ruta o URL abajo y pulsa Enter o Añadir)"
-                )
+                body.update("(sin fuentes — escribe una ruta o URL abajo y pulsa Enter o Añadir)")
                 return
             lines = [f"Fuentes ({len(self.state.recipe.sources)}):"]
             for i, s in enumerate(self.state.recipe.sources, start=1):
-                lines.append(
-                    f"  [{i}] {s.kind:<11}  {s.language:<4}  {s.path}"
-                )
+                lines.append(f"  [{i}] {s.kind:<11}  {s.language:<4}  {s.path}")
             body.update("\n".join(lines))
 
         def _render_review(self) -> None:
@@ -553,9 +545,7 @@ def build_monitor_app(events_path: Path) -> Any:
             assert self.stats_widget is not None and self.log_widget is not None
             loss_s = f"{self.last_loss:.4f}" if self.last_loss is not None else "n/a"
             step_s = str(self.last_step) if self.last_step is not None else "n/a"
-            self.stats_widget.update(
-                f"step: {step_s}    loss: {loss_s}    events: {len(self.events)}"
-            )
+            self.stats_widget.update(f"step: {step_s}    loss: {loss_s}    events: {len(self.events)}")
             # Show last 30 events compactly
             lines = []
             for ev in list(self.events)[-30:]:

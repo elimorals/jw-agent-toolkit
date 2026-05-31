@@ -50,13 +50,12 @@ __all__ = [
 class MacOSFullDiskAccessError(RuntimeError):
     """Raised when reading the macOS sandbox container is blocked by TCC."""
 
+
 ENV_OPT_IN = "JW_LIBRARY_LOCAL_READ"
 
 # Used to locate UWP package folders on Windows. The suffix is the package
 # family name; the wildcard absorbs the publisher hash that UWP appends.
-_WINDOWS_UWP_GLOB = (
-    "Packages/WatchtowerBibleandTractSocietyofNewYorkInc.JWLibrary_*/"
-)
+_WINDOWS_UWP_GLOB = "Packages/WatchtowerBibleandTractSocietyofNewYorkInc.JWLibrary_*/"
 # macOS install location (the WrappedBundle iPad app under /Applications).
 _MAC_APP_PATH = Path("/Applications/JW Library.app")
 # macOS sandbox container (unreachable without TCC + a private entitlement,
@@ -195,13 +194,8 @@ def _inspect_windows() -> LocalInspectionResult:
             supported=True,
             opt_in=True,
             app_detected=False,
-            reasons=[
-                "JW Library UWP package folder not found under LocalAppData."
-            ],
-            suggestions=[
-                "Install JW Library from Microsoft Store, run it once, "
-                "then re-run this tool."
-            ],
+            reasons=["JW Library UWP package folder not found under LocalAppData."],
+            suggestions=["Install JW Library from Microsoft Store, run it once, then re-run this tool."],
         )
     package_dir = Path(matches[0])
     local_state = package_dir / "LocalState"
@@ -244,19 +238,14 @@ def _inspect_macos() -> LocalInspectionResult:
     if app_detected:
         reasons.append(f"JW Library app detected at {_MAC_APP_PATH}.")
     else:
-        reasons.append(
-            "JW Library not found in /Applications. Install from Mac App Store."
-        )
+        reasons.append("JW Library not found in /Applications. Install from Mac App Store.")
 
     user_data_path = ""
     fda_status = check_macos_full_disk_access()
 
     if container_exists:
         if fda_status["readable"]:
-            reasons.append(
-                f"Sandbox container at {_MAC_CONTAINER} is readable (Full "
-                "Disk Access detected)."
-            )
+            reasons.append(f"Sandbox container at {_MAC_CONTAINER} is readable (Full Disk Access detected).")
             ud = _find_userdata_in_container(_MAC_CONTAINER)
             if ud is not None:
                 user_data_path = str(ud)
@@ -279,8 +268,7 @@ def _inspect_macos() -> LocalInspectionResult:
             suggestions.extend(_fda_instructions())
     else:
         reasons.append(
-            "Sandbox container has not been created yet "
-            f"(expected at {_MAC_CONTAINER}). Run the app at least once."
+            f"Sandbox container has not been created yet (expected at {_MAC_CONTAINER}). Run the app at least once."
         )
 
     suggestions.append(
@@ -391,14 +379,12 @@ def read_macos_userdata():
     fda = check_macos_full_disk_access()
     if not fda["readable"]:
         raise MacOSFullDiskAccessError(
-            "Cannot read JW Library container without Full Disk Access. "
-            + str(fda.get("error", ""))
+            "Cannot read JW Library container without Full Disk Access. " + str(fda.get("error", ""))
         )
     src = _find_userdata_in_container(_MAC_CONTAINER)
     if src is None:
         raise MacOSFullDiskAccessError(
-            "Container is readable but userData.db is missing. "
-            "Run JW Library at least once."
+            "Container is readable but userData.db is missing. Run JW Library at least once."
         )
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
         tmp_path = Path(tmp.name)
@@ -424,8 +410,7 @@ def _inspect_linux() -> LocalInspectionResult:
         opt_in=True,
         app_detected=False,
         reasons=[
-            "JW Library has no native Linux build. Use a `.jwlibrary` "
-            "backup exported from a supported device instead."
+            "JW Library has no native Linux build. Use a `.jwlibrary` backup exported from a supported device instead."
         ],
         suggestions=[
             "Export a backup from JW Library on Android/iOS/Windows, "

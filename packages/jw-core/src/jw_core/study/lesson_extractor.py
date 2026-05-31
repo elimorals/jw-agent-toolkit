@@ -47,13 +47,9 @@ def extract_lesson(pub_code: str, chapter: int, language: str = "es") -> LessonC
         raise LessonExtractionError(str(e)) from e
 
     if not (1 <= chapter <= book.total_chapters):
-        raise LessonExtractionError(
-            f"chapter={chapter} out of range for {pub_code} (1..{book.total_chapters})"
-        )
+        raise LessonExtractionError(f"chapter={chapter} out of range for {pub_code} (1..{book.total_chapters})")
     if language not in book.languages:
-        raise LessonExtractionError(
-            f"language={language!r} not supported for {pub_code} (supported: {book.languages})"
-        )
+        raise LessonExtractionError(f"language={language!r} not supported for {pub_code} (supported: {book.languages})")
 
     jwpub_path = _find_jwpub_path(symbol=book.jwpub_symbol, language=language)
     if jwpub_path is not None:
@@ -80,9 +76,7 @@ def _extract_from_jwpub(book, chapter, language, path) -> LessonContent:
     pub = parse_jwpub(path)
     documents = list(pub.documents)
     if not (1 <= chapter <= len(documents)):
-        raise LessonExtractionError(
-            f"jwpub for {book.pub_code}/{language} only has {len(documents)} documents"
-        )
+        raise LessonExtractionError(f"jwpub for {book.pub_code}/{language} only has {len(documents)} documents")
     doc = documents[chapter - 1]
     title = doc.title or book.title_by_lang.get(language, book.pub_code)
     paragraphs = list(doc.paragraphs)

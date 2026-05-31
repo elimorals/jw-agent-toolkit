@@ -36,7 +36,18 @@ from jw_agents.base import AgentResult, Citation, Finding
 
 logger = logging.getLogger(__name__)
 
-_LANG_TO_JW = {"en": "E", "es": "S", "pt": "T", "fr": "F", "de": "X", "it": "I", "ru": "U", "ja": "J", "ko": "KO", "zh": "CHS"}
+_LANG_TO_JW = {
+    "en": "E",
+    "es": "S",
+    "pt": "T",
+    "fr": "F",
+    "de": "X",
+    "it": "I",
+    "ru": "U",
+    "ja": "J",
+    "ko": "KO",
+    "zh": "CHS",
+}
 
 _COMMENT_INTROS: dict[str, dict[str, str]] = {
     "en": {
@@ -231,8 +242,7 @@ def _parse_watchtower(
             continue
         study_idx += 1
         paragraphs = [
-            WatchtowerStudyParagraph(number=i + 1, text=p, scripture_refs=[])
-            for i, p in enumerate(doc.paragraphs)
+            WatchtowerStudyParagraph(number=i + 1, text=p, scripture_refs=[]) for i, p in enumerate(doc.paragraphs)
         ]
         out.append(
             WatchtowerStudy(

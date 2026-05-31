@@ -36,7 +36,7 @@ import hashlib
 import json
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -377,9 +377,7 @@ def sync_backup_to_rag(
         )
 
     # 1. Remove chunks for deleted/updated items.
-    to_remove = list(plan.deleted_note_source_ids) + [
-        _note_source_id(n) for n in plan.updated_notes
-    ]
+    to_remove = list(plan.deleted_note_source_ids) + [_note_source_id(n) for n in plan.updated_notes]
     if include_bookmarks:
         to_remove += plan.deleted_bookmark_source_ids
         to_remove += [_bookmark_source_id(b) for b in plan.updated_bookmarks]
@@ -453,7 +451,7 @@ def sync_backup_to_rag(
         if state.input_fields[key].source_id in plan.deleted_input_field_source_ids:
             del state.input_fields[key]
 
-    state.last_synced_at = datetime.now(timezone.utc).isoformat()
+    state.last_synced_at = datetime.now(UTC).isoformat()
     state_store.save(state)
 
     return SyncReport(

@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import asyncio
 
-import pytest
-
 from jw_core.language_discovery import (
     DEFAULT_PROBE_CANDIDATES,
     LanguageProbeResult,

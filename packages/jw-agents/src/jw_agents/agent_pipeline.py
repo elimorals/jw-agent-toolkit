@@ -74,9 +74,7 @@ async def verse_explainer_with_finetuned(
     context_chunks = _findings_to_context(enrich_result)
     if context_chunks:
         prompt = (
-            f"Contexto bíblico recuperado:\n\n"
-            + "\n\n---\n\n".join(context_chunks)
-            + f"\n\nPregunta: {query}\n\n"
+            "Contexto bíblico recuperado:\n\n" + "\n\n---\n\n".join(context_chunks) + f"\n\nPregunta: {query}\n\n"
             "Responde basándote estrictamente en el contexto, citando "
             "el versículo donde corresponda."
         )
@@ -84,20 +82,24 @@ async def verse_explainer_with_finetuned(
         prompt = query
 
     try:
-        resp = finetuned_client.generate(GenerateRequest(
-            prompt=prompt,
-            system=(
-                "Eres un asistente que explica textos bíblicos según las "
-                "publicaciones de los Testigos de Jehová. Cita versículos "
-                "fielmente y mantén el tono respetuoso."
-            ) if language.startswith("es") else (
-                "You are an assistant explaining bible passages from Jehovah's "
-                "Witnesses' publications. Cite verses faithfully and stay respectful."
-            ),
-            max_new_tokens=max_new_tokens,
-            temperature=temperature,
-            language=language,
-        ))
+        resp = finetuned_client.generate(
+            GenerateRequest(
+                prompt=prompt,
+                system=(
+                    "Eres un asistente que explica textos bíblicos según las "
+                    "publicaciones de los Testigos de Jehová. Cita versículos "
+                    "fielmente y mantén el tono respetuoso."
+                )
+                if language.startswith("es")
+                else (
+                    "You are an assistant explaining bible passages from Jehovah's "
+                    "Witnesses' publications. Cite verses faithfully and stay respectful."
+                ),
+                max_new_tokens=max_new_tokens,
+                temperature=temperature,
+                language=language,
+            )
+        )
         enrich_result.metadata["generated_answer"] = resp.text
         enrich_result.metadata["generation_backend"] = getattr(resp, "backend", "unknown")
         enrich_result.metadata["generation_usage"] = dict(resp.usage)
@@ -129,21 +131,23 @@ async def conversation_assistant_with_finetuned(
         f"Objeción / pregunta: {query}\n\n"
         + (
             "Material de referencia:\n\n" + "\n\n---\n\n".join(context_chunks)
-            if context_chunks else
-            "No se encontró material previo en el catálogo."
+            if context_chunks
+            else "No se encontró material previo en el catálogo."
         )
         + "\n\nRedacta una respuesta calmada y respetuosa, citando los "
         "textos bíblicos disponibles."
     )
 
     try:
-        resp = finetuned_client.generate(GenerateRequest(
-            prompt=prompt,
-            system="Eres un publicador que maneja objeciones con respeto y citas escriturales.",
-            max_new_tokens=max_new_tokens,
-            temperature=temperature,
-            language=language,
-        ))
+        resp = finetuned_client.generate(
+            GenerateRequest(
+                prompt=prompt,
+                system="Eres un publicador que maneja objeciones con respeto y citas escriturales.",
+                max_new_tokens=max_new_tokens,
+                temperature=temperature,
+                language=language,
+            )
+        )
         enrich_result.metadata["generated_answer"] = resp.text
         enrich_result.metadata["generation_backend"] = getattr(resp, "backend", "unknown")
     except Exception as e:  # noqa: BLE001

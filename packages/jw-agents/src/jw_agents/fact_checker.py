@@ -28,7 +28,6 @@ from jw_core.parsers.reference import parse_all_references
 from jw_agents.base import AgentResult, Citation, Finding
 from jw_agents.research_topic import _flatten_search, _wol_url_from
 
-
 # Phrases that, when found in published JW material, signal a contradiction
 # of a hypothetical user claim. We don't try NLU here — we surface evidence
 # and let the LLM judge.

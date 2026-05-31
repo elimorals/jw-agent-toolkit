@@ -6,16 +6,14 @@ import tempfile
 from pathlib import Path
 
 from jw_core.personalization import (
+    TONE_TEMPLATES,
     MemoryEntry,
     SessionMemory,
-    TONE_TEMPLATES,
     UserProfile,
     UserProfileStore,
     adjust_tone,
     easy_read,
     high_contrast_palette,
-    load_memory_for_user,
-    save_memory_for_user,
 )
 
 

@@ -43,12 +43,12 @@ class Recipe:
     weight_decay: float = 0.0
     # Unsloth-specific knobs (added F6.2).
     chat_template: str = "chatml"  # "chatml" | "qwen-2.5" | "llama-3" | "gemma" | "phi-4" | "mistral"
-    use_rslora: bool = False       # rank-stabilized LoRA — improves stability for rank>=64
-    packing: bool | None = None    # None = task default (CPT=True, SFT=False); set to override
+    use_rslora: bool = False  # rank-stabilized LoRA — improves stability for rank>=64
+    packing: bool | None = None  # None = task default (CPT=True, SFT=False); set to override
     train_on_responses_only: bool = True  # mask user tokens during SFT
-    instruction_part: str = ""     # auto-derived from chat_template if empty
-    response_part: str = ""        # auto-derived from chat_template if empty
-    use_multi_gpu: bool = False    # enable Accelerate multi-GPU
+    instruction_part: str = ""  # auto-derived from chat_template if empty
+    response_part: str = ""  # auto-derived from chat_template if empty
+    use_multi_gpu: bool = False  # enable Accelerate multi-GPU
     embedding_learning_rate_ratio: float = 0.1  # CPT: embedding_lr = lr * this
 
     # Data preparation knobs.

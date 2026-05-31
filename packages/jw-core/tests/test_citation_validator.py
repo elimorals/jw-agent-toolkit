@@ -3,13 +3,9 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_core.citations.models import (
-    CatalogStatus,
     CitationCheck,
     CitationReport,
-    DriftStatus,
-    ResolveStatus,
 )
 
 
@@ -129,9 +125,7 @@ async def test_structural_with_populated_catalog_ok(tmp_path) -> None:
     cat = MepsCatalog(db_path=tmp_path / "meps.db")
     # Hand-craft a publication+document row to avoid needing a real .jwpub.
     conn = cat._open()  # noqa: SLF001 — test-only access
-    conn.execute(
-        "INSERT INTO publication (pub_code, language_index, title) VALUES ('w24', 0, 'Watchtower')"
-    )
+    conn.execute("INSERT INTO publication (pub_code, language_index, title) VALUES ('w24', 0, 'Watchtower')")
     conn.execute(
         """INSERT INTO document
            (document_id, meps_document_id, pub_code, language_index, title)
@@ -246,9 +240,7 @@ async def test_live_redirect_loop(tmp_path) -> None:
     cat = MepsCatalog(db_path=tmp_path / "meps.db")
     url = "https://wol.jw.org/es/wol/d/r4/lp-s/1"
     chain = [f"https://wol.jw.org/r/{i}" for i in range(5)]  # 5 > max_redirects 3
-    fetcher = _fake_fetcher_factory(
-        {url: FetcherResponse(final_url=url, status=200, redirect_chain=chain)}
-    )
+    fetcher = _fake_fetcher_factory({url: FetcherResponse(final_url=url, status=200, redirect_chain=chain)})
     v = CitationValidator(catalog=cat, fetcher=fetcher, max_redirects=3)
     report = await v.validate_urls([url], mode="live")
     assert report.checks[0].resolve == "redirect_loop"
@@ -310,9 +302,7 @@ async def test_drift_no_snapshot_is_warning(tmp_path) -> None:
     snaps = tmp_path / "snaps"
     snaps.mkdir()
     url = "https://wol.jw.org/es/wol/d/r4/lp-s/1"
-    fetcher = _fake_fetcher_factory(
-        {url: FetcherResponse(final_url=url, status=200, body="<html>hi</html>")}
-    )
+    fetcher = _fake_fetcher_factory({url: FetcherResponse(final_url=url, status=200, body="<html>hi</html>")})
     v = CitationValidator(catalog=cat, fetcher=fetcher, snapshots_root=snaps)
     report = await v.validate_urls([url], mode="live+drift")
     check = report.checks[0]
@@ -344,9 +334,7 @@ async def test_drift_detected_when_shape_changes(tmp_path) -> None:
     snaps.mkdir()
     url = "https://wol.jw.org/es/wol/d/r4/lp-s/1"
     digest = hashlib.sha256(url.encode()).hexdigest()
-    (snaps / f"{digest}.html").write_text(
-        "<html><body><p>old</p></body></html>", encoding="utf-8"
-    )
+    (snaps / f"{digest}.html").write_text("<html><body><p>old</p></body></html>", encoding="utf-8")
     # Live body is structurally different (extra div changes the shape).
     fetcher = _fake_fetcher_factory(
         {

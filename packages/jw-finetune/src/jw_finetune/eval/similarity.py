@@ -31,6 +31,7 @@ class SimilarityResult:
 def _cosine(a: list[float] | Any, b: list[float] | Any) -> float:
     """Cosine similarity for two equally-sized float vectors."""
     import math
+
     dot = sum(x * y for x, y in zip(a, b, strict=True))
     na = math.sqrt(sum(x * x for x in a))
     nb = math.sqrt(sum(y * y for y in b))
@@ -95,15 +96,22 @@ def evaluate_similarity(
     per_prompt: list[dict] = []
     total = 0.0
     for prompt, gold, answer, gvec, avec in zip(
-        prompts, golds, answers, gold_vecs, answer_vecs, strict=True,
+        prompts,
+        golds,
+        answers,
+        gold_vecs,
+        answer_vecs,
+        strict=True,
     ):
         sim = _cosine(gvec, avec)
-        per_prompt.append({
-            "prompt": prompt,
-            "gold": gold,
-            "answer": answer,
-            "similarity": sim,
-        })
+        per_prompt.append(
+            {
+                "prompt": prompt,
+                "gold": gold,
+                "answer": answer,
+                "similarity": sim,
+            }
+        )
         total += sim
 
     return SimilarityResult(

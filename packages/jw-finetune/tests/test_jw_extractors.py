@@ -5,18 +5,15 @@ from __future__ import annotations
 from pathlib import Path
 from types import SimpleNamespace
 
-import pytest
-
 from jw_finetune.data.jw_extractors import (
+    _format_verse_ref,
     build_terminology_set_from_topic_index,
     extract_objection_qa,
     extract_study_notes_qa,
     extract_user_notes_qa,
     extract_watchtower_study_qa,
     extract_workbook_qa,
-    _format_verse_ref,
 )
-
 
 # ---------------------------------------------------------------------------
 # 1.1 — Watchtower Study
@@ -47,9 +44,7 @@ _WATCHTOWER_HTML = """
 
 
 def test_extract_watchtower_study_qa_yields_pairs() -> None:
-    pairs = list(extract_watchtower_study_qa(
-        _WATCHTOWER_HTML, pub_code="w24", language="es"
-    ))
+    pairs = list(extract_watchtower_study_qa(_WATCHTOWER_HTML, pub_code="w24", language="es"))
     # Parser tolerance varies; assert we got at least one pair OR that the
     # parser couldn't find paragraphs (defensive fallback).
     if pairs:
@@ -63,9 +58,7 @@ def test_extract_watchtower_study_qa_yields_pairs() -> None:
 
 
 def test_extract_watchtower_study_handles_empty() -> None:
-    pairs = list(extract_watchtower_study_qa(
-        "<html></html>", pub_code="w24", language="es"
-    ))
+    pairs = list(extract_watchtower_study_qa("<html></html>", pub_code="w24", language="es"))
     assert pairs == []
 
 
@@ -75,9 +68,7 @@ def test_extract_watchtower_study_handles_empty() -> None:
 
 
 def test_extract_study_notes_qa_empty_html_yields_nothing() -> None:
-    pairs = list(extract_study_notes_qa(
-        "<html></html>", book_num=43, chapter=3, language="es"
-    ))
+    pairs = list(extract_study_notes_qa("<html></html>", book_num=43, chapter=3, language="es"))
     assert pairs == []
 
 
@@ -168,8 +159,7 @@ def _fake_workbook_week() -> SimpleNamespace:
         title="Conversación inicial",
         minutes=3,
         kind="demonstration",
-        body="Inicia la conversación mostrando interés por la persona y "
-             "ofrece un texto bíblico como Mateo 11:28.",
+        body="Inicia la conversación mostrando interés por la persona y ofrece un texto bíblico como Mateo 11:28.",
         references=["Mateo 11:28"],
         cue="th study 8",
     )
@@ -216,10 +206,8 @@ def test_extract_workbook_qa_skips_empty() -> None:
                 name="treasures",
                 heading="",
                 assignments=[
-                    SimpleNamespace(title="", minutes=5, kind="talk",
-                                    body="x", references=[], cue=""),  # empty title
-                    SimpleNamespace(title="Talk", minutes=5, kind="talk",
-                                    body="", references=[], cue=""),  # empty body
+                    SimpleNamespace(title="", minutes=5, kind="talk", body="x", references=[], cue=""),  # empty title
+                    SimpleNamespace(title="Talk", minutes=5, kind="talk", body="", references=[], cue=""),  # empty body
                 ],
             ),
         ],
@@ -239,7 +227,9 @@ def test_extract_user_notes_qa_with_fake_backup(monkeypatch, tmp_path: Path) -> 
     return a synthetic BackupContents.
     """
     fake_loc = SimpleNamespace(
-        book_number=43, chapter_number=3, verse_number=16,
+        book_number=43,
+        chapter_number=3,
+        verse_number=16,
         key_symbol="nwtsty",
     )
     fake_note = SimpleNamespace(
@@ -254,8 +244,8 @@ def test_extract_user_notes_qa_with_fake_backup(monkeypatch, tmp_path: Path) -> 
         highlights=[],
     )
 
-    import jw_finetune.data.jw_extractors as ext
     import jw_core.parsers.jw_library_backup as backup_mod
+
     monkeypatch.setattr(backup_mod, "parse_jw_library_backup", lambda _p: fake_backup)
 
     pairs = list(extract_user_notes_qa(tmp_path / "fake.jwlibrary", language="es"))
@@ -269,11 +259,15 @@ def test_extract_user_notes_qa_with_fake_backup(monkeypatch, tmp_path: Path) -> 
 
 def test_extract_user_notes_filters_short(monkeypatch, tmp_path: Path) -> None:
     short_note = SimpleNamespace(
-        note_id=2, guid="n-2", title="", content="ok",
+        note_id=2,
+        guid="n-2",
+        title="",
+        content="ok",
         location=None,
     )
     fake_backup = SimpleNamespace(notes=[short_note], highlights=[])
     import jw_core.parsers.jw_library_backup as backup_mod
+
     monkeypatch.setattr(backup_mod, "parse_jw_library_backup", lambda _p: fake_backup)
     pairs = list(extract_user_notes_qa(tmp_path / "fake.jwlibrary", language="es", min_note_chars=30))
     assert pairs == []

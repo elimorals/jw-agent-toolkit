@@ -11,6 +11,7 @@ import pytest
 def _has_fastapi() -> bool:
     try:
         import fastapi  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -27,32 +28,59 @@ def _make_run(tmp_path: Path, run_name: str = "run-20260530-120000") -> Path:
         encoding="utf-8",
     )
     (run / "dataset_qa.jsonl").write_text(
-        json.dumps({"messages": [
-            {"role": "user", "content": "¿Qué es el Reino?"},
-            {"role": "assistant", "content": "El Reino es el gobierno celestial de Jehová."},
-        ]}) + "\n",
+        json.dumps(
+            {
+                "messages": [
+                    {"role": "user", "content": "¿Qué es el Reino?"},
+                    {"role": "assistant", "content": "El Reino es el gobierno celestial de Jehová."},
+                ]
+            }
+        )
+        + "\n",
         encoding="utf-8",
     )
     # Use a tiny recipe yaml
     import yaml  # type: ignore[import-untyped]
-    yaml_content = yaml.safe_dump({
-        "name": "test",
-        "task": "sft",
-        "sources": [{"kind": "jwpub", "path": "x.jwpub", "language": "es",
-                     "pub_code_hint": "", "publication_kind_hint": None}],
-        "languages": ["es"],
-        "publication_kinds": ["watchtower"],
-        "qa_style": "doctrinal",
-        "base_model": "unsloth/Qwen2.5-3B-bnb-4bit",
-        "lora_rank": 16, "lora_alpha": 32, "lora_dropout": 0.0,
-        "max_seq_len": 2048, "epochs": 1, "batch_size": 2,
-        "gradient_accumulation": 4, "learning_rate": 2e-4,
-        "warmup_ratio": 0.05, "weight_decay": 0.0,
-        "min_chunk_chars": 80, "max_chunk_chars": 1500,
-        "dedupe_threshold": 4, "synth_provider": "ollama",
-        "synth_model": None, "qa_per_chunk": 3, "eval_split": 0.05,
-        "output_dir": "./jw-finetune-workspace", "seed": 42, "extra": {},
-    })
+
+    yaml_content = yaml.safe_dump(
+        {
+            "name": "test",
+            "task": "sft",
+            "sources": [
+                {
+                    "kind": "jwpub",
+                    "path": "x.jwpub",
+                    "language": "es",
+                    "pub_code_hint": "",
+                    "publication_kind_hint": None,
+                }
+            ],
+            "languages": ["es"],
+            "publication_kinds": ["watchtower"],
+            "qa_style": "doctrinal",
+            "base_model": "unsloth/Qwen2.5-3B-bnb-4bit",
+            "lora_rank": 16,
+            "lora_alpha": 32,
+            "lora_dropout": 0.0,
+            "max_seq_len": 2048,
+            "epochs": 1,
+            "batch_size": 2,
+            "gradient_accumulation": 4,
+            "learning_rate": 2e-4,
+            "warmup_ratio": 0.05,
+            "weight_decay": 0.0,
+            "min_chunk_chars": 80,
+            "max_chunk_chars": 1500,
+            "dedupe_threshold": 4,
+            "synth_provider": "ollama",
+            "synth_model": None,
+            "qa_per_chunk": 3,
+            "eval_split": 0.05,
+            "output_dir": "./jw-finetune-workspace",
+            "seed": 42,
+            "extra": {},
+        }
+    )
     (run / "recipe.yaml").write_text(yaml_content, encoding="utf-8")
     (run / "checkpoints" / "final").mkdir(parents=True)
     return run
@@ -60,7 +88,6 @@ def _make_run(tmp_path: Path, run_name: str = "run-20260530-120000") -> Path:
 
 def test_studio_index_returns_html(tmp_path: Path) -> None:
     from fastapi.testclient import TestClient
-
     from jw_finetune.monitor.studio import create_studio_app
 
     events = tmp_path / "events.jsonl"
@@ -74,7 +101,6 @@ def test_studio_index_returns_html(tmp_path: Path) -> None:
 
 def test_api_presets(tmp_path: Path) -> None:
     from fastapi.testclient import TestClient
-
     from jw_finetune.monitor.studio import create_studio_app
 
     events = tmp_path / "events.jsonl"
@@ -90,7 +116,6 @@ def test_api_presets(tmp_path: Path) -> None:
 
 def test_api_models(tmp_path: Path) -> None:
     from fastapi.testclient import TestClient
-
     from jw_finetune.monitor.studio import create_studio_app
 
     events = tmp_path / "events.jsonl"
@@ -106,7 +131,6 @@ def test_api_models(tmp_path: Path) -> None:
 
 def test_api_runs(tmp_path: Path) -> None:
     from fastapi.testclient import TestClient
-
     from jw_finetune.monitor.studio import create_studio_app
 
     _make_run(tmp_path)
@@ -124,7 +148,6 @@ def test_api_runs(tmp_path: Path) -> None:
 
 def test_api_run_detail(tmp_path: Path) -> None:
     from fastapi.testclient import TestClient
-
     from jw_finetune.monitor.studio import create_studio_app
 
     run = _make_run(tmp_path)
@@ -141,7 +164,6 @@ def test_api_run_detail(tmp_path: Path) -> None:
 
 def test_api_run_path_traversal_rejected(tmp_path: Path) -> None:
     from fastapi.testclient import TestClient
-
     from jw_finetune.monitor.studio import create_studio_app
 
     events = tmp_path / "events.jsonl"
@@ -154,7 +176,6 @@ def test_api_run_path_traversal_rejected(tmp_path: Path) -> None:
 
 def test_api_dataset_preview(tmp_path: Path) -> None:
     from fastapi.testclient import TestClient
-
     from jw_finetune.monitor.studio import create_studio_app
 
     run = _make_run(tmp_path)
@@ -171,7 +192,6 @@ def test_api_dataset_preview(tmp_path: Path) -> None:
 
 def test_api_recipe_save_rejects_invalid(tmp_path: Path) -> None:
     from fastapi.testclient import TestClient
-
     from jw_finetune.monitor.studio import create_studio_app
 
     events = tmp_path / "events.jsonl"
@@ -196,7 +216,6 @@ def test_api_recipe_save_rejects_invalid(tmp_path: Path) -> None:
 
 def test_api_chat_404_without_run(tmp_path: Path) -> None:
     from fastapi.testclient import TestClient
-
     from jw_finetune.monitor.studio import create_studio_app
 
     events = tmp_path / "events.jsonl"

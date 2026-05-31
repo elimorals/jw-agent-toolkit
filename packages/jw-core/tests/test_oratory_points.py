@@ -5,10 +5,8 @@ from __future__ import annotations
 from datetime import date
 
 import pytest
-
 from jw_core.data.oratory_points import (
     ORATORY_POINTS,
-    OratoryPoint,
     brief,
     get_point,
     key_phrase,

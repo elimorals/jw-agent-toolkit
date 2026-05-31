@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import Any
 
 import pytest
-
 from jw_core.integrations.jw_library import (
     JWLibraryError,
     VerseRange,
@@ -20,7 +19,6 @@ from jw_core.integrations.jw_library import (
     open_jw_library,
 )
 from jw_core.parsers.reference import parse_reference
-
 
 # ── URL builders ─────────────────────────────────────────────────────────
 

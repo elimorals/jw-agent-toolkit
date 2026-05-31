@@ -10,9 +10,14 @@ def test_collect_returns_systemmetrics() -> None:
     d = sm.to_dict()
     # All keys present; values may be None when backend is missing.
     expected_keys = {
-        "cpu_percent", "ram_used_mb", "ram_total_mb",
-        "gpu_name", "gpu_mem_used_mb", "gpu_mem_total_mb",
-        "gpu_util_percent", "gpu_kind",
+        "cpu_percent",
+        "ram_used_mb",
+        "ram_total_mb",
+        "gpu_name",
+        "gpu_mem_used_mb",
+        "gpu_mem_total_mb",
+        "gpu_util_percent",
+        "gpu_kind",
     }
     assert expected_keys <= set(d.keys())
 

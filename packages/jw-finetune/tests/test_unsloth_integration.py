@@ -4,18 +4,19 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from jw_finetune.data.models import SourceSpec
 from jw_finetune.recipes.base import Recipe, validate_recipe
 
 
 def _recipe(**kw) -> Recipe:
     defaults = dict(
-        name="test", task="sft",
+        name="test",
+        task="sft",
         sources=[SourceSpec(kind="jwpub", path="x.jwpub", language="es")],
-        languages=["es"], publication_kinds=["watchtower"],
-        qa_style="doctrinal", base_model="unsloth/Qwen2.5-3B-bnb-4bit",
+        languages=["es"],
+        publication_kinds=["watchtower"],
+        qa_style="doctrinal",
+        base_model="unsloth/Qwen2.5-3B-bnb-4bit",
     )
     defaults.update(kw)
     return Recipe(**defaults)
@@ -54,6 +55,7 @@ def test_recipe_embedding_lr_ratio_default() -> None:
 def test_recipe_yaml_roundtrip_new_fields(tmp_path: Path) -> None:
     """The new Unsloth fields must survive YAML serialization."""
     from jw_finetune.recipes.base import recipe_from_yaml, recipe_to_yaml
+
     r = _recipe(
         chat_template="qwen-2.5",
         use_rslora=True,
@@ -85,6 +87,7 @@ def test_recipe_validate_passes_with_all_fields() -> None:
 
 def test_resolve_responses_only_parts_chatml() -> None:
     from jw_finetune.train.sft import _resolve_responses_only_parts
+
     r = _recipe(chat_template="chatml")
     instr, resp = _resolve_responses_only_parts(r)
     assert "<|im_start|>user" in instr
@@ -93,6 +96,7 @@ def test_resolve_responses_only_parts_chatml() -> None:
 
 def test_resolve_responses_only_parts_llama3() -> None:
     from jw_finetune.train.sft import _resolve_responses_only_parts
+
     r = _recipe(chat_template="llama-3")
     instr, resp = _resolve_responses_only_parts(r)
     assert "<|start_header_id|>user" in instr
@@ -101,6 +105,7 @@ def test_resolve_responses_only_parts_llama3() -> None:
 
 def test_resolve_responses_only_parts_gemma() -> None:
     from jw_finetune.train.sft import _resolve_responses_only_parts
+
     r = _recipe(chat_template="gemma")
     instr, resp = _resolve_responses_only_parts(r)
     assert "<start_of_turn>user" in instr
@@ -109,6 +114,7 @@ def test_resolve_responses_only_parts_gemma() -> None:
 
 def test_resolve_responses_only_parts_user_override() -> None:
     from jw_finetune.train.sft import _resolve_responses_only_parts
+
     r = _recipe(
         chat_template="custom-foo",
         instruction_part="[USER]",
@@ -121,6 +127,7 @@ def test_resolve_responses_only_parts_user_override() -> None:
 
 def test_resolve_responses_only_parts_unknown_template_returns_empty() -> None:
     from jw_finetune.train.sft import _resolve_responses_only_parts
+
     r = _recipe(chat_template="totally-unknown")
     instr, resp = _resolve_responses_only_parts(r)
     assert instr == ""
@@ -134,6 +141,7 @@ def test_resolve_responses_only_parts_unknown_template_returns_empty() -> None:
 
 def test_export_gguf_normalize_quant() -> None:
     from jw_finetune.export.gguf import _normalize_quant
+
     assert _normalize_quant("Q4_K_M") == "q4_k_m"
     assert _normalize_quant("Q5-K-M") == "q5_k_m"
     assert _normalize_quant("q8_0") == "q8_0"
@@ -147,6 +155,7 @@ def test_export_gguf_normalize_quant() -> None:
 def test_clear_model_cache_returns_count() -> None:
     """Test cache eviction tracking."""
     from jw_finetune.monitor import studio
+
     studio._LOADED_MODEL_CACHE.clear()
     studio._LOADED_MODEL_CACHE["fake1"] = ("m1", "t1")
     studio._LOADED_MODEL_CACHE["fake2"] = ("m2", "t2")
@@ -158,6 +167,7 @@ def test_clear_model_cache_returns_count() -> None:
 def test_model_cache_evicts_oldest_when_full(monkeypatch) -> None:
     """When cache is at max, oldest entry is evicted."""
     from jw_finetune.monitor import studio
+
     studio.clear_model_cache()
     monkeypatch.setattr(studio, "_MAX_CACHED_MODELS", 2)
 

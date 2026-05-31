@@ -5,22 +5,19 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from jw_rag.chunker import Chunk
-
 from jw_finetune.data.formats import (
     QAPair,
     write_alpaca_jsonl,
     write_raw_jsonl,
     write_sharegpt_jsonl,
 )
+from jw_rag.chunker import Chunk
 
 
 def test_write_raw_jsonl(tmp_path: Path) -> None:
     chunks = [
-        Chunk(id="x:0", text="hola mundo", source_id="x",
-              metadata={"language": "es"}),
-        Chunk(id="x:1", text="otra cosa", source_id="x",
-              metadata={"language": "es"}),
+        Chunk(id="x:0", text="hola mundo", source_id="x", metadata={"language": "es"}),
+        Chunk(id="x:1", text="otra cosa", source_id="x", metadata={"language": "es"}),
     ]
     out = tmp_path / "raw.jsonl"
     n = write_raw_jsonl(chunks, out)
@@ -74,8 +71,6 @@ def test_write_alpaca_jsonl(tmp_path: Path) -> None:
 
 def test_write_creates_parent_dir(tmp_path: Path) -> None:
     out = tmp_path / "nested" / "dir" / "raw.jsonl"
-    n = write_raw_jsonl(
-        [Chunk(id="x:0", text="t", source_id="x", metadata={})], out
-    )
+    n = write_raw_jsonl([Chunk(id="x:0", text="t", source_id="x", metadata={})], out)
     assert n == 1
     assert out.exists()

@@ -17,7 +17,6 @@ from jw_core.concordance.store import ConcordanceStore
 from jw_core.parsers.epub import parse_epub
 from jw_core.parsers.jwpub import JwpubError, parse_jwpub
 
-
 # ── Public types ──────────────────────────────────────────────────────
 
 

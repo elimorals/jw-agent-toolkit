@@ -416,9 +416,7 @@ def linkify_markdown(
                 detected_language=lang_iso,
                 raw_match=normalized[m.start() : m.end()].strip(),
             )
-            orig_start, orig_end = _norm_span_to_original(
-                offsets, m.start(), m.end(), original_length=len(chunk)
-            )
+            orig_start, orig_end = _norm_span_to_original(offsets, m.start(), m.end(), original_length=len(chunk))
             original_label = rewritten[orig_start:orig_end]
             link = render_markdown_link(
                 ref,
@@ -529,7 +527,10 @@ def render_verse_block(
     reference and wants a stub the user can fill in later.
     """
     link = render_markdown_link(
-        ref, length=length, language=language, wtlocale=wtlocale,
+        ref,
+        length=length,
+        language=language,
+        wtlocale=wtlocale,
     )
     body = (verse_text or "").strip()
     if template == "plain":

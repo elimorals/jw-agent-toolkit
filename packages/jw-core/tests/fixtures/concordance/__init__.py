@@ -35,9 +35,7 @@ def build_minimal_epub(path: Path, *, title: str, paragraphs: list[str]) -> Path
   </spine>
 </package>"""
 
-    body_paras = "\n".join(
-        f'<p data-pid="{i}">{text}</p>' for i, text in enumerate(paragraphs)
-    )
+    body_paras = "\n".join(f'<p data-pid="{i}">{text}</p>' for i, text in enumerate(paragraphs))
     xhtml = f"""<?xml version="1.0"?>
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head><title>{title}</title></head>

@@ -27,8 +27,7 @@ def hash_checkpoint_dir(checkpoint_dir: Path) -> str:
     """Compute a deterministic short hash over a checkpoint's safetensors."""
     h = hashlib.sha256()
     files = sorted(
-        p for p in checkpoint_dir.rglob("*")
-        if p.is_file() and p.suffix in {".safetensors", ".bin", ".json", ".txt"}
+        p for p in checkpoint_dir.rglob("*") if p.is_file() and p.suffix in {".safetensors", ".bin", ".json", ".txt"}
     )
     for fp in files:
         h.update(fp.name.encode("utf-8"))

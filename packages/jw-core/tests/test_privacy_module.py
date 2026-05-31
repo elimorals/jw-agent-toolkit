@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 
 import pytest
-
 from jw_core.privacy import (
     EncryptionError,
     FieldEncryptor,
@@ -14,7 +13,6 @@ from jw_core.privacy import (
     generate_key,
     is_offline_mode,
 )
-
 
 # ── Encryption ──────────────────────────────────────────────────────────
 

@@ -6,11 +6,15 @@ from jw_finetune.data.chunk import records_to_chunks
 from jw_finetune.data.models import ParagraphRecord
 
 
-def _rec(text: str, pub: str = "w24", doc: str = "001",
-         lang: str = "es") -> ParagraphRecord:
+def _rec(text: str, pub: str = "w24", doc: str = "001", lang: str = "es") -> ParagraphRecord:
     return ParagraphRecord(
-        text=text, pub_code=pub, language=lang, kind="watchtower",
-        source_path="x", doc_id=doc, section_ref=f"{pub} {doc}",
+        text=text,
+        pub_code=pub,
+        language=lang,
+        kind="watchtower",
+        source_path="x",
+        doc_id=doc,
+        section_ref=f"{pub} {doc}",
     )
 
 

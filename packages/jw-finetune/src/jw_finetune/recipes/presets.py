@@ -12,7 +12,6 @@ from copy import deepcopy
 
 from jw_finetune.recipes.base import Recipe
 
-
 PRESETS: dict[str, Recipe] = {
     "watchtower-style-es-cpt": Recipe(
         name="watchtower-style-es-cpt",
@@ -115,7 +114,7 @@ PRESETS: dict[str, Recipe] = {
         publication_kinds=["other"],
         qa_style="doctrinal",
         base_model="unsloth/Qwen2.5-3B-bnb-4bit",
-        lora_rank=8,    # small dataset → small rank
+        lora_rank=8,  # small dataset → small rank
         lora_alpha=16,
         max_seq_len=2048,
         epochs=3,
@@ -133,7 +132,5 @@ def list_presets() -> list[str]:
 def get_preset(name: str) -> Recipe:
     """Return a deep copy of the preset so the caller can mutate freely."""
     if name not in PRESETS:
-        raise KeyError(
-            f"Unknown preset: {name!r}. Available: {list_presets()}"
-        )
+        raise KeyError(f"Unknown preset: {name!r}. Available: {list_presets()}")
     return deepcopy(PRESETS[name])

@@ -12,14 +12,10 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import typer
-from pydantic import ValidationError
-from rich.console import Console
-from rich.table import Table
-
 from jw_agents.study_conductor import prepare_lesson
 from jw_agents.study_progress import (
     GoalKind,
@@ -34,6 +30,9 @@ from jw_agents.study_progress import (
     scan_lesson_for_crisis,
 )
 from jw_core.data.study_books import get_book
+from pydantic import ValidationError
+from rich.console import Console
+from rich.table import Table
 
 study_app = typer.Typer(
     name="study",
@@ -104,10 +103,7 @@ def lesson_cmd(
 def _get_store(language: str = "es") -> StudentProgressStore:
     passphrase = os.getenv("JW_STUDY_PASSPHRASE")
     if not passphrase:
-        console.print(
-            "[red]Falta passphrase.[/red] "
-            "Set JW_STUDY_PASSPHRASE en el entorno y vuelva a intentarlo."
-        )
+        console.print("[red]Falta passphrase.[/red] Set JW_STUDY_PASSPHRASE en el entorno y vuelva a intentarlo.")
         raise typer.Exit(code=2)
 
     salt = default_salt_path()
@@ -126,13 +122,10 @@ def log_cmd(
     student_id: str = typer.Argument(..., help="Alias del estudiante (regex [a-z0-9_-]{3,32})"),
     pub_code: str = typer.Argument(..., help="Código de publicación (lff, …)"),
     lesson: int = typer.Argument(..., help="Número de lección"),
-    status: str = typer.Option("in_progress", "--status",
-                                help="not_started|in_progress|completed|skipped"),
+    status: str = typer.Option("in_progress", "--status", help="not_started|in_progress|completed|skipped"),
     note: str = typer.Option("", "--note", help="Nota libre (se cifra al guardar)"),
-    goal: list[str] = typer.Option(None, "--goal",
-                                    help="Meta de la taxonomía (repetible)"),
-    target_iso: str = typer.Option(None, "--target-iso",
-                                    help="ISO date (solo para --goal baptism)"),
+    goal: list[str] = typer.Option(None, "--goal", help="Meta de la taxonomía (repetible)"),
+    target_iso: str = typer.Option(None, "--target-iso", help="ISO date (solo para --goal baptism)"),
     lang: str = typer.Option("es", "--lang", "-l"),
 ) -> None:
     """Registra el progreso de una lección para un estudiante."""
@@ -144,7 +137,7 @@ def log_cmd(
             lesson=lesson,
             status=LessonStatus(status),
             notes=note,
-            updated_at_iso=datetime.now(timezone.utc).isoformat(),
+            updated_at_iso=datetime.now(UTC).isoformat(),
         )
     except (ValidationError, ValueError) as e:
         console.print(f"[red]Entrada inválida:[/red] {e}")
@@ -158,8 +151,9 @@ def log_cmd(
     if goal:
         now = row.updated_at_iso
         row.goals = [
-            StudentGoal(kind=GoalKind(g), set_at_iso=now,
-                        target_iso=(target_iso if GoalKind(g) == GoalKind.BAPTISM else None))
+            StudentGoal(
+                kind=GoalKind(g), set_at_iso=now, target_iso=(target_iso if GoalKind(g) == GoalKind.BAPTISM else None)
+            )
             for g in goal
         ]
         if any(g.kind == GoalKind.BAPTISM for g in row.goals):
@@ -189,10 +183,7 @@ def lessons_cmd(
     except KeyError:
         console.print(f"[red]Libro desconocido:[/red] {pub_code}")
         raise typer.Exit(code=2)
-    console.print(
-        f"[bold]{book.title_by_lang.get(lang, book.pub_code)}[/bold] — "
-        f"{book.total_chapters} capítulos"
-    )
+    console.print(f"[bold]{book.title_by_lang.get(lang, book.pub_code)}[/bold] — {book.total_chapters} capítulos")
     console.print(f"Idiomas soportados: {', '.join(book.languages)}")
 
 
@@ -218,7 +209,9 @@ def progress_cmd(
     table.add_column("actualizado")
     for r in rows:
         table.add_row(
-            r.book_pub, str(r.lesson), r.status.value,
+            r.book_pub,
+            str(r.lesson),
+            r.status.value,
             ", ".join(g.kind.value for g in r.goals) or "—",
             r.updated_at_iso[:10],
         )

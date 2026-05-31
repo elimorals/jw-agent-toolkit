@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-from typer.testing import CliRunner
-
 from jw_cli.main import app
-
+from typer.testing import CliRunner
 
 runner = CliRunner()
 
@@ -15,10 +13,14 @@ def test_letter_cli_letter_kind_runs() -> None:
         app,
         [
             "letter",
-            "--kind", "letter",
-            "--topic", "esperanza para una madre en duelo",
-            "--audience", "grieving",
-            "--lang", "es",
+            "--kind",
+            "letter",
+            "--topic",
+            "esperanza para una madre en duelo",
+            "--audience",
+            "grieving",
+            "--lang",
+            "es",
         ],
     )
     assert result.exit_code == 0, result.output
@@ -50,10 +52,14 @@ def test_letter_cli_territory_hint_appears_in_output() -> None:
         app,
         [
             "letter",
-            "--kind", "letter",
-            "--topic", "esperanza",
-            "--lang", "es",
-            "--territory", "Lima, Perú",
+            "--kind",
+            "letter",
+            "--topic",
+            "esperanza",
+            "--lang",
+            "es",
+            "--territory",
+            "Lima, Perú",
         ],
     )
     assert result.exit_code == 0

@@ -18,8 +18,8 @@ def test_citation_reward_basic() -> None:
     fn = make_citation_reward()
     prompts = ["q1", "q2"]
     completions = [
-        "Como dice Mateo 24:14, esto es una señal.",   # has ref
-        "No tiene ninguna cita bíblica.",                # no ref
+        "Como dice Mateo 24:14, esto es una señal.",  # has ref
+        "No tiene ninguna cita bíblica.",  # no ref
     ]
     scores = fn(prompts, completions)
     assert scores == [1.0, 0.0]
@@ -46,9 +46,9 @@ def test_terminology_reward_es() -> None:
 def test_length_penalty_in_range() -> None:
     fn = make_length_penalty(min_chars=30, max_chars=200)
     completions = [
-        "x" * 100,   # in range
-        "x" * 10,    # too short
-        "x" * 500,   # too long
+        "x" * 100,  # in range
+        "x" * 10,  # too short
+        "x" * 500,  # too long
     ]
     scores = fn(["q"] * 3, completions)
     assert scores[0] == 1.0
@@ -73,5 +73,6 @@ def test_composite_reward() -> None:
 
 def test_composite_weight_mismatch_raises() -> None:
     import pytest
+
     with pytest.raises(ValueError, match="weights"):
         composite_reward([make_citation_reward()], weights=[0.5, 0.5])

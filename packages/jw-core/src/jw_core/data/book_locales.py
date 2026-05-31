@@ -55,18 +55,43 @@ _DATA_DIR = Path(__file__).parent / "bible_books"
 
 
 SIGN_LANGUAGE_BASE_MAP: dict[str, str] = {
-    "ASL": "E", "BSL": "E", "AUS": "E", "NZS": "E", "ISG": "E", "JML": "E",
-    "DGS": "X", "OGS": "X",
+    "ASL": "E",
+    "BSL": "E",
+    "AUS": "E",
+    "NZS": "E",
+    "ISG": "E",
+    "JML": "E",
+    "DGS": "X",
+    "OGS": "X",
     "FID": "FI",
-    "LSM": "S", "LSE": "S", "LSA": "S", "BVL": "S", "SCH": "S",
-    "LSC": "S", "SCR": "S", "CBS": "S", "SEC": "S", "LSG": "S",
-    "SHO": "S", "LSN": "S", "PSL": "S", "LSP": "S", "SPE": "S",
-    "LSS": "S", "LSU": "S", "LSV": "S",
+    "LSM": "S",
+    "LSE": "S",
+    "LSA": "S",
+    "BVL": "S",
+    "SCH": "S",
+    "LSC": "S",
+    "SCR": "S",
+    "CBS": "S",
+    "SEC": "S",
+    "LSG": "S",
+    "SHO": "S",
+    "LSN": "S",
+    "PSL": "S",
+    "LSP": "S",
+    "SPE": "S",
+    "LSS": "S",
+    "LSU": "S",
+    "LSV": "S",
     "NGT": "O",
     "KSL": "KO",
     "LGP": "TPO",
-    "LSF": "F", "SBF": "F", "LSQ": "F", "LSI": "F", "BFL": "F",
-    "CRS": "F", "CML": "F",
+    "LSF": "F",
+    "SBF": "F",
+    "LSQ": "F",
+    "LSI": "F",
+    "BFL": "F",
+    "CRS": "F",
+    "CML": "F",
     "HZJ": "C",
     "SLV": "VT",
 }
@@ -76,10 +101,23 @@ SIGN_LANGUAGE_BASE_MAP: dict[str, str] = {
 
 
 JW_CODE_TO_ISO: dict[str, str] = {
-    "E": "en", "S": "es", "TPO": "pt-PT", "F": "fr", "X": "de",
-    "I": "it", "U": "ru", "J": "ja", "KO": "ko", "B": "cs",
-    "C": "hr", "D": "da", "O": "nl", "FI": "fi", "TG": "tl",
-    "VT": "vi", "CW": "bem",
+    "E": "en",
+    "S": "es",
+    "TPO": "pt-PT",
+    "F": "fr",
+    "X": "de",
+    "I": "it",
+    "U": "ru",
+    "J": "ja",
+    "KO": "ko",
+    "B": "cs",
+    "C": "hr",
+    "D": "da",
+    "O": "nl",
+    "FI": "fi",
+    "TG": "tl",
+    "VT": "vi",
+    "CW": "bem",
 }
 
 ISO_TO_JW_CODE: dict[str, str] = {v: k for k, v in JW_CODE_TO_ISO.items()}
@@ -223,10 +261,7 @@ def _alias_key(name: str) -> str:
     import re
     import unicodedata
 
-    normalized = "".join(
-        c for c in unicodedata.normalize("NFD", name.lower())
-        if not unicodedata.combining(c)
-    )
+    normalized = "".join(c for c in unicodedata.normalize("NFD", name.lower()) if not unicodedata.combining(c))
     return re.sub(r"[\s.\-]+", "", normalized)
 
 
@@ -261,9 +296,7 @@ def merge_into_books(base_books: list[dict]) -> list[dict]:
             for name in names:
                 alias_owner.setdefault(_alias_key(name), b["num"])
 
-    locales_ordered = list(_PRIORITY_LOCALES) + [
-        c for c in available_locales() if c not in _PRIORITY_LOCALES
-    ]
+    locales_ordered = list(_PRIORITY_LOCALES) + [c for c in available_locales() if c not in _PRIORITY_LOCALES]
     seen_locales: set[str] = set()
     for jw_code in locales_ordered:
         if jw_code in seen_locales:

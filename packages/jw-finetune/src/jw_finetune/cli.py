@@ -30,7 +30,6 @@ from jw_finetune.recipes.base import (
     validate_recipe,
 )
 from jw_finetune.recipes.presets import get_preset, list_presets
-from jw_finetune.synth.orchestrator import synthesize_chunk
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -82,9 +81,11 @@ def _build_provider(provider_name: str | None, model_name: str | None):
     name = (provider_name or "ollama").lower()
     if name == "ollama":
         from jw_finetune.synth.ollama_provider import OllamaProvider
+
         return OllamaProvider(model=model_name or "llama3.1:8b")
     if name == "anthropic":
         from jw_finetune.synth.anthropic_provider import AnthropicProvider
+
         return AnthropicProvider(model=model_name or "claude-haiku-4-5-20251001")
     raise typer.BadParameter(f"Unknown synth provider: {name!r}")
 
@@ -157,9 +158,7 @@ def presets() -> None:
     table.add_column("QA style", style="white")
     for name in list_presets():
         r = get_preset(name)
-        table.add_row(
-            name, r.task, ",".join(r.languages), r.base_model, r.qa_style or "-"
-        )
+        table.add_row(name, r.task, ",".join(r.languages), r.base_model, r.qa_style or "-")
     console.print(table)
 
 
@@ -176,26 +175,18 @@ def init(
 
 @app.command()
 def prepare(
-    recipe: Annotated[
-        str | None, typer.Option("--recipe", "-r", help="Preset name.")
-    ] = None,
-    recipe_file: Annotated[
-        Path | None, typer.Option("--recipe-file", help="Path to YAML recipe.")
-    ] = None,
+    recipe: Annotated[str | None, typer.Option("--recipe", "-r", help="Preset name.")] = None,
+    recipe_file: Annotated[Path | None, typer.Option("--recipe-file", help="Path to YAML recipe.")] = None,
     source: Annotated[
         list[Path] | None,
         typer.Option("--source", "-s", help="JWPUB/EPUB file or directory; may repeat."),
     ] = None,
-    workspace: Annotated[
-        Path, typer.Option("--workspace", "-w")
-    ] = Path("./jw-finetune-workspace"),
+    workspace: Annotated[Path, typer.Option("--workspace", "-w")] = Path("./jw-finetune-workspace"),
     provider: Annotated[
         str | None,
         typer.Option("--synth-provider", help="anthropic | ollama"),
     ] = None,
-    model: Annotated[
-        str | None, typer.Option("--synth-model")
-    ] = None,
+    model: Annotated[str | None, typer.Option("--synth-model")] = None,
 ) -> None:
     """Stage 1-4: extract → dedupe → chunk → (synth Q&A if SFT)."""
     rec = _load_recipe(recipe, recipe_file)
@@ -222,9 +213,7 @@ def prepare(
     deduped = list(deduplicate(records, threshold=rec.dedupe_threshold))
     console.print(f"[blue]After dedupe:[/blue] {len(deduped)}")
 
-    chunks = records_to_chunks(
-        deduped, max_chars=rec.max_chunk_chars, min_chars=rec.min_chunk_chars
-    )
+    chunks = records_to_chunks(deduped, max_chars=rec.max_chunk_chars, min_chars=rec.min_chunk_chars)
     console.print(f"[blue]Chunks:[/blue] {len(chunks)}")
 
     if rec.task == "cpt":
@@ -232,9 +221,7 @@ def prepare(
         n = write_raw_jsonl(chunks, out)
         console.print(f"[green]✓[/green] CPT dataset: {out} ({n} records)")
     else:
-        prov = _build_provider(
-            provider or rec.synth_provider, model or rec.synth_model
-        )
+        prov = _build_provider(provider or rec.synth_provider, model or rec.synth_model)
         qas = _synth_chunks(chunks, prov, rec)
         out = run_dir / "dataset_qa.jsonl"
         n = write_sharegpt_jsonl(qas, out)
@@ -296,9 +283,7 @@ def evaluate_cmd(
     """Run evaluation on a checkpoint."""
     from jw_finetune.eval.runner import run_eval, write_eval_report
 
-    prompt_list = [
-        ln.strip() for ln in prompts.read_text(encoding="utf-8").splitlines() if ln.strip()
-    ]
+    prompt_list = [ln.strip() for ln in prompts.read_text(encoding="utf-8").splitlines() if ln.strip()]
     result = run_eval(checkpoint, prompt_list, language=language)
     write_eval_report(result, out)
     console.print(f"[green]✓ Eval report:[/green] {out}")
@@ -312,7 +297,9 @@ def export(
     fmt: Annotated[
         str,
         typer.Option(
-            "--format", "-f", help="gguf | mlx | merged | adapter",
+            "--format",
+            "-f",
+            help="gguf | mlx | merged | adapter",
         ),
     ] = "gguf",
     quant: Annotated[str, typer.Option("--quant", "-q")] = "Q4_K_M",
@@ -347,6 +334,7 @@ def export(
             # checkpoint is `.../<run-dir>/checkpoints/final`; workspace is two up.
             workspace = checkpoint.parent.parent
             from jw_finetune.ux.run_readme import write_run_readme
+
             readme_path = write_run_readme(
                 workspace=workspace,
                 export_dir=p,
@@ -378,33 +366,38 @@ def diff_cmd(
     out: Annotated[Path, typer.Option("--out", "-o")] = Path("./diff-report.json"),
 ) -> None:
     """Compare two checkpoints by running the same prompts through each."""
-    from dataclasses import asdict
     import json
+    from dataclasses import asdict
+
     from jw_finetune.ux.diff import compare_checkpoints
 
-    prompt_list = [
-        ln.strip() for ln in prompts.read_text(encoding="utf-8").splitlines() if ln.strip()
-    ]
+    prompt_list = [ln.strip() for ln in prompts.read_text(encoding="utf-8").splitlines() if ln.strip()]
     result = compare_checkpoints(
-        checkpoint_a, checkpoint_b, prompt_list, language=language,
+        checkpoint_a,
+        checkpoint_b,
+        prompt_list,
+        language=language,
     )
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps({
-        "checkpoint_a": result.checkpoint_a,
-        "checkpoint_b": result.checkpoint_b,
-        "mean_citation_a": result.mean_citation_a,
-        "mean_citation_b": result.mean_citation_b,
-        "mean_terminology_a": result.mean_terminology_a,
-        "mean_terminology_b": result.mean_terminology_b,
-        "rows": [asdict(r) for r in result.rows],
-    }, ensure_ascii=False, indent=2), encoding="utf-8")
+    out.write_text(
+        json.dumps(
+            {
+                "checkpoint_a": result.checkpoint_a,
+                "checkpoint_b": result.checkpoint_b,
+                "mean_citation_a": result.mean_citation_a,
+                "mean_citation_b": result.mean_citation_b,
+                "mean_terminology_a": result.mean_terminology_a,
+                "mean_terminology_b": result.mean_terminology_b,
+                "rows": [asdict(r) for r in result.rows],
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
     console.print(f"[green]✓ Diff report:[/green] {out}")
-    console.print(
-        f"  A: citation {result.mean_citation_a:.2%} · terminology {result.mean_terminology_a:.2%}"
-    )
-    console.print(
-        f"  B: citation {result.mean_citation_b:.2%} · terminology {result.mean_terminology_b:.2%}"
-    )
+    console.print(f"  A: citation {result.mean_citation_a:.2%} · terminology {result.mean_terminology_a:.2%}")
+    console.print(f"  B: citation {result.mean_citation_b:.2%} · terminology {result.mean_terminology_b:.2%}")
 
 
 @app.command(name="tui-wizard")
@@ -417,9 +410,7 @@ def tui_wizard() -> None:
 
 @app.command(name="tui-monitor")
 def tui_monitor(
-    workspace: Annotated[
-        Path | None, typer.Option("--workspace", "-w")
-    ] = None,
+    workspace: Annotated[Path | None, typer.Option("--workspace", "-w")] = None,
 ) -> None:
     """Inline TUI monitor that tails events.jsonl in your terminal."""
     if workspace is None:
@@ -440,7 +431,8 @@ def monitor(
     workspace: Annotated[
         Path | None,
         typer.Option(
-            "--workspace", "-w",
+            "--workspace",
+            "-w",
             help="Run directory; defaults to most recent run-* under ./jw-finetune-workspace.",
         ),
     ] = None,
@@ -451,9 +443,7 @@ def monitor(
     if workspace is None:
         base = Path("./jw-finetune-workspace")
         if not base.exists():
-            raise typer.BadParameter(
-                f"No workspace specified and {base} not found; pass --workspace"
-            )
+            raise typer.BadParameter(f"No workspace specified and {base} not found; pass --workspace")
         workspace = _latest_run_dir(base)
     events_path = workspace / "events.jsonl"
     if not events_path.exists():
@@ -467,9 +457,7 @@ def monitor(
 
 @app.command()
 def studio(
-    workspace_root: Annotated[
-        Path, typer.Option("--workspace-root", "-W")
-    ] = Path("./jw-finetune-workspace"),
+    workspace_root: Annotated[Path, typer.Option("--workspace-root", "-W")] = Path("./jw-finetune-workspace"),
     host: Annotated[str, typer.Option("--host")] = "127.0.0.1",
     port: Annotated[int, typer.Option("--port")] = 7860,
 ) -> None:
@@ -490,25 +478,15 @@ def studio(
 
 @app.command()
 def run(
-    recipe: Annotated[
-        str | None, typer.Option("--recipe", "-r", help="Preset name.")
-    ] = None,
-    recipe_file: Annotated[
-        Path | None, typer.Option("--recipe-file")
-    ] = None,
+    recipe: Annotated[str | None, typer.Option("--recipe", "-r", help="Preset name.")] = None,
+    recipe_file: Annotated[Path | None, typer.Option("--recipe-file")] = None,
     source: Annotated[
         list[Path] | None,
         typer.Option("--source", "-s", help="JWPUB/EPUB file or directory; may repeat."),
     ] = None,
-    workspace: Annotated[
-        Path, typer.Option("--workspace", "-w")
-    ] = Path("./jw-finetune-workspace"),
-    export_fmt: Annotated[
-        str, typer.Option("--export", help="Format to export at the end")
-    ] = "gguf",
-    export_quant: Annotated[
-        str, typer.Option("--export-quant", help="Quantization for export")
-    ] = "Q4_K_M",
+    workspace: Annotated[Path, typer.Option("--workspace", "-w")] = Path("./jw-finetune-workspace"),
+    export_fmt: Annotated[str, typer.Option("--export", help="Format to export at the end")] = "gguf",
+    export_quant: Annotated[str, typer.Option("--export-quant", help="Quantization for export")] = "Q4_K_M",
 ) -> None:
     """End-to-end pipeline: prepare → train → export."""
     ctx = typer.get_current_context()

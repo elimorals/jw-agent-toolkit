@@ -24,15 +24,15 @@ import hashlib
 import json
 import logging
 import re
+from collections.abc import Iterator
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING
 
 from jw_core.integrations.markdown import (
     NameLength,
     QuoteTemplate,
-    render_markdown_link,
     render_verse_block,
 )
 from jw_core.models import BibleRef
@@ -231,10 +231,7 @@ class VaultSyncState:
         return cls(
             vault_root=str(data.get("vault_root", "")),
             last_synced_at=str(data.get("last_synced_at", "")),
-            notes={
-                k: VaultSyncEntry(**v)
-                for k, v in (data.get("notes") or {}).items()
-            },
+            notes={k: VaultSyncEntry(**v) for k, v in (data.get("notes") or {}).items()},
         )
 
 
@@ -257,11 +254,7 @@ class VaultSyncStateStore:
     def save(self, state: VaultSyncState) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         try:
-            data = (
-                json.loads(self.path.read_text(encoding="utf-8"))
-                if self.path.exists()
-                else {}
-            )
+            data = json.loads(self.path.read_text(encoding="utf-8")) if self.path.exists() else {}
         except (json.JSONDecodeError, OSError):
             data = {}
         if not isinstance(data, dict):
@@ -350,11 +343,7 @@ def index_vault_to_rag(
 
     root = Path(vault_root).expanduser().resolve()
     vault_root_str = str(root)
-    state_file = (
-        Path(state_path)
-        if state_path
-        else Path(store.path) / "vault_sync.json"
-    )
+    state_file = Path(state_path) if state_path else Path(store.path) / "vault_sync.json"
     state_store = VaultSyncStateStore(state_file)
     state = state_store.load(vault_root_str)
 
@@ -432,7 +421,7 @@ def index_vault_to_rag(
     if to_evict:
         report.chunks_removed += store.delete_by_source_ids(to_evict)
 
-    state.last_synced_at = datetime.now(timezone.utc).isoformat()
+    state.last_synced_at = datetime.now(UTC).isoformat()
     state_store.save(state)
     return report
 
@@ -535,7 +524,7 @@ def _render_note_md(
     frontmatter_lines = [
         "---",
         f'title: "{(note.title or "").replace(chr(34), chr(39))}"',
-        f'note_id: {note.note_id}',
+        f"note_id: {note.note_id}",
         f'guid: "{note.guid}"',
         f'source_backup: "{backup.manifest.name or backup.source_path}"',
     ]

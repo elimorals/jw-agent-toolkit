@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from jw_core.concordance.nwt_ingest import nwt_chapter_from_html
 
-
 _HTML_FIXTURE = """
 <div id="bibleText">
   <span id="v43003015" class="v">

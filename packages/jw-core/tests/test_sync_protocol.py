@@ -13,7 +13,6 @@ cryptography = pytest.importorskip("cryptography")
 from jw_core.privacy.encryption import FieldEncryptor, generate_key
 from jw_core.privacy.sync import (
     SCHEMA_VERSION,
-    SyncEnvelope,
     decrypt_envelope,
     encrypt_envelope,
     export_envelope,
@@ -25,9 +24,7 @@ from jw_core.privacy.sync import (
 
 def _make_db(path: Path) -> None:
     with sqlite3.connect(path) as conn:
-        conn.execute(
-            "CREATE TABLE notes (note_id TEXT PRIMARY KEY, body TEXT, updated_at_unix REAL)"
-        )
+        conn.execute("CREATE TABLE notes (note_id TEXT PRIMARY KEY, body TEXT, updated_at_unix REAL)")
         conn.executescript(
             """
             INSERT INTO notes VALUES ('a', 'first body', 100.0);

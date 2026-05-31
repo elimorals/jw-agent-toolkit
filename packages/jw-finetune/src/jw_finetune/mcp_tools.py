@@ -45,6 +45,7 @@ def register_jw_finetune_tools(
             { "runs": [{run_id, task, has_recipe, checkpoints, ...}] }
         """
         from jw_finetune.monitor.studio import _list_runs
+
         return {"runs": _list_runs(root)}
 
     registered.append("list_finetune_runs")
@@ -71,10 +72,7 @@ def register_jw_finetune_tools(
                 out["recipe_error"] = str(e)
         out["dataset"] = _read_dataset_preview(run_dir, limit=5)
         ckpt_root = run_dir / "checkpoints"
-        out["checkpoints"] = (
-            sorted(c.name for c in ckpt_root.iterdir() if c.is_dir())
-            if ckpt_root.is_dir() else []
-        )
+        out["checkpoints"] = sorted(c.name for c in ckpt_root.iterdir() if c.is_dir()) if ckpt_root.is_dir() else []
         return out
 
     registered.append("get_finetune_run")
@@ -118,17 +116,19 @@ def register_jw_finetune_tools(
         out = []
         for name in list_presets():
             r = get_preset(name)
-            out.append({
-                "name": name,
-                "task": r.task,
-                "languages": r.languages,
-                "publication_kinds": r.publication_kinds,
-                "qa_style": r.qa_style,
-                "base_model": r.base_model,
-                "epochs": r.epochs,
-                "lora_rank": r.lora_rank,
-                "synth_provider": r.synth_provider,
-            })
+            out.append(
+                {
+                    "name": name,
+                    "task": r.task,
+                    "languages": r.languages,
+                    "publication_kinds": r.publication_kinds,
+                    "qa_style": r.qa_style,
+                    "base_model": r.base_model,
+                    "epochs": r.epochs,
+                    "lora_rank": r.lora_rank,
+                    "synth_provider": r.synth_provider,
+                }
+            )
         return {"presets": out}
 
     registered.append("list_finetune_presets")
@@ -164,17 +164,14 @@ def register_jw_finetune_tools(
                 return_tensors="pt",
                 add_generation_prompt=True,
             ).to(model.device)
-            out = model.generate(
-                inputs, max_new_tokens=max_new_tokens, do_sample=False
-            )
-            answer = tokenizer.decode(
-                out[0][inputs.shape[1]:], skip_special_tokens=True
-            )
+            out = model.generate(inputs, max_new_tokens=max_new_tokens, do_sample=False)
+            answer = tokenizer.decode(out[0][inputs.shape[1] :], skip_special_tokens=True)
         except Exception as e:  # noqa: BLE001
             return {"error": f"generation failed: {e}"}
 
         from jw_finetune.eval.doctrinal import score_terminology
         from jw_finetune.eval.refs import score_citation_accuracy
+
         return {
             "answer": answer,
             "citation_accuracy": score_citation_accuracy([answer]),
@@ -191,10 +188,7 @@ def register_jw_finetune_tools(
         report = run_doctor()
         return {
             "ok": report.ok,
-            "checks": [
-                {"name": c.name, "status": c.status, "detail": c.detail}
-                for c in report.checks
-            ],
+            "checks": [{"name": c.name, "status": c.status, "detail": c.detail} for c in report.checks],
         }
 
     registered.append("doctor_finetune")

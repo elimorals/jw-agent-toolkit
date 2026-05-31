@@ -81,7 +81,10 @@ def _try_apple() -> dict | None:
     try:
         out = subprocess.run(
             ["system_profiler", "SPDisplaysDataType"],
-            capture_output=True, text=True, timeout=2, check=False,
+            capture_output=True,
+            text=True,
+            timeout=2,
+            check=False,
         )
         for line in out.stdout.splitlines():
             line = line.strip()

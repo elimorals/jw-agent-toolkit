@@ -65,23 +65,27 @@ def finetuned_assistant(
                 kind=str(md.get("kind") or "chunk"),
                 metadata={k: str(v) for k, v in md.items() if k != "text"},
             )
-            result.findings.append(Finding(
-                summary=(text[:160] + "…") if len(text) > 160 else text,
-                citation=citation,
-                excerpt=text,
-                metadata={"rag_score": float(getattr(hit, "score", 0.0))},
-            ))
+            result.findings.append(
+                Finding(
+                    summary=(text[:160] + "…") if len(text) > 160 else text,
+                    citation=citation,
+                    excerpt=text,
+                    metadata={"rag_score": float(getattr(hit, "score", 0.0))},
+                )
+            )
             context_chunks.append(text)
 
     prompt = _build_prompt(query, context_chunks)
     try:
-        resp = client.generate(GenerateRequest(
-            prompt=prompt,
-            system=system or _default_system(language),
-            max_new_tokens=max_new_tokens,
-            temperature=temperature,
-            language=language,
-        ))
+        resp = client.generate(
+            GenerateRequest(
+                prompt=prompt,
+                system=system or _default_system(language),
+                max_new_tokens=max_new_tokens,
+                temperature=temperature,
+                language=language,
+            )
+        )
     except Exception as e:  # noqa: BLE001
         result.warnings.append(f"model generation failed: {e}")
         result.metadata["generated_answer"] = ""

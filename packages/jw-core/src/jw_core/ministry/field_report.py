@@ -216,9 +216,7 @@ class FieldReportStore:
         if self._enc.enabled:
             ids_to_close = [
                 row["study_id"]
-                for row in self._conn.execute(
-                    "SELECT study_id, student_id FROM studies WHERE closed_at IS NULL"
-                )
+                for row in self._conn.execute("SELECT study_id, student_id FROM studies WHERE closed_at IS NULL")
                 if self._enc.decrypt(row["student_id"]) == student_id
             ]
             self._conn.executemany(
@@ -228,8 +226,7 @@ class FieldReportStore:
             self._conn.commit()
             return len(ids_to_close)
         cur = self._conn.execute(
-            "UPDATE studies SET closed_at = ? "
-            "WHERE student_id = ? AND closed_at IS NULL",
+            "UPDATE studies SET closed_at = ? WHERE student_id = ? AND closed_at IS NULL",
             (_iso(closed_at), student_id),
         )
         self._conn.commit()
@@ -246,9 +243,7 @@ class FieldReportStore:
         else:
             study_ids = [
                 row["study_id"]
-                for row in self._conn.execute(
-                    "SELECT study_id FROM studies WHERE student_id = ?", (student_id,)
-                )
+                for row in self._conn.execute("SELECT study_id FROM studies WHERE student_id = ?", (student_id,))
             ]
         for sid in study_ids:
             self._conn.execute(
@@ -268,15 +263,11 @@ class FieldReportStore:
             result.append(
                 StudyEntry(
                     study_id=row["study_id"],
-                    student_id=self._enc.decrypt(row["student_id"])
-                    if self._enc.enabled
-                    else row["student_id"],
+                    student_id=self._enc.decrypt(row["student_id"]) if self._enc.enabled else row["student_id"],
                     started_at=_date.fromisoformat(row["started_at"]),
                     closed_at=_from_iso(row["closed_at"]),
                     met_dates=[_date.fromisoformat(m["met_date"]) for m in mets],
-                    note=self._enc.decrypt(row["note"])
-                    if (self._enc.enabled and row["note"])
-                    else row["note"] or "",
+                    note=self._enc.decrypt(row["note"]) if (self._enc.enabled and row["note"]) else row["note"] or "",
                     created_at_unix=row["created_at_unix"],
                 )
             )
@@ -287,7 +278,7 @@ class FieldReportStore:
     def close(self) -> None:
         self._conn.close()
 
-    def __enter__(self) -> "FieldReportStore":
+    def __enter__(self) -> FieldReportStore:
         return self
 
     def __exit__(self, *args: object) -> None:

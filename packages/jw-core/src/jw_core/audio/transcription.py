@@ -15,7 +15,6 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -59,9 +58,7 @@ def transcribe_file(
     try:
         from faster_whisper import WhisperModel
     except ImportError as e:
-        raise TranscriptionError(
-            "faster-whisper is not installed. `pip install faster-whisper`"
-        ) from e
+        raise TranscriptionError("faster-whisper is not installed. `pip install faster-whisper`") from e
 
     model = WhisperModel(model_size, device=device, compute_type="int8")
     segments_iter, info = model.transcribe(

@@ -18,6 +18,7 @@ def test_apocrypha_penalty_clean_text() -> None:
 def test_apocrypha_penalty_returns_neutral_when_detector_missing(monkeypatch) -> None:
     """If the apocrypha_detector module isn't importable, return 1.0 for safety."""
     import sys
+
     # Hide the agent module
     monkeypatch.setitem(sys.modules, "jw_agents.apocrypha_detector", None)
     fn = make_apocrypha_penalty()

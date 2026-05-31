@@ -66,7 +66,7 @@ def mask_references(text: str) -> MaskedText:
         )
     for match, ref in ordered:
         idx = next(i for i, p in enumerate(references_payload) if p["raw_match"] == ref.raw_match)
-        masked = masked[: match.start()] + f"<<REF:{idx}>>" + masked[match.end():]
+        masked = masked[: match.start()] + f"<<REF:{idx}>>" + masked[match.end() :]
     return MaskedText(text=masked, references=references_payload)
 
 

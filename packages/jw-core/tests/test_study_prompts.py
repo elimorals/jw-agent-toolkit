@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_core.data.study_prompts import (
     ANTICIPATION_TEMPLATES,
-    CRISIS_KEYWORDS,
     render_template,
     scan_for_crisis,
 )

@@ -5,10 +5,9 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 
-from jw_rag.chunker import Chunk
-
 from jw_finetune.synth.orchestrator import SynthResult, synthesize_chunk
 from jw_finetune.synth.provider import LLMRequest, LLMResponse
+from jw_rag.chunker import Chunk
 
 
 @dataclass
@@ -42,17 +41,22 @@ def _chunk(text: str | None = None) -> Chunk:
 
 
 def test_orchestrator_parses_valid_json() -> None:
-    txt = json.dumps({
-        "pairs": [
-            {
-                "q": "¿Qué es el Reino?",
-                "a": "El Reino es el gobierno celestial mencionado en Daniel 2:44.",
-            },
-        ]
-    })
+    txt = json.dumps(
+        {
+            "pairs": [
+                {
+                    "q": "¿Qué es el Reino?",
+                    "a": "El Reino es el gobierno celestial mencionado en Daniel 2:44.",
+                },
+            ]
+        }
+    )
     result = synthesize_chunk(
-        _chunk(), provider=FakeProvider(txt),
-        qa_style="doctrinal", language="es", n_pairs=1,
+        _chunk(),
+        provider=FakeProvider(txt),
+        qa_style="doctrinal",
+        language="es",
+        n_pairs=1,
     )
     assert isinstance(result, SynthResult)
     assert len(result.pairs) == 1
@@ -64,23 +68,26 @@ def test_orchestrator_parses_valid_json() -> None:
 def test_orchestrator_strips_markdown_fences() -> None:
     txt = (
         "```json\n"
-        + json.dumps({"pairs": [
-            {"q": "¿Cuál es el propósito?",
-             "a": "El propósito es santificar el nombre de Jehová Dios."}
-        ]})
+        + json.dumps(
+            {"pairs": [{"q": "¿Cuál es el propósito?", "a": "El propósito es santificar el nombre de Jehová Dios."}]}
+        )
         + "\n```"
     )
     result = synthesize_chunk(
-        _chunk(), provider=FakeProvider(txt),
-        qa_style="doctrinal", language="es",
+        _chunk(),
+        provider=FakeProvider(txt),
+        qa_style="doctrinal",
+        language="es",
     )
     assert len(result.pairs) == 1
 
 
 def test_orchestrator_handles_malformed_json() -> None:
     result = synthesize_chunk(
-        _chunk(), provider=FakeProvider("no soy json válido"),
-        qa_style="doctrinal", language="es",
+        _chunk(),
+        provider=FakeProvider("no soy json válido"),
+        qa_style="doctrinal",
+        language="es",
     )
     assert result.pairs == []
     assert result.parse_error is True
@@ -90,8 +97,10 @@ def test_orchestrator_handles_malformed_json() -> None:
 def test_orchestrator_rejects_too_short_pair() -> None:
     txt = json.dumps({"pairs": [{"q": "x", "a": "y"}]})
     result = synthesize_chunk(
-        _chunk(), provider=FakeProvider(txt),
-        qa_style="doctrinal", language="es",
+        _chunk(),
+        provider=FakeProvider(txt),
+        qa_style="doctrinal",
+        language="es",
     )
     assert result.pairs == []
     assert result.rejected == 1
@@ -99,21 +108,32 @@ def test_orchestrator_rejects_too_short_pair() -> None:
 
 def test_orchestrator_unknown_qa_style_raises() -> None:
     import pytest
+
     with pytest.raises(ValueError, match="Unknown qa_style"):
         synthesize_chunk(
-            _chunk(), provider=FakeProvider("{}"),
-            qa_style="unknown-style", language="es",
+            _chunk(),
+            provider=FakeProvider("{}"),
+            qa_style="unknown-style",
+            language="es",
         )
 
 
 def test_orchestrator_propagates_metadata() -> None:
-    txt = json.dumps({"pairs": [
-        {"q": "¿Cuándo se profetizó el Reino?",
-         "a": "Daniel 2:44 profetiza el Reino como un gobierno que jamás será destruido."},
-    ]})
+    txt = json.dumps(
+        {
+            "pairs": [
+                {
+                    "q": "¿Cuándo se profetizó el Reino?",
+                    "a": "Daniel 2:44 profetiza el Reino como un gobierno que jamás será destruido.",
+                },
+            ]
+        }
+    )
     result = synthesize_chunk(
-        _chunk(), provider=FakeProvider(txt),
-        qa_style="doctrinal", language="es",
+        _chunk(),
+        provider=FakeProvider(txt),
+        qa_style="doctrinal",
+        language="es",
     )
     assert len(result.pairs) == 1
     qa = result.pairs[0]

@@ -33,9 +33,7 @@ def generate_key() -> bytes:
     try:
         from cryptography.fernet import Fernet
     except ImportError as e:
-        raise EncryptionError(
-            "`cryptography` is required. `pip install cryptography`"
-        ) from e
+        raise EncryptionError("`cryptography` is required. `pip install cryptography`") from e
     return Fernet.generate_key()
 
 
@@ -67,9 +65,7 @@ class FieldEncryptor:
         try:
             from cryptography.fernet import Fernet
         except ImportError as e:
-            raise EncryptionError(
-                "`cryptography` is required to use a key. `pip install cryptography`"
-            ) from e
+            raise EncryptionError("`cryptography` is required to use a key. `pip install cryptography`") from e
         try:
             self._fernet = Fernet(key)
             self.enabled = True

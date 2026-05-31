@@ -19,8 +19,8 @@ API — it's just enough to swap in for ad-hoc summarisation / re-ranking.
 from __future__ import annotations
 
 import os
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
-from typing import AsyncIterator
 
 import httpx
 
@@ -67,8 +67,9 @@ class OllamaAdapter:
     async def generate_stream(self, prompt: str, *, temperature: float = 0.3) -> AsyncIterator[str]:
         """Yield chunks of generated text. Caller joins as needed."""
         try:
-            async with httpx.AsyncClient(timeout=120.0) as c:
-                async with c.stream(
+            async with (
+                httpx.AsyncClient(timeout=120.0) as c,
+                c.stream(
                     "POST",
                     f"{self.host}/api/generate",
                     json={
@@ -77,23 +78,24 @@ class OllamaAdapter:
                         "stream": True,
                         "options": {"temperature": temperature},
                     },
-                ) as resp:
-                    resp.raise_for_status()
-                    import json as _json
+                ) as resp,
+            ):
+                resp.raise_for_status()
+                import json as _json
 
-                    async for line in resp.aiter_lines():
-                        line = line.strip()
-                        if not line:
-                            continue
-                        try:
-                            payload = _json.loads(line)
-                        except Exception:
-                            continue
-                        chunk = payload.get("response", "")
-                        if chunk:
-                            yield chunk
-                        if payload.get("done"):
-                            return
+                async for line in resp.aiter_lines():
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        payload = _json.loads(line)
+                    except Exception:
+                        continue
+                    chunk = payload.get("response", "")
+                    if chunk:
+                        yield chunk
+                    if payload.get("done"):
+                        return
         except httpx.HTTPError as e:
             raise OllamaError(f"Ollama stream failed: {e}") from e
 

@@ -41,9 +41,7 @@ class IndexedVideo:
 # ── WebVTT parser ────────────────────────────────────────────────────────
 
 
-_TIMESTAMP_RE = re.compile(
-    r"(\d{2}):(\d{2}):(\d{2})[.,](\d{3})\s+-->\s+(\d{2}):(\d{2}):(\d{2})[.,](\d{3})"
-)
+_TIMESTAMP_RE = re.compile(r"(\d{2}):(\d{2}):(\d{2})[.,](\d{3})\s+-->\s+(\d{2}):(\d{2}):(\d{2})[.,](\d{3})")
 
 
 def parse_vtt(vtt_text: str) -> list[VTTSegment]:

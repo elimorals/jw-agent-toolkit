@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from jw_agents.base import AgentResult, Citation, Finding
 from jw_core.exporters.ir import CitationIR, StudySection, StudySheet
 
@@ -70,9 +68,7 @@ def test_from_agent_result_explicit_title_wins() -> None:
 
 def test_from_agent_result_truncates_long_title() -> None:
     long_q = "Por qué " + "muy largo " * 50
-    sheet = StudySheet.from_agent_result(
-        AgentResult(query=long_q, agent_name="apologetics")
-    )
+    sheet = StudySheet.from_agent_result(AgentResult(query=long_q, agent_name="apologetics"))
     assert len(sheet.title) <= 80
 
 

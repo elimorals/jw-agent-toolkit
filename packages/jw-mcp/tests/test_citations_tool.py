@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 
 def test_validate_citations_rejects_missing_input() -> None:
     from jw_mcp.server import validate_citations

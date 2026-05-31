@@ -10,11 +10,10 @@ from __future__ import annotations
 import asyncio
 
 import typer
+from jw_agents.letter_composer import KINDS, letter_composer
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-
-from jw_agents.letter_composer import KINDS, letter_composer
 
 console = Console()
 
@@ -22,23 +21,26 @@ console = Console()
 def letter_cmd(
     kind: str = typer.Option(
         "letter",
-        "--kind", "-k",
+        "--kind",
+        "-k",
         help="Modality: letter | phone | cart.",
     ),
     topic: str = typer.Option(
         ...,
-        "--topic", "-t",
+        "--topic",
+        "-t",
         help="Free-form topic or question for the witnessing scaffold.",
     ),
     audience: str = typer.Option(
         "default",
-        "--audience", "-a",
-        help="Audience profile: default | new | religious | atheist | "
-             "grieving | young | parents.",
+        "--audience",
+        "-a",
+        help="Audience profile: default | new | religious | atheist | grieving | young | parents.",
     ),
     lang: str = typer.Option(
         "es",
-        "--lang", "-l",
+        "--lang",
+        "-l",
         help="Language code: en, es, or pt.",
     ),
     territory: str | None = typer.Option(
@@ -55,9 +57,7 @@ def letter_cmd(
     """Compose a witnessing scaffold (letter / phone / cart)."""
 
     if kind not in KINDS:
-        console.print(
-            f"[red]Unknown kind {kind!r}. Allowed: {', '.join(KINDS)}[/red]"
-        )
+        console.print(f"[red]Unknown kind {kind!r}. Allowed: {', '.join(KINDS)}[/red]")
         raise typer.Exit(code=2)
 
     result = asyncio.run(
@@ -79,17 +79,11 @@ def letter_cmd(
         f"[bold]Language:[/bold] {md['language']}",
     ]
     if md.get("time_target_seconds"):
-        header_lines.append(
-            f"[bold]Time target:[/bold] ~{md['time_target_seconds']}s"
-        )
+        header_lines.append(f"[bold]Time target:[/bold] ~{md['time_target_seconds']}s")
     if md.get("word_count_target"):
-        header_lines.append(
-            f"[bold]Word count target:[/bold] ~{md['word_count_target']}"
-        )
+        header_lines.append(f"[bold]Word count target:[/bold] ~{md['word_count_target']}")
     if md.get("territory_hint"):
-        header_lines.append(
-            f"[bold]Territory hint:[/bold] {md['territory_hint']}"
-        )
+        header_lines.append(f"[bold]Territory hint:[/bold] {md['territory_hint']}")
     console.print(Panel("\n".join(header_lines), title="letter_composer"))
 
     table = Table(show_header=True, header_style="bold cyan")
@@ -105,6 +99,4 @@ def letter_cmd(
         for w in result.warnings:
             console.print(f"  - {w}")
 
-    console.print(
-        f"\n[blue underline]{md['jw_link_suggested']}[/blue underline]"
-    )
+    console.print(f"\n[blue underline]{md['jw_link_suggested']}[/blue underline]")

@@ -147,11 +147,7 @@ async def _surface_scripture_anchors(
         except Exception as e:
             result.warnings.append(f"Could not fetch {ref_text}: {e}")
             continue
-        verse = (
-            get_verse(html, ref.book_num, ref.chapter, ref.verse_start, language=iso)
-            if ref.verse_start
-            else None
-        )
+        verse = get_verse(html, ref.book_num, ref.chapter, ref.verse_start, language=iso) if ref.verse_start else None
         result.findings.append(
             Finding(
                 summary=f"Scripture anchor: {ref.display()}",

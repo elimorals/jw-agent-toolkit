@@ -13,7 +13,6 @@ from jw_core.study.originals import (
     load_strong_json,
 )
 
-
 OPENSCRIPTURES_FRAGMENT = {
     "H7225": {
         "lemma": "רֵאשִׁית",

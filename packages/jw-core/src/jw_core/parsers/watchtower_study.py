@@ -104,7 +104,7 @@ def _extract_paragraphs(soup: BeautifulSoup) -> list[WatchtowerStudyParagraph]:
         m = _PARAGRAPH_NUM_RE.match(text)
         if m:
             num = int(m.group(1))
-            stripped = text[m.end():]
+            stripped = text[m.end() :]
             paragraphs.append((num, stripped, _pluck_scripture_refs(p)))
             continue
         if pid and pid.isdigit():

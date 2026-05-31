@@ -5,10 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import patch
 
-from typer.testing import CliRunner
-
 from jw_agents.base import AgentResult, Citation, Finding
 from jw_cli.commands.news import news_app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

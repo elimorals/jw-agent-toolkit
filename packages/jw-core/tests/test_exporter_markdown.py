@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from jw_core.exporters.ir import CitationIR, StudySection, StudySheet
 from jw_core.exporters.markdown import export_markdown, render_markdown
 

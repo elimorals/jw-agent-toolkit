@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import sqlite3
-import sys
 from pathlib import Path
 
 import pytest
-
 from jw_core.integrations import jw_library_local as mod
 from jw_core.integrations.jw_library_local import (
     ENV_OPT_IN,
@@ -59,9 +57,7 @@ def _redirect_mac_paths(
     monkeypatch.setattr(mod, "_MAC_CONTAINER", container)
 
 
-def test_macos_reports_app_when_installed(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_macos_reports_app_when_installed(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr(mod, "_platform", lambda: "darwin")
     _redirect_mac_paths(monkeypatch, tmp_path, app_exists=True, container_exists=False)
     result = inspect_local_jw_library(force=True)
@@ -71,9 +67,7 @@ def test_macos_reports_app_when_installed(
     assert any("backup" in s.lower() for s in result.suggestions)
 
 
-def test_macos_reports_no_app_when_missing(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_macos_reports_no_app_when_missing(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr(mod, "_platform", lambda: "darwin")
     _redirect_mac_paths(monkeypatch, tmp_path, app_exists=False, container_exists=False)
     result = inspect_local_jw_library(force=True)
@@ -81,9 +75,7 @@ def test_macos_reports_no_app_when_missing(
     assert any("not found" in r.lower() for r in result.reasons)
 
 
-def test_macos_container_detected_but_unreadable(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_macos_container_detected_but_unreadable(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr(mod, "_platform", lambda: "darwin")
     _redirect_mac_paths(monkeypatch, tmp_path, app_exists=True, container_exists=True)
     result = inspect_local_jw_library(force=True)
@@ -163,18 +155,12 @@ def test_windows_no_localappdata(monkeypatch: pytest.MonkeyPatch) -> None:
     assert any("LOCALAPPDATA" in r for r in result.reasons)
 
 
-def test_windows_publications_db_schema_partial(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_windows_publications_db_schema_partial(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     # Only PublicationId + Title present; we must still return rows.
     monkeypatch.setattr(mod, "_platform", lambda: "win32")
     monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
     pkg = (
-        tmp_path
-        / "Packages"
-        / "WatchtowerBibleandTractSocietyofNewYorkInc.JWLibrary_x"
-        / "LocalState"
-        / "Publications"
+        tmp_path / "Packages" / "WatchtowerBibleandTractSocietyofNewYorkInc.JWLibrary_x" / "LocalState" / "Publications"
     )
     pkg.mkdir(parents=True)
     db_path = pkg / "publications.db"
@@ -228,18 +214,14 @@ def _seed_macos_container_with_userdata(tmp_path: Path) -> Path:
     return container
 
 
-def test_check_fda_returns_unreadable_for_missing_path(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_check_fda_returns_unreadable_for_missing_path(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr(mod, "_MAC_CONTAINER", tmp_path / "nope")
     out = check_macos_full_disk_access()
     assert out["readable"] is False
     assert "does not exist" in out["error"]
 
 
-def test_check_fda_succeeds_when_path_readable(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_check_fda_succeeds_when_path_readable(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     target = tmp_path / "Containers" / "org.jw.jwlibrary"
     target.mkdir(parents=True)
     monkeypatch.setattr(mod, "_MAC_CONTAINER", target)
@@ -247,9 +229,7 @@ def test_check_fda_succeeds_when_path_readable(
     assert out["readable"] is True
 
 
-def test_check_fda_reports_permission_error(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_check_fda_reports_permission_error(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     target = tmp_path / "blocked"
     target.mkdir()
     monkeypatch.setattr(mod, "_MAC_CONTAINER", target)
@@ -263,9 +243,7 @@ def test_check_fda_reports_permission_error(
     assert "PermissionError" in out["error"]
 
 
-def test_read_macos_userdata_succeeds_when_fda_granted(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_read_macos_userdata_succeeds_when_fda_granted(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     container = _seed_macos_container_with_userdata(tmp_path)
     monkeypatch.setattr(mod, "_MAC_CONTAINER", container)
     backup = read_macos_userdata()
@@ -275,9 +253,7 @@ def test_read_macos_userdata_succeeds_when_fda_granted(
     assert backup.notes[0].location.book_number == 43
 
 
-def test_read_macos_userdata_raises_when_blocked(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_read_macos_userdata_raises_when_blocked(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     target = tmp_path / "blocked"
     target.mkdir()
     monkeypatch.setattr(mod, "_MAC_CONTAINER", target)
@@ -290,9 +266,7 @@ def test_read_macos_userdata_raises_when_blocked(
         read_macos_userdata()
 
 
-def test_inspect_macos_reports_fda_granted_and_userdata_path(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_inspect_macos_reports_fda_granted_and_userdata_path(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr(mod, "_platform", lambda: "darwin")
     monkeypatch.setattr(mod, "_MAC_APP_PATH", tmp_path / "JW Library.app")
     (tmp_path / "JW Library.app").mkdir()
@@ -304,9 +278,7 @@ def test_inspect_macos_reports_fda_granted_and_userdata_path(
     assert any("Full Disk Access" in r for r in result.reasons)
 
 
-def test_inspect_macos_gives_fda_instructions_when_blocked(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_inspect_macos_gives_fda_instructions_when_blocked(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr(mod, "_platform", lambda: "darwin")
     monkeypatch.setattr(mod, "_MAC_APP_PATH", tmp_path / "JW Library.app")
     (tmp_path / "JW Library.app").mkdir()
@@ -323,9 +295,7 @@ def test_inspect_macos_gives_fda_instructions_when_blocked(
     assert any("Privacy & Security" in s for s in result.suggestions)
 
 
-def test_to_dict_shape_matches_expected_keys(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_to_dict_shape_matches_expected_keys(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr(mod, "_platform", lambda: "darwin")
     _redirect_mac_paths(monkeypatch, tmp_path, app_exists=False, container_exists=False)
     d = inspect_local_jw_library(force=True).to_dict()

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_core.data.books import BOOKS
 from jw_core.parsers.reference import parse_reference
 from jw_core.translation import render_reference

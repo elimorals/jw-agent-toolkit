@@ -20,7 +20,6 @@ from datetime import date, timedelta
 from bs4 import BeautifulSoup, Tag
 
 from jw_core.models_meeting import (
-    WORKBOOK_SECTIONS,
     WorkbookAssignment,
     WorkbookSection,
     WorkbookWeek,
