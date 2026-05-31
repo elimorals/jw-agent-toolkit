@@ -10,8 +10,12 @@ module is safe on machines without any of them.
 """
 
 from jw_rag.visual.errors import ConfigError, VisualStoreMismatchError
+from jw_rag.visual.models import IngestResult, MultiVectorHit, VisualChunk
 
 __all__ = [
     "ConfigError",
+    "IngestResult",
+    "MultiVectorHit",
+    "VisualChunk",
     "VisualStoreMismatchError",
 ]
