@@ -1,0 +1,28 @@
+id: l3_life_topics_grief_en
+agent: life_topics
+layer: l3
+input:
+  query: "grief"
+  language: "en"
+expected:
+  golden_answer: |
+    The Bible offers real comfort to those grieving the death of a loved one.
+    Ecclesiastes 9:5 explains that the dead are unconscious — they are not
+    suffering. Jehovah promises a resurrection on a paradise earth
+    (John 5:28, 29; Acts 24:15), so the parting is not forever. While this
+    information is from published Watchtower material, your family and the
+    elders of your congregation are willing to comfort you personally.
+  expected_keywords_any:
+    - "resurrection"
+    - "Ecclesiastes 9:5"
+    - "elders"
+  expected_keywords_none:
+    - "will be reunited"
+    - "guaranteed to see them again"
+    - "therapist"
+    - "professional grief counseling"
+metadata:
+  topic: life.grief
+  family: sensitive
+  added_by: elias
+  added_at: 2026-05-30
