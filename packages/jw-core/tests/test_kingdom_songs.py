@@ -95,3 +95,40 @@ def test_canonical_url_falls_back_to_finder_pattern() -> None:
     song = reg.lookup(5)
     # Spanish wtlocale = "S".
     assert song.canonical_url == "https://www.jw.org/finder?wtlocale=S&pub=sjj"
+
+
+def test_seed_integrity() -> None:
+    """Invariants that protect the seed from accidentally storing lyrics."""
+
+    from jw_core.songs import get_registry
+
+    # Heuristic anti-lyrics tokens — flag obvious copy-paste from a lyric sheet.
+    FORBIDDEN_TOKENS = [
+        "verse 1", "estrofa", "estribillo", "refrão", "refrain",
+        "chorus", "stanza", "©", "copyright watch tower",
+    ]
+
+    parallel_numbers: dict[str, set[int]] = {}
+    for lang in ["en", "es", "pt"]:
+        reg = get_registry(lang)
+        nums = set()
+        for s in reg.all():
+            assert 1 <= s.number <= 200, f"{lang}/#{s.number}: out of 1..200"
+            assert len(s.theme) <= 200, f"{lang}/#{s.number}: theme too long"
+            assert len(s.title) <= 200, f"{lang}/#{s.number}: title too long"
+            lower_blob = (s.title + " " + s.theme).lower()
+            for tok in FORBIDDEN_TOKENS:
+                assert tok not in lower_blob, (
+                    f"{lang}/#{s.number}: forbidden token {tok!r}"
+                )
+            # Every scripture must parse cleanly.
+            assert s.resolved_scriptures() or not s.scriptures, (
+                f"{lang}/#{s.number}: scriptures {s.scriptures} all unparseable"
+            )
+            nums.add(s.number)
+        parallel_numbers[lang] = nums
+
+    # All three languages cover the same numbers (parallel coverage).
+    assert parallel_numbers["en"] == parallel_numbers["es"] == parallel_numbers["pt"], (
+        f"language coverage mismatch: {parallel_numbers}"
+    )
