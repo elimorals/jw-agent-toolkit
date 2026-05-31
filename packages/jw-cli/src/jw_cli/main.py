@@ -33,6 +33,7 @@ from jw_cli.commands import (
     verse,
     workbook,
 )
+from jw_cli.commands.constrained import constrained_app
 from jw_cli.commands.image import image_app
 from jw_cli.commands.rag import rag_app
 from jw_cli.commands import (
@@ -88,6 +89,7 @@ app.command(name="life")(life.life_cmd)
 app.command(name="eval")(eval_module.eval_cmd)
 app.command(name="say")(say.say_cmd)
 app.command(name="transcribe")(transcribe.transcribe_cmd)
+app.add_typer(constrained_app, name="constrained")
 
 
 def main() -> None:
