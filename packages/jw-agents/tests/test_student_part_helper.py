@@ -195,3 +195,20 @@ def test_idempotent_with_same_today() -> None:
     a = _run(student_part_helper(**args))  # type: ignore[arg-type]
     b = _run(student_part_helper(**args))  # type: ignore[arg-type]
     assert a.to_dict() == b.to_dict()
+
+
+def test_resolves_reference_in_en_es_pt() -> None:
+    for ref_in, lang in [
+        ("John 3:16", "en"),
+        ("Juan 3:16", "es"),
+        ("João 3:16", "pt"),
+    ]:
+        r = _run(student_part_helper(
+            kind="bible_reading",
+            topic_or_ref=ref_in,
+            language=lang,
+            oratory_point=1,
+            today=date(2026, 1, 15),
+        ))
+        assert "3:16" in r.metadata["resolved_reference"], (ref_in, lang)
+        assert r.findings[0].citation.url.startswith("https://wol.jw.org/")
