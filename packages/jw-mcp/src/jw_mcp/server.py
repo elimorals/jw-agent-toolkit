@@ -2944,6 +2944,133 @@ def ingest_image_to_rag(image_path: str, language: str = "en") -> dict:
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Fase 37 — Visual RAG (ColPali/ColQwen2 late-interaction)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool()
+def visual_search(
+    query: str,
+    text_store_path: str = "./jw-rag-store",
+    visual_store_path: str = "./jw-rag-store/visual",
+    top_k: int = 10,
+    language: str = "",
+) -> dict:
+    """Hybrid search including visual MaxSim. Falls back to text-only if no GPU.
+
+    Returns: {"hits": [...], "visual_enabled": bool, "hint": str}
+    """
+    import os
+    from pathlib import Path as _Path37
+
+    from jw_rag import FakeEmbedder, VectorStore
+    from jw_rag.visual import (
+        ConfigError as _VConfigError,
+    )
+    from jw_rag.visual import (
+        VisualVectorStore as _VStore,
+    )
+    from jw_rag.visual import (
+        get_default_visual_embedder as _get_v_emb,
+    )
+    from jw_rag.visual import (
+        hybrid_search_with_visual as _hybrid_v,
+    )
+
+    if os.environ.get("JW_VISUAL_ENABLED", "1") == "0":
+        return {
+            "error": "visual_disabled",
+            "hint": "Set JW_VISUAL_ENABLED=1 to enable. Falling back to text-only.",
+            "hits": [],
+            "visual_enabled": False,
+        }
+
+    text = VectorStore(_Path37(text_store_path), FakeEmbedder(dim=64))
+    try:
+        text.load()
+    except Exception:  # noqa: BLE001
+        pass
+
+    visual = None
+    visual_enabled = False
+    hint = ""
+    try:
+        embedder = _get_v_emb()
+        visual = _VStore(_Path37(visual_store_path), embedder)
+        visual.load()
+        visual_enabled = True
+    except _VConfigError as exc:
+        hint = str(exc)
+
+    hits = _hybrid_v(text, visual, query, top_k=top_k)
+    return {
+        "visual_enabled": visual_enabled,
+        "hint": hint,
+        "hits": [
+            {
+                "rank": h.rank,
+                "score": float(h.score),
+                "source": h.source,
+                "chunk_id": h.chunk.id,
+                "source_id": getattr(h.chunk, "source_id", ""),
+                "text": getattr(h.chunk, "text", ""),
+                "image_path": str(getattr(h.chunk, "image_path", "")) or None,
+                "page_number": getattr(h.chunk, "page_number", None),
+                "language": language or getattr(h.chunk, "metadata", {}).get("language", ""),
+            }
+            for h in hits
+        ],
+    }
+
+
+@mcp.tool()
+def ingest_publication_visual(
+    path: str,
+    store_path: str = "./jw-rag-store/visual",
+    language: str = "",
+    force: bool = False,
+) -> dict:
+    """Ingest a JWPUB/EPUB/PDF into the visual store. Requires GPU."""
+    import os
+    from pathlib import Path as _Path37b
+
+    from jw_rag.visual import (
+        ConfigError as _VConfigError2,
+    )
+    from jw_rag.visual import (
+        VisualVectorStore as _VStore2,
+    )
+    from jw_rag.visual import (
+        get_default_visual_embedder as _get_v_emb2,
+    )
+    from jw_rag.visual import (
+        ingest_path_visual as _ingest_v,
+    )
+
+    if os.environ.get("JW_VISUAL_ENABLED", "1") == "0":
+        return {"error": "visual_disabled", "hint": "Set JW_VISUAL_ENABLED=1."}
+
+    try:
+        embedder = _get_v_emb2()
+    except _VConfigError2 as exc:
+        return {"error": "no_gpu", "hint": str(exc)}
+
+    store = _VStore2(_Path37b(store_path), embedder)
+    try:
+        store.load()
+    except Exception as exc:  # noqa: BLE001
+        return {"error": "load_failed", "hint": str(exc)}
+
+    result = _ingest_v(_Path37b(path), store, language=language, force=force)
+    return {
+        "pages_added": result.pages_added,
+        "pages_skipped": result.pages_skipped,
+        "duration_ms": result.duration_ms,
+        "store_path": store_path,
+    }
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
 

@@ -139,6 +139,9 @@ _EXPECTED_TOOLS = {
     # Phase 36 — VLM-OCR (structured page extraction)
     "extract_structured_page",
     "ingest_image_to_rag",
+    # Phase 37 — Visual RAG (ColPali/ColQwen2 late-interaction)
+    "visual_search",
+    "ingest_publication_visual",
 }
 
 
