@@ -794,7 +794,9 @@ async def get_topic_articles(docid_or_url: str, language: str = "en") -> dict[st
 
 
 @mcp.tool
-def semantic_search(query: str, top_k: int = 5, mode: str = "hybrid") -> dict[str, Any]:
+def semantic_search(
+    query: str, top_k: int = 5, mode: str = "hybrid", rerank: bool = True
+) -> dict[str, Any]:
     """Search the local RAG store (Bible chapters + ingested articles).
 
     The store is created on demand at JW_RAG_STORE_PATH (default
@@ -805,6 +807,9 @@ def semantic_search(query: str, top_k: int = 5, mode: str = "hybrid") -> dict[st
         query: Free-text query.
         top_k: Number of results.
         mode: 'hybrid' (default), 'vector', or 'bm25'.
+        rerank: When mode='hybrid', apply the Fase 33 cross-encoder reranker
+            on top of RRF. Defaults to True; falls back to NoOpReranker when
+            no real reranker is installed (bit-identical to rerank=False).
     """
     store = _get_rag_store()
     if store.is_empty:
@@ -817,7 +822,7 @@ def semantic_search(query: str, top_k: int = 5, mode: str = "hybrid") -> dict[st
     elif mode == "bm25":
         hits = store.bm25_search(query, top_k=top_k)
     else:
-        hits = store.hybrid_search(query, top_k=top_k)
+        hits = store.hybrid_search(query, top_k=top_k, rerank=rerank)
     return {
         "query": query,
         "mode": mode,
