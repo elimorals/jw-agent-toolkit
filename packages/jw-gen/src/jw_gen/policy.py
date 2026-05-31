@@ -231,10 +231,16 @@ def finalize_output(
         shutil.copy2(raw_path, dest)
         moved = True
 
-        # 2) Visible watermark (if mode includes visible).
+        # 2) Visible watermark (only meaningful for image outputs).
         if request.watermark.mode == "visible+metadata":
-            text = get_message("watermark.default", lang=request.lang)
-            _self.apply_watermark(dest, text=text, cfg=request.watermark)
+            if dest.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".tiff", ".gif"}:
+                text = get_message("watermark.default", lang=request.lang)
+                _self.apply_watermark(dest, text=text, cfg=request.watermark)
+            else:
+                # Audio/video: visible watermark not applicable; metadata + disclaimer still enforced.
+                warnings.append(
+                    "visible watermark skipped for non-image output (metadata + disclaimer still enforced)."
+                )
         elif request.watermark.mode == "off":
             warnings.append(
                 "watermark mode is 'off' — visible AND metadata suppressed (audit logged)."

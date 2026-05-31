@@ -3040,6 +3040,7 @@ source = { editable = "packages/jw-cli" }
 dependencies = [
     { name = "jw-core" },
     { name = "jw-eval" },
+    { name = "jw-gen" },
     { name = "rich" },
     { name = "typer" },
 ]
@@ -3048,6 +3049,7 @@ dependencies = [
 requires-dist = [
     { name = "jw-core", editable = "packages/jw-core" },
     { name = "jw-eval", editable = "packages/jw-eval" },
+    { name = "jw-gen", editable = "packages/jw-gen" },
     { name = "rich", specifier = ">=13.9.0" },
     { name = "typer", specifier = ">=0.13.0" },
 ]
