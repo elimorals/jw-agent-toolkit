@@ -132,3 +132,69 @@ def test_seed_integrity() -> None:
     assert parallel_numbers["en"] == parallel_numbers["es"] == parallel_numbers["pt"], (
         f"language coverage mismatch: {parallel_numbers}"
     )
+
+
+def _make_workbook_result(songs_dict: dict[str, int | None]):
+    """Build a minimal AgentResult mirroring what workbook_helper emits."""
+
+    from jw_agents.base import AgentResult, Citation, Finding
+
+    result = AgentResult(query="2026-W23", agent_name="workbook_helper")
+    result.findings.append(
+        Finding(
+            summary="Workbook week of 2026-06-08",
+            excerpt="PROVERBIOS 1-3",
+            citation=Citation(
+                url="https://wol.jw.org/example",
+                title="Reunión",
+                kind="workbook_week",
+                metadata={"songs": songs_dict},
+            ),
+            metadata={"source": "workbook_week"},
+        )
+    )
+    return result
+
+
+def test_enrich_adds_three_findings_when_all_slots_present() -> None:
+    from jw_core.songs.integration import enrich_with_songs
+
+    result = _make_workbook_result({"opening": 5, "middle": 47, "closing": 151})
+    out = enrich_with_songs(result, language="es")
+    song_findings = [f for f in out.findings if f.metadata.get("source") == "kingdom_song"]
+    assert len(song_findings) == 3
+    assert {f.citation.metadata["slot"] for f in song_findings} == {"opening", "middle", "closing"}
+
+
+def test_enrich_is_idempotent() -> None:
+    from jw_core.songs.integration import enrich_with_songs
+
+    result = _make_workbook_result({"opening": 5, "middle": 47, "closing": 151})
+    enrich_with_songs(result, language="en")
+    enrich_with_songs(result, language="en")
+    song_findings = [f for f in result.findings if f.metadata.get("source") == "kingdom_song"]
+    assert len(song_findings) == 3
+
+
+def test_enrich_handles_unknown_song_gracefully() -> None:
+    from jw_core.songs.integration import enrich_with_songs
+
+    result = _make_workbook_result({"opening": 999, "middle": 5, "closing": None})
+    out = enrich_with_songs(result, language="en")
+    song_findings = [f for f in out.findings if f.metadata.get("source") == "kingdom_song"]
+    # Only #5 should land as a finding.
+    assert len(song_findings) == 1
+    assert song_findings[0].citation.metadata["number"] == 5
+    # The unknown number surfaces as a warning.
+    assert any("999" in w for w in out.warnings)
+
+
+def test_enrich_no_workbook_week_finding_is_noop() -> None:
+    from jw_agents.base import AgentResult
+
+    from jw_core.songs.integration import enrich_with_songs
+
+    result = AgentResult(query="x", agent_name="other")
+    enrich_with_songs(result, language="en")
+    assert result.findings == []
+    assert result.warnings == []
