@@ -29,11 +29,19 @@ except ImportError:  # pragma: no cover
     OpenAIAdapter = None  # type: ignore[assignment,misc]
     OpenAIAdapterError = RuntimeError  # type: ignore[assignment,misc]
 
+try:  # optional import — only succeeds with [grammar-local] extra
+    from jw_core.privacy.llama_cpp_adapter import LlamaCppAdapter, LlamaCppError
+except ImportError:  # pragma: no cover
+    LlamaCppAdapter = None  # type: ignore[assignment,misc]
+    LlamaCppError = RuntimeError  # type: ignore[assignment,misc]
+
 __all__ = [
     "AnthropicAdapter",
     "AnthropicAdapterError",
     "EncryptionError",
     "FieldEncryptor",
+    "LlamaCppAdapter",
+    "LlamaCppError",
     "OllamaAdapter",
     "OllamaError",
     "OpenAIAdapter",
