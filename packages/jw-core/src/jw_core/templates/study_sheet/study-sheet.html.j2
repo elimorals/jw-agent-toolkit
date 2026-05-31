@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="{{ sheet.language }}">
+<head>
+  <meta charset="utf-8">
+  <title>{{ sheet.title }}</title>
+  <style>
+    @page { margin: 1.8cm 2.5cm; }
+    body { font-family: "Charter", "Source Serif Pro", Georgia, serif; line-height: 1.55; color: #1a1a1a; }
+    h1 { font-size: 26pt; margin-bottom: 0; border-bottom: 2px solid #1a1a1a; padding-bottom: 6pt; }
+    h2.subtitle { font-size: 13pt; color: #555; margin-top: 6pt; font-weight: 400; font-style: italic; }
+    h3 { font-size: 14pt; margin-top: 22pt; color: #0a3a6a; }
+    .body { font-size: 11.5pt; word-wrap: break-word; text-align: justify; hyphens: auto; }
+    .excerpt { border-left: 4px solid #c9a64f; background: #faf7f0; padding: 6pt 10pt; margin: 10pt 0; color: #333; font-style: italic; }
+    .cite-list { font-size: 9pt; color: #555; margin-top: 6pt; list-style: square; }
+    .cite-list li { margin-bottom: 2pt; }
+    a { color: #0a3a6a; word-wrap: break-word; }
+    .footer { margin-top: 36pt; border-top: 1px solid #aaa; padding-top: 8pt; font-size: 9pt; color: #777; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>{{ sheet.title }}</h1>
+  {% if sheet.subtitle %}<h2 class="subtitle">{{ sheet.subtitle }}</h2>{% endif %}
+
+  {% for section in sheet.sections %}
+    <section>
+      <h3>{{ section.heading }}</h3>
+      <div class="body">{{ section.body }}</div>
+      {% if section.excerpt %}<div class="excerpt">{{ section.excerpt }}</div>{% endif %}
+      {% if section.citations %}
+        <ul class="cite-list">
+          {% for c in section.citations %}
+            <li><a href="{{ c.url }}">{{ c.short_label or c.title or c.url }}</a></li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </section>
+  {% endfor %}
+
+  {% if sheet.footer_note %}
+    <div class="footer">{{ sheet.footer_note }}</div>
+  {% endif %}
+</body>
+</html>
