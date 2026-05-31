@@ -2791,6 +2791,37 @@ async def life_topic_info(
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Phase 22 — Doctrinal regression eval suite
+# ────────────────────────────────────────────────────────────────────────
+
+from pathlib import Path as _Path  # noqa: E402
+
+from jw_eval.cli import run_from_cli as _eval_run  # noqa: E402
+from jw_eval.models import LayerName as _LayerName  # noqa: E402
+
+
+@mcp.tool()
+def run_eval_suite(
+    layers: list[int] = [1],
+    cases_root: str = "packages/jw-eval/fixtures/golden_qa",
+    snapshots_root: str = "packages/jw-eval/fixtures/wol_snapshots",
+    live: bool = False,
+    agent: str | None = None,
+) -> dict:
+    """Run the jw-eval doctrinal regression suite. Returns the SuiteReport as a dict."""
+
+    layer_names: list[_LayerName] = [f"l{n}" for n in layers]  # type: ignore[misc]
+    report = _eval_run(
+        cases_root=_Path(cases_root),
+        snapshots_root=_Path(snapshots_root),
+        layers=layer_names,
+        agent_filter=agent,
+        live=live,
+    )
+    return report.model_dump(mode="json")
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
 

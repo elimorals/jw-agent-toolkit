@@ -1653,6 +1653,7 @@ dependencies = [
     { name = "fastmcp" },
     { name = "jw-agents" },
     { name = "jw-core" },
+    { name = "jw-eval" },
     { name = "jw-rag" },
 ]
 
@@ -1661,6 +1662,7 @@ requires-dist = [
     { name = "fastmcp", specifier = ">=2.0.0" },
     { name = "jw-agents", editable = "packages/jw-agents" },
     { name = "jw-core", editable = "packages/jw-core" },
+    { name = "jw-eval", editable = "packages/jw-eval" },
     { name = "jw-rag", editable = "packages/jw-rag" },
 ]
 

@@ -131,6 +131,8 @@ _EXPECTED_TOOLS = {
     "export_study_sheet",
     # Phase 32 — Life topics (informational + pastoral boundary)
     "life_topic_info",
+    # Phase 22 — Doctrinal regression eval suite
+    "run_eval_suite",
 }
 
 
