@@ -2681,6 +2681,75 @@ async def songs_for_week(
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Phase 31 — Exporter (Markdown / PDF / DOCX / Anki)
+# ────────────────────────────────────────────────────────────────────────
+
+
+from pathlib import Path as _Path  # noqa: E402
+from typing import Literal as _Literal  # noqa: E402
+
+from jw_core.exporters.errors import ExportError as _ExportError  # noqa: E402
+from jw_core.exporters.errors import MissingDependencyError as _MissingDepErr  # noqa: E402
+from jw_core.exporters.ir import StudySheet as _StudySheet  # noqa: E402
+from jw_core.exporters.markdown import export_markdown as _export_markdown  # noqa: E402
+
+
+@mcp.tool
+def export_study_sheet(
+    agent_result: dict[str, Any],
+    format: _Literal["markdown", "pdf", "docx", "apkg"],
+    out_path: str,
+    title: str | None = None,
+    language: str | None = None,
+    citation_style: _Literal["inline-paren", "footnote", "bibliography"] = "footnote",
+    include_citations: bool = True,
+    theme: _Literal["plain", "study-sheet"] = "study-sheet",
+    per_citation_cards: bool = False,
+) -> dict[str, Any]:
+    """Convert an AgentResult dict into a printable study sheet (md/pdf/docx/apkg).
+
+    Returns {"out": str, "format": str, "bytes_written": int} on success,
+    or {"error": "..."} on failure.
+    """
+
+    sheet = _StudySheet.from_agent_result(
+        agent_result,
+        title=title,
+        language=language,
+        include_citations=include_citations,
+    )
+    out = _Path(out_path).expanduser()
+
+    try:
+        if format == "markdown":
+            written = _export_markdown(sheet, out=out, citation_style=citation_style)
+        elif format == "pdf":
+            from jw_core.exporters.pdf import export_pdf
+
+            written = export_pdf(sheet, out=out, theme=theme)
+        elif format == "docx":
+            from jw_core.exporters.docx import export_docx
+
+            written = export_docx(sheet, out=out)
+        elif format == "apkg":
+            from jw_core.exporters.anki import export_apkg
+
+            written = export_apkg(sheet, out=out, per_citation_cards=per_citation_cards)
+        else:
+            return {"error": f"unknown format {format!r}"}
+    except _MissingDepErr as exc:
+        return {"error": str(exc)}
+    except _ExportError as exc:
+        return {"error": f"export failed: {exc}"}
+
+    return {
+        "out": str(written),
+        "format": format,
+        "bytes_written": written.stat().st_size,
+    }
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
 

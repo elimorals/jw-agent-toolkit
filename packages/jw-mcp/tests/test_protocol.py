@@ -127,6 +127,8 @@ _EXPECTED_TOOLS = {
     # Phase 30 — Kingdom songs
     "lookup_song",
     "songs_for_week",
+    # Phase 31 — Exporter (PDF/DOCX/Anki/Markdown)
+    "export_study_sheet",
 }
 
 
