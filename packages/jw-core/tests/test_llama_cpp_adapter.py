@@ -7,7 +7,6 @@ import sys
 import types
 
 import pytest
-
 from jw_core.grammar.schemas import AgentResultModel
 
 
@@ -53,9 +52,7 @@ def test_llama_cpp_adapter_passes_grammar(monkeypatch: pytest.MonkeyPatch, tmp_p
     fake_model.write_bytes(b"\x00")  # presence check only
     from jw_core.privacy.llama_cpp_adapter import LlamaCppAdapter
 
-    raw = asyncio.run(
-        LlamaCppAdapter(model_path=str(fake_model)).generate("p", json_schema=AgentResultModel)
-    )
+    raw = asyncio.run(LlamaCppAdapter(model_path=str(fake_model)).generate("p", json_schema=AgentResultModel))
     parsed = AgentResultModel.model_validate_json(raw)
     assert parsed.findings[0].citation.url.startswith("https://wol.jw.org/")
     assert any("grammar" in c for c in captured)
@@ -70,9 +67,7 @@ def test_llama_cpp_adapter_requires_model_path(monkeypatch: pytest.MonkeyPatch) 
         asyncio.run(LlamaCppAdapter().generate("p", json_schema=AgentResultModel))
 
 
-def test_llama_cpp_adapter_is_available_when_module_importable(
-    monkeypatch: pytest.MonkeyPatch, tmp_path
-) -> None:
+def test_llama_cpp_adapter_is_available_when_module_importable(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     _install_fake_llama_cpp(monkeypatch)
     fake_model = tmp_path / "m.gguf"
     fake_model.write_bytes(b"\x00")

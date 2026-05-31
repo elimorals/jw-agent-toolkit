@@ -11,7 +11,6 @@ import types
 from pathlib import Path
 
 import pytest
-
 from jw_gen.models import GenerationRequest
 
 
@@ -39,9 +38,7 @@ def test_cost_estimate_is_constant(tmp_path: Path) -> None:
     assert hint.time_s > 0
 
 
-def test_generate_calls_sdk_and_writes_png(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_generate_calls_sdk_and_writes_png(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     captured: dict = {}
 
     class _FakeImage:

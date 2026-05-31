@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_gen.i18n import REQUIRED_KEYS, get_message, list_logo_keywords, realism_suffix
 
 

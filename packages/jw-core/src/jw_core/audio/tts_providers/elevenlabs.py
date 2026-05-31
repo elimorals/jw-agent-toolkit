@@ -28,8 +28,21 @@ class ElevenLabsProvider(TTSProvider):
     name = "elevenlabs"
     target: ClassVar[Literal["api", "nvidia", "mlx", "cpu"]] = "api"
     languages_supported = {
-        "en", "es", "pt", "fr", "de", "it", "ja", "ko", "zh",
-        "ar", "ru", "tr", "pl", "nl", "cs",
+        "en",
+        "es",
+        "pt",
+        "fr",
+        "de",
+        "it",
+        "ja",
+        "ko",
+        "zh",
+        "ar",
+        "ru",
+        "tr",
+        "pl",
+        "nl",
+        "cs",
     }
 
     DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"  # Rachel

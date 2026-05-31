@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import pytest
-from pydantic import ValidationError
-
 from jw_agents.base import AgentResult, Citation, Finding
 from jw_core.grammar.schemas import (
     AgentResultModel,
@@ -12,6 +10,7 @@ from jw_core.grammar.schemas import (
     FindingModel,
     pydantic_to_gbnf,
 )
+from pydantic import ValidationError
 
 
 def test_citation_accepts_wol_url() -> None:
@@ -31,9 +30,7 @@ def test_citation_rejects_http() -> None:
 
 def test_finding_requires_non_empty_summary() -> None:
     with pytest.raises(ValidationError):
-        FindingModel(
-            summary="", citation=CitationModel(url="https://wol.jw.org/es/x", kind="article")
-        )
+        FindingModel(summary="", citation=CitationModel(url="https://wol.jw.org/es/x", kind="article"))
 
 
 def test_agent_result_requires_at_least_one_finding() -> None:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from jw_gen.audit import audit_log_path, log_generation, rotate_log
@@ -57,7 +57,7 @@ def test_log_generation_timestamp_is_utc(isolated_jw_gen_home: Path) -> None:
         watermark_mode="visible+metadata",
         safety_flags={},
         warnings=[],
-        now=lambda: datetime(2026, 5, 31, 14, 0, tzinfo=timezone.utc),
+        now=lambda: datetime(2026, 5, 31, 14, 0, tzinfo=UTC),
     )
     assert event["timestamp"].endswith("Z")
     assert "2026-05-31T14:00" in event["timestamp"]

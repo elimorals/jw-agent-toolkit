@@ -7,7 +7,6 @@ import sys
 import types
 
 import pytest
-
 from jw_core.grammar.schemas import AgentResultModel
 
 

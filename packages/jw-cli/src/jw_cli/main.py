@@ -33,17 +33,14 @@ from jw_cli.commands import (
     verse,
     workbook,
 )
-from jw_cli.commands.constrained import constrained_app
-from jw_cli.commands.image import image_app
-from jw_cli.commands.rag import rag_app
 from jw_cli.commands import (
     eval as eval_module,
 )
 from jw_cli.commands import (
-    gen as gen_module,
+    export as export_module,
 )
 from jw_cli.commands import (
-    export as export_module,
+    gen as gen_module,
 )
 from jw_cli.commands import (
     grep as grep_module,
@@ -54,6 +51,9 @@ from jw_cli.commands import (
 from jw_cli.commands import (
     report as report_module,
 )
+from jw_cli.commands.constrained import constrained_app
+from jw_cli.commands.image import image_app
+from jw_cli.commands.rag import rag_app
 
 app = typer.Typer(
     name="jw",

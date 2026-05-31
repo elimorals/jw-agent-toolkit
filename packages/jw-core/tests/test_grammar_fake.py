@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 
 import pytest
-
 from jw_core.grammar.fake import FakeConstrainedCaller
 from jw_core.grammar.schemas import AgentResultModel
 

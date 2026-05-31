@@ -27,8 +27,22 @@ class DeepgramProvider(ASRProvider):
     name = "deepgram"
     target: ClassVar[Literal["api", "nvidia", "mlx", "cpu"]] = "api"
     languages_supported = {
-        "en", "es", "pt", "fr", "de", "it", "ja", "ko", "zh", "ru", "ar", "tr",
-        "nl", "pl", "cs", "hi",
+        "en",
+        "es",
+        "pt",
+        "fr",
+        "de",
+        "it",
+        "ja",
+        "ko",
+        "zh",
+        "ru",
+        "ar",
+        "tr",
+        "nl",
+        "pl",
+        "cs",
+        "hi",
     }
     BASE_URL = "https://api.deepgram.com/v1/listen"
 
@@ -56,9 +70,7 @@ class DeepgramProvider(ASRProvider):
             return self._transcribe_via_sdk(audio_path, key, language)
         return self._transcribe_via_http(audio_path, key, language)
 
-    def _transcribe_via_http(
-        self, audio_path: Path, key: str, language: str | None
-    ) -> TranscriptionResult:
+    def _transcribe_via_http(self, audio_path: Path, key: str, language: str | None) -> TranscriptionResult:
         params = {"model": "nova-2", "smart_format": "true"}
         if language:
             params["language"] = language
@@ -72,9 +84,7 @@ class DeepgramProvider(ASRProvider):
         }
         try:
             with httpx.Client(timeout=120.0) as client:
-                resp = client.post(
-                    url, headers=headers, content=audio_path.read_bytes()
-                )
+                resp = client.post(url, headers=headers, content=audio_path.read_bytes())
                 resp.raise_for_status()
                 data = resp.json()
         except Exception as exc:  # noqa: BLE001
@@ -82,9 +92,7 @@ class DeepgramProvider(ASRProvider):
 
         return _parse_deepgram(data)
 
-    def _transcribe_via_sdk(
-        self, audio_path: Path, key: str, language: str | None
-    ) -> TranscriptionResult:
+    def _transcribe_via_sdk(self, audio_path: Path, key: str, language: str | None) -> TranscriptionResult:
         try:
             from deepgram import DeepgramClient, PrerecordedOptions  # type: ignore[import-not-found]
         except ImportError as e:  # pragma: no cover
@@ -123,8 +131,6 @@ def _parse_deepgram(data: dict) -> TranscriptionResult:
                     text=text,
                 )
             )
-        return TranscriptionResult(
-            text=text, language=language, duration=duration, segments=segs
-        )
+        return TranscriptionResult(text=text, language=language, duration=duration, segments=segs)
     except (KeyError, IndexError, TypeError) as exc:
         raise TranscriptionError(f"Unexpected Deepgram payload: {exc!r}") from exc

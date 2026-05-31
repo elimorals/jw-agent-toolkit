@@ -3,9 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
-
 from jw_gen.cli import gen_app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

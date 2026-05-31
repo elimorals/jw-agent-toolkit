@@ -4,7 +4,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from jw_core.audio.tts_providers.fakes import FakeKokoroTTS
 from jw_core.audio.tts_providers.kokoro import KokoroTTSProvider
 
@@ -23,15 +22,12 @@ def test_kokoro_real_is_unavailable_without_deps() -> None:
 
 def test_kokoro_real_synthesize_raises_when_unavailable(tmp_path: Path) -> None:
     provider = KokoroTTSProvider()
-    with patch.object(provider, "is_available", return_value=False):
-        with pytest.raises(Exception):
-            provider.synthesize("hi", voice=None, language="en", output_path=tmp_path / "x.wav")
+    with patch.object(provider, "is_available", return_value=False), pytest.raises(Exception):
+        provider.synthesize("hi", voice=None, language="en", output_path=tmp_path / "x.wav")
 
 
 def test_fake_kokoro_writes_wav(tmp_path: Path) -> None:
-    out = FakeKokoroTTS().synthesize(
-        "Hola mundo", voice=None, language="es", output_path=tmp_path / "h.wav"
-    )
+    out = FakeKokoroTTS().synthesize("Hola mundo", voice=None, language="es", output_path=tmp_path / "h.wav")
     assert out.exists()
     assert out.suffix == ".wav"
     assert out.stat().st_size > 44  # header + at least 1 frame

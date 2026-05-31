@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_gen.factory import NoProviderAvailable, get_provider
 from jw_gen.providers.fakes import (
     FakeAudioProvider,

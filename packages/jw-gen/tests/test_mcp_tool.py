@@ -10,7 +10,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_gen.factory import get_provider
 from jw_gen.models import GenerationRequest
 from jw_gen.policy import finalize_output
@@ -39,14 +38,10 @@ def generate_illustration_mcp(
     if not decision.allow:
         return {"error": decision.reason or "safety.refuse.logo"}
     provider = get_provider(kind)  # type: ignore[arg-type]
-    augmented = request.model_copy(
-        update={"prompt": decision.augmented_prompt or prompt}
-    )
+    augmented = request.model_copy(update={"prompt": decision.augmented_prompt or prompt})
     raw = provider.generate(augmented)
     dest = (out_dir or raw.parent) / f"mcp_{raw.stem}.png"
-    result = finalize_output(
-        raw_path=raw, request=request, dest=dest, provider=provider.name
-    )
+    result = finalize_output(raw_path=raw, request=request, dest=dest, provider=provider.name)
     return {
         "output_path": str(result.output_path),
         "disclaimer_path": str(result.disclaimer_path),
@@ -55,9 +50,7 @@ def generate_illustration_mcp(
     }
 
 
-def test_mcp_tool_smoke(
-    tmp_path: Path, isolated_jw_gen_home: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_mcp_tool_smoke(tmp_path: Path, isolated_jw_gen_home: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("JW_GEN_IMAGE_PROVIDER", "fake")
     res = generate_illustration_mcp(
         prompt="ovejas pastoreadas",
@@ -70,9 +63,7 @@ def test_mcp_tool_smoke(
     assert Path(res["disclaimer_path"]).exists()
 
 
-def test_mcp_tool_refuses_logo(
-    tmp_path: Path, isolated_jw_gen_home: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_mcp_tool_refuses_logo(tmp_path: Path, isolated_jw_gen_home: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("JW_GEN_IMAGE_PROVIDER", "fake")
     res = generate_illustration_mcp(
         prompt="watchtower logo blue",

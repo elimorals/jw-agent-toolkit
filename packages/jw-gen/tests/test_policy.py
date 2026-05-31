@@ -4,8 +4,6 @@ import hashlib
 from pathlib import Path
 
 import pytest
-from PIL import Image
-
 from jw_gen.models import GenerationRequest, WatermarkConfig
 from jw_gen.policy import (
     PolicyError,
@@ -15,6 +13,7 @@ from jw_gen.policy import (
     finalize_output,
     write_disclaimer_sibling,
 )
+from PIL import Image
 
 
 def _make_png(path: Path, w: int = 200, h: int = 200) -> Path:

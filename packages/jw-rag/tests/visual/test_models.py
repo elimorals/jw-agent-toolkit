@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
-
 from jw_rag.visual.models import IngestResult, MultiVectorHit, VisualChunk
 
 
@@ -56,9 +55,7 @@ def test_ingest_result_addition() -> None:
 
 def test_visual_chunk_text_alias_for_ocr() -> None:
     """`.text` proxies to `ocr_text` so VisualChunk slots into SearchHit shape."""
-    c = VisualChunk(
-        id="x#1", source_id="x", page_number=1, image_path=Path("/tmp/x.png"), ocr_text="hello"
-    )
+    c = VisualChunk(id="x#1", source_id="x", page_number=1, image_path=Path("/tmp/x.png"), ocr_text="hello")
     assert c.text == "hello"
 
 

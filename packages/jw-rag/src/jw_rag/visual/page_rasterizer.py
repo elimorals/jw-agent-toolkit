@@ -38,9 +38,7 @@ except ImportError:
     _HAS_PLAYWRIGHT = False
 
 
-_INSTALL_HINT = (
-    "Install with: uv sync --extra visual (NVIDIA) or --extra visual-mlx (Apple Silicon)."
-)
+_INSTALL_HINT = "Install with: uv sync --extra visual (NVIDIA) or --extra visual-mlx (Apple Silicon)."
 
 
 class PageRasterizer:
@@ -80,13 +78,9 @@ class PageRasterizer:
                 context.close()
                 browser.close()
 
-    def rasterize_jwpub(
-        self, path: Path, *, dpi: int = 200
-    ) -> Iterator[tuple[int, Image.Image]]:  # noqa: ARG002
+    def rasterize_jwpub(self, path: Path, *, dpi: int = 200) -> Iterator[tuple[int, Image.Image]]:  # noqa: ARG002
         if not _HAS_PLAYWRIGHT:
-            raise ConfigError(
-                f"playwright not installed (needed for JWPUB rendering). {_INSTALL_HINT}"
-            )
+            raise ConfigError(f"playwright not installed (needed for JWPUB rendering). {_INSTALL_HINT}")
         from jw_core.parsers.jwpub import parse_jwpub
 
         meta = parse_jwpub(path)

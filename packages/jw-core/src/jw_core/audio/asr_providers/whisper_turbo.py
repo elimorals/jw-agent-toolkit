@@ -42,8 +42,23 @@ class WhisperTurboProvider(ASRProvider):
     name = "whisper_turbo"
     target: ClassVar[Literal["api", "nvidia", "mlx", "cpu"]] = "cpu"
     languages_supported = {
-        "en", "es", "pt", "fr", "de", "it", "ja", "ko", "zh", "ru", "ar", "tr",
-        "nl", "pl", "cs", "hu", "hi",
+        "en",
+        "es",
+        "pt",
+        "fr",
+        "de",
+        "it",
+        "ja",
+        "ko",
+        "zh",
+        "ru",
+        "ar",
+        "tr",
+        "nl",
+        "pl",
+        "cs",
+        "hu",
+        "hi",
     }
 
     def is_available(self) -> bool:
@@ -61,9 +76,7 @@ class WhisperTurboProvider(ASRProvider):
         model_size: str = "auto",
     ) -> TranscriptionResult:
         if not self.is_available():
-            raise TranscriptionError(
-                "faster-whisper not installed. Install jw-core[asr-turbo]."
-            )
+            raise TranscriptionError("faster-whisper not installed. Install jw-core[asr-turbo].")
         resolved = recommend_model_size() if model_size == "auto" else model_size
         return _run_faster_whisper(
             audio_path,

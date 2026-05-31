@@ -3,14 +3,13 @@ from __future__ import annotations
 import wave
 from pathlib import Path
 
-from PIL import Image
-
 from jw_gen.models import GenerationRequest
 from jw_gen.providers.fakes import (
     FakeAudioProvider,
     FakeImageProvider,
     FakeVideoProvider,
 )
+from PIL import Image
 
 
 def test_fake_image_provider_returns_valid_png(tmp_path: Path) -> None:

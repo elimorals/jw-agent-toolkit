@@ -2931,9 +2931,7 @@ def ingest_image_to_rag(image_path: str, language: str = "en") -> dict:
     from jw_rag import FakeEmbedder, VectorStore
     from jw_rag.ingest_image import ingest_image as _ingest
 
-    store = VectorStore(
-        _Path36("~/.jw-toolkit/rag").expanduser(), FakeEmbedder(dim=64)
-    )
+    store = VectorStore(_Path36("~/.jw-toolkit/rag").expanduser(), FakeEmbedder(dim=64))
     n = _ingest(
         store,
         image_path,
@@ -3104,14 +3102,10 @@ def generate_illustration(
     if not decision.allow:
         return {"error": decision.reason or "safety.refuse.logo"}
     provider = _jwgen_get_provider(kind)  # type: ignore[arg-type]
-    augmented = request.model_copy(
-        update={"prompt": decision.augmented_prompt or prompt}
-    )
+    augmented = request.model_copy(update={"prompt": decision.augmented_prompt or prompt})
     raw = provider.generate(augmented)
     dest = _Path38(raw).parent / f"mcp_{_Path38(raw).stem}.png"
-    result = _jwgen_finalize(
-        raw_path=raw, request=request, dest=dest, provider=provider.name
-    )
+    result = _jwgen_finalize(raw_path=raw, request=request, dest=dest, provider=provider.name)
     return {
         "output_path": str(result.output_path),
         "disclaimer_path": str(result.disclaimer_path),
@@ -3124,10 +3118,8 @@ def generate_illustration(
 # Phase 35 — Constrained decoding (grammar-anchored synthesis)
 # ────────────────────────────────────────────────────────────────────────
 
-import asyncio as _asyncio  # noqa: E402
 import inspect as _inspect  # noqa: E402
 import json as _json  # noqa: E402
-from typing import Any as _Any  # noqa: E402
 
 # Maps LLM-facing alias keys to the real keyword arguments of the
 # registered agents. Keeps the MCP input contract stable even if
@@ -3209,9 +3201,7 @@ def run_constrained(
     from jw_core.grammar.factory import get_default_constrained_caller
 
     caller = (
-        None
-        if provider == "auto"
-        else get_default_constrained_caller(provider=provider)  # type: ignore[arg-type]
+        None if provider == "auto" else get_default_constrained_caller(provider=provider)  # type: ignore[arg-type]
     )
     agent_fn = _resolve_constrained_agent(agent_name)
 

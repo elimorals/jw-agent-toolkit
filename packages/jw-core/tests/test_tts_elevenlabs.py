@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
-
 from jw_core.audio.tts import TTSError
 from jw_core.audio.tts_providers.elevenlabs import ElevenLabsProvider
 from jw_core.audio.tts_providers.fakes import FakeElevenLabsTTS
@@ -24,9 +22,7 @@ def test_elevenlabs_available_with_key(monkeypatch) -> None:
 def test_elevenlabs_synthesize_raises_without_key(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.delenv("ELEVENLABS_API_KEY", raising=False)
     with pytest.raises(TTSError):
-        ElevenLabsProvider().synthesize(
-            "hi", voice=None, language="en", output_path=tmp_path / "x.mp3"
-        )
+        ElevenLabsProvider().synthesize("hi", voice=None, language="en", output_path=tmp_path / "x.mp3")
 
 
 def test_elevenlabs_uses_httpx_with_voice_id(monkeypatch, tmp_path: Path) -> None:
@@ -57,13 +53,9 @@ def test_elevenlabs_uses_httpx_with_voice_id(monkeypatch, tmp_path: Path) -> Non
             return FakeResp()
 
     monkeypatch.setattr("httpx.Client", FakeClient)
-    monkeypatch.setattr(
-        ElevenLabsProvider, "_use_sdk", lambda self: False, raising=True
-    )
+    monkeypatch.setattr(ElevenLabsProvider, "_use_sdk", lambda self: False, raising=True)
 
-    out = ElevenLabsProvider().synthesize(
-        "hello", voice=None, language="en", output_path=tmp_path / "h.mp3"
-    )
+    out = ElevenLabsProvider().synthesize("hello", voice=None, language="en", output_path=tmp_path / "h.mp3")
     assert out.exists()
     assert out.read_bytes() == b"ID3FAKEMP3"
     assert "my-voice" in called["url"]

@@ -190,7 +190,6 @@ from jw_core.audio.tts_providers.f5 import F5TTSProvider  # noqa: E402
 from jw_core.audio.tts_providers.kokoro import KokoroTTSProvider  # noqa: E402
 from jw_core.audio.tts_providers.xtts import XTTSv2Provider  # noqa: E402
 
-
 _PROVIDERS: list[type[TTSProvider]] = [
     KokoroTTSProvider,
     EdgeTTSProvider,
@@ -245,14 +244,10 @@ def get_tts_provider(name: str | None = None) -> TTSProvider:
     if requested:
         cls = _by_name(requested)
         if cls is None:
-            raise TTSError(
-                f"Unknown TTS provider {requested!r}. Known: {[c.name for c in _PROVIDERS]}"
-            )
+            raise TTSError(f"Unknown TTS provider {requested!r}. Known: {[c.name for c in _PROVIDERS]}")
         instance = cls()
         if not instance.is_available():
-            raise TTSError(
-                f"Provider {requested!r} is registered but not available on this machine."
-            )
+            raise TTSError(f"Provider {requested!r} is registered but not available on this machine.")
         return instance
 
     for entry in DEFAULT_TTS_CHAIN:
@@ -264,8 +259,7 @@ def get_tts_provider(name: str | None = None) -> TTSProvider:
             return instance
 
     raise TTSError(
-        "No TTS provider available. Install one of: "
-        "jw-core[tts-kokoro] | edge-tts | piper-tts | system `say`/`espeak`."
+        "No TTS provider available. Install one of: jw-core[tts-kokoro] | edge-tts | piper-tts | system `say`/`espeak`."
     )
 
 

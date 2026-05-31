@@ -12,10 +12,9 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from PIL import Image
-
 from jw_rag.visual.errors import ConfigError
 from jw_rag.visual.page_rasterizer import PageRasterizer, rasterize_any
+from PIL import Image
 
 FIXTURES = Path(__file__).parent / "fixtures"
 

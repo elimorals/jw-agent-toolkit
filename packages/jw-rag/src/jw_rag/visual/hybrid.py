@@ -37,9 +37,7 @@ def hybrid_search_with_visual(
     rrf_k=rrf_k)`.
     """
     if visual_store is None or visual_store.is_empty:
-        return text_store.hybrid_search(
-            query, top_k=top_k, candidate_pool=candidate_pool, rrf_k=rrf_k
-        )
+        return text_store.hybrid_search(query, top_k=top_k, candidate_pool=candidate_pool, rrf_k=rrf_k)
 
     vec_hits = text_store.vector_search(query, top_k=candidate_pool)
     bm25_hits = text_store.bm25_search(query, top_k=candidate_pool)

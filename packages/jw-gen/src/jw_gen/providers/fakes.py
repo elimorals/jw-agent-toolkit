@@ -33,9 +33,7 @@ class FakeImageProvider:
     target = "cpu"
 
     def __init__(self, work_dir: Path | None = None) -> None:
-        self.work_dir = work_dir or Path(
-            os.environ.get("JW_GEN_CACHE", "/tmp/jw-gen-cache")
-        )
+        self.work_dir = work_dir or Path(os.environ.get("JW_GEN_CACHE", "/tmp/jw-gen-cache"))
         self.work_dir.mkdir(parents=True, exist_ok=True)
 
     def is_available(self) -> bool:
@@ -55,9 +53,7 @@ class FakeImageProvider:
             font = ImageFont.truetype("DejaVuSans.ttf", 16)
         except Exception:  # noqa: BLE001
             font = ImageFont.load_default()
-        wrapped = "\n".join(
-            request.prompt[i : i + 32] for i in range(0, len(request.prompt), 32)
-        )
+        wrapped = "\n".join(request.prompt[i : i + 32] for i in range(0, len(request.prompt), 32))
         draw.text((10, 10), wrapped, fill=(255, 255, 255), font=font)
         digest = hashlib.sha256(request.prompt.encode("utf-8")).hexdigest()[:12]
         out = self.work_dir / f"fake_image_{digest}.png"
@@ -71,9 +67,7 @@ class FakeAudioProvider:
     target = "cpu"
 
     def __init__(self, work_dir: Path | None = None) -> None:
-        self.work_dir = work_dir or Path(
-            os.environ.get("JW_GEN_CACHE", "/tmp/jw-gen-cache")
-        )
+        self.work_dir = work_dir or Path(os.environ.get("JW_GEN_CACHE", "/tmp/jw-gen-cache"))
         self.work_dir.mkdir(parents=True, exist_ok=True)
 
     def is_available(self) -> bool:
@@ -95,11 +89,7 @@ class FakeAudioProvider:
             w.setsampwidth(2)
             w.setframerate(sample_rate)
             for i in range(n):
-                v = int(
-                    32767
-                    * 0.4
-                    * math.sin(2 * math.pi * freq * (i / sample_rate))
-                )
+                v = int(32767 * 0.4 * math.sin(2 * math.pi * freq * (i / sample_rate)))
                 w.writeframes(struct.pack("<h", v))
         return out
 
@@ -110,9 +100,7 @@ class FakeVideoProvider:
     target = "cpu"
 
     def __init__(self, work_dir: Path | None = None) -> None:
-        self.work_dir = work_dir or Path(
-            os.environ.get("JW_GEN_CACHE", "/tmp/jw-gen-cache")
-        )
+        self.work_dir = work_dir or Path(os.environ.get("JW_GEN_CACHE", "/tmp/jw-gen-cache"))
         self.work_dir.mkdir(parents=True, exist_ok=True)
 
     def is_available(self) -> bool:
@@ -129,7 +117,5 @@ class FakeVideoProvider:
         frames = [frame.copy() for _ in range(3)]
         digest = hashlib.sha256(request.prompt.encode("utf-8")).hexdigest()[:12]
         out = self.work_dir / f"fake_video_{digest}.gif"
-        frames[0].save(
-            out, save_all=True, append_images=frames[1:], duration=600, loop=0
-        )
+        frames[0].save(out, save_all=True, append_images=frames[1:], duration=600, loop=0)
         return out

@@ -7,7 +7,6 @@ import sys
 import types
 
 import pytest
-
 from jw_core.grammar.schemas import AgentResultModel
 
 
@@ -51,9 +50,7 @@ def test_openai_adapter_uses_structured_outputs(monkeypatch: pytest.MonkeyPatch)
     captured = _install_fake_openai(monkeypatch)
     from jw_core.privacy.openai_adapter import OpenAIAdapter
 
-    raw = asyncio.run(
-        OpenAIAdapter(model="gpt-4o-mini").generate("q", json_schema=AgentResultModel)
-    )
+    raw = asyncio.run(OpenAIAdapter(model="gpt-4o-mini").generate("q", json_schema=AgentResultModel))
 
     rf = captured[-1]["response_format"]
     assert rf["type"] == "json_schema"

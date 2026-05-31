@@ -33,8 +33,7 @@ class OpenAIAdapter:
     ) -> str:
         if grammar is not None:
             raise NotImplementedError(
-                "OpenAI adapter only accepts json_schema=. Use the Ollama or llama-cpp adapter "
-                "for raw GBNF grammars."
+                "OpenAI adapter only accepts json_schema=. Use the Ollama or llama-cpp adapter for raw GBNF grammars."
             )
         if json_schema is None:
             raise OpenAIAdapterError("OpenAIAdapter.generate requires json_schema=")

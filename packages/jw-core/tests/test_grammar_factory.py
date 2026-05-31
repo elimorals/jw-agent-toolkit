@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 
 import pytest
-
 from jw_core.grammar.factory import (
     ConstrainedCaller,
     get_default_constrained_caller,

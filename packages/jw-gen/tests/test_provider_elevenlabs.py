@@ -7,7 +7,6 @@ import types
 from pathlib import Path
 
 import pytest
-
 from jw_gen.models import GenerationRequest
 
 
@@ -35,9 +34,7 @@ def test_cost_estimate_scales_with_prompt_length(tmp_path: Path) -> None:
     assert long_.usd > short.usd
 
 
-def test_generate_writes_mp3_and_passes_correct_args(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_generate_writes_mp3_and_passes_correct_args(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     captured: dict = {}
 
     class _FakeTTS:
@@ -59,9 +56,7 @@ def test_generate_writes_mp3_and_passes_correct_args(
     from jw_gen.providers.audio.elevenlabs import ElevenLabsProvider
 
     p = ElevenLabsProvider(work_dir=tmp_path)
-    out = p.generate(
-        GenerationRequest(prompt="Hola mundo", kind="audio", extra={"voice_id": "v1"})
-    )
+    out = p.generate(GenerationRequest(prompt="Hola mundo", kind="audio", extra={"voice_id": "v1"}))
     assert out.suffix == ".mp3"
     assert out.read_bytes().startswith(b"ID3")
     assert captured["voice_id"] == "v1"
@@ -69,9 +64,7 @@ def test_generate_writes_mp3_and_passes_correct_args(
     assert captured["api_key"] == "fake-key"
 
 
-def test_generate_uses_default_voice_when_none_specified(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_generate_uses_default_voice_when_none_specified(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     captured: dict = {}
 
     class _FakeTTS:
@@ -89,7 +82,5 @@ def test_generate_uses_default_voice_when_none_specified(
 
     from jw_gen.providers.audio.elevenlabs import ElevenLabsProvider
 
-    ElevenLabsProvider(work_dir=tmp_path).generate(
-        GenerationRequest(prompt="x", kind="audio")
-    )
+    ElevenLabsProvider(work_dir=tmp_path).generate(GenerationRequest(prompt="x", kind="audio"))
     assert captured["voice_id"] == "EXAVITQu4vr4xnSDxMaL"

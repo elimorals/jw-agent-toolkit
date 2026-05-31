@@ -106,16 +106,11 @@ class ColPaliEmbedder(_BaseRealEmbedder):
             from colpali_engine.models import ColPali, ColPaliProcessor  # type: ignore[import-not-found]
         except ImportError as exc:
             raise ConfigError(
-                f"colpali-engine / torch not installed: {exc}. "
-                "Install with: uv sync --extra visual"
+                f"colpali-engine / torch not installed: {exc}. Install with: uv sync --extra visual"
             ) from exc
         device = "cuda" if self.target == "nvidia" else "cpu"
         self._processor = ColPaliProcessor.from_pretrained("vidore/colpali-v1.2")
-        self._model = (
-            ColPali.from_pretrained("vidore/colpali-v1.2", torch_dtype=torch.float16)
-            .to(device)
-            .eval()
-        )
+        self._model = ColPali.from_pretrained("vidore/colpali-v1.2", torch_dtype=torch.float16).to(device).eval()
 
     def _embed_image_impl(self, image: Image.Image) -> np.ndarray:
         import torch  # type: ignore[import-not-found]
@@ -151,16 +146,11 @@ class ColQwen2Embedder(_BaseRealEmbedder):
             from colpali_engine.models import ColQwen2, ColQwen2Processor  # type: ignore[import-not-found]
         except ImportError as exc:
             raise ConfigError(
-                f"colpali-engine / torch not installed: {exc}. "
-                "Install with: uv sync --extra visual"
+                f"colpali-engine / torch not installed: {exc}. Install with: uv sync --extra visual"
             ) from exc
         device = "cuda" if self.target == "nvidia" else "cpu"
         self._processor = ColQwen2Processor.from_pretrained("vidore/colqwen2-v0.1")
-        self._model = (
-            ColQwen2.from_pretrained("vidore/colqwen2-v0.1", torch_dtype=torch.float16)
-            .to(device)
-            .eval()
-        )
+        self._model = ColQwen2.from_pretrained("vidore/colqwen2-v0.1", torch_dtype=torch.float16).to(device).eval()
 
     def _embed_image_impl(self, image: Image.Image) -> np.ndarray:
         import torch  # type: ignore[import-not-found]

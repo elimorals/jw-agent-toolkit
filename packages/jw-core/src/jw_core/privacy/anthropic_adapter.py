@@ -64,10 +64,7 @@ class AnthropicAdapter:
 
         msg = await asyncio.to_thread(_call)
         for block in getattr(msg, "content", []):
-            if (
-                getattr(block, "type", "") == "tool_use"
-                and getattr(block, "input", None) is not None
-            ):
+            if getattr(block, "type", "") == "tool_use" and getattr(block, "input", None) is not None:
                 return json.dumps(block.input, ensure_ascii=False)
         raise AnthropicAdapterError("anthropic response did not include tool_use block")
 

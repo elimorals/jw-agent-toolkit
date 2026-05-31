@@ -80,6 +80,13 @@ ignore = [
 # Typer commands declare options via `typer.Option(...)` / `typer.Argument(...)`
 # in defaults — that IS the framework's interface, B008 is a false positive.
 "packages/jw-cli/src/jw_cli/commands/*.py" = ["B008"]
+"packages/jw-gen/src/jw_gen/cli.py" = ["B008"]
+# jw-gen exception classes deliberately use semantic names (SafetyRefused
+# reads as "safety refused the request"; NoProviderAvailable reads as a
+# state, not an error). Both inherit from RuntimeError/Exception so the
+# Error suffix would be redundant.
+"packages/jw-gen/src/jw_gen/safety.py" = ["N818", "SIM102"]
+"packages/jw-gen/src/jw_gen/factory.py" = ["N818"]
 # Tests intentionally use blind `Exception` assertions for malformed inputs.
 # Tests also legitimately use lazy imports after path/sys-attribute setup,
 # triggering E402 (module-level import not at top); those are deliberate.

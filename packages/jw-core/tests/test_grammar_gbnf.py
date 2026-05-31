@@ -5,7 +5,6 @@ from __future__ import annotations
 import re
 
 import pytest
-
 from jw_core.grammar.gbnf import (
     agent_result_grammar,
     bible_ref_grammar,
@@ -15,7 +14,7 @@ from jw_core.grammar.gbnf import (
 
 
 def test_escape_gbnf_string_basic() -> None:
-    assert escape_gbnf_string('hello "world"') == r'hello \"world\"'
+    assert escape_gbnf_string('hello "world"') == r"hello \"world\""
     assert escape_gbnf_string("back\\slash") == r"back\\slash"
 
 

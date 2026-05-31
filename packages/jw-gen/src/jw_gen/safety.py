@@ -83,9 +83,7 @@ def refuse_jw_logo_emulation(prompt: str, lang: Lang = "es") -> None:
     for catalog_lang in ("en", "es", "pt"):
         for kw in list_logo_keywords(catalog_lang):  # type: ignore[arg-type]
             if _normalize(kw) in norm:
-                raise SafetyRefused(
-                    "safety.refuse.logo", audit_flag=("logo_check", "fail")
-                )
+                raise SafetyRefused("safety.refuse.logo", audit_flag=("logo_check", "fail"))
 
     # Proximity heuristic (multilingual): brand name + neighbor noun within window.
     # Brand vocabulary covers Watchtower/Awake! magazine titles in EN/ES/PT plus
@@ -111,9 +109,7 @@ def refuse_jw_logo_emulation(prompt: str, lang: Lang = "es") -> None:
         if any(b in window_str for b in brand_words):
             if any(n in window_str for n in _LOGO_NEIGHBORS):
                 # Brand word + logo-neighbor noun in same window → refuse.
-                raise SafetyRefused(
-                    "safety.refuse.logo", audit_flag=("logo_check", "fail")
-                )
+                raise SafetyRefused("safety.refuse.logo", audit_flag=("logo_check", "fail"))
 
 
 # ---------------------------------------------------------------------------
@@ -156,41 +152,25 @@ def refuse_voice_cloning_without_double_optin(
         return "fake-owner"
 
     if not voice_clone_flag:
-        raise SafetyRefused(
-            "safety.refuse.voice_clone_no_consent", audit_flag=flag_fail
-        )
+        raise SafetyRefused("safety.refuse.voice_clone_no_consent", audit_flag=flag_fail)
 
     consent_path = audio_src.with_suffix(audio_src.suffix + ".consent.txt")
     if not consent_path.exists():
-        raise SafetyRefused(
-            "safety.refuse.voice_clone_no_consent", audit_flag=flag_fail
-        )
+        raise SafetyRefused("safety.refuse.voice_clone_no_consent", audit_flag=flag_fail)
 
     fields = _parse_consent_file(consent_path)
     required = {"voice_owner", "date", "purpose", "signature_sha256"}
     if not required.issubset(fields):
-        raise SafetyRefused(
-            "safety.refuse.voice_clone_no_consent", audit_flag=flag_fail
-        )
+        raise SafetyRefused("safety.refuse.voice_clone_no_consent", audit_flag=flag_fail)
 
-    header = (
-        f"voice_owner: {fields['voice_owner']}\n"
-        f"date: {fields['date']}\n"
-        f"purpose: {fields['purpose']}\n"
-    )
+    header = f"voice_owner: {fields['voice_owner']}\ndate: {fields['date']}\npurpose: {fields['purpose']}\n"
     expected_sig = hashlib.sha256(header.encode("utf-8")).hexdigest()
     if expected_sig != fields["signature_sha256"]:
-        raise SafetyRefused(
-            "safety.refuse.voice_clone_no_consent", audit_flag=flag_fail
-        )
+        raise SafetyRefused("safety.refuse.voice_clone_no_consent", audit_flag=flag_fail)
 
-    question = get_message(
-        "safety.confirm.voice_clone", lang=lang, owner=fields["voice_owner"]
-    )
+    question = get_message("safety.confirm.voice_clone", lang=lang, owner=fields["voice_owner"])
     if not interactive_confirm(question):
-        raise SafetyRefused(
-            "safety.refuse.voice_clone_no_consent", audit_flag=flag_fail
-        )
+        raise SafetyRefused("safety.refuse.voice_clone_no_consent", audit_flag=flag_fail)
 
     return fields["voice_owner"]
 
@@ -295,9 +275,7 @@ def evaluate(req: GenerationRequest) -> SafetyDecision:
     augmented = refuse_realistic_faces_without_optin(
         prompt=req.prompt, lang=req.lang, realistic_optin=req.realistic_people_optin
     )
-    flags["realistic_faces_optin"] = (
-        "optin" if req.realistic_people_optin else "stylized"
-    )
+    flags["realistic_faces_optin"] = "optin" if req.realistic_people_optin else "stylized"
 
     return SafetyDecision(
         allow=True,

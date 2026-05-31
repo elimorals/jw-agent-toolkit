@@ -41,8 +41,23 @@ class FakeXTTSv2(TTSProvider):
     name = "xtts"
     target: ClassVar[Literal["api", "nvidia", "mlx", "cpu"]] = "nvidia"
     languages_supported = {
-        "en", "es", "pt", "fr", "de", "it", "ja", "ko", "zh",
-        "ar", "ru", "tr", "pl", "nl", "cs", "hu", "hi",
+        "en",
+        "es",
+        "pt",
+        "fr",
+        "de",
+        "it",
+        "ja",
+        "ko",
+        "zh",
+        "ar",
+        "ru",
+        "tr",
+        "pl",
+        "nl",
+        "cs",
+        "hu",
+        "hi",
     }
 
     def is_available(self) -> bool:

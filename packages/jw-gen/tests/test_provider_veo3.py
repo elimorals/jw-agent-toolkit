@@ -7,7 +7,6 @@ import types
 from pathlib import Path
 
 import pytest
-
 from jw_gen.models import GenerationRequest
 
 
@@ -35,9 +34,7 @@ def test_cost_estimate_scales_with_duration(tmp_path: Path) -> None:
     assert long_.usd > short.usd
 
 
-def test_generate_polls_until_done_and_downloads(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_generate_polls_until_done_and_downloads(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     captured: dict = {}
 
     class _FakeVideo:
@@ -92,18 +89,14 @@ def test_generate_polls_until_done_and_downloads(
 
     from jw_gen.providers.video.veo3 import Veo3Provider
 
-    out = Veo3Provider(work_dir=tmp_path).generate(
-        GenerationRequest(prompt="océano al amanecer", kind="video")
-    )
+    out = Veo3Provider(work_dir=tmp_path).generate(GenerationRequest(prompt="océano al amanecer", kind="video"))
     assert out.exists()
     assert out.read_bytes().startswith(b"\x00\x00\x00\x18ftypmp42")
     assert captured["model"] == "veo-3.0-generate-preview"
     assert fake_op.calls >= 1
 
 
-def test_generate_raises_on_timeout(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_generate_raises_on_timeout(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     class _FakeOp:
         done = False
         response = None
@@ -138,6 +131,4 @@ def test_generate_raises_on_timeout(
     from jw_gen.providers.video.veo3 import Veo3Provider
 
     with pytest.raises(RuntimeError, match="timed out"):
-        Veo3Provider(work_dir=tmp_path).generate(
-            GenerationRequest(prompt="x", kind="video")
-        )
+        Veo3Provider(work_dir=tmp_path).generate(GenerationRequest(prompt="x", kind="video"))

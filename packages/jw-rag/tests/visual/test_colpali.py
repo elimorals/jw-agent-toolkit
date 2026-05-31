@@ -11,7 +11,6 @@ We never actually load the model in CI — only verify:
 from __future__ import annotations
 
 import pytest
-
 from jw_rag.visual.colpali import (
     ColPaliEmbedder,
     ColQwen2Embedder,

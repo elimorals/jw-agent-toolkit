@@ -26,7 +26,7 @@ import os
 import shutil
 import uuid
 from collections.abc import Callable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -54,8 +54,8 @@ def log_generation(
     warnings: list[str],
     now: Callable[[], datetime] | None = None,
 ) -> dict[str, object]:
-    ts_provider = now or (lambda: datetime.now(timezone.utc))
-    ts = ts_provider().astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S") + "Z"
+    ts_provider = now or (lambda: datetime.now(UTC))
+    ts = ts_provider().astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S") + "Z"
     event: dict[str, object] = {
         "audit_id": str(uuid.uuid4()),
         "timestamp": ts,
@@ -82,7 +82,7 @@ def rotate_log() -> Path | None:
     path = audit_log_path()
     if not path.exists() or path.stat().st_size == 0:
         return None
-    stamp = datetime.now(timezone.utc).strftime("%Y-%m")
+    stamp = datetime.now(UTC).strftime("%Y-%m")
     dest = path.with_suffix(f".log.{stamp}.gz")
     with path.open("rb") as src, gzip.open(dest, "wb") as gz:
         shutil.copyfileobj(src, gz)

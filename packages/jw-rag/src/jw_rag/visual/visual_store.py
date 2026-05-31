@@ -172,8 +172,7 @@ class VisualVectorStore:
             # Soft warn via exception: only raise if name differs AND user wants to read.
             # We raise to be safe — silent acceptance breaks the cache invariant.
             raise VisualStoreMismatchError(
-                f"model mismatch: store={meta['model_name']} embedder={self.embedder.name}. "
-                "Re-ingest."
+                f"model mismatch: store={meta['model_name']} embedder={self.embedder.name}. Re-ingest."
             )
         self._chunks = []
         with (self.path / "chunks.jsonl").open("r", encoding="utf-8") as f:

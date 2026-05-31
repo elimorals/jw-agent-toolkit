@@ -3,7 +3,6 @@ from __future__ import annotations
 from unittest.mock import patch
 
 import pytest
-
 from jw_core.audio.tts import (
     DEFAULT_TTS_CHAIN,
     TTSError,
@@ -45,12 +44,14 @@ def test_jw_tts_provider_env_forces_choice(monkeypatch) -> None:
 
 def test_jw_tts_provider_unavailable_raises(monkeypatch) -> None:
     monkeypatch.setenv("JW_TTS_PROVIDER", "kokoro_local")
-    with patch(
-        "jw_core.audio.tts_providers.kokoro.KokoroTTSProvider.is_available",
-        return_value=False,
+    with (
+        patch(
+            "jw_core.audio.tts_providers.kokoro.KokoroTTSProvider.is_available",
+            return_value=False,
+        ),
+        pytest.raises(TTSError, match="kokoro_local"),
     ):
-        with pytest.raises(TTSError, match="kokoro_local"):
-            get_tts_provider()
+        get_tts_provider()
 
 
 def test_existing_providers_still_present_unchanged() -> None:

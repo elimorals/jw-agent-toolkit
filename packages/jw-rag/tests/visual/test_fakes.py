@@ -10,9 +10,8 @@ import hashlib
 import io
 
 import numpy as np
-from PIL import Image
-
 from jw_rag.visual.fakes import FakeColPaliEmbedder, FakeRasterizer
+from PIL import Image
 
 
 def _img_bytes(image: Image.Image) -> bytes:
@@ -64,7 +63,7 @@ def test_fake_rasterizer_yields_blank_pages() -> None:
     r = FakeRasterizer(n_pages=3, size=(64, 64))
     pages = list(r.rasterize_pdf(b"any-bytes"))
     assert len(pages) == 3
-    for idx, img in pages:
+    for _idx, img in pages:
         assert isinstance(img, Image.Image)
         assert img.size == (64, 64)
     assert [idx for idx, _ in pages] == [0, 1, 2]

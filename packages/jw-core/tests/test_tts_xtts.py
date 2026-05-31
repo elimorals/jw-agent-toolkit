@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_core.audio.tts import TTSError
 from jw_core.audio.tts_providers.fakes import FakeXTTSv2
 from jw_core.audio.tts_providers.xtts import XTTSv2Provider

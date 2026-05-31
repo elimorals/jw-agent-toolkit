@@ -18,7 +18,6 @@ from collections.abc import Awaitable, Callable
 from typing import Any
 
 import typer
-
 from jw_agents.base import AgentResult
 from jw_agents.constrained import run_with_citations
 from jw_core.grammar.factory import get_default_constrained_caller
@@ -93,9 +92,7 @@ def _agent_callable(
         "verse_explainer": _verse_explainer,
     }
     if name not in registry:
-        raise typer.BadParameter(
-            f"unknown agent: {name!r} (have {sorted(registry)})"
-        )
+        raise typer.BadParameter(f"unknown agent: {name!r} (have {sorted(registry)})")
 
     fn = registry[name]
 
@@ -108,12 +105,8 @@ def _agent_callable(
 
 @constrained_app.command("ask")
 def ask(
-    agent: str = typer.Option(
-        ..., "--agent", help="Agent name (e.g. verse_explainer)."
-    ),
-    input_json: str = typer.Option(
-        "{}", "--input", help="JSON input for the agent."
-    ),
+    agent: str = typer.Option(..., "--agent", help="Agent name (e.g. verse_explainer)."),
+    input_json: str = typer.Option("{}", "--input", help="JSON input for the agent."),
     provider: str = typer.Option(
         "auto",
         "--provider",
@@ -128,9 +121,7 @@ def ask(
     agent_fn = _agent_callable(agent)
 
     caller = (
-        None
-        if provider == "auto"
-        else get_default_constrained_caller(provider=provider)  # type: ignore[arg-type]
+        None if provider == "auto" else get_default_constrained_caller(provider=provider)  # type: ignore[arg-type]
     )
 
     async def _run() -> AgentResult:

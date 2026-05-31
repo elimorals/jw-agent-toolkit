@@ -57,8 +57,8 @@ class KokoroTTSProvider(TTSProvider):
     def _ensure_model(self):
         if self._model is not None:
             return self._model
-        from huggingface_hub import snapshot_download  # type: ignore[import-not-found]
         import onnxruntime as ort  # type: ignore[import-not-found]
+        from huggingface_hub import snapshot_download  # type: ignore[import-not-found]
 
         cache_dir = snapshot_download(repo_id=self._repo)
         onnx_path = Path(cache_dir) / "kokoro-v1.0.onnx"
@@ -102,8 +102,7 @@ class KokoroTTSProvider(TTSProvider):
             )[0]
         except Exception as exc:  # noqa: BLE001
             raise TTSError(
-                f"Kokoro inference failed ({exc!r}). "
-                "Check JW_KOKORO_MODEL_REPO matches the ONNX schema."
+                f"Kokoro inference failed ({exc!r}). Check JW_KOKORO_MODEL_REPO matches the ONNX schema."
             ) from exc
 
         sf.write(str(output_path), np.squeeze(audio), samplerate=24000)

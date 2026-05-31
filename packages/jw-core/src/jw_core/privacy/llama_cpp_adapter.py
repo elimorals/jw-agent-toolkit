@@ -46,19 +46,14 @@ class LlamaCppAdapter:
         if self._llm is not None:
             return self._llm
         if not self.model_path:
-            raise LlamaCppError(
-                "model_path is required (set JW_LLAMA_CPP_MODEL env or pass model_path=)"
-            )
+            raise LlamaCppError("model_path is required (set JW_LLAMA_CPP_MODEL env or pass model_path=)")
         try:
             from llama_cpp import Llama  # type: ignore[import-not-found]
         except ImportError as exc:
             raise LlamaCppError(
-                "llama-cpp-python is not installed. "
-                "Install with `uv pip install -e packages/jw-core[grammar-local]`."
+                "llama-cpp-python is not installed. Install with `uv pip install -e packages/jw-core[grammar-local]`."
             ) from exc
-        self._llm = Llama(
-            model_path=self.model_path, n_ctx=self.n_ctx, n_gpu_layers=self.n_gpu_layers
-        )
+        self._llm = Llama(model_path=self.model_path, n_ctx=self.n_ctx, n_gpu_layers=self.n_gpu_layers)
         return self._llm
 
     async def generate(
@@ -87,9 +82,7 @@ class LlamaCppAdapter:
         grammar_obj = LlamaGrammar.from_string(grammar)
 
         def _call() -> dict[str, Any]:
-            return llm(
-                prompt=prompt, grammar=grammar_obj, temperature=temperature, max_tokens=1024
-            )
+            return llm(prompt=prompt, grammar=grammar_obj, temperature=temperature, max_tokens=1024)
 
         out = await asyncio.to_thread(_call)
         text = out["choices"][0]["text"]

@@ -11,12 +11,11 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from PIL import Image
-
 from jw_rag.visual.errors import VisualStoreMismatchError
 from jw_rag.visual.fakes import FakeColPaliEmbedder
 from jw_rag.visual.models import VisualChunk
 from jw_rag.visual.visual_store import VisualVectorStore
+from PIL import Image
 
 
 def _make_chunks(n: int, tmp_path: Path) -> list[tuple[VisualChunk, Image.Image]]:

@@ -104,10 +104,7 @@ def _run(
             refuse_voice_cloning_without_double_optin(
                 audio_src=input_audio,
                 voice_clone_flag=True,
-                interactive_confirm=lambda q: typer.prompt(q)
-                .strip()
-                .lower()
-                in {"si", "sí", "yes", "y", "sim", "s"},
+                interactive_confirm=lambda q: typer.prompt(q).strip().lower() in {"si", "sí", "yes", "y", "sim", "s"},
                 lang=request.lang,
             )
         except SafetyRefused as exc:
@@ -129,11 +126,7 @@ def _run(
 
     # 5) Generate
     try:
-        raw_path = provider.generate(
-            request.model_copy(
-                update={"prompt": decision.augmented_prompt or request.prompt}
-            )
-        )
+        raw_path = provider.generate(request.model_copy(update={"prompt": decision.augmented_prompt or request.prompt}))
     except Exception as exc:  # noqa: BLE001
         typer.echo(f"provider failed: {exc!r}", err=True)
         raise typer.Exit(code=15) from exc
@@ -152,9 +145,7 @@ def _run(
 
     typer.echo(f"OK {result.output_path}")
     typer.echo(f"  disclaimer: {result.disclaimer_path}")
-    typer.echo(
-        f"  audit:      {audit_log_path()}#audit_id={result.audit_id}"
-    )
+    typer.echo(f"  audit:      {audit_log_path()}#audit_id={result.audit_id}")
 
 
 @gen_app.command("image")

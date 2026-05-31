@@ -9,11 +9,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PIL import Image
-
 from jw_rag.visual.fakes import FakeColPaliEmbedder, FakeRasterizer
 from jw_rag.visual.ingest import ingest_path_visual
 from jw_rag.visual.visual_store import VisualVectorStore
+from PIL import Image
 
 
 def _make_pdf(tmp_path: Path) -> Path:

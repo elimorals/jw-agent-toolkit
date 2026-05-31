@@ -5,9 +5,8 @@ from __future__ import annotations
 import json
 
 import pytest
-from typer.testing import CliRunner
-
 from jw_agents.base import AgentResult, Citation, Finding
+from typer.testing import CliRunner
 
 
 @pytest.fixture
@@ -34,9 +33,7 @@ def _stub_verse_explainer(text: str = "", *, language: str = "en", **_: object) 
     )
 
 
-def test_constrained_ask_runs_with_fake_provider(
-    runner: CliRunner, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_constrained_ask_runs_with_fake_provider(runner: CliRunner, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("JW_LLM_PROVIDER", "fake")
 
     # Stub the agent registry resolver so the test doesn't depend on
@@ -47,13 +44,7 @@ def test_constrained_ask_runs_with_fake_provider(
 
     def _patched(name: str):  # type: ignore[no-untyped-def]
         if name == "verse_explainer":
-            return lambda inp: _stub_verse_explainer(
-                **{
-                    k: v
-                    for k, v in inp.items()
-                    if k in ("text", "language")
-                }
-            )
+            return lambda inp: _stub_verse_explainer(**{k: v for k, v in inp.items() if k in ("text", "language")})
         return real_resolver(name)
 
     monkeypatch.setattr(_constrained, "_agent_callable", _patched)
@@ -82,9 +73,7 @@ def test_constrained_ask_runs_with_fake_provider(
     assert "findings" in payload
 
 
-def test_constrained_ask_unknown_agent_fails(
-    runner: CliRunner, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_constrained_ask_unknown_agent_fails(runner: CliRunner, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("JW_LLM_PROVIDER", "fake")
     from jw_cli.main import app
 

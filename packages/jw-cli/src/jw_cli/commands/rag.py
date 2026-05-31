@@ -20,9 +20,7 @@ rag_app = typer.Typer(
 @rag_app.command("ingest-visual")
 def ingest_visual(
     path: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
-    store_path: Path = typer.Option(
-        Path("./jw-rag-store/visual"), "--store", help="Visual store directory."
-    ),
+    store_path: Path = typer.Option(Path("./jw-rag-store/visual"), "--store", help="Visual store directory."),
     force: bool = typer.Option(False, "--force", help="Re-ingest even if already indexed."),
     language: str = typer.Option("", "--language", "-l", help="Language tag in chunk metadata."),
 ) -> None:
@@ -49,10 +47,7 @@ def ingest_visual(
     except Exception as exc:  # noqa: BLE001
         typer.echo(f"warn: load failed ({exc}); starting fresh", err=True)
     result = ingest_path_visual(path, store, language=language, force=force)
-    typer.echo(
-        f"added={result.pages_added} skipped={result.pages_skipped} "
-        f"duration_ms={result.duration_ms}"
-    )
+    typer.echo(f"added={result.pages_added} skipped={result.pages_skipped} duration_ms={result.duration_ms}")
 
 
 @rag_app.command("search-visual")

@@ -4,7 +4,6 @@ import hashlib
 from pathlib import Path
 
 import pytest
-
 from jw_gen.models import GenerationRequest
 from jw_gen.safety import (
     SafetyRefused,
@@ -69,8 +68,7 @@ def test_refuse_voice_clone_blocks_on_invalid_signature(tmp_path: Path) -> None:
     audio.write_bytes(b"fake-wav")
     consent = audio.with_suffix(".wav.consent.txt")
     consent.write_text(
-        "voice_owner: Hermano X\ndate: 2026-05-31\npurpose: test\n"
-        "signature_sha256: deadbeef-bad-sig\n",
+        "voice_owner: Hermano X\ndate: 2026-05-31\npurpose: test\nsignature_sha256: deadbeef-bad-sig\n",
         encoding="utf-8",
     )
     with pytest.raises(SafetyRefused):

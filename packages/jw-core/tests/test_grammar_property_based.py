@@ -11,8 +11,8 @@ from __future__ import annotations
 import asyncio
 import re
 
-from hypothesis import given, settings, strategies as st
-
+from hypothesis import given, settings
+from hypothesis import strategies as st
 from jw_core.grammar.fake import FakeConstrainedCaller
 from jw_core.grammar.schemas import CITATION_URL_REGEX, AgentResultModel
 

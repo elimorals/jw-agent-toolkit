@@ -6,7 +6,6 @@ import asyncio
 import json
 
 import pytest
-
 from jw_agents.base import AgentResult, Citation, Finding
 from jw_agents.constrained import CitationForgeryError, run_with_citations
 from jw_core.grammar.fake import FakeConstrainedCaller
@@ -31,9 +30,7 @@ def _procedural_factory(urls: list[str]):
 
 def test_happy_path_returns_agent_result() -> None:
     procedural = _procedural_factory(["https://wol.jw.org/en/wol/d/r1/lp-e/2024001"])
-    caller = FakeConstrainedCaller(
-        seed=1, allowed_urls=["https://wol.jw.org/en/wol/d/r1/lp-e/2024001"]
-    )
+    caller = FakeConstrainedCaller(seed=1, allowed_urls=["https://wol.jw.org/en/wol/d/r1/lp-e/2024001"])
     res = asyncio.run(run_with_citations("question", agent=procedural, caller=caller))
     assert isinstance(res, AgentResult)
     assert all(f.citation.url.startswith("https://wol.jw.org/") for f in res.findings)

@@ -16,9 +16,7 @@ class ElevenLabsProvider:
     target = "api"
 
     def __init__(self, work_dir: Path | None = None) -> None:
-        self.work_dir = work_dir or Path(
-            os.environ.get("JW_GEN_CACHE", "/tmp/jw-gen-cache")
-        )
+        self.work_dir = work_dir or Path(os.environ.get("JW_GEN_CACHE", "/tmp/jw-gen-cache"))
         self.work_dir.mkdir(parents=True, exist_ok=True)
 
     def is_available(self) -> bool:

@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
-
 from jw_core.audio.asr_providers.fakes import FakeWhisperTurbo
 from jw_core.audio.asr_providers.whisper_turbo import WhisperTurboProvider
-from jw_core.audio.transcription import TranscriptionError, transcribe_file
+from jw_core.audio.transcription import transcribe_file
 
 
 def test_whisper_turbo_is_available_when_pkg_installed() -> None:
@@ -32,9 +30,7 @@ def test_whisper_turbo_resolves_auto_to_recommended_size(monkeypatch, tmp_path: 
 
         return TranscriptionResult(text="ok", language="en", duration=0.0, segments=[])
 
-    monkeypatch.setattr(
-        "jw_core.audio.asr_providers.whisper_turbo._run_faster_whisper", fake_inner
-    )
+    monkeypatch.setattr("jw_core.audio.asr_providers.whisper_turbo._run_faster_whisper", fake_inner)
     result = provider.transcribe(audio, language="en", model_size="auto")
     assert captured["model_size"] == "large-v3-turbo"
     assert result.text == "ok"
@@ -53,9 +49,7 @@ def test_whisper_turbo_respects_explicit_size(monkeypatch, tmp_path: Path) -> No
 
         return TranscriptionResult(text="ok", language="en", duration=0.0, segments=[])
 
-    monkeypatch.setattr(
-        "jw_core.audio.asr_providers.whisper_turbo._run_faster_whisper", fake_inner
-    )
+    monkeypatch.setattr("jw_core.audio.asr_providers.whisper_turbo._run_faster_whisper", fake_inner)
     provider.transcribe(audio, language="en", model_size="medium")
     assert captured["model_size"] == "medium"
 

@@ -28,8 +28,23 @@ class XTTSv2Provider(TTSProvider):
     name = "xtts"
     target: ClassVar[Literal["api", "nvidia", "mlx", "cpu"]] = "nvidia"
     languages_supported = {
-        "en", "es", "pt", "fr", "de", "it", "ja", "ko", "zh",
-        "ar", "ru", "tr", "pl", "nl", "cs", "hu", "hi",
+        "en",
+        "es",
+        "pt",
+        "fr",
+        "de",
+        "it",
+        "ja",
+        "ko",
+        "zh",
+        "ar",
+        "ru",
+        "tr",
+        "pl",
+        "nl",
+        "cs",
+        "hu",
+        "hi",
     }
 
     DEFAULT_MODEL = "tts_models/multilingual/multi-dataset/xtts_v2"
@@ -63,14 +78,9 @@ class XTTSv2Provider(TTSProvider):
 
     def synthesize(self, text: str, *, voice: str | None, language: str, output_path: Path) -> Path:
         if not self._consent_granted():
-            raise TTSError(
-                "XTTSv2 cloning requires explicit consent. "
-                "Set JW_XTTS_CLONE_CONSENT=1 to acknowledge."
-            )
+            raise TTSError("XTTSv2 cloning requires explicit consent. Set JW_XTTS_CLONE_CONSENT=1 to acknowledge.")
         if not voice:
-            raise TTSError(
-                "XTTSv2 needs a voice_sample (6-10s WAV) passed as the `voice` arg."
-            )
+            raise TTSError("XTTSv2 needs a voice_sample (6-10s WAV) passed as the `voice` arg.")
         sample_path = Path(voice)
         if not sample_path.exists():
             raise TTSError(f"voice_sample not found: {sample_path}")

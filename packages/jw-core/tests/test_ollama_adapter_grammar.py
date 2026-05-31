@@ -9,7 +9,6 @@ import asyncio
 
 import httpx
 import pytest
-
 from jw_core.grammar.schemas import AgentResultModel
 from jw_core.privacy.ollama_adapter import OllamaAdapter, OllamaError
 

@@ -15,7 +15,6 @@ import string
 
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
-
 from jw_gen.safety import SafetyRefused, refuse_jw_logo_emulation
 
 _BRAND_NOUNS_ES = ["atalaya", "ATALAYA", "Átalaya", "atalayá", "Sentinela", "salón del reino"]
@@ -36,9 +35,7 @@ def _noise_chars() -> st.SearchStrategy[str]:
     middle=_noise_chars(),
     suffix=_noise_chars(),
 )
-def test_jw_logo_emulation_rejected_property(
-    brand: str, neighbor: str, prefix: str, middle: str, suffix: str
-) -> None:
+def test_jw_logo_emulation_rejected_property(brand: str, neighbor: str, prefix: str, middle: str, suffix: str) -> None:
     """Any prompt containing a brand noun within window of a logo-neighbor must refuse."""
 
     prompt = f"{prefix} {brand} {middle} {neighbor} {suffix}".strip()

@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_core.audio.asr_providers.deepgram import DeepgramProvider
 from jw_core.audio.asr_providers.fakes import FakeDeepgram
 from jw_core.audio.transcription import TranscriptionError
@@ -61,6 +60,7 @@ def test_deepgram_transcribe_via_http(monkeypatch, tmp_path: Path) -> None:
         def __init__(self, *a, **kw) -> None: ...
         def __enter__(self):
             return self
+
         def __exit__(self, *a) -> None: ...
         def post(self, url, **kw):
             captured["url"] = url

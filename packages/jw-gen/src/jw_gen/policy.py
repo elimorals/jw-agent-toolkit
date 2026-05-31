@@ -103,9 +103,9 @@ def embed_metadata(path: Path, *, fields: dict[str, str]) -> None:
     exif_dict: dict[str, Any] = {
         "0th": {
             piexif.ImageIFD.Software: fields.get("Software", "jw-gen").encode("utf-8"),
-            piexif.ImageIFD.ImageDescription: fields.get(
-                "ImageDescription", "jw-gen personal-use illustration"
-            ).encode("utf-8"),
+            piexif.ImageIFD.ImageDescription: fields.get("ImageDescription", "jw-gen personal-use illustration").encode(
+                "utf-8"
+            ),
             piexif.ImageIFD.Artist: b"jw-gen",
         },
         "Exif": {
@@ -242,9 +242,7 @@ def finalize_output(
                     "visible watermark skipped for non-image output (metadata + disclaimer still enforced)."
                 )
         elif request.watermark.mode == "off":
-            warnings.append(
-                "watermark mode is 'off' — visible AND metadata suppressed (audit logged)."
-            )
+            warnings.append("watermark mode is 'off' — visible AND metadata suppressed (audit logged).")
 
         # 3) Metadata — ALWAYS, even when watermark mode is metadata-only.
         if request.watermark.mode != "off":

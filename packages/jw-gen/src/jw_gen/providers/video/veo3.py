@@ -17,9 +17,7 @@ class Veo3Provider:
     target = "api"
 
     def __init__(self, work_dir: Path | None = None) -> None:
-        self.work_dir = work_dir or Path(
-            os.environ.get("JW_GEN_CACHE", "/tmp/jw-gen-cache")
-        )
+        self.work_dir = work_dir or Path(os.environ.get("JW_GEN_CACHE", "/tmp/jw-gen-cache"))
         self.work_dir.mkdir(parents=True, exist_ok=True)
 
     def is_available(self) -> bool:
@@ -58,7 +56,5 @@ class Veo3Provider:
             raise RuntimeError("Veo3 generation timed out after 5 minutes")
         digest = abs(hash(request.prompt)) & 0xFFFFFF
         out = self.work_dir / f"veo3_{digest:06x}.mp4"
-        client.files.download(
-            file=op.response.generated_videos[0].video, destination=str(out)
-        )
+        client.files.download(file=op.response.generated_videos[0].video, destination=str(out))
         return out
