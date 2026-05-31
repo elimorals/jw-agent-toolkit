@@ -1,0 +1,21 @@
+id: l1_letter_composer_letter_grieving_es
+agent: letter_composer
+layer: l1
+input:
+  kind: letter
+  language: es
+  topic_or_question: "Una madre que perdió a su hijo"
+  audience: grieving
+expected:
+  min_findings: 4
+  must_have_source: verse_text
+  must_have_citation: true
+  forbidden_keywords_in_findings:
+    - "Jehová te pide"
+    - "deberías sentir"
+    - "olvida tu dolor"
+    - "supérelo"
+metadata:
+  topic: ministry.letter.grieving
+  added_by: elias
+  added_at: 2026-05-30

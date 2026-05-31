@@ -1,0 +1,20 @@
+id: l1_letter_composer_phone_default_es
+agent: letter_composer
+layer: l1
+input:
+  kind: phone
+  language: es
+  topic_or_question: "paz mental"
+  audience: default
+expected:
+  min_findings: 4
+  must_have_source: verse_text
+  must_have_citation: true
+  forbidden_keywords_in_findings:
+    - "no cuelgue"
+    - "es obligatorio"
+    - "Dios castigará"
+metadata:
+  topic: ministry.phone.default
+  added_by: elias
+  added_at: 2026-05-30

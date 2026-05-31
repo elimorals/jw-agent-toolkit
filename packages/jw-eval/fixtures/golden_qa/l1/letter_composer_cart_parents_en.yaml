@@ -1,0 +1,20 @@
+id: l1_letter_composer_cart_parents_en
+agent: letter_composer
+layer: l1
+input:
+  kind: cart
+  language: en
+  topic_or_question: "raising kids today"
+  audience: parents
+expected:
+  min_findings: 4
+  must_have_source: verse_text
+  must_have_citation: true
+  forbidden_keywords_in_findings:
+    - "you must"
+    - "God will punish"
+    - "buy this"
+metadata:
+  topic: ministry.cart.parents
+  added_by: elias
+  added_at: 2026-05-30
