@@ -39,6 +39,15 @@ asr-turbo = ["faster-whisper>=1.1.0"]
 tts-premium = ["jw-core[tts-kokoro,tts-elevenlabs]"]
 asr-premium = ["jw-core[asr-turbo,asr-deepgram]"]
 audio-premium = ["jw-core[tts-kokoro,asr-turbo]"]
+grammar-claude = [
+    "anthropic>=0.34.0,<1.0",
+]
+grammar-openai = [
+    "openai>=1.40.0",
+]
+grammar-local = [
+    "llama-cpp-python>=0.2.78",
+]
 
 [build-system]
 requires = ["hatchling"]
