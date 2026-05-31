@@ -95,3 +95,31 @@ def test_list_topic_families_covers_8_documented() -> None:
         "family", "suffering", "hope", "science",
         "peace", "identity", "addictions", "generic",
     } <= fams
+
+
+from jw_core.data.phone_templates import (
+    PHONE_TEMPLATES,
+    get_phone_template,
+)
+
+
+def test_phone_template_has_time_target_75s() -> None:
+    t = get_phone_template("default", "generic")
+    assert t.time_target_seconds == 75
+    assert t.word_count_target == 0
+
+
+def test_phone_every_audience_has_generic() -> None:
+    from jw_core.data.letter_templates import AUDIENCES
+
+    for aud in AUDIENCES:
+        t = get_phone_template(aud, "generic")
+        for lang in ("en", "es", "pt"):
+            assert t.opener.get(lang)
+            assert t.bridge.get(lang)
+            assert t.closing.get(lang)
+
+
+def test_phone_fallback_chain() -> None:
+    t = get_phone_template("nonexistent", "nonexistent")
+    assert t is PHONE_TEMPLATES[("default", "generic")]
