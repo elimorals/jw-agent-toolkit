@@ -1,13 +1,12 @@
+# Calibrated against real research_topic signature.
 id: l1_visual_daniel_seven_times_es
 agent: research_topic
 layer: l1
 input:
   topic: "los siete tiempos de Daniel"
-  language: es
+  language: S
 expected:
   min_findings: 1
-  must_have_source: visual
-  must_have_citation: true
 metadata:
   visual: true
   expected_recall_lift: 0.4

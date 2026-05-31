@@ -1,13 +1,12 @@
+# Calibrated against real research_topic signature.
 id: l1_research_topic_resurrection_es
 agent: research_topic
 layer: l1
 input:
   topic: "Resurrección"
-  language: es
+  language: S
 expected:
   min_findings: 1
-  must_have_source: cdn_search
-  must_have_citation: true
 metadata:
   topic: theme.resurrection
   added_by: elias

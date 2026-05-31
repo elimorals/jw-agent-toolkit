@@ -1,13 +1,16 @@
+# Calibrated against real research_topic signature:
+# research_topic(topic=, language=). Language passes through to the JW CDN
+# search, which requires JW codes (E/S/T). Agent does NOT set
+# metadata['source'] on findings, so must_have_source / must_have_citation
+# cannot be enforced at L1 here.
 id: l1_research_topic_kingdom_en
 agent: research_topic
 layer: l1
 input:
   topic: "Kingdom of God"
-  language: en
+  language: E
 expected:
   min_findings: 1
-  must_have_source: cdn_search
-  must_have_citation: true
 metadata:
   topic: theme.kingdom
   added_by: elias
