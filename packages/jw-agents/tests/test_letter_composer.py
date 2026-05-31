@@ -159,3 +159,50 @@ def test_invalid_kind_raises() -> None:
                 topic_or_question="x",
             )
         )
+
+
+def test_topic_client_optional_adds_topic_anchor() -> None:
+    class StubTopic:
+        async def search_subjects(self, q, *, language="E", limit=1):
+            return [{"url": "https://wol.jw.org/topic/x", "title": "Stub topic"}]
+
+        async def aclose(self) -> None:
+            pass
+
+    result = asyncio.run(
+        letter_composer(
+            kind="letter",
+            language="es",
+            topic_or_question="paz",
+            audience="default",
+            topic=StubTopic(),  # type: ignore[arg-type]
+        )
+    )
+    anchors = [f for f in result.findings if f.metadata.get("section") == "topic_anchor"]
+    assert len(anchors) == 1
+    assert anchors[0].citation.url == "https://wol.jw.org/topic/x"
+
+
+def test_topic_client_failure_emits_warning_not_raise() -> None:
+    class BrokenTopic:
+        async def search_subjects(self, q, *, language="E", limit=1):
+            raise RuntimeError("network down")
+
+    result = asyncio.run(
+        letter_composer(
+            kind="letter",
+            language="es",
+            topic_or_question="paz",
+            audience="default",
+            topic=BrokenTopic(),  # type: ignore[arg-type]
+        )
+    )
+    # Still produces a usable scaffold.
+    assert len(result.findings) >= 4
+    assert any("topic index" in w.lower() for w in result.warnings)
+
+
+def test_letter_composer_importable_from_package_root() -> None:
+    import jw_agents
+
+    assert hasattr(jw_agents, "letter_composer")

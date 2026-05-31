@@ -19,6 +19,7 @@ from jw_agents.audio_helper import (
 )
 from jw_agents.base import AgentResult, Citation, Finding
 from jw_agents.conversation_assistant import conversation_assistant
+from jw_agents.letter_composer import letter_composer
 from jw_agents.meeting_helper import meeting_helper
 from jw_agents.presentation_builder import list_audiences, presentation_builder
 from jw_agents.public_talk_outline import public_talk_outline
@@ -39,6 +40,7 @@ __all__ = [
     "RevisitStore",
     "apologetics",
     "conversation_assistant",
+    "letter_composer",
     "list_audiences",
     "meeting_helper",
     "plan_next_visit",
