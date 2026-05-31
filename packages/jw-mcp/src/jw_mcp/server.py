@@ -50,6 +50,7 @@ from jw_agents.presentation_builder import list_audiences as _list_audiences
 from jw_agents.presentation_builder import presentation_builder as presentation_builder_agent
 from jw_agents.reverse_citation_lookup import reverse_citation_lookup as reverse_citation_lookup_agent
 from jw_agents.revisit_tracker import Revisit, RevisitStore, plan_next_visit
+from jw_agents.news_monitor import news_monitor as news_monitor_agent
 from jw_agents.study_conductor import prepare_lesson as prepare_lesson_agent
 from jw_core.audio.broadcasting import BroadcastingIndex, index_vtt_file
 from jw_core.audio.tts import list_tts_providers
@@ -2352,6 +2353,46 @@ def set_student_goal(
         return {"row": row.model_dump(mode="json")}
     except Exception as e:  # noqa: BLE001
         return {"error": str(e)}
+
+
+@mcp.tool
+async def news_digest(
+    since: str | None = "last_run",
+    languages: list[str] | None = None,
+    channels: list[str] | None = None,
+    update: bool = True,
+) -> dict[str, Any]:
+    """Run the news monitor and return the deterministic digest.
+
+    Args:
+        since: "last_run" (default), "epoch", or an ISO-8601 date (e.g.
+            "2026-05-23"). Drives the human-facing "Ventana:" line of the
+            digest; new/retired classification still uses the local seen-store.
+        languages: ISO codes (en/es/pt/...). Default ["en","es","pt"].
+        channels: subset of {"publications","broadcasting","programs"}.
+            Default all three.
+        update: when True, mark new items as seen and advance last_run.
+            Use False from interactive sessions to preview without committing.
+
+    Returns:
+        Dict with `markdown` (ready to render), `stats`, `findings`,
+        `warnings`, and `retired_items`. Cite each `findings[i].citation.url`.
+    """
+
+    try:
+        result = await news_monitor_agent(
+            since=since,
+            languages=languages,
+            channels=channels,
+            update=update,
+        )
+    except ValueError as exc:
+        return {"error": str(exc)}
+    return result.to_dict() | {
+        "markdown": result.metadata.get("markdown", ""),
+        "stats": result.metadata.get("stats", {}),
+        "since_resolved": result.metadata.get("since_resolved"),
+    }
 
 
 # ────────────────────────────────────────────────────────────────────────
