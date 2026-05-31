@@ -329,3 +329,56 @@ def test_aggregate_monthly_report_empty(tmp_path: Path, monkeypatch: pytest.Monk
     assert r.active_studies_max == 0
     assert r.revisits_count == 0
     assert r.days_with_service == 0
+
+
+# ---------------------------------------------------------------------------
+# Task 6 — markdown exporter
+# ---------------------------------------------------------------------------
+
+
+def test_render_markdown_contains_all_sections() -> None:
+    from jw_core.ministry.exporters import render_markdown
+    from jw_core.ministry.field_report import MonthlyReport
+
+    report = MonthlyReport(
+        month="2026-05",
+        total_hours=7.75,
+        total_hours_display="7h 45min",
+        breakdown_by_tag={"street": 2.0, "return_visit": 1.5, "cart": 3.75, "untagged": 0.5},
+        active_studies_max=4,
+        active_studies_ids=["a", "b", "c", "d"],
+        revisits_count=11,
+        entries_count=4,
+        days_with_service=3,
+    )
+    md = render_markdown(report)
+    assert "# Informe mensual" in md
+    assert "2026-05" in md
+    assert "7h 45min" in md
+    assert "Cursos bíblicos activos" in md
+    assert "Revisitas" in md
+    assert "11" in md
+    assert "street" in md
+    # Footer with MAX-rule explanation
+    assert "máximo" in md.lower() or "maximo" in md.lower()
+
+
+def test_render_markdown_handles_empty_report() -> None:
+    from jw_core.ministry.exporters import render_markdown
+    from jw_core.ministry.field_report import MonthlyReport
+
+    md = render_markdown(
+        MonthlyReport(
+            month="2026-05",
+            total_hours=0.0,
+            total_hours_display="0h 00min",
+            breakdown_by_tag={},
+            active_studies_max=0,
+            active_studies_ids=[],
+            revisits_count=0,
+            entries_count=0,
+            days_with_service=0,
+        )
+    )
+    assert "2026-05" in md
+    assert "0h 00min" in md
