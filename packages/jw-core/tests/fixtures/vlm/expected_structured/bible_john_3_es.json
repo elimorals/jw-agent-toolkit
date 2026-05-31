@@ -1,0 +1,8 @@
+{
+  "blocks": [
+    {"kind": "header", "text": "Juan 3", "lang_hint": "es", "confidence": 0.99},
+    {"kind": "bible_ref", "text": "Juan 3:16", "lang_hint": "es", "confidence": 0.99},
+    {"kind": "paragraph", "text": "Porque tanto amó Dios al mundo que dio a su Hijo unigénito.", "lang_hint": "es", "confidence": 0.96}
+  ],
+  "language_detected": "es"
+}

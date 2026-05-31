@@ -1,0 +1,9 @@
+{
+  "blocks": [
+    {"kind": "header", "text": "La Atalaya 2024", "lang_hint": "es", "confidence": 0.97},
+    {"kind": "paragraph", "text": "Jehová cuida de los suyos.", "lang_hint": "es", "confidence": 0.95},
+    {"kind": "bible_ref", "text": "Salmo 23:1", "lang_hint": "es", "confidence": 0.99},
+    {"kind": "footnote", "text": "Véase w24 julio, p. 12.", "lang_hint": "es", "confidence": 0.9}
+  ],
+  "language_detected": "es"
+}
