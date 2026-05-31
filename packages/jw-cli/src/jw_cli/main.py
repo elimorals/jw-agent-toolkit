@@ -18,6 +18,7 @@ from jw_cli.commands import (
     citations,
     daily,
     download,
+    export as export_module,
     grep as grep_module,
     jwpub,
     languages,
@@ -60,6 +61,7 @@ app.add_typer(citations.citations_app, name="citations")
 app.add_typer(study.study_app, name="study")
 app.add_typer(news.news_app, name="news")
 app.add_typer(report_module.report_app, name="report")
+app.command(name="export")(export_module.export_cmd)
 
 
 def main() -> None:
