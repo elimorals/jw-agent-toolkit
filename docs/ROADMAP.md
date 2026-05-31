@@ -593,3 +593,29 @@ gráficas (export JSON ya lo habilita externamente), modo familia.
 - ✅ 2 tests en `packages/jw-cli/tests/test_life_cmd.py`.
 - ✅ 2 tests en `packages/jw-mcp/tests/test_life_topic_tool.py`.
 - ✅ Suite global sin regresiones.
+
+---
+
+## Fase 22 — Eval doctrinal regresión ✅
+
+> Tier 1 infraestructura de confianza. Spec: `docs/superpowers/specs/2026-05-30-fase-22-eval-doctrinal-design.md`.
+
+- ✅ Paquete nuevo `packages/jw-eval/`.
+- ✅ Modelos Pydantic: `GoldenCase`, `LayerResult`, `SuiteReport`.
+- ✅ YAML loader recursivo con filtro por capa.
+- ✅ Layer 1 (structural): contract regression sobre agentes.
+- ✅ Layer 2 (citations): snapshot (offline, bloqueante CI) + live (weekly, abre issues).
+- ✅ Layer 3 (semantic): embeddings (sentence-transformers opcional, FakeEmbedder default) + escalada LLM (Ollama default, Claude/OpenAI opt-in).
+- ✅ 12 cases L1 + 12 cases L2 + 6 cases L3 = 30 cases iniciales (más fixtures parqueadas de fases 24-32: ~22 extra).
+- ✅ Reporter markdown + JSON.
+- ✅ CLI `jw eval --layer 1,2,3 --live --report md --out file`.
+- ✅ Tool MCP `run_eval_suite`.
+- ✅ CI jobs: `eval-fast` (bloqueante), `eval-l2-live` (weekly), `eval-nightly` (no-block).
+- ✅ Script `build_eval_snapshots.py` + `eval_open_drift_issues.py`.
+- ✅ Guía `docs/guias/eval-doctrinal.md`.
+
+### Cobertura de tests
+
+- ✅ 26 tests nuevos en `packages/jw-eval/tests/`.
+- ✅ 1 test MCP en `packages/jw-mcp/tests/test_eval_tool.py`.
+- ✅ Suite global sin regresiones.

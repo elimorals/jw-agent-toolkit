@@ -26,6 +26,7 @@
 | Fase 30 (kingdom songs) | VISION #1 | `jw_core.songs` — metadatos `sjj` sin letra (12 cánticos en/es/pt), CLI `jw song`, MCP `lookup_song`/`songs_for_week` |
 | Fase 31 (exportador hoja de estudio) | ✅ Nuevo | `jw_core.exporters` — IR `StudySheet` + Markdown / PDF (`[pdf]`) / DOCX (`[docx]`) / Anki (`[anki]`) con GUIDs sha256 estables; CLI `jw export`; MCP `export_study_sheet` |
 | Fase 32 (life topics) | ✅ Nuevo | `life_topics` agente + tool MCP + registry 9 temas |
+| Fase 22 (eval doctrinal) | ✅ Nuevo | `jw-eval` — L1+L2+L3, 30 cases iniciales |
 
 **100% de las 13 secciones tienen entrega.** Métricas:
 - **24+ archivos Python nuevos** organizados en 8 sub-paquetes (`audio/`, `calendar/`, `family/`, `observability/`, `personalization/`, `privacy/`, `study/`, `vision/`).
