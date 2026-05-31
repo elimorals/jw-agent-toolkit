@@ -33,6 +33,7 @@ from jw_cli.commands import (
     verse,
     workbook,
 )
+from jw_cli.commands.image import image_app
 from jw_cli.commands import (
     eval as eval_module,
 )
@@ -75,6 +76,7 @@ app.add_typer(citations.citations_app, name="citations")
 app.add_typer(study.study_app, name="study")
 app.add_typer(news.news_app, name="news")
 app.add_typer(report_module.report_app, name="report")
+app.add_typer(image_app, name="image")
 app.command(name="export")(export_module.export_cmd)
 app.command(name="life")(life.life_cmd)
 app.command(name="eval")(eval_module.eval_cmd)
