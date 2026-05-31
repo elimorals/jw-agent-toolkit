@@ -13,6 +13,7 @@ import json
 import logging
 from functools import lru_cache
 from importlib import resources
+from typing import Any
 
 from jw_core.languages import get_language
 from jw_core.songs.models import KingdomSong, SongLookupError
@@ -73,9 +74,7 @@ class SongRegistry:
         try:
             return self._by_number[number]
         except KeyError as exc:
-            raise SongLookupError(
-                f"song #{number} not in registry for language={self._language!r}"
-            ) from exc
+            raise SongLookupError(f"song #{number} not in registry for language={self._language!r}") from exc
 
     def get(self, number: int) -> KingdomSong | None:
         return self._by_number.get(number)
@@ -87,7 +86,7 @@ class SongRegistry:
         return self._language
 
 
-def _derive_canonical_url(rec: dict, wtlocale: str) -> str:
+def _derive_canonical_url(rec: dict[str, Any], wtlocale: str) -> str:
     """Stable jw.org URL for a song.
 
     Preference order (no network):

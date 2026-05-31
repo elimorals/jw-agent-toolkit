@@ -32,7 +32,7 @@ class KingdomSong(BaseModel):
     pub_symbol: str = Field(default="sjj")
     canonical_url: str = Field(default="")
 
-    def resolved_scriptures(self) -> list["BibleRef"]:
+    def resolved_scriptures(self) -> list[BibleRef]:
         """Parse each `scriptures` entry via `parse_reference`.
 
         Unparseable entries are silently dropped.

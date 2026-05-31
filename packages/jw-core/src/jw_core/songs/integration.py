@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 _SLOTS: tuple[str, ...] = ("opening", "middle", "closing")
 
 
-def enrich_with_songs(result: "AgentResult", language: str = "en") -> "AgentResult":
+def enrich_with_songs(result: AgentResult, language: str = "en") -> AgentResult:
     """Mutate `result` in place by appending kingdom_song findings.
 
     Returns the same `result` (for chaining).
@@ -35,9 +35,7 @@ def enrich_with_songs(result: "AgentResult", language: str = "en") -> "AgentResu
 
     songs_dict = (workbook_finding.citation.metadata or {}).get("songs") or {}
     if not isinstance(songs_dict, dict):
-        result.warnings.append(
-            f"enrich_with_songs: songs metadata has unexpected shape {type(songs_dict).__name__}"
-        )
+        result.warnings.append(f"enrich_with_songs: songs metadata has unexpected shape {type(songs_dict).__name__}")
         return result
 
     registry = get_registry(language)
@@ -48,18 +46,14 @@ def enrich_with_songs(result: "AgentResult", language: str = "en") -> "AgentResu
         if number is None:
             continue
         if not isinstance(number, int):
-            result.warnings.append(
-                f"enrich_with_songs: songs[{slot}] is {number!r}, expected int"
-            )
+            result.warnings.append(f"enrich_with_songs: songs[{slot}] is {number!r}, expected int")
             continue
         key = (slot, number)
         if key in existing:
             continue
         song = registry.get(number)
         if song is None:
-            result.warnings.append(
-                f"enrich_with_songs: song #{number} ({slot}) not in registry for {language!r}"
-            )
+            result.warnings.append(f"enrich_with_songs: song #{number} ({slot}) not in registry for {language!r}")
             continue
         result.findings.append(
             Finding(
@@ -84,7 +78,7 @@ def enrich_with_songs(result: "AgentResult", language: str = "en") -> "AgentResu
     return result
 
 
-def _find_workbook_week(result: "AgentResult") -> Any | None:
+def _find_workbook_week(result: AgentResult) -> Any | None:
     for f in result.findings:
         citation = getattr(f, "citation", None)
         if citation is not None and getattr(citation, "kind", "") == "workbook_week":
@@ -92,7 +86,7 @@ def _find_workbook_week(result: "AgentResult") -> Any | None:
     return None
 
 
-def _existing_song_keys(result: "AgentResult") -> set[tuple[str, int]]:
+def _existing_song_keys(result: AgentResult) -> set[tuple[str, int]]:
     seen: set[tuple[str, int]] = set()
     for f in result.findings:
         citation = getattr(f, "citation", None)

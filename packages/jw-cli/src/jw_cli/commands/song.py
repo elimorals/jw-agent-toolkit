@@ -12,12 +12,11 @@ from __future__ import annotations
 import asyncio
 
 import typer
+from jw_core.songs import SongLookupError, get_registry
+from jw_core.songs.integration import enrich_with_songs
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-
-from jw_core.songs import SongLookupError, get_registry
-from jw_core.songs.integration import enrich_with_songs
 
 console = Console()
 
@@ -55,24 +54,17 @@ def _week(
 
     from jw_agents import workbook_helper
 
-    result = asyncio.run(
-        workbook_helper(date or None, language=language, include_comments=False)
-    )
+    result = asyncio.run(workbook_helper(date or None, language=language, include_comments=False))
     enrich_with_songs(result, language=language)
-    song_findings = [
-        f for f in result.findings if f.metadata.get("source") == "kingdom_song"
-    ]
+    song_findings = [f for f in result.findings if f.metadata.get("source") == "kingdom_song"]
     if not song_findings:
         console.print(
-            "[yellow]No song metadata found for this week. "
-            "The workbook may not have declared song numbers.[/yellow]"
+            "[yellow]No song metadata found for this week. The workbook may not have declared song numbers.[/yellow]"
         )
         raise typer.Exit(code=0)
 
     week_of = result.metadata.get("week_of", "?")
-    console.print(
-        Panel(f"Songs for the week of [bold]{week_of}[/bold]", title="jw song week", border_style="cyan")
-    )
+    console.print(Panel(f"Songs for the week of [bold]{week_of}[/bold]", title="jw song week", border_style="cyan"))
 
     table = Table(show_header=True, header_style="bold magenta", expand=True)
     table.add_column("slot", width=10)
