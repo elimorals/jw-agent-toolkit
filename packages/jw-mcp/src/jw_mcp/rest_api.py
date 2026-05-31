@@ -186,6 +186,26 @@ class VaultExportRequest(BaseModel):
     overwrite: bool = False
 
 
+class CrossRefRequest(BaseModel):
+    """Body of POST /api/v1/cross_references (Fase 48)."""
+
+    reference: str
+    language: str = "en"
+    limit: int = 8
+
+
+class VaultAppendRequest(BaseModel):
+    """Body of POST /api/v1/vault/append (Fase 48)."""
+
+    reference: str
+    vault_path: str
+    template: str = "callout"
+    length: str = "medium"
+    language: str = "en"
+    subdir: str = "Verses"
+    publication: str = "nwtsty"
+
+
 # ── Endpoints ───────────────────────────────────────────────────────────
 
 
@@ -357,6 +377,66 @@ def post_vault_export(req: VaultExportRequest) -> dict[str, Any]:
         overwrite=req.overwrite,
     )
     return report.to_dict()
+
+
+# ── Fase 48: WOL browser extension endpoints ───────────────────────────
+
+
+@app.post("/api/v1/cross_references")
+async def post_cross_references(req: CrossRefRequest) -> dict[str, Any]:
+    """Return up to ``limit`` cross-references for a parsed verse reference.
+
+    MVP implementation: parse_reference → query the CDN search for the verse
+    string → return matched WOL URLs. Empty list on bad reference or network
+    failure; never raises 5xx for shape errors.
+    """
+    ref = parse_reference(req.reference)
+    if ref is None:
+        return {
+            "refs": [],
+            "error": f"could not parse reference: {req.reference!r}",
+        }
+
+    cdn = _get_cdn()
+    lang = get_language(req.language)
+    query = ref.display()
+    try:
+        data = await cdn.search(
+            query,
+            filter_type="bible",
+            language=lang.jw_code,
+            limit=max(1, min(req.limit, 20)),
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("cross_references search failed: %r", exc)
+        return {"refs": [], "error": str(exc), "reference": ref.display()}
+
+    # CDN returns ``{"results": [...]}``. Each result has title, snippet, links.
+    refs: list[dict[str, Any]] = []
+    results = data.get("results", []) if isinstance(data, dict) else []
+    for h in results:
+        if not isinstance(h, dict):
+            continue
+        # Extract URL from links — usually links.canonical or links.publication.
+        url: str | None = None
+        links = h.get("links")
+        if isinstance(links, dict):
+            for k in ("canonical", "publication", "image"):
+                v = links.get(k)
+                if isinstance(v, str) and v.startswith("https://wol.jw.org/"):
+                    url = v
+                    break
+        if not url:
+            continue
+        refs.append(
+            {
+                "verse": str(h.get("title") or query),
+                "url": url,
+                "excerpt": str(h.get("snippet") or ""),
+            }
+        )
+
+    return {"refs": refs, "reference": ref.display(), "language": req.language}
 
 
 @app.on_event("shutdown")
