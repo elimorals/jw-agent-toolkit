@@ -967,17 +967,35 @@ async def apologetics(
     web_top_k: int = 3,
     use_rag: bool = True,
     rag_top_k: int = 5,
+    fidelity: str = "warn",
 ) -> dict[str, Any]:
     """Answer a doctrinal question with citations only from jw.org sources.
 
     If `use_rag=True` (default) and the local RAG store has any chunks,
     they're hybrid-searched alongside the CDN search results.
+
+    The `fidelity` parameter (Fase 39) enables runtime NLI verification:
+      - "off":    no verification, fastest.
+      - "warn":   (default) annotate each finding with nli_verdict/score/provider
+                  and append a warning if score < 0.7 or verdict != entails.
+      - "reject": same as warn but DROP low-fidelity findings from the result.
     """
+    from jw_agents.fidelity_wrap import fidelity_wrap
+
     rag_store = None
     if use_rag:
         s = _get_rag_store()
         rag_store = s if not s.is_empty else None
-    result = await apologetics_agent(
+
+    if fidelity == "off":
+        callable_agent = apologetics_agent
+    else:
+        callable_agent = fidelity_wrap(
+            min_score=0.7,
+            on_fail="reject" if fidelity == "reject" else "warn",
+        )(apologetics_agent)
+
+    result = await callable_agent(
         question,
         language=language,
         cdn=_get_cdn(),
@@ -987,6 +1005,35 @@ async def apologetics(
         web_top_k=web_top_k,
     )
     return result.to_dict()
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tool: evaluate_nli (Phase 39)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+def evaluate_nli(claim: str, premise: str, language: str = "en") -> dict[str, Any]:
+    """Run a single NLI judgement on a (claim, premise) pair.
+
+    Useful for clients that want to verify a citation/summary pair without
+    running a full agent. Uses the same provider stack as the @fidelity_wrap
+    decorator, honoring JW_NLI_PROVIDER.
+
+    Returns:
+        {"verdict": "entails"|"neutral"|"contradicts",
+         "score": float in [0, 1],
+         "provider": str}
+    """
+
+    from jw_core.fidelity import evaluate_entailment
+
+    v = evaluate_entailment(claim=claim, premise=premise, language=language)
+    return {
+        "verdict": v.verdict,
+        "score": round(v.score, 4),
+        "provider": v.provider,
+    }
 
 
 # ────────────────────────────────────────────────────────────────────────
