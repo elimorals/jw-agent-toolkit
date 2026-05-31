@@ -1,0 +1,14 @@
+id: l1_visual_jw_org_structure_en
+agent: research_topic
+layer: l1
+input:
+  topic: "organizational structure of Jehovah's Witnesses"
+  language: en
+expected:
+  min_findings: 1
+  must_have_source: visual
+  must_have_citation: true
+metadata:
+  visual: true
+  expected_recall_lift: 0.4
+  added_at: 2026-05-31
