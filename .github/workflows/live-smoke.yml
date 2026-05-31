@@ -1,0 +1,149 @@
+name: Live smoke
+
+# Hits jw.org / wol.jw.org / b.jw-cdn.org / data.jw-api.org for real
+# every day. The 1641-test offline suite proves the CODE is correct;
+# this workflow proves the EXTERNAL API is still shaped the way our
+# parsers expect. If any check fails, an issue is opened (or updated)
+# automatically with the JSON report attached.
+
+on:
+  schedule:
+    # Daily at 05:30 UTC — well before the eval-nightly (04:00) cycle,
+    # but late enough that nightly maintenance on jw.org has settled.
+    - cron: "30 5 * * *"
+  # Allow manual trigger from the Actions tab.
+  workflow_dispatch:
+  # Run on push to main only when the smoke script itself changes,
+  # so we catch script bugs early.
+  push:
+    branches: [main]
+    paths:
+      - "scripts/live_smoke.py"
+      - "scripts/tests/test_live_smoke.py"
+      - ".github/workflows/live-smoke.yml"
+
+concurrency:
+  group: live-smoke
+  cancel-in-progress: false  # Don't cancel a running smoke with a new run.
+
+permissions:
+  contents: read
+  issues: write  # Required to open / update the drift issue.
+
+jobs:
+  smoke:
+    name: Smoke jw.org endpoints
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Install dependencies
+        run: uv sync --all-packages
+
+      - name: Run live smoke against jw.org
+        id: smoke
+        # `continue-on-error` lets the workflow keep running so we can
+        # upload the report and open an issue even when the script exits 1.
+        continue-on-error: true
+        run: |
+          uv run --no-sync python scripts/live_smoke.py --json > smoke-report.json
+          echo "exitcode=$?" >> "$GITHUB_OUTPUT"
+          cat smoke-report.json
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoke-report
+          path: smoke-report.json
+          retention-days: 30
+
+      - name: Open or update issue on failure
+        if: steps.smoke.outputs.exitcode != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Funnel all GitHub-context strings through env vars (defense in
+          # depth — even built-in context values are kept out of the shell
+          # template).
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -e
+          RUN_URL="${SERVER_URL}/${REPOSITORY}/actions/runs/${RUN_ID}"
+
+          # Build a markdown body from the JSON report. jq receives the
+          # run URL via --arg so the value never touches a shell template.
+          BODY=$(jq -r --arg run_url "$RUN_URL" '
+            "## Live smoke failed at \(.timestamp_utc)\n\n" +
+            "| Check | Status | Duration | Detail |\n" +
+            "|---|---|---|---|\n" +
+            (.checks | map(
+              "| `\(.name)` | " +
+              (if .ok then "✓ pass" else "✗ fail" end) +
+              " | \(.duration_ms)ms | " +
+              (if .ok then .detail else "`" + (.error // "?") + "`" end) +
+              " |"
+            ) | join("\n")) +
+            "\n\nRun: \($run_url)"
+          ' smoke-report.json)
+
+          TITLE="[live-smoke] jw.org endpoint failure"
+
+          # Look for an existing open issue with the marker label.
+          EXISTING=$(gh issue list \
+            --label live-smoke \
+            --state open \
+            --json number \
+            --limit 1 \
+            --jq '.[0].number // empty')
+
+          if [ -n "$EXISTING" ]; then
+            echo "Updating existing issue #$EXISTING"
+            gh issue comment "$EXISTING" --body "$BODY"
+          else
+            echo "Opening new issue"
+            # Ensure the label exists (idempotent).
+            gh label create live-smoke \
+              --description "jw.org daily smoke detected drift / outage" \
+              --color "f0b97a" \
+              --force || true
+            gh issue create \
+              --title "$TITLE" \
+              --label live-smoke \
+              --body "$BODY"
+          fi
+
+      - name: Close drift issue on recovery
+        if: steps.smoke.outputs.exitcode == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          # If the previous run failed and this one passed, close the
+          # tracking issue with a celebratory comment.
+          EXISTING=$(gh issue list \
+            --label live-smoke \
+            --state open \
+            --json number \
+            --limit 1 \
+            --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            echo "Closing recovered issue #$EXISTING"
+            gh issue comment "$EXISTING" --body "✓ Live smoke recovered at $(date -u +%FT%TZ). Closing."
+            gh issue close "$EXISTING" --reason completed
+          fi
+
+      - name: Fail workflow if smoke failed
+        if: steps.smoke.outputs.exitcode != '0'
+        run: exit 1
