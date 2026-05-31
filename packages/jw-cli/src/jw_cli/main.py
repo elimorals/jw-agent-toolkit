@@ -21,6 +21,7 @@ from jw_cli.commands import (
     grep as grep_module,
     jwpub,
     languages,
+    letter as letter_module,
     ministry,
     news,
     report as report_module,
@@ -41,6 +42,7 @@ app = typer.Typer(
 
 # Register subcommands as top-level verbs.
 app.command(name="verse")(verse.verse_cmd)
+app.command(name="letter")(letter_module.letter_cmd)
 app.command(name="search")(search.search_cmd)
 app.command(name="daily")(daily.daily_cmd)
 app.command(name="languages")(languages.languages_cmd)
