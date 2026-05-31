@@ -85,7 +85,15 @@ from jw_core.integrations.obsidian_vault import (
     export_backup_to_vault,
     index_vault_to_rag,
 )
+from datetime import date as _date
 from jw_core.languages import get_language
+from jw_core.ministry.exporters import render_csv, render_markdown
+from jw_core.ministry.field_report import (
+    FieldReportStore,
+    HoursEntry,
+    StudyEntry,
+    aggregate_monthly_report,
+)
 from jw_core.parsers.article import parse_article
 from jw_core.parsers.daily_text import parse_daily_text
 from jw_core.parsers.epub import parse_epub
@@ -2421,6 +2429,103 @@ async def student_part_help(
         audience=audience,
     )
     return result.to_dict()
+
+
+# ---------------------------------------------------------------------------
+# Phase 27 — Pioneer monthly report
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def field_log_hours(
+    hours_decimal: float,
+    date: str = "",
+    tag: str | None = None,
+    note: str = "",
+) -> dict[str, Any]:
+    """Registrar horas de servicio (local, cifrable). `date` ISO o vacío = hoy."""
+
+    d = _date.fromisoformat(date) if date else _date.today()
+    with FieldReportStore() as store:
+        e = store.add_hours(
+            HoursEntry(entry_id="", date=d, hours_decimal=hours_decimal, tag=tag, note=note)
+        )
+    return {"entry_id": e.entry_id, "date": e.date.isoformat(), "hours_decimal": e.hours_decimal, "tag": e.tag}
+
+
+@mcp.tool()
+def field_log_study(
+    student_alias: str,
+    started: str = "",
+    closed: str = "",
+    met_today: bool = False,
+    note: str = "",
+) -> dict[str, Any]:
+    """Registrar, cerrar o marcar reunión de un curso bíblico (local, cifrable)."""
+
+    with FieldReportStore() as store:
+        if closed:
+            n = store.close_study(student_id=student_alias, closed_at=_date.fromisoformat(closed))
+            return {"closed_count": n, "student_alias": student_alias}
+        s = store.upsert_study(
+            StudyEntry(
+                study_id="",
+                student_id=student_alias,
+                started_at=_date.fromisoformat(started) if started else _date.today(),
+                note=note,
+            )
+        )
+        if met_today:
+            store.mark_met(student_id=student_alias, met_date=_date.today())
+        return {
+            "study_id": s.study_id,
+            "student_alias": student_alias,
+            "started_at": s.started_at.isoformat(),
+            "met_today": met_today,
+        }
+
+
+@mcp.tool()
+def field_monthly_report(
+    month: str,
+    include_revisits: bool = True,
+    format: str = "json",
+) -> dict[str, Any]:
+    """Generar el informe mensual. ``format`` ∈ {json, markdown, csv}."""
+
+    revisits = None
+    if include_revisits:
+        # Inline adapter — mirrors the CLI's _RevisitsAdapter.
+        try:
+            from jw_agents.revisit_tracker import RevisitStore as _RevisitStore
+        except ImportError:
+            _RevisitStore = None  # type: ignore[assignment]
+        if _RevisitStore is not None:
+            import datetime as _dt
+
+            class _Adapter:
+                def count_in_range(self, start: _date, end: _date) -> int:
+                    try:
+                        with _RevisitStore() as s:
+                            rows = s.list_all()
+                    except Exception:
+                        return 0
+                    n = 0
+                    for r in rows:
+                        ts = r.updated_at_unix or 0
+                        if ts and start <= _dt.date.fromtimestamp(ts) <= end:
+                            n += 1
+                    return n
+
+            revisits = _Adapter()
+
+    with FieldReportStore() as store:
+        report = aggregate_monthly_report(store, month, revisits=revisits)
+    if format == "markdown":
+        return {"format": "markdown", "body": render_markdown(report)}
+    if format == "csv":
+        return {"format": "csv", "body": render_csv(report)}
+    return {"format": "json", **report.model_dump()}
 
 
 # ────────────────────────────────────────────────────────────────────────
