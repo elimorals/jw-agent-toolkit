@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "JW Agent Toolkit — WOL Companion",
+  "short_name": "JW Toolkit WOL",
+  "version": "0.1.0",
+  "description": "Inline explanations, cross-references, and Obsidian export for wol.jw.org. 100% local.",
+  "default_locale": "en",
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": "icons/48.png",
+    "default_title": "JW Toolkit WOL"
+  },
+  "background": {
+    "service_worker": "src/background.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://wol.jw.org/*"],
+      "js": ["src/content_script.ts"],
+      "css": ["src/dom/styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "host_permissions": ["http://localhost:8765/*"],
+  "permissions": ["storage"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "jw-agent-toolkit@cipre.dev",
+      "strict_min_version": "121.0"
+    }
+  }
+}

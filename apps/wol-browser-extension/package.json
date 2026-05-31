@@ -1,0 +1,32 @@
+{
+  "name": "@jw-agent-toolkit/wol-browser-extension",
+  "version": "0.1.0",
+  "description": "Chrome/Edge/Firefox extension that injects inline actions for wol.jw.org. 100% local.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "package": "pnpm build && node scripts/package.mjs",
+    "test": "vitest run",
+    "test:e2e": "playwright test --config tests/playwright/playwright.config.ts",
+    "test:privacy": "playwright test --config tests/playwright/playwright.config.ts privacy.spec.ts",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0-beta.27",
+    "@playwright/test": "^1.46.0",
+    "@types/chrome": "^0.0.268",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.5.0",
+    "@typescript-eslint/parser": "^8.5.0",
+    "archiver": "^7.0.1",
+    "eslint": "^9.10.0",
+    "happy-dom": "^15.0.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0",
+    "vitest": "^2.0.5"
+  }
+}
