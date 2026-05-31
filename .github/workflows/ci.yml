@@ -125,6 +125,35 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  gen-policy:
+    name: jw-gen policy (offline, property test)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - run: uv python install 3.13
+      - run: uv sync --all-packages
+      - name: jw-gen unit tests (offline)
+        run: uv run pytest packages/jw-gen/tests -v
+      - name: Property test — 100 adversarial prompts then 0 allowed
+        run: uv run pytest packages/jw-gen/tests/test_safety_property.py -v
+      - name: Smoke — output always carries watermark + disclaimer
+        run: uv run pytest packages/jw-gen/tests/test_policy.py -v -k "finalize"
+      - name: CLI smoke — fake image succeeds, fake logo prompt fails
+        env:
+          JW_GEN_IMAGE_PROVIDER: fake
+          JW_GEN_HOME: /tmp/jw-gen-ci
+        run: |
+          uv run jw gen image --prompt "ovejas pastoreadas" --out /tmp/ok.png
+          test -f /tmp/ok.png
+          test -f /tmp/ok.png.disclaimer.txt
+          ! uv run jw gen image --prompt "watchtower logo blue" --out /tmp/bad.png
+          ! test -f /tmp/bad.png
+
   eval-nightly:
     name: Eval nightly (L1+L2+L3 Ollama)
     if: github.event_name == 'schedule' && github.event.schedule == '0 4 * * *'
