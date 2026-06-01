@@ -1,0 +1,20 @@
+"""{{ name }} — stub VLM provider. Replace with real vision model integration.
+
+Required Protocol shape:
+  - name: str
+  - is_available() -> bool
+  - describe(image_bytes: bytes, *, language: str = "en") -> str
+"""
+
+from __future__ import annotations
+
+
+class {{ module|capitalize }}VLM:
+    name = "{{ module }}"
+
+    def is_available(self) -> bool:
+        return True
+
+    def describe(self, image_bytes: bytes, *, language: str = "en") -> str:
+        # Stub: returns deterministic placeholder. Replace with model call.
+        return f"{{ module }}[{language}] len={len(image_bytes)}"

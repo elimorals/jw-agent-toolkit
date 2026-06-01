@@ -1,0 +1,21 @@
+"""Tests for {{ name }} VLM provider. Deterministic, no network, no model."""
+
+from __future__ import annotations
+
+from {{ module }}.vlm import {{ module|capitalize }}VLM
+
+
+def test_attributes_present() -> None:
+    vlm = {{ module|capitalize }}VLM()
+    assert vlm.name == "{{ module }}"
+
+
+def test_is_available() -> None:
+    assert {{ module|capitalize }}VLM().is_available()
+
+
+def test_describe_returns_string() -> None:
+    out = {{ module|capitalize }}VLM().describe(b"x" * 100, language="es")
+    assert isinstance(out, str)
+    assert "100" in out
+    assert "es" in out

@@ -1,0 +1,36 @@
+# {{ name }}
+
+An agent plugin for [`jw-agent-toolkit`](https://github.com/eliascipre/jw-agent-toolkit) (Fase 41 plugin SDK).
+
+## Install (editable)
+
+```bash
+uv sync
+uv run pytest
+```
+
+## Verify discovery
+
+```bash
+uv pip install -e .
+uv run jw plugins list
+uv run jw plugins verify {{ module }}
+```
+
+## Implement your logic
+
+Edit `src/{{ module }}/agent.py`. The stub returns a placeholder finding;
+replace with real calls to `jw-core` / `jw-rag` / `jw-agents`.
+
+See [cookbook recipes](https://github.com/eliascipre/jw-agent-toolkit/tree/main/docs/cookbook)
+for copy-pasteable examples.
+
+## Scope reminder
+
+`jw-agent-toolkit` is 100% for Jehovah's Witnesses publications. Build plugins
+that serve the JW community: meeting prep, apologetics, ministry tools,
+specialized parsers for JW formats, etc.
+
+## License
+
+{{ license }}

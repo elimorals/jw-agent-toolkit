@@ -17,7 +17,10 @@ from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
-from create_jw_agent.validate import python_module_name
+from create_jw_agent.validate import python_module_name, validate_name
+
+
+_UNSAFE_FILENAME_CHARS = frozenset(("/", "\\"))
 
 
 @dataclass(frozen=True)
@@ -41,6 +44,14 @@ class RenderContext:
         jw_core_version: str = ">=2.3,<3.0",
         license: str = "GPL-3.0",
     ) -> "RenderContext":
+        # Security: enforce the validate_name allowlist at construction time so
+        # there is no path through which a malicious caller (CLI flag, library
+        # use) gets to filename interpolation with a name that could contain
+        # `/`, `\`, `..`, or other path-traversal payloads. validate_name
+        # rejects everything outside `[a-z][a-z0-9-]*` kebab-case.
+        err = validate_name(name)
+        if err is not None:
+            raise ValueError(f"invalid project name: {err.message}")
         return cls(
             name=name,
             module=python_module_name(name),
@@ -54,12 +65,27 @@ class RenderContext:
 _PLACEHOLDER = re.compile(r"\{\{(\w+)\}\}")
 
 
+def _safe_replace_value(value: str) -> str:
+    """Defense in depth: reject any substitution that contains path separators
+    or '..'/.', even though `validate_name` already rules these out for
+    `name`/`module`. This protects against future placeholders being added
+    without remembering to validate."""
+
+    if not isinstance(value, str):
+        raise ValueError(f"non-string substitution value: {value!r}")
+    if value in {"", ".", ".."}:
+        raise ValueError(f"unsafe substitution value: {value!r}")
+    if any(ch in value for ch in _UNSAFE_FILENAME_CHARS):
+        raise ValueError(f"substitution value contains path separator: {value!r}")
+    return value
+
+
 def _interpolate_filename(name: str, ctx: RenderContext) -> str:
     mapping = {
-        "name": ctx.name,
-        "module": ctx.module,
-        "type": ctx.type,
-        "lang": ctx.lang,
+        "name": _safe_replace_value(ctx.name),
+        "module": _safe_replace_value(ctx.module),
+        "type": _safe_replace_value(ctx.type),
+        "lang": _safe_replace_value(ctx.lang),
     }
     return _PLACEHOLDER.sub(lambda m: mapping.get(m.group(1), m.group(0)), name)
 
@@ -90,6 +116,8 @@ def render_template(
         raise FileNotFoundError(f"no template for type={template_type!r}")
 
     created: list[Path] = []
+    output_dir.mkdir(parents=True, exist_ok=True)
+    out_root = output_dir.resolve()
     with as_file(template_root) as src_root:
         env = Environment(
             loader=FileSystemLoader(str(src_root)),
@@ -103,6 +131,15 @@ def render_template(
                 rel_str = rel_str[:-3]
             rel_str = _interpolate_filename(rel_str, ctx)
             target = output_dir / rel_str
+            # Defense in depth: ensure the final resolved path stays inside
+            # output_dir even if a template carries a `..` segment.
+            target_resolved = (output_dir / rel_str).resolve()
+            try:
+                target_resolved.relative_to(out_root)
+            except ValueError as exc:
+                raise ValueError(
+                    f"refusing to write outside output dir: {rel_str!r}"
+                ) from exc
             target.parent.mkdir(parents=True, exist_ok=True)
             if str(rel).endswith(".j2"):
                 template = env.get_template(str(rel))

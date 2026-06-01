@@ -1,0 +1,27 @@
+"""Tests for {{ name }} embedder. Deterministic, no network, no model download."""
+
+from __future__ import annotations
+
+from {{ module }}.embedder import {{ module|capitalize }}Embedder
+
+
+def test_attributes_present() -> None:
+    emb = {{ module|capitalize }}Embedder()
+    assert emb.name
+    assert emb.target in {"cpu", "gpu", "mlx"}
+    assert emb.dim > 0
+
+
+def test_is_available() -> None:
+    assert {{ module|capitalize }}Embedder().is_available()
+
+
+def test_embed_returns_correct_shape() -> None:
+    emb = {{ module|capitalize }}Embedder()
+    vecs = emb.embed(["hello", "world", "foo"])
+    assert vecs.shape == (3, emb.dim)
+
+
+def test_embed_handles_empty_list() -> None:
+    vecs = {{ module|capitalize }}Embedder().embed([])
+    assert vecs.shape[0] == 0

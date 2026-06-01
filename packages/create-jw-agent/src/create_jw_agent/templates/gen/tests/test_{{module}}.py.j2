@@ -1,0 +1,24 @@
+"""Tests for {{ name }} generation provider. Deterministic, no network."""
+
+from __future__ import annotations
+
+from {{ module }}.gen import {{ module|capitalize }}Gen
+
+
+def test_attributes_present() -> None:
+    gen = {{ module|capitalize }}Gen()
+    assert gen.name == "{{ module }}"
+
+
+def test_is_available() -> None:
+    assert {{ module|capitalize }}Gen().is_available()
+
+
+def test_generate_returns_string() -> None:
+    out = {{ module|capitalize }}Gen().generate("hello", max_tokens=10)
+    assert isinstance(out, str)
+
+
+def test_generate_respects_max_tokens() -> None:
+    out = {{ module|capitalize }}Gen().generate("x" * 100, max_tokens=5)
+    assert isinstance(out, str)

@@ -1,0 +1,34 @@
+"""Smoke + contract tests for {{ name }}.
+
+Three deterministic tests, no network. CI-green from the first commit.
+"""
+
+from __future__ import annotations
+
+from {{ module }}.agent import {{ module }}
+
+
+async def test_smoke() -> None:
+    result = await {{ module }}(question="Trinity", language="en")
+    assert result["findings"], "agent must return at least one finding"
+
+
+async def test_contract_shape() -> None:
+    result = await {{ module }}(question="x", language="en")
+    for finding in result["findings"]:
+        assert finding["source"]
+        assert finding["text"]
+        assert finding["citation"]
+        assert finding["citation"]["url"].startswith("https://")
+
+
+async def test_citations_present() -> None:
+    result = await {{ module }}(question="x", language="en")
+    for finding in result["findings"]:
+        assert finding["citation"]
+
+
+async def test_optional_attributes_exposed() -> None:
+    # Capability matrix: optional `languages` and `version` (since 1.0).
+    assert hasattr({{ module }}, "languages")
+    assert hasattr({{ module }}, "version")

@@ -1,0 +1,26 @@
+"""{{ name }} — stub embedder. Replace with real model logic.
+
+Required Protocol shape (Fase 41 capabilities matrix):
+  - name: str
+  - target: str  ("cpu" | "gpu" | "mlx")
+  - dim: int
+  - is_available() -> bool
+  - embed(texts: list[str]) -> np.ndarray of shape (N, dim)
+"""
+
+from __future__ import annotations
+
+import numpy as np
+
+
+class {{ module|capitalize }}Embedder:
+    name = "{{ module }}"
+    target = "cpu"
+    dim = 8
+
+    def is_available(self) -> bool:
+        return True
+
+    def embed(self, texts: list[str]) -> np.ndarray:
+        # Stub: returns zero vectors. Replace with real model call.
+        return np.zeros((len(texts), self.dim), dtype=np.float32)
