@@ -1,0 +1,28 @@
+[project]
+name = "plugin-sample"
+version = "0.1.0"
+description = "Test fixture: a third-party plugin for jw-agent-toolkit"
+requires-python = ">=3.13"
+dependencies = []
+
+[project.entry-points."jw_agent_toolkit.agents"]
+plugin_sample_agent = "plugin_sample.agent:sample_agent"
+
+[project.entry-points."jw_agent_toolkit.parsers"]
+plugin_sample_parser = "plugin_sample.parser:sample_parser"
+
+[project.entry-points."jw_agent_toolkit.embedders"]
+plugin_sample_embedder = "plugin_sample.embedder:SampleEmbedder"
+
+[project.entry-points."jw_agent_toolkit.vlm_providers"]
+plugin_sample_vlm = "plugin_sample.vlm:SampleVLM"
+
+[project.entry-points."jw_agent_toolkit.gen_providers"]
+plugin_sample_gen = "plugin_sample.gen:SampleGen"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/plugin_sample"]
