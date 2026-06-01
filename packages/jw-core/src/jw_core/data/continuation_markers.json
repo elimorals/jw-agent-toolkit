@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "es": {
+    "continuation": [
+      "Sin embargo",
+      "Por otro lado",
+      "Además",
+      "Pero",
+      "No obstante",
+      "Asimismo",
+      "Es más",
+      "También"
+    ],
+    "closure": [
+      "Por lo tanto",
+      "En conclusión",
+      "Así que",
+      "En resumen",
+      "De manera que"
+    ],
+    "fingerprint": ["el", "la", "los", "las", "de", "que", "es", "por"]
+  },
+  "en": {
+    "continuation": [
+      "However",
+      "On the other hand",
+      "Moreover",
+      "But",
+      "Nevertheless",
+      "Furthermore",
+      "Also"
+    ],
+    "closure": [
+      "Therefore",
+      "In conclusion",
+      "So",
+      "In summary",
+      "Hence",
+      "Thus"
+    ],
+    "fingerprint": ["the", "and", "of", "is", "that", "to", "in"]
+  },
+  "pt": {
+    "continuation": [
+      "No entanto",
+      "Por outro lado",
+      "Além disso",
+      "Mas",
+      "Contudo",
+      "Ademais",
+      "Também"
+    ],
+    "closure": [
+      "Portanto",
+      "Em conclusão",
+      "Assim",
+      "Em resumo",
+      "Logo"
+    ],
+    "fingerprint": ["o", "a", "os", "as", "de", "que", "é", "para", "não"]
+  }
+}
