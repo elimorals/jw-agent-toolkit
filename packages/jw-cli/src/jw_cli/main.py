@@ -56,6 +56,7 @@ from jw_cli.commands import (
 )
 from jw_cli.commands.constrained import constrained_app
 from jw_cli.commands.image import image_app
+from jw_cli.commands.provenance import provenance_app
 from jw_cli.commands.rag import rag_app
 
 app = typer.Typer(
@@ -93,6 +94,7 @@ app.command(name="eval")(eval_module.eval_cmd)
 app.command(name="say")(say.say_cmd)
 app.command(name="transcribe")(transcribe.transcribe_cmd)
 app.add_typer(constrained_app, name="constrained")
+app.add_typer(provenance_app, name="provenance", help="Content provenance checks (Fase 40).")
 app.command(name="apologetics")(apologetics_module.apologetics_cmd)
 
 
