@@ -150,6 +150,8 @@ _EXPECTED_TOOLS = {
     "evaluate_nli",
     # Phase 40 — Content provenance
     "verify_provenance",
+    # Phase 45 — Semantic chunking
+    "set_chunker",
 }
 
 

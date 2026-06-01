@@ -844,20 +844,51 @@ def semantic_search(query: str, top_k: int = 5, mode: str = "hybrid", rerank: bo
 # ────────────────────────────────────────────────────────────────────────
 
 
+# Session-scoped chunker selection (Fase 45).
+_session_chunker: str = "paragraph"
+
+
 @mcp.tool
-async def ingest_bible_chapter(book_num: int, chapter: int, language: str = "en") -> dict[str, Any]:
+def set_chunker(name: str) -> dict[str, Any]:
+    """Set the active chunker for subsequent ingest_* calls in this MCP session.
+
+    Args:
+        name: 'paragraph' | 'semantic' | 'llm'
+    """
+    global _session_chunker
+    from jw_rag.chunkers import get_chunker
+
+    try:
+        c = get_chunker(name)
+    except ValueError as exc:
+        return {"error": str(exc)}
+    _session_chunker = c.name
+    return {"active_chunker": _session_chunker}
+
+
+@mcp.tool
+async def ingest_bible_chapter(
+    book_num: int,
+    chapter: int,
+    language: str = "en",
+    chunker: str | None = None,
+) -> dict[str, Any]:
     """Fetch a Bible chapter from wol.jw.org and add it to the local RAG store."""
     if not 1 <= book_num <= 66:
         return {"error": f"book_num must be 1..66, got {book_num}"}
     from jw_rag.ingest import ingest_bible_chapter as _ingest
 
     store = _get_rag_store()
-    count = await _ingest(store, book_num, chapter, language=language, wol=_get_wol())
+    effective = chunker or _session_chunker
+    count = await _ingest(
+        store, book_num, chapter, language=language, wol=_get_wol(), chunker=effective,
+    )
     store.save()
     return {
         "book_num": book_num,
         "chapter": chapter,
         "language": language,
+        "chunker": effective,
         "chunks_added": count,
         "store_total": store.count,
     }
