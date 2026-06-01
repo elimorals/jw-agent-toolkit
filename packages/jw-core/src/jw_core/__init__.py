@@ -13,3 +13,6 @@ __all__ = [
     "parse_reference",
     "parse_all_references",
 ]
+
+# ---- Plugin SDK (Fase 41) -------------------------------------------------
+from jw_core import plugins as plugins  # noqa: E402, F401
