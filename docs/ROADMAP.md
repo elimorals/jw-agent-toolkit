@@ -779,6 +779,34 @@ Backend hardening incluido en la misma fase:
 - ✅ dist/ raw: ~20 KB, gzip: ~8 KB.
 - ✅ zip de release: 13 KB *(ceiling pactado: 800 KB; 98% headroom).*
 
+## Fase 49 — second-brain
+
+- **Estado**: Estable (2026-06-01).
+- **Spec**: `docs/superpowers/specs/2026-06-01-fase-49-second-brain-design.md`.
+- **Plan**: `docs/superpowers/plans/2026-06-01-fase-49-second-brain-plan.md`.
+- **Guía**: `docs/guias/second-brain.md`.
+
+Nuevo paquete del workspace `packages/jw-brain/` con runtime
+Karpathy-style + GraphRAG. Dual backend (DuckDB embebido + Neo4j
+opt-in) detrás del mismo Protocol con contract tests parametrizables.
+Compiler LLM-driven con dry-run obligatorio + cache content_hash +
+provenance per edge. Wiki sobre Obsidian con write-safe contract
+extendido de F20 (incluye fix de seguridad sobre el parseo de
+frontmatter `human_edited`). CLI `jw brain {init,compile,query,lint,
+status,snapshot,list}`. MCP tools `second_brain_*` (5 nuevas).
+Multi-tenant via `--brain` flag + `JW_BRAIN_HOME` env + registry
+global. `BrainDomain` se conecta via Fase 41 plugin SDK
+(`jw_agent_toolkit.brain_domains`) — TJ builtin + financial fixture
+prueba la generalidad. CLAUDE.md autogenerado per dominio activo.
+
+### Cobertura de tests
+
+- ✅ **+81 tests** sobre jw-brain (8 backend contract + 7 schema + 6 wiki + 4 parser + 8 extractor/cache + 3 compiler + 7 query + 4 lint + 8 CLI + 6 MCP + 4 domain registry + 7 multi-tenant + 7 CLAUDE.md + 1 smoke).
+- ✅ Cero regresiones en suite existente.
+- ✅ Cero red en tests: FakeGenProvider + FakeNLIProvider + monkey-patched plugin SDK.
+- ✅ Cero LLM real en CI: `JW_GEN_PROVIDER=fake` por default; production wiring opt-in.
+- ✅ Security fix de F40 wiki_writer: parseo YAML estricto fail-closed (vs substring match bypaseable).
+
 ## Fase 41 — plugin-sdk
 
 - **Estado**: Estable (2026-06-01).
