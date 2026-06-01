@@ -13,6 +13,8 @@ from typing import Literal, Protocol, runtime_checkable
 
 import numpy as np
 
+from jw_core.plugins import get_plugins
+
 logger = logging.getLogger(__name__)
 
 Target = Literal["api", "mlx", "nvidia", "cpu"]
@@ -74,15 +76,13 @@ def _instantiate_registry() -> list[EmbedProvider]:
     from jw_rag.embed_providers.ollama import OllamaEmbedProvider
     from jw_rag.embed_providers.voyage import VoyageMultilingualProvider
 
-    return [
-        # Real providers
+    registry: list[EmbedProvider] = [
         CohereEmbedV3Provider(),
         JinaEmbeddingsV3Provider(),
         VoyageMultilingualProvider(),
         BGEM3Provider(),
         MultilingualE5Provider(),
         OllamaEmbedProvider(),
-        # Fakes — always considered available, used by tests via JW_EMBED_PROVIDER=fake-*
         FakeBGEM3(),
         FakeMultilingualE5(),
         FakeJinaEmbed(),
@@ -90,6 +90,24 @@ def _instantiate_registry() -> list[EmbedProvider]:
         FakeVoyageEmbed(),
         FakeOllamaEmbed(),
     ]
+
+    # Fase 41 — merge community plugin embedders.
+    for _name, spec in get_plugins("jw_agent_toolkit.embedders").items():
+        try:
+            target = spec.resolve()
+            instance = target() if isinstance(target, type) else target
+        except Exception:  # noqa: BLE001
+            logger.warning("plugin embedder %r failed to load — skipping", _name)
+            continue
+        if not isinstance(instance, EmbedProvider):
+            logger.warning(
+                "plugin embedder %r does not satisfy EmbedProvider Protocol — skipping",
+                _name,
+            )
+            continue
+        registry.append(instance)
+
+    return registry
 
 
 def _named_lookup(name: str) -> EmbedProvider | None:
