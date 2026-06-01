@@ -1,0 +1,52 @@
+queries:
+  - id: q_es_trinidad
+    language: es
+    query: "¿Es bíblica la doctrina de la Trinidad?"
+    expected_citations:
+      - https://wol.jw.org/es/wol/d/r4/lp-s/1102004110
+      - https://wol.jw.org/es/wol/d/r4/lp-s/2007005
+  - id: q_es_alma_inmortal
+    language: es
+    query: "¿Es el alma humana inmortal?"
+    expected_citations:
+      - https://wol.jw.org/es/wol/d/r4/lp-s/1102004193
+  - id: q_es_infierno_fuego
+    language: es
+    query: "¿Existe el infierno de fuego literal?"
+    expected_citations:
+      - https://wol.jw.org/es/wol/d/r4/lp-s/1102004148
+  - id: q_es_identidad_cristo
+    language: es
+    query: "¿Es Jesucristo el Dios Todopoderoso?"
+    expected_citations:
+      - https://wol.jw.org/es/wol/d/r4/lp-s/1102004111
+  - id: q_es_esperanza_terrestre
+    language: es
+    query: "¿Cuál es la esperanza terrenal para los cristianos?"
+    expected_citations:
+      - https://wol.jw.org/es/wol/d/r4/lp-s/1102004167
+  - id: q_en_trinity
+    language: en
+    query: "Is the Trinity biblical?"
+    expected_citations:
+      - https://wol.jw.org/en/wol/d/r1/lp-e/1102004110
+  - id: q_en_soul
+    language: en
+    query: "Is the human soul immortal?"
+    expected_citations:
+      - https://wol.jw.org/en/wol/d/r1/lp-e/1102004193
+  - id: q_en_hell
+    language: en
+    query: "Is hellfire a literal place of torment?"
+    expected_citations:
+      - https://wol.jw.org/en/wol/d/r1/lp-e/1102004148
+  - id: q_pt_trindade
+    language: pt
+    query: "A Trindade é bíblica?"
+    expected_citations:
+      - https://wol.jw.org/pt/wol/d/r5/lp-t/1102004110
+  - id: q_pt_alma_imortal
+    language: pt
+    query: "A alma humana é imortal?"
+    expected_citations:
+      - https://wol.jw.org/pt/wol/d/r5/lp-t/1102004193
