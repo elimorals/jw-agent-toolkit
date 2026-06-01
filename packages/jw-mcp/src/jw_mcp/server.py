@@ -3324,6 +3324,58 @@ async def verify_provenance(
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Plugin SDK integration (Fase 41)
+# ────────────────────────────────────────────────────────────────────────
+
+
+import asyncio as _asyncio_plugins
+import inspect as _inspect_plugins
+import logging as _logging_plugins
+from typing import Any as _Any_plugins
+
+from jw_core.plugins import get_plugins
+
+_plugins_logger = _logging_plugins.getLogger(__name__)
+
+
+def _make_mcp_tool(name: str, fn: _Any_plugins):
+    """Wrap a plugin agent into an MCP tool callable."""
+
+    is_coro = _inspect_plugins.iscoroutinefunction(fn)
+
+    async def tool_fn(**kwargs: _Any_plugins) -> _Any_plugins:
+        if is_coro:
+            return await fn(**kwargs)
+        return await _asyncio_plugins.to_thread(fn, **kwargs)
+
+    tool_fn.__name__ = name
+    tool_fn.__doc__ = (fn.__doc__ or f"Plugin agent: {name}").strip()
+    return tool_fn
+
+
+def register_plugin_tools(mcp_instance: _Any_plugins) -> None:
+    """Register every discovered agent plugin as MCP tool `agent.<name>`."""
+
+    for plug_name, spec in get_plugins("jw_agent_toolkit.agents").items():
+        try:
+            target = spec.resolve()
+        except Exception:  # noqa: BLE001
+            _plugins_logger.warning(
+                "skipping plugin agent %r — failed to resolve target", plug_name
+            )
+            continue
+        tool_name = f"agent.{plug_name}"
+        wrapped = _make_mcp_tool(tool_name, target)
+        try:
+            mcp_instance.tool(name=tool_name)(wrapped)
+        except Exception:  # noqa: BLE001
+            _plugins_logger.warning(
+                "skipping plugin agent %r — MCP refused tool registration", plug_name
+            )
+            continue
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
 
@@ -3331,6 +3383,7 @@ async def verify_provenance(
 def main() -> None:
     """Run the MCP server over stdio."""
     logger.info("Starting jw-agent-toolkit MCP server")
+    register_plugin_tools(mcp)
     mcp.run()
 
 
