@@ -86,3 +86,21 @@ class GenProviderPlugin(Protocol):
     def is_available(self) -> bool: ...
 
     def generate(self, prompt: str, *, max_tokens: int = 128) -> str: ...
+
+
+@dataclass(frozen=True)
+class VerifyReport:
+    """Structured report from `verify_plugin(name, group)`."""
+
+    name: str
+    group: str
+    dist_name: str
+    dist_version: str
+    ok: bool
+    required_present: tuple[str, ...]
+    required_missing: tuple[str, ...]
+    optional_present: tuple[str, ...]
+    optional_missing: tuple[str, ...]
+    version_constraint: str | None
+    version_satisfied: bool
+    errors: tuple[str, ...]
