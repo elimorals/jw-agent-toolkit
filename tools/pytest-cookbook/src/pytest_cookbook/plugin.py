@@ -107,7 +107,12 @@ class CookbookItem(pytest.Item):
                 self.add_marker(pytest.mark.slow)
 
     def runtest(self) -> None:
-        local_ns: dict = {"__name__": "__cookbook__"}
+        # Pretend the block is a script living next to its source .md.
+        # This lets recipes refer to `__file__` (e.g. to add _common/ to sys.path).
+        local_ns: dict = {
+            "__name__": "__cookbook__",
+            "__file__": str(self.block.source_path),
+        }
         try:
             exec(compile(self.block.code, str(self.block.source_path), "exec"), local_ns)
         except Exception as exc:
