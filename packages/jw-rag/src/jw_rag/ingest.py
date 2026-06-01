@@ -25,9 +25,21 @@ from jw_core.parsers.jw_library_backup import (
 from jw_core.parsers.jwpub import parse_jwpub
 
 from jw_rag.chunker import chunk_paragraphs
+from jw_rag.chunkers import Chunker, get_chunker
 from jw_rag.store import VectorStore
 
 logger = logging.getLogger(__name__)
+
+
+def _resolve_chunker(chunker: Chunker | str | None) -> Chunker:
+    """Resolve an explicit chunker arg, env var, or default to paragraph.
+
+    Accepts a Chunker instance directly (for tests), a string name, or None.
+    """
+
+    if chunker is None or isinstance(chunker, str):
+        return get_chunker(chunker)
+    return chunker
 
 
 async def ingest_bible_chapter(
@@ -38,8 +50,10 @@ async def ingest_bible_chapter(
     language: str = "en",
     publication: str = "nwtsty",
     wol: WOLClient | None = None,
+    chunker: Chunker | str | None = None,
 ) -> int:
     """Ingest a single Bible chapter. Returns the number of chunks added."""
+    _chunker = _resolve_chunker(chunker)
     owned = False
     if wol is None:
         wol = WOLClient()
@@ -51,7 +65,7 @@ async def ingest_bible_chapter(
             await wol.aclose()
 
     article = parse_article(html)
-    chunks = chunk_paragraphs(
+    chunks = _chunker.chunk(
         article.paragraphs,
         source_id=f"bible:{book_num}:{chapter}:{language}",
         metadata={
@@ -65,7 +79,7 @@ async def ingest_bible_chapter(
         },
     )
     store.add(chunks)
-    logger.info(f"Ingested Bible {book_num}:{chapter} ({language}) — {len(chunks)} chunks")
+    logger.info(f"Ingested Bible {book_num}:{chapter} ({language}) — {len(chunks)} chunks using {_chunker.name}")
     return len(chunks)
 
 
@@ -75,8 +89,10 @@ async def ingest_article(
     *,
     wol: WOLClient | None = None,
     metadata: dict[str, Any] | None = None,
+    chunker: Chunker | str | None = None,
 ) -> int:
     """Ingest an arbitrary wol.jw.org article URL."""
+    _chunker = _resolve_chunker(chunker)
     owned = False
     if wol is None:
         wol = WOLClient()
@@ -88,7 +104,7 @@ async def ingest_article(
             await wol.aclose()
 
     article = parse_article(html)
-    chunks = chunk_paragraphs(
+    chunks = _chunker.chunk(
         article.paragraphs,
         source_id=f"article:{url}",
         metadata={
@@ -99,7 +115,7 @@ async def ingest_article(
         },
     )
     store.add(chunks)
-    logger.info(f"Ingested article {url!r} — {len(chunks)} chunks")
+    logger.info(f"Ingested article {url!r} — {len(chunks)} chunks using {_chunker.name}")
     return len(chunks)
 
 
