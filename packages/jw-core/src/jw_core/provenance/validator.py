@@ -159,6 +159,26 @@ class ProvenanceValidator:
             notes=["sha256 mismatch"],
         )
 
+        try:
+            import time
+
+            from jw_core.telemetry import get_telemetry
+
+            tel = get_telemetry()
+            if tel.enabled:
+                tel._state.setdefault("provenance_events", []).append(  # noqa: SLF001
+                    {
+                        "kind": "provenance_drift",
+                        "url": citation.url,
+                        "delta_chars": delta,
+                        "original_accessed_at": record.accessed_at,
+                        "ts": time.time(),
+                    }
+                )
+                tel._save()  # noqa: SLF001
+        except Exception:  # noqa: BLE001
+            pass
+
         if self._nli_provider is not None:
             verdict.nli_rerun = await self._maybe_rerun_nli(citation, canonical_current)
 
