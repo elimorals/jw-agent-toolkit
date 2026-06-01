@@ -807,6 +807,35 @@ prueba la generalidad. CLAUDE.md autogenerado per dominio activo.
 - ✅ Cero LLM real en CI: `JW_GEN_PROVIDER=fake` por default; production wiring opt-in.
 - ✅ Security fix de F40 wiki_writer: parseo YAML estricto fail-closed (vs substring match bypaseable).
 
+## Fase 42 — scaffolding
+
+- **Estado**: Estable (2026-06-01).
+- **Spec**: `docs/superpowers/specs/2026-06-01-fase-42-scaffolding-design.md`.
+- **Plan**: `docs/superpowers/plans/2026-06-01-fase-42-scaffolding-plan.md`.
+- **Guía**: `docs/guias/scaffolding.md`.
+
+Dos entregables. **(a)** `create-jw-agent`: scaffolder standalone publicable a
+PyPI que genera proyectos plugin listos para CI en <10 min, cableando los
+entry-points de la Fase 41 desde el primer commit. Soporta 5 tipos (`agent`,
+`parser`, `embedder`, `vlm`, `gen`), valida nombres PEP 503 (rechaza prefijo
+`jw-*`, reservados core, casing/shape inválido), i18n CLI auto-detectado
+(`en`/`es`/`pt` con paridad de claves garantizada por test) y opt-in
+`--check-pypi`. **(b)** Cookbook ejecutable: 12 recetas Markdown verificadas
+por un plugin nuevo `pytest-cookbook` que detecta bloques ` ```python ` con
+markers `# test`, `# test slow`, `# test skip-until-fase=N`. CLI `jw create-agent`
+es un thin-wrapper. Defensa en profundidad path-traversal: validación temprana
+en `RenderContext.build`, sanitización en `_safe_replace_value` (rechaza `/`,
+`\`, `..`, `.`) y verificación final con `Path.resolve()` + `relative_to(root)`.
+
+### Cobertura de tests
+
+- ✅ **create-jw-agent**: validación PEP 503 + i18n parity (3 idiomas) + render security (5 path-traversal regressions) + golden snapshots parametrizados sobre 5 templates + CLI no-network guarantee.
+- ✅ **pytest-cookbook plugin**: parsing de fences + marker injection + `__file__` inyectado en `exec()` namespace.
+- ✅ **Cookbook**: 10 recetas pasan (01-08, 10, 11) + 2 skip por marker `skip-until-fase` (09 F43-pendiente, 12 F47-pendiente).
+- ✅ CI: nuevos jobs `cookbook-tests` y `create-jw-agent` (E2E scaffold smoke + assertion de archivos clave).
+- ✅ Trusted publishing workflow OIDC (`.github/workflows/publish-create-jw-agent.yml`) on tag `create-jw-agent-v*`, verifica match tag↔pyproject version.
+- ✅ Astro site: el glob `**/*.md` en `website/src/content.config.ts` ya indexa `docs/cookbook/*.md` sin cambios.
+
 ## Fase 41 — plugin-sdk
 
 - **Estado**: Estable (2026-06-01).

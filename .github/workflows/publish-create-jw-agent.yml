@@ -1,0 +1,47 @@
+name: publish-create-jw-agent
+on:
+  push:
+    tags:
+      - "create-jw-agent-v*"
+
+# PyPI trusted publishing (OIDC) — no API tokens stored as secrets.
+# Configure on PyPI: pending publisher → publisher = GitHub Actions,
+#   repo = eliascipre/jw-agent-toolkit, workflow = publish-create-jw-agent.yml
+#   environment = pypi-publish-create-jw-agent
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-publish:
+    name: Build wheel + publish to PyPI via OIDC
+    runs-on: ubuntu-latest
+    environment: pypi-publish-create-jw-agent
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv python install 3.13
+
+      - name: Verify tag matches package version
+        run: |
+          # Extract version from tag (create-jw-agent-vX.Y.Z → X.Y.Z)
+          TAG_VERSION="${GITHUB_REF_NAME#create-jw-agent-v}"
+          PKG_VERSION=$(grep -m1 '^version =' packages/create-jw-agent/pyproject.toml \
+            | sed -E 's/version = "(.+)"/\1/')
+          if [[ "$TAG_VERSION" != "$PKG_VERSION" ]]; then
+            echo "ERROR: tag $TAG_VERSION != pyproject version $PKG_VERSION"
+            exit 1
+          fi
+
+      - name: Build
+        run: |
+          cd packages/create-jw-agent
+          uv build
+
+      - name: Publish to PyPI
+        # uv publish supports trusted-publishing via env var.
+        env:
+          UV_PUBLISH_TOKEN: ""  # explicitly empty; rely on OIDC
+        run: |
+          cd packages/create-jw-agent
+          uv publish --trusted-publishing always

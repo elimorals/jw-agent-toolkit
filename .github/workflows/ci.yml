@@ -197,3 +197,35 @@ jobs:
       - run: uv pip install -e packages/jw-core/tests/fixtures/plugin_sample
       - run: uv run pytest packages/jw-core/tests/test_plugins_*.py -v
       - run: uv run jw plugins list --json | head -30
+
+  cookbook-tests:
+    name: Cookbook recipes (executable Markdown blocks)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv python install 3.13
+      - run: uv sync --all-packages
+      - run: uv run pytest --cookbook-dir=docs/cookbook docs/cookbook/ -v
+
+  create-jw-agent:
+    name: create-jw-agent (scaffolder + golden snapshots)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv python install 3.13
+      - run: uv sync --all-packages
+      - run: uv run pytest packages/create-jw-agent/tests/ -v
+      - run: uv run pytest tools/pytest-cookbook/tests/ -v
+      # Smoke E2E: scaffold + verify the generated project's first commit is CI-green.
+      - name: E2E scaffold smoke
+        run: |
+          mkdir -p /tmp/smoke
+          uv run create-jw-agent demo-plugin --type=agent --lang=en \
+            --output-dir=/tmp/smoke/demo-plugin --quiet
+          test -f /tmp/smoke/demo-plugin/pyproject.toml
+          test -f /tmp/smoke/demo-plugin/.github/workflows/ci.yml
+          test -f /tmp/smoke/demo-plugin/src/demo_plugin/agent.py
