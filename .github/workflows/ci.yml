@@ -184,3 +184,16 @@ jobs:
         with:
           name: chunker-bench-report
           path: chunker-bench.md
+
+  plugin-sdk:
+    name: Plugin SDK (e2e fixture install, offline)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv python install 3.13
+      - run: uv sync --all-packages
+      - run: uv pip install -e packages/jw-core/tests/fixtures/plugin_sample
+      - run: uv run pytest packages/jw-core/tests/test_plugins_*.py -v
+      - run: uv run jw plugins list --json | head -30
