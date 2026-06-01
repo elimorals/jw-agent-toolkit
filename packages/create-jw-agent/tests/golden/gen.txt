@@ -1,0 +1,188 @@
+=== .github/workflows/ci.yml ===
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv python install 3.13
+      - run: uv sync
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest -v
+
+=== .gitignore ===
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+dist/
+build/
+*.egg-info/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+=== Makefile ===
+.PHONY: install test lint format ci
+
+install:
+	uv sync
+
+test:
+	uv run pytest -v
+
+lint:
+	uv run ruff check .
+
+format:
+	uv run ruff format .
+
+ci: lint test
+
+=== README.md ===
+# my-gen
+
+An agent plugin for [`jw-agent-toolkit`](https://github.com/eliascipre/jw-agent-toolkit) (Fase 41 plugin SDK).
+
+## Install (editable)
+
+```bash
+uv sync
+uv run pytest
+```
+
+## Verify discovery
+
+```bash
+uv pip install -e .
+uv run jw plugins list
+uv run jw plugins verify my_gen
+```
+
+## Implement your logic
+
+Edit `src/my_gen/agent.py`. The stub returns a placeholder finding;
+replace with real calls to `jw-core` / `jw-rag` / `jw-agents`.
+
+See [cookbook recipes](https://github.com/eliascipre/jw-agent-toolkit/tree/main/docs/cookbook)
+for copy-pasteable examples.
+
+## Scope reminder
+
+`jw-agent-toolkit` is 100% for Jehovah's Witnesses publications. Build plugins
+that serve the JW community: meeting prep, apologetics, ministry tools,
+specialized parsers for JW formats, etc.
+
+## License
+
+GPL-3.0
+
+=== pyproject.toml ===
+[project]
+name = "my-gen"
+version = "0.1.0"
+description = "A generation provider plugin for jw-agent-toolkit."
+readme = "README.md"
+requires-python = ">=3.13"
+license = "GPL-3.0"
+dependencies = [
+    "jw-core>=2.3,<3.0",
+]
+
+[project.entry-points."jw_agent_toolkit.gen_providers"]
+my_gen = "my_gen.gen:My_genGen"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.7",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/my_gen"]
+
+=== src/my_gen/__init__.py ===
+"""my-gen — generation provider plugin for jw-agent-toolkit."""
+
+from __future__ import annotations
+
+from my_gen.gen import My_genGen
+
+__all__ = ["My_genGen"]
+__version__ = "0.1.0"
+
+=== src/my_gen/gen.py ===
+"""my-gen — stub generation provider. Replace with real LLM integration.
+
+Required Protocol shape:
+  - name: str
+  - is_available() -> bool
+  - generate(prompt: str, *, max_tokens: int = 128) -> str
+"""
+
+from __future__ import annotations
+
+
+class My_genGen:
+    name = "my_gen"
+
+    def is_available(self) -> bool:
+        return True
+
+    def generate(self, prompt: str, *, max_tokens: int = 128) -> str:
+        # Stub: returns deterministic placeholder. Replace with LLM call.
+        return f"my_gen[max_tokens={max_tokens}]: {prompt[:max_tokens]}"
+
+=== tests/__init__.py ===
+"""Tests for my-gen."""
+
+=== tests/conftest.py ===
+"""Shared fixtures for my-gen tests.
+
+By design these are deterministic and do NOT touch the network.
+Add your fakes here (FakeWOLClient, FakeEmbedder, etc.) as you grow.
+"""
+
+from __future__ import annotations
+
+=== tests/test_my_gen.py ===
+"""Tests for my-gen generation provider. Deterministic, no network."""
+
+from __future__ import annotations
+
+from my_gen.gen import My_genGen
+
+
+def test_attributes_present() -> None:
+    gen = My_genGen()
+    assert gen.name == "my_gen"
+
+
+def test_is_available() -> None:
+    assert My_genGen().is_available()
+
+
+def test_generate_returns_string() -> None:
+    out = My_genGen().generate("hello", max_tokens=10)
+    assert isinstance(out, str)
+
+
+def test_generate_respects_max_tokens() -> None:
+    out = My_genGen().generate("x" * 100, max_tokens=5)
+    assert isinstance(out, str)

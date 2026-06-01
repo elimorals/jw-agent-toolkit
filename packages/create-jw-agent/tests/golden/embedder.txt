@@ -1,0 +1,198 @@
+=== .github/workflows/ci.yml ===
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv python install 3.13
+      - run: uv sync
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest -v
+
+=== .gitignore ===
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+dist/
+build/
+*.egg-info/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+=== Makefile ===
+.PHONY: install test lint format ci
+
+install:
+	uv sync
+
+test:
+	uv run pytest -v
+
+lint:
+	uv run ruff check .
+
+format:
+	uv run ruff format .
+
+ci: lint test
+
+=== README.md ===
+# my-embedder
+
+An agent plugin for [`jw-agent-toolkit`](https://github.com/eliascipre/jw-agent-toolkit) (Fase 41 plugin SDK).
+
+## Install (editable)
+
+```bash
+uv sync
+uv run pytest
+```
+
+## Verify discovery
+
+```bash
+uv pip install -e .
+uv run jw plugins list
+uv run jw plugins verify my_embedder
+```
+
+## Implement your logic
+
+Edit `src/my_embedder/agent.py`. The stub returns a placeholder finding;
+replace with real calls to `jw-core` / `jw-rag` / `jw-agents`.
+
+See [cookbook recipes](https://github.com/eliascipre/jw-agent-toolkit/tree/main/docs/cookbook)
+for copy-pasteable examples.
+
+## Scope reminder
+
+`jw-agent-toolkit` is 100% for Jehovah's Witnesses publications. Build plugins
+that serve the JW community: meeting prep, apologetics, ministry tools,
+specialized parsers for JW formats, etc.
+
+## License
+
+GPL-3.0
+
+=== pyproject.toml ===
+[project]
+name = "my-embedder"
+version = "0.1.0"
+description = "An embedder plugin for jw-agent-toolkit."
+readme = "README.md"
+requires-python = ">=3.13"
+license = "GPL-3.0"
+dependencies = [
+    "jw-core>=2.3,<3.0",
+    "numpy>=1.26",
+]
+
+[project.entry-points."jw_agent_toolkit.embedders"]
+my_embedder = "my_embedder.embedder:My_embedderEmbedder"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.7",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/my_embedder"]
+
+=== src/my_embedder/__init__.py ===
+"""my-embedder — embedder plugin for jw-agent-toolkit."""
+
+from __future__ import annotations
+
+from my_embedder.embedder import My_embedderEmbedder
+
+__all__ = ["My_embedderEmbedder"]
+__version__ = "0.1.0"
+
+=== src/my_embedder/embedder.py ===
+"""my-embedder — stub embedder. Replace with real model logic.
+
+Required Protocol shape (Fase 41 capabilities matrix):
+  - name: str
+  - target: str  ("cpu" | "gpu" | "mlx")
+  - dim: int
+  - is_available() -> bool
+  - embed(texts: list[str]) -> np.ndarray of shape (N, dim)
+"""
+
+from __future__ import annotations
+
+import numpy as np
+
+
+class My_embedderEmbedder:
+    name = "my_embedder"
+    target = "cpu"
+    dim = 8
+
+    def is_available(self) -> bool:
+        return True
+
+    def embed(self, texts: list[str]) -> np.ndarray:
+        # Stub: returns zero vectors. Replace with real model call.
+        return np.zeros((len(texts), self.dim), dtype=np.float32)
+
+=== tests/__init__.py ===
+"""Tests for my-embedder."""
+
+=== tests/conftest.py ===
+"""Shared fixtures for my-embedder tests.
+
+By design these are deterministic and do NOT touch the network.
+Add your fakes here (FakeWOLClient, FakeEmbedder, etc.) as you grow.
+"""
+
+from __future__ import annotations
+
+=== tests/test_my_embedder.py ===
+"""Tests for my-embedder embedder. Deterministic, no network, no model download."""
+
+from __future__ import annotations
+
+from my_embedder.embedder import My_embedderEmbedder
+
+
+def test_attributes_present() -> None:
+    emb = My_embedderEmbedder()
+    assert emb.name
+    assert emb.target in {"cpu", "gpu", "mlx"}
+    assert emb.dim > 0
+
+
+def test_is_available() -> None:
+    assert My_embedderEmbedder().is_available()
+
+
+def test_embed_returns_correct_shape() -> None:
+    emb = My_embedderEmbedder()
+    vecs = emb.embed(["hello", "world", "foo"])
+    assert vecs.shape == (3, emb.dim)
+
+
+def test_embed_handles_empty_list() -> None:
+    vecs = My_embedderEmbedder().embed([])
+    assert vecs.shape[0] == 0
