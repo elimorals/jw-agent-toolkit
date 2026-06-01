@@ -20,12 +20,22 @@ import typer
 
 from jw_brain.backends import get_backend
 from jw_brain.config import default_config, load_brain_config, write_default_config
+from jw_brain.multi_tenant import (
+    load_registry,
+    register_brain,
+    resolve_alias,
+)
 
 brain_app = typer.Typer(help="Second-brain operations (Fase 49).", no_args_is_help=True)
 
 
 def _resolve_brain_path(brain: Path | None) -> Path:
     if brain is not None:
+        b_str = str(brain)
+        if "/" not in b_str and "\\" not in b_str and not Path(b_str).exists():
+            aliased = resolve_alias(b_str)
+            if aliased is not None:
+                return aliased
         return Path(brain).expanduser().resolve()
     env = os.environ.get("JW_BRAIN_HOME")
     if env:
@@ -65,11 +75,34 @@ def init_cmd(
     (vault / ".obsidian").mkdir(exist_ok=True)
 
     cfg_path = write_default_config(brain_path, domain=domain)
+
+    alias = brain_path.name
+    try:
+        register_brain(alias, brain_path)
+    except Exception:  # noqa: BLE001
+        pass
+
     typer.echo(f"Initialized brain at {brain_path}")
+    typer.echo(f"  alias:    {alias}")
     typer.echo(f"  domain:   {domain}")
     typer.echo(f"  vault:    {vault}")
     typer.echo(f"  config:   {cfg_path}")
     typer.echo("Drop raw files in raw/inbox/, then `jw brain compile --dry-run`.")
+
+
+@brain_app.command("list")
+def list_cmd() -> None:
+    """List brains registered in ~/.jw-brain/registry.toml."""
+
+    brains = load_registry()
+    if not brains:
+        typer.echo("(no brains registered — run `jw brain init` first)")
+        return
+    typer.echo(json.dumps(
+        {alias: str(path) for alias, path in brains.items()},
+        indent=2,
+        sort_keys=True,
+    ))
 
 
 @brain_app.command("status")
