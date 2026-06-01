@@ -1,0 +1,15 @@
+.PHONY: install test lint format ci
+
+install:
+	uv sync
+
+test:
+	uv run pytest -v
+
+lint:
+	uv run ruff check .
+
+format:
+	uv run ruff format .
+
+ci: lint test

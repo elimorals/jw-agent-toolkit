@@ -1,0 +1,46 @@
+"""{{ name }} — stub agent. Replace with real logic.
+
+See https://github.com/eliascipre/jw-agent-toolkit/tree/main/docs/cookbook
+for recipes showing how to call jw-core / jw-rag / jw-agents APIs.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+
+async def {{ module }}(
+    *,
+    question: str = "",
+    language: str = "en",
+    **kwargs: Any,
+) -> dict[str, Any]:
+    """Stub agent. Returns an AgentResult-shaped dict.
+
+    The Protocol requires:
+      - `__name__: str` (callables get this for free).
+      - async `__call__(**kwargs) -> AgentResult-like`.
+
+    Optional attributes can be attached after definition (cf. capabilities matrix
+    in docs/plugin-sdk/capabilities.md).
+    """
+
+    return {
+        "findings": [
+            {
+                "source": "stub",
+                "text": f"TODO: implement {{ module }} logic for {question!r}",
+                "citation": {
+                    "url": "https://wol.jw.org/",
+                    "title": "Placeholder citation",
+                    "metadata": {},
+                },
+            },
+        ],
+        "metadata": {"agent": "{{ module }}", "language": language},
+    }
+
+
+# Optional plugin attributes (detected via hasattr at use-site).
+{{ module }}.languages = ["en", "es", "pt"]  # type: ignore[attr-defined]
+{{ module }}.version = "0.1.0"  # type: ignore[attr-defined]
