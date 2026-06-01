@@ -778,3 +778,27 @@ Backend hardening incluido en la misma fase:
 
 - ✅ dist/ raw: ~20 KB, gzip: ~8 KB.
 - ✅ zip de release: 13 KB *(ceiling pactado: 800 KB; 98% headroom).*
+
+## Fase 40 — content-provenance
+
+- **Estado**: Estable (2026-05-31).
+- **Spec**: `docs/superpowers/specs/2026-05-31-fase-40-content-provenance-design.md`.
+- **Plan**: `docs/superpowers/plans/2026-05-31-fase-40-content-provenance-plan.md`.
+- **Guía**: `docs/guias/content-provenance.md`.
+
+Añade trazabilidad reproducible al passage citado por cada agente.
+Cuatro claves convencionales en `Citation.metadata`
+(`published_date`, `accessed_at`, `content_hash`, `revision`) +
+`ProvenanceValidator` que re-fetcha y compara hashes. Integra con Fase
+39 para re-correr NLI al detectar cambio. CLI `jw provenance check` +
+MCP `verify_provenance`. Telemetría opt-in via Fase 9.
+
+Encaja en la taxonomía de cuatro capas L0–L3 — Fase 40 ocupa L2
+(fidelidad de contenido), complementando L0/L1 (Fase 23) y L3 (Fase 39).
+
+### Cobertura de tests
+
+- ✅ **42 tests provenance nuevos**: 3 errors + 15 models + 12 hashing + 9 validator + 5 NLI re-run + 9 propagation + 2 drift telemetry + 3 backwards-compat + 5 CLI + 4 MCP tool.
+- ✅ Cero regresiones en los 2079+ tests existentes (incluye protocol contract: tool MCP `verify_provenance` registrada).
+- ✅ Sin nuevas deps: reusa `httpx` (Fase 23) + Pydantic 2 + stdlib `hashlib`/`unicodedata`.
+- ✅ Backwards-compat: `AgentResult`s pre-Fase 40 producen verdict `no_record` sin llamar al fetcher.

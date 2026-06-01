@@ -275,3 +275,7 @@ curl -s http://localhost:8765/healthz
 ### Fase 38 — jw-gen (séptimo paquete, generación ilustrativa)
 
 | Fase 38 (jw-gen) | ✅ Nuevo | Política aprobada: "Solo personal/ilustrativo + presentaciones/discursos. Watermark obligatorio. NO emulación contenido oficial JW." Implementada en `packages/jw-gen/src/jw_gen/{policy,safety,i18n}.py`. Property test de 100 prompts adversarios en CI. CLI `jw gen image/audio/video`, MCP tool `generate_illustration`, audit JSONL en `~/.jw-gen/audit.log` (prompt sólo como sha256). |
+
+### Fase 40 — content-provenance (L2 fidelidad de contenido)
+
+| Fase 40 (content-provenance) | ✅ Nuevo | `packages/jw-core/src/jw_core/provenance/` (5 módulos: errors, models, hashing, validator, propagation) + 4 claves convencionales en `Citation.metadata` (`published_date`, `accessed_at`, `content_hash`, `revision`) + CLI `jw provenance check` + MCP `verify_provenance` + integración opt-in con Fase 39 (NLI re-run en drift) + telemetría `provenance_drift` opt-in. Ocupa L2 (fidelidad del texto) entre Fase 23 (L0/L1: URL + catálogo) y Fase 39 (L3: entailment). Backwards compat: legacy AgentResults → verdict `no_record`. |

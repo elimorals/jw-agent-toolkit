@@ -31,6 +31,7 @@ Para colaboradores nuevos y para tomar decisiones de diseño con criterio.
 Orientadas a casos de uso. Cada una es autocontenida con código de ejemplo.
 
 - [Fidelidad NLI en runtime](guias/fidelity-nli.md) — Fase 39: verificación NLI claim/premise sobre cada `Finding`; 5 providers (Claude / OpenAI / DeBERTa / Ollama / Fake) con `FakeNLI` siempre disponible; CLI/MCP `--fidelity {off,warn,reject}`.
+- [Content provenance (Fase 40)](guias/content-provenance.md) — trazabilidad reproducible del texto citado: 4 claves en `Citation.metadata` + `ProvenanceValidator` que re-fetcha y compara hashes + integración opt-in con Fase 39. CLI `jw provenance check` + MCP `verify_provenance`.
 - [Extensión WOL para el navegador](guias/wol-browser-ext.md) — Fase 48: extensión Chrome/Edge/Firefox que añade botones inline en `wol.jw.org` (📖 Explicar / 🔗 Refs / 📝 Obsidian). 100% local, 3 capas de defensa contra requests externos.
 - [Resolver citas bíblicas](guias/resolver-citas-biblicas.md) — Usar `parse_reference`, manejar idiomas, construir URLs.
 - [Usar los clientes HTTP](guias/usar-clientes-http.md) — CDN, WOL, Mediator, PubMedia, TopicIndex: patrones comunes.
