@@ -280,6 +280,10 @@ curl -s http://localhost:8765/healthz
 
 | Fase 40 (content-provenance) | ✅ Nuevo | `packages/jw-core/src/jw_core/provenance/` (5 módulos: errors, models, hashing, validator, propagation) + 4 claves convencionales en `Citation.metadata` (`published_date`, `accessed_at`, `content_hash`, `revision`) + CLI `jw provenance check` + MCP `verify_provenance` + integración opt-in con Fase 39 (NLI re-run en drift) + telemetría `provenance_drift` opt-in. Ocupa L2 (fidelidad del texto) entre Fase 23 (L0/L1: URL + catálogo) y Fase 39 (L3: entailment). Backwards compat: legacy AgentResults → verdict `no_record`. |
 
+### Fase 41 — plugin-sdk (extension points para la comunidad)
+
+| Fase 41 (plugin-sdk) | ✅ Nuevo | `packages/jw-core/src/jw_core/plugins/` (7 módulos: errors, contracts, policy, registry, verify, factory + 5 Protocols runtime_checkable) + discovery via PEP 621 entry_points sobre 5 groups (`agents`, `parsers`, `embedders`, `vlm_providers`, `gen_providers`) + conflict policy default `NAMESPACED` + integración en `jw-eval.default_agent_registry`, `jw-rag.embed_providers.factory`, `jw-mcp.server.register_plugin_tools` + CLI `jw plugins {list,verify,disable}` + fixture `plugin_sample` para CI offline. Habilita Fase 49 (BrainDomain plugins) y abre el toolkit a contribuciones externas sin forkear el monorepo. |
+
 ### Fase 45 — semantic-chunking (chunking por unidad de pensamiento)
 
 | Fase 45 (semantic-chunking) | ✅ Nuevo | `packages/jw-rag/src/jw_rag/chunkers/` subpackage (paragraph/semantic/llm + protocol + fakes) + `continuation_markers.json` es/en/pt + `get_chunker()` router con env var `JW_CHUNKER` + `LLMChunker` con cache hit >95% en `~/.jw-agent-toolkit/chunk-cache/` + benchmark NDCG@10 (`jw_eval.bench.ndcg/chunker_bench`) con bootstrap CI95 + CLI `jw chunker-bench` con per-language ≥10% lift gate + MCP `set_chunker`. Backwards-compat: legacy `jw_rag.chunker.chunk_paragraphs` byte-stable via façade. |

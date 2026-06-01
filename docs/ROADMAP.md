@@ -779,6 +779,31 @@ Backend hardening incluido en la misma fase:
 - ✅ dist/ raw: ~20 KB, gzip: ~8 KB.
 - ✅ zip de release: 13 KB *(ceiling pactado: 800 KB; 98% headroom).*
 
+## Fase 41 — plugin-sdk
+
+- **Estado**: Estable (2026-06-01).
+- **Spec**: `docs/superpowers/specs/2026-05-31-fase-41-plugin-sdk-design.md`.
+- **Plan**: `docs/superpowers/plans/2026-05-31-fase-41-plugin-sdk-plan.md`.
+- **Guía**: `docs/plugin-sdk/{overview,security,capabilities,authoring}.md`.
+
+Nuevo subpaquete `jw_core.plugins` con discovery via PEP 621 entry
+points sobre 5 extension points: `agents`, `parsers`, `embedders`,
+`vlm_providers`, `gen_providers`. `verify_plugin()` chequea contracto +
+versión. Conflict policy por default `NAMESPACED` (ambigüedad explota
+explícita; configurable via `JW_PLUGINS_CONFLICT_POLICY`). Plugins
+descubiertos se integran en `jw-eval.default_agent_registry`,
+`jw-rag.embed_providers` y `jw-mcp.register_plugin_tools`. CLI
+`jw plugins list/verify/disable`. CI offline con fixture `plugin_sample`.
+
+### Cobertura de tests
+
+- ✅ **59 tests plugin-SDK nuevos**: 5 errors + 9 contracts + 13 policy + 8 registry + 12 verify + 6 factory + 6 e2e (subprocess venv) + integración (3 jw-eval + 2 jw-rag + 2 jw-mcp + 6 jw-cli).
+- ✅ Cero regresiones en 2030+ tests existentes.
+- ✅ Sin red en tests del registry: `entry_points` y `_distribution_for_entry_point` monkey-patched.
+- ✅ Cero deps de runtime (usa `importlib.metadata` y `packaging` del stdlib-adjacent).
+- ✅ Fail-soft por default; `JW_PLUGINS_STRICT=1` aborta.
+- ✅ Boundary de seguridad documentada (no sandboxing real; mismo modelo de confianza que `pip install`).
+
 ## Fase 45 — semantic-chunking
 
 - **Estado**: Estable (2026-05-31).
