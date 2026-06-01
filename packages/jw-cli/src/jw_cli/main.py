@@ -57,6 +57,7 @@ from jw_cli.commands import (
 from jw_brain.cli import brain_app
 from jw_cli.commands.chunker_bench import chunker_bench_cmd
 from jw_cli.commands.constrained import constrained_app
+from jw_cli.commands.create_agent import create_agent_cmd
 from jw_cli.commands.image import image_app
 from jw_cli.commands.plugins import app as plugins_app
 from jw_cli.commands.provenance import provenance_app
@@ -101,6 +102,11 @@ app.add_typer(provenance_app, name="provenance", help="Content provenance checks
 app.add_typer(plugins_app, name="plugins", help="Manage community plugins (Fase 41).")
 app.add_typer(brain_app, name="brain", help="Second-brain (Fase 49).")
 app.command(name="chunker-bench", help="Benchmark chunker variants (Fase 45).")(chunker_bench_cmd)
+app.command(
+    name="create-agent",
+    help="Scaffold a new plugin (delegates to create-jw-agent — Fase 42).",
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+)(create_agent_cmd)
 app.command(name="apologetics")(apologetics_module.apologetics_cmd)
 
 
