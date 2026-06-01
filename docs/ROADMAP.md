@@ -779,6 +779,28 @@ Backend hardening incluido en la misma fase:
 - ✅ dist/ raw: ~20 KB, gzip: ~8 KB.
 - ✅ zip de release: 13 KB *(ceiling pactado: 800 KB; 98% headroom).*
 
+## Fase 45 — semantic-chunking
+
+- **Estado**: Estable (2026-05-31).
+- **Spec**: `docs/superpowers/specs/2026-05-31-fase-45-semantic-chunking-design.md`.
+- **Plan**: `docs/superpowers/plans/2026-05-31-fase-45-semantic-chunking-plan.md`.
+- **Guía**: `docs/guias/semantic-chunking.md`.
+
+Nuevo subpackage `jw_rag.chunkers` (paragraph/semantic/llm + Chunker
+Protocol + fakes), catálogo multilingüe `continuation_markers.json`
+(es/en/pt) en `jw-core/data/`, router `get_chunker()` con env var
+`JW_CHUNKER`, `LLMChunker` con cache de acciones por content hash. CLI
+`jw chunker-bench` con bootstrap CI95 y per-language ≥10% lift gate.
+MCP `set_chunker` tool. Backwards-compat byte-stable: `jw_rag.chunker`
+sigue siendo façade re-exportando `Chunk` + `chunk_paragraphs`.
+
+### Cobertura de tests
+
+- ✅ **43 tests chunkers nuevos**: 6 backcompat + 21 markers + 7 NDCG + 4 bench + 3 semantic-es + 3 semantic-en + 2 semantic-pt + 8 closure + 5 LLM + 5 LLM cache + 6 env_var.
+- ✅ Cero regresiones en suite jw-rag/jw-eval/jw-mcp.
+- ✅ Sin nuevas deps de runtime: PyYAML ya estaba (eval).
+- ✅ Multilingual: es/en/pt con fixtures dedicadas; fallback gracioso a paragraph cuando detect_language() falla.
+
 ## Fase 40 — content-provenance
 
 - **Estado**: Estable (2026-05-31).
