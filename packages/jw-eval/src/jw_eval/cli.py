@@ -11,6 +11,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from jw_core.plugins import get_plugins
 from jw_eval.models import LayerName, SuiteReport
 from jw_eval.suite import Suite
 
@@ -65,6 +66,17 @@ def default_agent_registry() -> dict[str, Callable[[dict[str, Any]], Any]]:
         # populated ConcordanceStore — not wireable as a stateless callable
         # here. Cases targeting it remain skipped (annotated in their YAMLs).
     }
+
+    # Fase 41 — merge community plugins. Core agents win; plugin sharing a
+    # name is silently skipped (still accessible via namespaced lookup).
+    for name, spec in get_plugins("jw_agent_toolkit.agents").items():
+        if name in registry:
+            continue
+        try:
+            registry[name] = _make_sync_wrapper(spec.resolve())
+        except Exception:  # noqa: BLE001
+            continue
+
     return registry
 
 
