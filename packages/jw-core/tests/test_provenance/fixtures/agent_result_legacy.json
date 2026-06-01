@@ -1,0 +1,30 @@
+{
+  "query": "Juan 3:16",
+  "agent_name": "verse_explainer",
+  "warnings": [],
+  "metadata": {"language": "es"},
+  "findings": [
+    {
+      "summary": "Juan 3:16 muestra el amor de Dios.",
+      "excerpt": "Porque Dios amó tanto al mundo",
+      "metadata": {"source": "verse_text"},
+      "citation": {
+        "url": "https://wol.jw.org/x",
+        "title": "Juan 3",
+        "kind": "verse",
+        "metadata": {}
+      }
+    },
+    {
+      "summary": "Otro hallazgo legacy.",
+      "excerpt": "another body",
+      "metadata": {"source": "topic_index"},
+      "citation": {
+        "url": "https://wol.jw.org/y",
+        "title": "Topic",
+        "kind": "article",
+        "metadata": {"language": "es"}
+      }
+    }
+  ]
+}
