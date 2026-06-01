@@ -148,6 +148,8 @@ _EXPECTED_TOOLS = {
     "run_constrained",
     # Phase 39 — NLI runtime fidelity
     "evaluate_nli",
+    # Phase 40 — Content provenance
+    "verify_provenance",
 }
 
 

@@ -1,12 +1,19 @@
-"""Stamp citations with the four conventional provenance keys."""
+"""Stamp citations with the four conventional provenance keys.
+
+Imports from `jw_agents.base` are deferred to function body to avoid the
+circular import that happens because `jw_agents.apologetics` itself
+imports `stamp_finding_text` at module load time.
+"""
 
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from jw_agents.base import Citation, Finding
 from jw_core.provenance.hashing import content_sha256
+
+if TYPE_CHECKING:
+    from jw_agents.base import Citation, Finding
 
 
 def _utcnow_iso() -> str:

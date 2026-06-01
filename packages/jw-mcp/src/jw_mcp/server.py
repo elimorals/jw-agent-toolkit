@@ -3266,6 +3266,33 @@ def run_constrained(
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Tool: verify_provenance (Fase 40)
+# ────────────────────────────────────────────────────────────────────────
+
+
+from jw_mcp.tools.provenance import verify_provenance as _verify_provenance_impl
+
+
+@mcp.tool
+async def verify_provenance(
+    agent_output: dict,
+    since: str | None = None,
+    with_nli: bool = False,
+) -> dict:
+    """Re-check that each citation's content_hash still matches the live page.
+
+    Returns a ProvenanceReport dict. Network-bound. Pass `since='2026-01-01'`
+    to skip recently-accessed citations. Pass `with_nli=True` to re-run
+    entailment on drifted text when Fase 39 is configured server-side.
+    """
+    return await _verify_provenance_impl(
+        agent_output,
+        since=since,
+        with_nli=with_nli,
+    )
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
 
