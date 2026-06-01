@@ -3324,6 +3324,58 @@ async def verify_provenance(
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Second-brain (Fase 49)
+# ────────────────────────────────────────────────────────────────────────
+
+
+from jw_brain.server import (
+    second_brain_compile as _sb_compile_impl,
+    second_brain_lint as _sb_lint_impl,
+    second_brain_query as _sb_query_impl,
+    second_brain_snapshot as _sb_snapshot_impl,
+    second_brain_status as _sb_status_impl,
+)
+
+
+@mcp.tool
+async def second_brain_status(brain_path: str) -> dict:
+    """Show second-brain stats (Fase 49). brain_path is the absolute path to the brain home."""
+    return await _sb_status_impl(brain_path)
+
+
+@mcp.tool
+async def second_brain_compile(
+    brain_path: str,
+    dry_run: bool = False,
+    language: str = "es",
+) -> dict:
+    """Run the second-brain compiler (Fase 49). Use dry_run=True to plan without mutating."""
+    return await _sb_compile_impl(brain_path, dry_run=dry_run, language=language)
+
+
+@mcp.tool
+async def second_brain_query(
+    brain_path: str,
+    question: str,
+    mode: str = "auto",
+) -> dict:
+    """Query the second-brain. mode: auto | wiki | graph | vector."""
+    return await _sb_query_impl(brain_path, question, mode=mode)
+
+
+@mcp.tool
+async def second_brain_lint(brain_path: str) -> dict:
+    """Lint the second-brain: orphan pages and (TODO) NLI cross-publication."""
+    return await _sb_lint_impl(brain_path)
+
+
+@mcp.tool
+async def second_brain_snapshot(brain_path: str, label: str | None = None) -> dict:
+    """Snapshot the graph backend to <brain>/snapshots/."""
+    return await _sb_snapshot_impl(brain_path, label=label)
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Plugin SDK integration (Fase 41)
 # ────────────────────────────────────────────────────────────────────────
 

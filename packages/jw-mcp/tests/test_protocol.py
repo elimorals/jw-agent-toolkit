@@ -152,6 +152,12 @@ _EXPECTED_TOOLS = {
     "verify_provenance",
     # Phase 45 — Semantic chunking
     "set_chunker",
+    # Phase 49 — Second-brain
+    "second_brain_status",
+    "second_brain_compile",
+    "second_brain_query",
+    "second_brain_lint",
+    "second_brain_snapshot",
 }
 
 
