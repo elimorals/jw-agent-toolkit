@@ -1,0 +1,24 @@
+{
+  "query": "Juan 3:16",
+  "agent_name": "verse_explainer",
+  "warnings": [],
+  "metadata": {"language": "es"},
+  "findings": [
+    {
+      "summary": "Juan 3:16 muestra el amor de Dios.",
+      "excerpt": "Porque Dios amó tanto al mundo que dio a su Hijo unigénito",
+      "metadata": {"source": "verse_text"},
+      "citation": {
+        "url": "https://wol.jw.org/es/wol/b/r4/lp-s/nwt/E/2024/43/3",
+        "title": "Juan 3",
+        "kind": "verse",
+        "metadata": {
+          "accessed_at": "2026-05-30T10:00:00+00:00",
+          "content_hash": "PLACEHOLDER_HASH_REPLACE_VIA_SCRIPT",
+          "published_date": null,
+          "revision": "rev. 2023"
+        }
+      }
+    }
+  ]
+}

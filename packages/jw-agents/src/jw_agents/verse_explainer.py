@@ -22,6 +22,7 @@ from jw_core.parsers.study_notes import (
     study_notes_for_verse,
 )
 from jw_core.parsers.verse import parse_verses
+from jw_core.provenance.propagation import stamp_finding_text
 
 from jw_agents.base import AgentResult, Citation, Finding
 
@@ -162,4 +163,6 @@ async def verse_explainer(
                 )
             )
 
+    for f in result.findings:
+        stamp_finding_text(f)
     return result

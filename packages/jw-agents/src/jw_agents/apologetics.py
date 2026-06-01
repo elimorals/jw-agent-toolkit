@@ -19,6 +19,7 @@ from jw_core.parsers.article import parse_article
 from jw_core.parsers.reference import parse_all_references
 from jw_core.parsers.study_notes import parse_study_notes, study_notes_for_verse
 from jw_core.parsers.verse import get_verse
+from jw_core.provenance.propagation import stamp_finding_text
 
 from jw_agents.base import AgentResult, Citation, Finding
 from jw_agents.research_topic import _flatten_search, _wol_url_from
@@ -268,6 +269,8 @@ async def apologetics(
                 )
             )
 
+    for f in result.findings:
+        stamp_finding_text(f)
     return result
 
 

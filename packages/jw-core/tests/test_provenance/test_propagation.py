@@ -102,3 +102,19 @@ def test_stamp_finding_text_passes_through_published_date_kwargs() -> None:
 
     assert cit.metadata["published_date"] == "2024-01-01"
     assert cit.metadata["revision"] == "rev. 2023"
+
+
+def test_verse_explainer_stamps_findings_through_excerpt() -> None:
+    """End-to-end-ish: a finding emitted from an agent body has provenance."""
+
+    cit = Citation(url="https://wol.jw.org/es/wol/b/r4/lp-s/nwt/E/2024/43/3", metadata={})
+    finding = Finding(
+        summary="Juan 3:16 muestra el amor de Dios.",
+        citation=cit,
+        excerpt="Porque Dios amó tanto al mundo que dio a su Hijo unigénito",
+    )
+    stamp_finding_text(finding, published_date=None, revision="rev. 2023")
+    record = finding.citation.metadata
+    assert "content_hash" in record
+    assert "accessed_at" in record
+    assert record["revision"] == "rev. 2023"
