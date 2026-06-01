@@ -19,6 +19,7 @@ members = [
     "packages/jw-finetune",
     "packages/jw-eval",
     "packages/jw-gen",
+    "packages/jw-brain",
 ]
 
 [tool.uv.sources]
@@ -30,6 +31,7 @@ jw-agents = { workspace = true }
 jw-finetune = { workspace = true }
 jw-eval = { workspace = true }
 jw-gen = { workspace = true }
+jw-brain = { workspace = true }
 
 [dependency-groups]
 dev = [
