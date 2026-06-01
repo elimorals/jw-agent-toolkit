@@ -9,6 +9,7 @@ dependencies = [
     "jw-core",
     "jw-eval",
     "jw-gen",
+    "jw-brain",
     "typer>=0.13.0",
     "rich>=13.9.0",
 ]
