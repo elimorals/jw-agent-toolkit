@@ -82,6 +82,24 @@ def init_cmd(
     except Exception:  # noqa: BLE001
         pass
 
+    # Generate CLAUDE.md from the active domain's NodeTypes/EdgeTypes.
+    try:
+        from jw_brain.domain.registry import discover_domains
+        from jw_brain.wiki.claude_md import write_claude_md
+
+        domains = discover_domains()
+        dom = domains.get(domain) or domains.get("tj")
+        cfg = load_brain_config(brain_path)
+        claude_md_path = cfg.vault / cfg.vault_namespace / "CLAUDE.md"
+        write_claude_md(
+            target_path=claude_md_path,
+            domain_name=getattr(dom, "name", domain),
+            nodes=list(getattr(dom, "nodes", [])),
+            edges=list(getattr(dom, "edges", [])),
+        )
+    except Exception as exc:  # noqa: BLE001
+        typer.echo(f"  warn:     CLAUDE.md autogen failed: {exc}", err=True)
+
     typer.echo(f"Initialized brain at {brain_path}")
     typer.echo(f"  alias:    {alias}")
     typer.echo(f"  domain:   {domain}")
