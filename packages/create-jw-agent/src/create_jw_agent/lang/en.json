@@ -1,0 +1,22 @@
+{
+  "cli.help.intro": "Scaffolder for jw-agent-toolkit plugins.",
+  "cli.arg.name": "Project name (kebab-case). No 'jw-' prefix.",
+  "cli.opt.type": "Plugin type to scaffold.",
+  "cli.opt.lang": "UI language for CLI messages (en/es/pt).",
+  "cli.opt.output": "Output directory (defaults to ./NAME).",
+  "cli.opt.jw_core": "jw-core version range for the generated pyproject.toml.",
+  "cli.opt.license": "License for the generated project.",
+  "cli.opt.check_pypi": "Verify the name is not taken on PyPI (requires network).",
+  "cli.opt.interactive": "Prompt for missing values.",
+  "cli.opt.quiet": "Suppress decorative output.",
+  "validate.invalid_name": "Invalid project name: {reason}",
+  "validate.pypi_taken": "Name {name!r} is already taken on PyPI.",
+  "render.target_exists": "Output directory {path} already exists. Use a fresh path.",
+  "render.created": "Created {n} files in {path}",
+  "next_steps.header": "Next steps:",
+  "next_steps.line1": "  cd {path}",
+  "next_steps.line2": "  uv sync",
+  "next_steps.line3": "  uv run pytest",
+  "next_steps.line4": "Then edit src/{module}/ to implement your plugin.",
+  "tagline": "100% for Jehovah's Witnesses publications. Scope is jw-agent-toolkit."
+}

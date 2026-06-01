@@ -1,0 +1,22 @@
+{
+  "cli.help.intro": "Gerador de plugins para jw-agent-toolkit.",
+  "cli.arg.name": "Nome do projeto (kebab-case). Sem prefixo 'jw-'.",
+  "cli.opt.type": "Tipo de plugin a gerar.",
+  "cli.opt.lang": "Idioma da interface CLI (en/es/pt).",
+  "cli.opt.output": "Diretório de saída (padrão ./NAME).",
+  "cli.opt.jw_core": "Faixa de versão de jw-core no pyproject.toml gerado.",
+  "cli.opt.license": "Licença do projeto gerado.",
+  "cli.opt.check_pypi": "Verifica que o nome não esteja em uso no PyPI (requer rede).",
+  "cli.opt.interactive": "Pergunta valores faltantes.",
+  "cli.opt.quiet": "Suprime saída decorativa.",
+  "validate.invalid_name": "Nome de projeto inválido: {reason}",
+  "validate.pypi_taken": "O nome {name!r} já está em uso no PyPI.",
+  "render.target_exists": "O diretório de saída {path} já existe. Use um caminho novo.",
+  "render.created": "Foram criados {n} arquivos em {path}",
+  "next_steps.header": "Próximos passos:",
+  "next_steps.line1": "  cd {path}",
+  "next_steps.line2": "  uv sync",
+  "next_steps.line3": "  uv run pytest",
+  "next_steps.line4": "Em seguida edite src/{module}/ para implementar seu plugin.",
+  "tagline": "100% para publicações das Testemunhas de Jeová. Escopo: jw-agent-toolkit."
+}
