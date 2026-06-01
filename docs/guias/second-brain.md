@@ -1,6 +1,17 @@
 # Second Brain (Fase 49)
 
-> Karpathy-style compiler + GraphRAG sobre el toolkit. Dominio TJ como referencia; cualquier otro dominio (finanzas, legal, médico) se conecta como plugin via Fase 41.
+> Karpathy-style compiler + GraphRAG sobre el toolkit. **Foco exclusivo del proyecto: publicaciones de los testigos de Jehová.** TJ es el único dominio que el toolkit empaqueta y mantiene.
+
+## Foco del proyecto (lectura obligatoria)
+
+**`jw-agent-toolkit` es 100% para publicaciones JW** (wol.jw.org, JWPUB, EPUBs de la organización, Watchtower, Despertad, libros de estudio, etc.). Eso no cambia con Fase 49.
+
+Lo que Fase 49 sí hace es **separar dos cosas que antes estaban mezcladas**:
+
+1. **El runtime** (compiler, grafo, wiki, lint) — lógica que en sí misma no contiene NodeType ni EdgeType específicos de TJ.
+2. **El dominio TJ** — las 6 NodeTypes (`Verse`, `Topic`, `Publication`, `Concept`, `Person`, `Place`) y 6 EdgeTypes (`CITED_IN`, `MENTIONS`, `EXPANDS`, `CROSS_REFERENCES`, `CONTRADICTS`, `ABOUT`) que sí codifican la estructura de la literatura JW.
+
+Esa separación es **una decisión de ingeniería**, no un cambio de scope.
 
 ## TL;DR
 
@@ -58,34 +69,33 @@ Para queries de multi-hop ("versículos en publicaciones que también citan X"),
 
 Mismo `GraphBackend` Protocol — el código de aplicación no cambia entre uno y otro.
 
-## Otros dominios (financial brain)
+## El fixture `financial_brain_plugin` — qué es y qué NO es
 
-El runtime de F49 **no asume el dominio TJ**. Un plugin externo declara su propio NodeType/EdgeType y se conecta vía Fase 41:
+En `packages/jw-brain/tests/fixtures/financial_brain_plugin/` hay un paquete Python pequeño que registra un `FinanceBrainDomain` con NodeTypes `Transaction`/`Vendor`/`Category`/`TaxYear`.
 
-```toml
-# jw-brain-finance-plugin/pyproject.toml
-[project.entry-points."jw_agent_toolkit.brain_domains"]
-finance = "jw_brain_finance.domain:FinanceBrainDomain"
-```
+**Aclaración obligatoria** (porque la prosa anterior podía confundir):
 
-```python
-class FinanceBrainDomain:
-    name = "finance"
-    nodes = [NodeSpec("Transaction", ...), NodeSpec("Vendor", ...), ...]
-    edges = [EdgeSpec("PAID_TO", ...), EdgeSpec("CATEGORIZED_AS", ...)]
-```
+- ❌ NO es una funcionalidad del producto.
+- ❌ NO es algo que el toolkit ofrece a usuarios finales.
+- ❌ NO está en el roadmap.
+- ❌ NO se distribuye, no se publica en PyPI, no se instala en producción.
+- ✅ Es **únicamente un test fixture** que vive bajo `tests/` y se carga solo durante el test que verifica el descubrimiento de plugins.
 
-Luego: `jw brain init --domain finance --brain ~/financial-brain`. El runtime carga el plugin, escribe `CLAUDE.md` con tu dominio, y arranca. **Cero código del toolkit modificado.**
+**Para qué existe**: probar que el runtime de F49 **no tiene TJ hardcoded en sitios que deberían ser dominio-agnósticos** (graph backend, wiki writer, compiler loop, query router, CLAUDE.md autogen). Sin un dominio distinto a TJ que sirva de "control", esa garantía no se puede demostrar — el test `test_domain_registry.py::test_plugin_domain_discovered_via_f41` falla si alguien introduce ese acoplamiento sin querer.
+
+**El proyecto sigue siendo 100% TJ.** Si en algún momento quisieras usar el runtime para tu propio uso personal en otro dominio, técnicamente podrías porque la arquitectura lo permite — pero eso sería **tu uso personal externo**, no parte del scope del toolkit ni una promesa de soporte de mi parte.
 
 ## Multi-tenant
 
 Cada brain es independiente. El registry global en `~/.jw-brain/registry.toml` mantiene el mapa alias → ruta absoluta. Auto-registro en cada `jw brain init`.
 
+El **caso TJ legítimo** del multi-tenant es separar contextos de estudio: por ejemplo un brain para estudio personal y otro para preparación de reuniones, ambos con dominio `tj` pero distinto vault Obsidian y distinto corpus en `raw/`.
+
 ```bash
-jw brain init --brain ~/jw-second-brain      # alias = "jw-second-brain"
-jw brain init --brain ~/financial-brain      # alias = "financial-brain"
-jw brain list                                # lista ambos
-jw brain status --brain jw-second-brain      # alias resuelve a path
+jw brain init --brain ~/jw-study-brain        # estudio personal
+jw brain init --brain ~/jw-meeting-brain      # preparación de reuniones
+jw brain list                                 # lista ambos
+jw brain status --brain jw-study-brain        # alias resuelve a path
 ```
 
 ## Cómo se integra con las fases previas

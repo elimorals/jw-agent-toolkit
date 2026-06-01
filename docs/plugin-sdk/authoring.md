@@ -1,5 +1,9 @@
 # Plugin SDK — Authoring a Plugin
 
+> **Aclaración de scope**: `jw-agent-toolkit` es 100% para publicaciones JW (wol.jw.org, JWPUB, Watchtower, etc.). El plugin SDK existe para que la **comunidad JW** pueda extender el toolkit sin forkearlo — por ejemplo, un agente especializado en preparación del Salón del Reino, un parser para un formato local de archivo de un publicador, un embedder fine-tuned sobre el corpus JW.
+>
+> El fixture `plugin_sample` (este doc lo menciona como template) está bajo `tests/fixtures/` precisamente porque su único propósito es **probar la maquinaria de descubrimiento**, no servir de ejemplo de producto. Análogamente, el fixture `financial_brain_plugin` que vive en `packages/jw-brain/tests/fixtures/` es **un control arquitectónico** — sirve para garantizar que el runtime de F49 no tiene "TJ hardcoded" donde no debería. NO es una sugerencia de roadmap ni una invitación a otros dominios.
+
 ## 1. Crear el paquete
 
 ```bash
