@@ -37,3 +37,6 @@ def vcr_config() -> dict[str, object]:
         # Default to replay-only; re-record explicitly via --record-mode=rewrite.
         "record_mode": "none",
     }
+
+from tests.conftest_plugins import _clear_plugin_cache  # noqa: F401
+
