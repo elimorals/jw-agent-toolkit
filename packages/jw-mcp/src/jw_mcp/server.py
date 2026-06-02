@@ -999,6 +999,7 @@ async def apologetics(
     use_rag: bool = True,
     rag_top_k: int = 5,
     fidelity: str = "warn",
+    trace: bool = False,
 ) -> dict[str, Any]:
     """Answer a doctrinal question with citations only from jw.org sources.
 
@@ -1010,8 +1011,17 @@ async def apologetics(
       - "warn":   (default) annotate each finding with nli_verdict/score/provider
                   and append a warning if score < 0.7 or verdict != entails.
       - "reject": same as warn but DROP low-fidelity findings from the result.
+
+    Setting `trace=True` (Fase 43) writes a JSONL trace under $JW_TRACE_DIR
+    and surfaces `trace_id` plus `trace_events_path` in the returned dict's
+    `metadata` so a follow-up `get_trace(trace_id)` call can replay it.
     """
     from jw_agents.fidelity_wrap import fidelity_wrap
+    from jw_agents.tracing import use_tracer
+    from jw_agents.tracing._flag import (
+        resolve_trace_target,
+        tracer_from_target,
+    )
 
     rag_store = None
     if use_rag:
@@ -1026,16 +1036,38 @@ async def apologetics(
             on_fail="reject" if fidelity == "reject" else "warn",
         )(apologetics_agent)
 
-    result = await callable_agent(
-        question,
-        language=language,
-        cdn=_get_cdn(),
-        wol=_get_wol(),
-        rag_store=rag_store,
-        rag_top_k=rag_top_k,
-        web_top_k=web_top_k,
-    )
-    return result.to_dict()
+    tracer = None
+    target = None
+    if trace:
+        target = resolve_trace_target("DEFAULT", agent="apologetics")
+        tracer = tracer_from_target(target, agent="apologetics")
+
+    async def _run() -> Any:
+        return await callable_agent(
+            question,
+            language=language,
+            cdn=_get_cdn(),
+            wol=_get_wol(),
+            rag_store=rag_store,
+            rag_top_k=rag_top_k,
+            web_top_k=web_top_k,
+        )
+
+    if tracer is None:
+        result = await _run()
+    else:
+        with use_tracer(tracer), tracer.run(
+            input_kwargs={"question": question}, language=language
+        ):
+            result = await _run()
+
+    payload = result.to_dict()
+    if tracer is not None:
+        payload.setdefault("metadata", {})
+        payload["metadata"]["trace_id"] = str(tracer.trace_id)
+        if target is not None and target != "-":
+            payload["metadata"]["trace_events_path"] = str(target)
+    return payload
 
 
 # ────────────────────────────────────────────────────────────────────────
@@ -3425,6 +3457,61 @@ def register_plugin_tools(mcp_instance: _Any_plugins) -> None:
                 "skipping plugin agent %r — MCP refused tool registration", plug_name
             )
             continue
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Tool: get_trace (Phase 43)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def get_trace(trace_id: str) -> dict[str, Any]:
+    """Return the parsed events + envelope for a previously run trace.
+
+    Looks under $JW_TRACE_DIR. Matches against the trace_id field embedded
+    in the envelope, NOT the filename — filenames are auto-generated but the
+    UUID inside the envelope is the source of truth.
+    """
+
+    import json as _json
+    from pathlib import Path as _Path
+    from uuid import UUID
+
+    from jw_agents.tracing._flag import _default_root
+
+    try:
+        UUID(trace_id)
+    except ValueError as exc:
+        raise ValueError(f"trace_id is not a UUID: {trace_id!r}") from exc
+
+    root: _Path = _default_root()
+    if not root.exists():
+        return {"error": f"trace dir not found: {root}"}
+
+    candidates = sorted(
+        root.glob("*.jsonl"), key=lambda p: p.stat().st_mtime, reverse=True
+    )
+    for path in candidates[:200]:
+        try:
+            content = path.read_text(encoding="utf-8")
+            last_line = content.rstrip().rsplit("\n", 1)[-1]
+            obj = _json.loads(last_line)
+        except (OSError, ValueError):
+            continue
+        if (
+            obj.get("type") == "trace_complete"
+            and obj.get("trace_id") == trace_id
+        ):
+            events = [
+                _json.loads(line) for line in content.splitlines() if line.strip()
+            ]
+            return {
+                "trace_id": trace_id,
+                "path": str(path),
+                "envelope": events[-1],
+                "events": events[:-1],
+            }
+    return {"error": f"no trace with id={trace_id} under {root}"}
 
 
 # ────────────────────────────────────────────────────────────────────────
