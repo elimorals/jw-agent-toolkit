@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -7,7 +8,11 @@ import { MockBackend, startMockBackend } from "./mock_backend";
 
 const HERE = resolve(fileURLToPath(import.meta.url), "..");
 const EXT_PATH = resolve(HERE, "..", "..", "dist");
-const FIXTURE = `file://${resolve(HERE, "fixture_pages", "john_3_en.html")}`;
+const FIXTURE_HTML = readFileSync(
+  resolve(HERE, "fixture_pages", "john_3_en.html"),
+  "utf-8",
+);
+const WOL_URL = "https://wol.jw.org/en/wol/b/r1/lp-e/nwt/E/2024/43/3";
 
 /** Any URL whose prefix is in this list is considered safe. Everything else
  * is a hard test failure. The list is intentionally narrow: the extension
@@ -47,11 +52,25 @@ test.beforeEach(async () => {
       `--disable-extensions-except=${EXT_PATH}`,
       `--load-extension=${EXT_PATH}`,
       "--no-sandbox",
+      "--disable-features=PrivateNetworkAccessRespectPreflightResults,BlockInsecurePrivateNetworkRequests",
     ],
   });
   context.on("request", (req) => {
     const u = req.url();
     if (isExternal(u)) external.push(u);
+  });
+  // Same trick as extension.spec.ts: route wol.jw.org to the fixture so
+  // manifest matches activates the content_script.
+  await context.route("https://wol.jw.org/**", async (route) => {
+    if (route.request().resourceType() === "document") {
+      await route.fulfill({
+        status: 200,
+        contentType: "text/html",
+        body: FIXTURE_HTML,
+      });
+    } else {
+      await route.abort();
+    }
   });
 });
 
@@ -61,11 +80,9 @@ test.afterEach(async () => {
 });
 
 async function bootWolPage(page: import("@playwright/test").Page) {
-  await page.addInitScript(() => {
-    (window as unknown as { __JW_TEST_URL__: string }).__JW_TEST_URL__ =
-      "https://wol.jw.org/en/wol/b/r1/lp-e/nwt/E/2024/43/3";
-  });
-  await page.goto(FIXTURE);
+  await page.goto(WOL_URL);
+  // See extension.spec.ts for why this warm-up is required (Chrome MV3 PNA).
+  await page.evaluate(() => fetch("http://localhost:8765/healthz")).catch(() => {});
   await page.waitForTimeout(800);
 }
 

@@ -113,8 +113,12 @@ export async function startMockBackend(port = 8765): Promise<MockBackend> {
     port: actualPort,
     requests: recorded,
     stop: () =>
-      new Promise<void>((resolve, reject) =>
-        server.close((err) => (err ? reject(err) : resolve())),
-      ),
+      new Promise<void>((resolve, reject) => {
+        // `server.close()` only refuses new connections; keep-alive sockets
+        // from the previous test file otherwise hold the port until TIME_WAIT
+        // clears (~60s), causing EADDRINUSE in the next file's beforeAll.
+        server.closeAllConnections?.();
+        server.close((err) => (err ? reject(err) : resolve()));
+      }),
   };
 }
