@@ -1,0 +1,392 @@
+{
+  "version": "1.0",
+  "compiled_at": "2026-06-01",
+  "source_references": [
+    "Tov, E. (2012) Textual Criticism of the Hebrew Bible, 3rd ed. (Fortress)",
+    "BHS apparatus (Biblia Hebraica Stuttgartensia)",
+    "NETS prefaces (New English Translation of the Septuagint)",
+    "SBL Handbook of Style 8.3 (versification systems)"
+  ],
+  "discrepancies": [
+    {
+      "book": "Joel",
+      "book_num": 29,
+      "issue": "chapter_renumber",
+      "nwt": {"chapter": 2, "verse_start": 28, "verse_end": 32},
+      "masoretic": {"chapter": 3, "verse_start": 1, "verse_end": 5},
+      "lxx": {"chapter": 3, "verse_start": 1, "verse_end": 5},
+      "source": "Tov 2012 ch.3",
+      "explanation": {
+        "en": "Joel 2:28-32 in the NWT and other Christian Bibles corresponds to Joel 3:1-5 in the Hebrew Masoretic Text and the Septuagint.",
+        "es": "Joel 2:28-32 en la NWT y otras Biblias cristianas corresponde a Joel 3:1-5 en el texto hebreo masorético y en la Septuaginta.",
+        "pt": "Joel 2:28-32 na TNM e em outras Bíblias cristãs corresponde a Joel 3:1-5 no Texto Massorético hebraico e na Septuaginta."
+      }
+    },
+    {
+      "book": "Joel",
+      "book_num": 29,
+      "issue": "chapter_renumber",
+      "nwt": {"chapter": 3, "verse_start": 1, "verse_end": 21},
+      "masoretic": {"chapter": 4, "verse_start": 1, "verse_end": 21},
+      "lxx": {"chapter": 4, "verse_start": 1, "verse_end": 21},
+      "source": "Tov 2012 ch.3",
+      "explanation": {
+        "en": "What appears as Joel 3 in the NWT is numbered as Joel 4 in BHS and the LXX.",
+        "es": "Lo que aparece como Joel 3 en la NWT se numera como Joel 4 en BHS y en la LXX.",
+        "pt": "O que aparece como Joel 3 na TNM é numerado como Joel 4 na BHS e na LXX."
+      }
+    },
+    {
+      "book": "Malachi",
+      "book_num": 39,
+      "issue": "chapter_renumber",
+      "nwt": {"chapter": 4, "verse_start": 1, "verse_end": 6},
+      "masoretic": {"chapter": 3, "verse_start": 19, "verse_end": 24},
+      "source": "BHS apparatus Mal",
+      "explanation": {
+        "en": "Malachi 4:1-6 in the NWT corresponds to Malachi 3:19-24 in the Hebrew Masoretic Text; BHS treats the prophet's closing oracle as a continuation of chapter 3.",
+        "es": "Malaquías 4:1-6 en la NWT corresponde a Malaquías 3:19-24 en el texto hebreo masorético; BHS trata el oráculo final como continuación del capítulo 3.",
+        "pt": "Malaquias 4:1-6 na TNM corresponde a Malaquias 3:19-24 no Texto Massorético hebraico; a BHS trata o oráculo final como continuação do capítulo 3."
+      }
+    },
+    {
+      "book": "Psalms",
+      "book_num": 19,
+      "issue": "superscription",
+      "nwt": {"chapter": 3, "verse_start": 1},
+      "masoretic": {"chapter": 3, "verse_start": 0},
+      "source": "BHS apparatus Ps",
+      "explanation": {
+        "en": "The Psalm superscription is counted as verse 1 in the NWT but as verse 0 (an unnumbered title) in the Hebrew Masoretic Text.",
+        "es": "La superscripción del Salmo se cuenta como versículo 1 en la NWT pero como versículo 0 (un título sin numerar) en el texto hebreo masorético.",
+        "pt": "A superscrição do Salmo é contada como versículo 1 na TNM mas como versículo 0 (um título sem numeração) no Texto Massorético hebraico."
+      }
+    },
+    {
+      "book": "Psalms",
+      "book_num": 19,
+      "issue": "superscription",
+      "nwt": {"chapter": 51, "verse_start": 1},
+      "masoretic": {"chapter": 51, "verse_start": 0},
+      "lxx": {"chapter": 50, "verse_start": 0},
+      "source": "BHS apparatus Ps 51",
+      "explanation": {
+        "en": "Psalm 51's superscription is verse 1 in the NWT and verse 0 in BHS. The LXX numbers the psalm as 50 because Psalms 9 and 10 are merged earlier in its sequence.",
+        "es": "La superscripción del Salmo 51 es versículo 1 en la NWT y versículo 0 en BHS. La LXX numera el salmo como 50 porque más arriba une los Salmos 9 y 10.",
+        "pt": "A superscrição do Salmo 51 é versículo 1 na TNM e versículo 0 na BHS. A LXX numera o salmo como 50 porque antes une os Salmos 9 e 10."
+      }
+    },
+    {
+      "book": "Psalms",
+      "book_num": 19,
+      "issue": "chapter_split",
+      "nwt": {"chapter": 9, "verse_start": 1, "verse_end": 20},
+      "lxx": {"chapter": 9, "verse_start": 1, "verse_end": 20},
+      "source": "NETS Psalms preface",
+      "explanation": {
+        "en": "The Septuagint merges Psalms 9 and 10 into a single psalm, so its numbering runs one psalm behind the Hebrew/Christian sequence from Psalm 10 to Psalm 113.",
+        "es": "La Septuaginta une los Salmos 9 y 10 en uno solo, por lo que su numeración va un salmo atrasada respecto a la hebrea/cristiana desde el Salmo 10 hasta el 113.",
+        "pt": "A Septuaginta une os Salmos 9 e 10 em um único salmo, de modo que sua numeração fica um salmo atrás da hebraica/cristã do Salmo 10 ao 113."
+      }
+    },
+    {
+      "book": "Psalms",
+      "book_num": 19,
+      "issue": "chapter_split",
+      "nwt": {"chapter": 114, "verse_start": 1, "verse_end": 8},
+      "lxx": {"chapter": 113, "verse_start": 1, "verse_end": 8},
+      "source": "NETS Psalms preface",
+      "explanation": {
+        "en": "Psalm 114 in the NWT is the first half of LXX Psalm 113; the second half is what the NWT calls Psalm 115.",
+        "es": "El Salmo 114 en la NWT es la primera mitad del Salmo 113 en la LXX; la segunda mitad es lo que la NWT llama Salmo 115.",
+        "pt": "O Salmo 114 na TNM é a primeira metade do Salmo 113 na LXX; a segunda metade é o que a TNM chama de Salmo 115."
+      }
+    },
+    {
+      "book": "Romans",
+      "book_num": 45,
+      "issue": "verse_shift",
+      "nwt": {"chapter": 16, "verse_start": 25, "verse_end": 27},
+      "vulgate": {"chapter": 14, "verse_start": 24, "verse_end": 26},
+      "source": "Metzger 1994 Textual Commentary on the Greek NT",
+      "explanation": {
+        "en": "The doxology that concludes Romans appears at 16:25-27 in the NWT; in the Vulgate manuscript tradition it was placed after Romans 14:23 (then numbered 14:24-26).",
+        "es": "La doxología que concluye Romanos aparece en 16:25-27 en la NWT; en la tradición manuscrita de la Vulgata se ubicaba tras Romanos 14:23 (numerada entonces 14:24-26).",
+        "pt": "A doxologia que conclui Romanos aparece em 16:25-27 na TNM; na tradição manuscrita da Vulgata era colocada após Romanos 14:23 (numerada então 14:24-26)."
+      }
+    },
+    {
+      "book": "2 Corinthians",
+      "book_num": 47,
+      "issue": "verse_shift",
+      "nwt": {"chapter": 13, "verse_start": 12, "verse_end": 14},
+      "vulgate": {"chapter": 13, "verse_start": 13, "verse_end": 13},
+      "source": "Nestle-Aland 28 apparatus",
+      "explanation": {
+        "en": "The final greetings of 2 Corinthians 13 are split into three verses in the NWT (12, 13, 14) but combined into a single verse 13 in the Vulgate tradition.",
+        "es": "Los saludos finales de 2 Corintios 13 se dividen en tres versículos en la NWT (12, 13, 14) pero se unen en un solo versículo 13 en la tradición de la Vulgata.",
+        "pt": "As saudações finais de 2 Coríntios 13 são divididas em três versículos na TNM (12, 13, 14) mas unidas em um único versículo 13 na tradição da Vulgata."
+      }
+    },
+    {
+      "book": "1 Kings",
+      "book_num": 11,
+      "issue": "verse_shift",
+      "nwt": {"chapter": 4, "verse_start": 21, "verse_end": 34},
+      "masoretic": {"chapter": 5, "verse_start": 1, "verse_end": 14},
+      "source": "BHS apparatus 1 Kgs 5",
+      "explanation": {
+        "en": "1 Kings 4:21-34 in the NWT is numbered as 1 Kings 5:1-14 in the Hebrew Masoretic Text.",
+        "es": "1 Reyes 4:21-34 en la NWT se numera como 1 Reyes 5:1-14 en el texto hebreo masorético.",
+        "pt": "1 Reis 4:21-34 na TNM é numerado como 1 Reis 5:1-14 no Texto Massorético hebraico."
+      }
+    },
+    {
+      "book": "1 Kings",
+      "book_num": 11,
+      "issue": "verse_shift",
+      "nwt": {"chapter": 5, "verse_start": 1, "verse_end": 18},
+      "masoretic": {"chapter": 5, "verse_start": 15, "verse_end": 32},
+      "source": "BHS apparatus 1 Kgs 5",
+      "explanation": {
+        "en": "What the NWT prints as 1 Kings 5:1-18 continues the verse count in BHS as 1 Kings 5:15-32.",
+        "es": "Lo que la NWT imprime como 1 Reyes 5:1-18 continúa la numeración en BHS como 1 Reyes 5:15-32.",
+        "pt": "O que a TNM imprime como 1 Reis 5:1-18 continua a numeração na BHS como 1 Reis 5:15-32."
+      }
+    },
+    {
+      "book": "Nehemiah",
+      "book_num": 16,
+      "issue": "verse_shift",
+      "nwt": {"chapter": 9, "verse_start": 38},
+      "masoretic": {"chapter": 10, "verse_start": 1},
+      "source": "BHS apparatus Neh 10",
+      "explanation": {
+        "en": "Nehemiah 9:38 in the NWT becomes Nehemiah 10:1 in BHS, which then shifts every verse of chapter 10 by one.",
+        "es": "Nehemías 9:38 en la NWT pasa a ser Nehemías 10:1 en BHS, lo que desplaza en uno toda la numeración del capítulo 10.",
+        "pt": "Neemias 9:38 na TNM passa a ser Neemias 10:1 na BHS, o que desloca em um toda a numeração do capítulo 10."
+      }
+    },
+    {
+      "book": "Daniel",
+      "book_num": 27,
+      "issue": "verse_shift",
+      "nwt": {"chapter": 4, "verse_start": 1, "verse_end": 3},
+      "masoretic": {"chapter": 3, "verse_start": 31, "verse_end": 33},
+      "source": "BHS apparatus Dan 3-4",
+      "explanation": {
+        "en": "Daniel 4:1-3 in the NWT corresponds to Daniel 3:31-33 in BHS; the chapter break falls one paragraph later in the Masoretic Text.",
+        "es": "Daniel 4:1-3 en la NWT corresponde a Daniel 3:31-33 en BHS; la división de capítulo cae un párrafo más adelante en el texto masorético.",
+        "pt": "Daniel 4:1-3 na TNM corresponde a Daniel 3:31-33 na BHS; a quebra de capítulo cai um parágrafo depois no Texto Massorético."
+      }
+    },
+    {
+      "book": "Daniel",
+      "book_num": 27,
+      "issue": "verse_shift",
+      "nwt": {"chapter": 4, "verse_start": 4, "verse_end": 37},
+      "masoretic": {"chapter": 4, "verse_start": 1, "verse_end": 34},
+      "source": "BHS apparatus Dan 4",
+      "explanation": {
+        "en": "Daniel 4:4-37 in the NWT is numbered 4:1-34 in BHS as a consequence of the earlier shift.",
+        "es": "Daniel 4:4-37 en la NWT se numera 4:1-34 en BHS como consecuencia del desplazamiento previo.",
+        "pt": "Daniel 4:4-37 na TNM é numerado 4:1-34 na BHS por causa do deslocamento anterior."
+      }
+    },
+    {
+      "book": "Hosea",
+      "book_num": 28,
+      "issue": "chapter_renumber",
+      "nwt": {"chapter": 1, "verse_start": 10, "verse_end": 11},
+      "masoretic": {"chapter": 2, "verse_start": 1, "verse_end": 2},
+      "source": "BHS apparatus Hos 2",
+      "explanation": {
+        "en": "Hosea 1:10-11 in the NWT corresponds to Hosea 2:1-2 in BHS, where the chapter break falls earlier.",
+        "es": "Oseas 1:10-11 en la NWT corresponde a Oseas 2:1-2 en BHS, donde la división de capítulo es anterior.",
+        "pt": "Oseias 1:10-11 na TNM corresponde a Oseias 2:1-2 na BHS, onde a divisão do capítulo é anterior."
+      }
+    },
+    {
+      "book": "Jonah",
+      "book_num": 32,
+      "issue": "chapter_renumber",
+      "nwt": {"chapter": 1, "verse_start": 17},
+      "masoretic": {"chapter": 2, "verse_start": 1},
+      "source": "BHS apparatus Jon 2",
+      "explanation": {
+        "en": "Jonah 1:17 in the NWT (the great fish swallowing the prophet) is numbered Jonah 2:1 in BHS.",
+        "es": "Jonás 1:17 en la NWT (el gran pez tragando al profeta) se numera Jonás 2:1 en BHS.",
+        "pt": "Jonas 1:17 na TNM (o grande peixe engolindo o profeta) é numerado Jonas 2:1 na BHS."
+      }
+    },
+    {
+      "book": "Jonah",
+      "book_num": 32,
+      "issue": "verse_shift",
+      "nwt": {"chapter": 2, "verse_start": 1, "verse_end": 10},
+      "masoretic": {"chapter": 2, "verse_start": 2, "verse_end": 11},
+      "source": "BHS apparatus Jon 2",
+      "explanation": {
+        "en": "After the earlier shift, every verse of Jonah 2 in the NWT is one number lower than in BHS.",
+        "es": "Tras el desplazamiento anterior, cada versículo de Jonás 2 en la NWT lleva un número menos que en BHS.",
+        "pt": "Após o deslocamento anterior, cada versículo de Jonas 2 na TNM tem um número a menos que na BHS."
+      }
+    },
+    {
+      "book": "Psalms",
+      "book_num": 19,
+      "issue": "superscription",
+      "nwt": {"chapter": 18, "verse_start": 1},
+      "masoretic": {"chapter": 18, "verse_start": 0},
+      "source": "BHS apparatus Ps 18",
+      "explanation": {
+        "en": "Psalm 18's long historical superscription counts as verse 1 in the NWT and verse 0 in BHS.",
+        "es": "La extensa superscripción histórica del Salmo 18 es versículo 1 en la NWT y versículo 0 en BHS.",
+        "pt": "A longa superscrição histórica do Salmo 18 é versículo 1 na TNM e versículo 0 na BHS."
+      }
+    },
+    {
+      "book": "Psalms",
+      "book_num": 19,
+      "issue": "superscription",
+      "nwt": {"chapter": 30, "verse_start": 1},
+      "masoretic": {"chapter": 30, "verse_start": 0},
+      "source": "BHS apparatus Ps 30",
+      "explanation": {
+        "en": "Psalm 30's superscription is counted as verse 1 in the NWT and as verse 0 in BHS.",
+        "es": "La superscripción del Salmo 30 se cuenta como versículo 1 en la NWT y como versículo 0 en BHS.",
+        "pt": "A superscrição do Salmo 30 é contada como versículo 1 na TNM e como versículo 0 na BHS."
+      }
+    },
+    {
+      "book": "Psalms",
+      "book_num": 19,
+      "issue": "superscription",
+      "nwt": {"chapter": 7, "verse_start": 1},
+      "masoretic": {"chapter": 7, "verse_start": 0},
+      "source": "BHS apparatus Ps 7",
+      "explanation": {
+        "en": "Psalm 7's superscription is counted as verse 1 in the NWT and as verse 0 in BHS.",
+        "es": "La superscripción del Salmo 7 se cuenta como versículo 1 en la NWT y como versículo 0 en BHS.",
+        "pt": "A superscrição do Salmo 7 é contada como versículo 1 na TNM e como versículo 0 na BHS."
+      }
+    },
+    {
+      "book": "Psalms",
+      "book_num": 19,
+      "issue": "superscription",
+      "nwt": {"chapter": 38, "verse_start": 1},
+      "masoretic": {"chapter": 38, "verse_start": 0},
+      "source": "BHS apparatus Ps 38",
+      "explanation": {
+        "en": "Psalm 38's superscription is counted as verse 1 in the NWT and as verse 0 in BHS.",
+        "es": "La superscripción del Salmo 38 se cuenta como versículo 1 en la NWT y como versículo 0 en BHS.",
+        "pt": "A superscrição do Salmo 38 é contada como versículo 1 na TNM e como versículo 0 na BHS."
+      }
+    },
+    {
+      "book": "Psalms",
+      "book_num": 19,
+      "issue": "superscription",
+      "nwt": {"chapter": 60, "verse_start": 1},
+      "masoretic": {"chapter": 60, "verse_start": 0},
+      "source": "BHS apparatus Ps 60",
+      "explanation": {
+        "en": "Psalm 60's superscription is counted as verse 1 in the NWT and as verse 0 in BHS.",
+        "es": "La superscripción del Salmo 60 se cuenta como versículo 1 en la NWT y como versículo 0 en BHS.",
+        "pt": "A superscrição do Salmo 60 é contada como versículo 1 na TNM e como versículo 0 na BHS."
+      }
+    },
+    {
+      "book": "Psalms",
+      "book_num": 19,
+      "issue": "superscription",
+      "nwt": {"chapter": 90, "verse_start": 1},
+      "masoretic": {"chapter": 90, "verse_start": 0},
+      "source": "BHS apparatus Ps 90",
+      "explanation": {
+        "en": "Psalm 90's superscription is counted as verse 1 in the NWT and as verse 0 in BHS.",
+        "es": "La superscripción del Salmo 90 se cuenta como versículo 1 en la NWT y como versículo 0 en BHS.",
+        "pt": "A superscrição do Salmo 90 é contada como versículo 1 na TNM e como versículo 0 na BHS."
+      }
+    },
+    {
+      "book": "Psalms",
+      "book_num": 19,
+      "issue": "superscription",
+      "nwt": {"chapter": 144, "verse_start": 1},
+      "masoretic": {"chapter": 144, "verse_start": 0},
+      "source": "BHS apparatus Ps 144",
+      "explanation": {
+        "en": "Psalm 144's superscription is counted as verse 1 in the NWT and as verse 0 in BHS.",
+        "es": "La superscripción del Salmo 144 se cuenta como versículo 1 en la NWT y como versículo 0 en BHS.",
+        "pt": "A superscrição do Salmo 144 é contada como versículo 1 na TNM e como versículo 0 na BHS."
+      }
+    },
+    {
+      "book": "Ecclesiastes",
+      "book_num": 21,
+      "issue": "verse_shift",
+      "nwt": {"chapter": 4, "verse_start": 17},
+      "masoretic": {"chapter": 5, "verse_start": 1},
+      "source": "BHS apparatus Ecc 5",
+      "explanation": {
+        "en": "Ecclesiastes 4:17 in the NWT becomes Ecclesiastes 5:1 in BHS, shifting the rest of chapter 5 by one.",
+        "es": "Eclesiastés 4:17 en la NWT pasa a ser Eclesiastés 5:1 en BHS, desplazando el resto del capítulo 5 en uno.",
+        "pt": "Eclesiastes 4:17 na TNM passa a ser Eclesiastes 5:1 na BHS, deslocando o restante do capítulo 5 em um."
+      }
+    },
+    {
+      "book": "Song of Solomon",
+      "book_num": 22,
+      "issue": "chapter_renumber",
+      "nwt": {"chapter": 6, "verse_start": 13},
+      "masoretic": {"chapter": 7, "verse_start": 1},
+      "source": "BHS apparatus Sg 7",
+      "explanation": {
+        "en": "Song of Solomon 6:13 in the NWT corresponds to Song of Solomon 7:1 in BHS, which shifts the rest of chapter 7 by one.",
+        "es": "Cantar de los Cantares 6:13 en la NWT corresponde a Cantar de los Cantares 7:1 en BHS, lo que desplaza el resto del capítulo 7 en uno.",
+        "pt": "Cântico de Salomão 6:13 na TNM corresponde a Cântico de Salomão 7:1 na BHS, o que desloca o restante do capítulo 7 em um."
+      }
+    },
+    {
+      "book": "Job",
+      "book_num": 18,
+      "issue": "verse_shift",
+      "nwt": {"chapter": 41, "verse_start": 1, "verse_end": 8},
+      "masoretic": {"chapter": 40, "verse_start": 25, "verse_end": 32},
+      "source": "BHS apparatus Job 40-41",
+      "explanation": {
+        "en": "The Leviathan passage at Job 41:1-8 in the NWT is numbered Job 40:25-32 in BHS, where the chapter break falls later.",
+        "es": "El pasaje sobre el leviatán en Job 41:1-8 en la NWT se numera Job 40:25-32 en BHS, donde la división de capítulo es posterior.",
+        "pt": "A passagem sobre o leviatã em Jó 41:1-8 na TNM é numerada Jó 40:25-32 na BHS, onde a divisão do capítulo é posterior."
+      }
+    },
+    {
+      "book": "Isaiah",
+      "book_num": 23,
+      "issue": "verse_shift",
+      "nwt": {"chapter": 9, "verse_start": 1},
+      "masoretic": {"chapter": 8, "verse_start": 23},
+      "source": "BHS apparatus Isa 9",
+      "explanation": {
+        "en": "Isaiah 9:1 in the NWT is numbered Isaiah 8:23 in BHS; the chapter break is one verse earlier in the Masoretic Text.",
+        "es": "Isaías 9:1 en la NWT se numera Isaías 8:23 en BHS; la división de capítulo cae un versículo antes en el texto masorético.",
+        "pt": "Isaías 9:1 na TNM é numerado Isaías 8:23 na BHS; a divisão do capítulo é um versículo antes no Texto Massorético."
+      }
+    },
+    {
+      "book": "Genesis",
+      "book_num": 1,
+      "issue": "verse_shift",
+      "nwt": {"chapter": 31, "verse_start": 55},
+      "masoretic": {"chapter": 32, "verse_start": 1},
+      "source": "BHS apparatus Gen 32",
+      "explanation": {
+        "en": "Genesis 31:55 in the NWT becomes Genesis 32:1 in BHS, which shifts the rest of chapter 32 by one.",
+        "es": "Génesis 31:55 en la NWT pasa a ser Génesis 32:1 en BHS, lo que desplaza el resto del capítulo 32 en uno.",
+        "pt": "Gênesis 31:55 na TNM passa a ser Gênesis 32:1 na BHS, o que desloca o restante do capítulo 32 em um."
+      }
+    }
+  ]
+}
