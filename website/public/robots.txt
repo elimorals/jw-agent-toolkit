@@ -1,0 +1,79 @@
+# robots.txt for jw-agent-toolkit website
+#
+# Policy:
+#   - Classic search crawlers (Googlebot, Bingbot, DuckDuckBot...) are
+#     allowed to index the entire static site.
+#   - Modern AI crawlers (GPTBot, ClaudeBot, PerplexityBot, Google-Extended,
+#     CCBot, etc.) are explicitly named and allowed. Naming them keeps the
+#     policy auditable: if we ever need to opt out for one provider, we
+#     flip its Allow: / to Disallow: / without affecting the others.
+#   - The Pagefind search bundle and OG image directory are excluded from
+#     crawl because they are static assets, not addressable content.
+#   - Sitemap and the two LLM-discovery files are referenced explicitly.
+
+User-agent: *
+Allow: /
+Disallow: /pagefind/
+Disallow: /_astro/
+
+# --- AI / LLM crawlers (explicit opt-in) ---
+
+User-agent: GPTBot
+Allow: /
+Disallow: /pagefind/
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /pagefind/
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GoogleOther
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+# --- Discovery files ---
+
+Sitemap: https://jw-agent-toolkit.vercel.app/sitemap-index.xml

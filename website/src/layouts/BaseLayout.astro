@@ -3,12 +3,20 @@ import "../styles/global.css";
 import DisclaimerBar from "../components/DisclaimerBar.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import JsonLd from "../components/seo/JsonLd.astro";
 
 interface Props {
   title?: string;
   description?: string;
   showHeader?: boolean;
   ogImageKey?: string;
+  /** OpenGraph type override. Defaults to "website"; docs pass "article". */
+  ogType?: "website" | "article";
+  /** ISO-8601 dates for article-style pages. */
+  publishedTime?: string;
+  modifiedTime?: string;
+  /** Optional named JSON-LD blocks to merge into the @graph. */
+  extraJsonLd?: Array<Record<string, unknown>>;
 }
 
 const {
@@ -16,19 +24,20 @@ const {
   description = "Toolkit técnico independiente para acceso programático a contenido público de jw.org. Monorepo Python con CLI, MCP, RAG y agentes.",
   showHeader = true,
   ogImageKey,
+  ogType = "website",
+  publishedTime,
+  modifiedTime,
+  extraJsonLd = [],
 } = Astro.props;
+
+const SITE_NAME = "jw-agent-toolkit";
+const TWITTER_HANDLE = "@cipreholding";
 
 const fullTitle =
   title === "jw-agent-toolkit"
     ? "jw-agent-toolkit — Toolkit agéntico para contenido de jw.org"
     : `${title} · jw-agent-toolkit`;
 
-/**
- * Derive the OG image key from the URL when the page doesn't pass one
- * explicitly. Pages with their own /og/{key}.png are: home, docs,
- * vision, arquitectura, and each package (paquetes-{slug}).
- * Everything else falls back to the home OG image.
- */
 function deriveOgKey(pathname: string): string {
   const p = pathname.replace(/\/$/, "") || "/";
   if (p === "/") return "home";
@@ -42,10 +51,99 @@ function deriveOgKey(pathname: string): string {
 }
 
 const ogKey = ogImageKey ?? deriveOgKey(Astro.url.pathname);
-const ogImageUrl = new URL(`/og/${ogKey}.png`, Astro.site ?? Astro.url).href;
+const siteUrl = Astro.site ?? new URL("https://jw-agent-toolkit.vercel.app/");
+const ogImageUrl = new URL(`/og/${ogKey}.png`, siteUrl).href;
+const canonical = new URL(Astro.url.pathname, siteUrl).href;
 
 import { getLangFromUrl } from "../i18n/utils";
 const lang = getLangFromUrl(Astro.url);
+const isEn = lang === "en";
+
+// Compute hreflang alternates between the es and en variants of the page.
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+const enPath =
+  path === "/"
+    ? "/en/"
+    : path.startsWith("/en")
+      ? path
+      : "/en" + path;
+const esPath =
+  path === "/en" || path === "/en/"
+    ? "/"
+    : path.startsWith("/en/")
+      ? path.slice(3)
+      : path;
+const enHref = new URL(enPath, siteUrl).href;
+const esHref = new URL(esPath, siteUrl).href;
+const ogLocale = isEn ? "en_US" : "es_ES";
+const ogLocaleAlternate = isEn ? "es_ES" : "en_US";
+
+// --- Schema.org @graph -------------------------------------------------------
+
+const organization = {
+  "@type": "Organization",
+  "@id": new URL("/#organization", siteUrl).href,
+  name: "Cipre Holding",
+  url: siteUrl.origin + "/",
+  sameAs: ["https://github.com/elimorals/jw-agent-toolkit"],
+};
+
+const website = {
+  "@type": "WebSite",
+  "@id": new URL("/#website", siteUrl).href,
+  url: siteUrl.origin + "/",
+  name: SITE_NAME,
+  description,
+  inLanguage: isEn ? "en" : "es",
+  publisher: { "@id": organization["@id"] },
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: siteUrl.origin + "/docs?q={search_term_string}",
+    },
+    "query-input": "required name=search_term_string",
+  },
+};
+
+const isHome =
+  (Astro.url.pathname || "/") === "/" || Astro.url.pathname === "/en/";
+
+const softwareSourceCode = isHome
+  ? {
+      "@type": "SoftwareSourceCode",
+      "@id": siteUrl.origin + "/#software",
+      name: SITE_NAME,
+      description,
+      url: siteUrl.origin + "/",
+      codeRepository: "https://github.com/elimorals/jw-agent-toolkit",
+      programmingLanguage: ["Python", "TypeScript"],
+      runtimePlatform: ["Python 3.13", "Node.js 24"],
+      license: "https://www.gnu.org/licenses/gpl-3.0.html",
+      author: { "@id": organization["@id"] },
+    }
+  : null;
+
+const webPage = {
+  "@type": "WebPage",
+  "@id": canonical + "#webpage",
+  url: canonical,
+  name: fullTitle,
+  description,
+  inLanguage: isEn ? "en" : "es",
+  isPartOf: { "@id": website["@id"] },
+  primaryImageOfPage: ogImageUrl,
+  ...(publishedTime ? { datePublished: publishedTime } : {}),
+  ...(modifiedTime ? { dateModified: modifiedTime } : {}),
+};
+
+const graph: Array<Record<string, unknown>> = [
+  organization,
+  website,
+  ...(softwareSourceCode ? [softwareSourceCode] : []),
+  webPage,
+  ...extraJsonLd,
+];
 ---
 
 <!doctype html>
@@ -55,20 +153,77 @@ const lang = getLangFromUrl(Astro.url);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
-    <meta name="robots" content="index, follow" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="canonical" href={Astro.url.href} />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1"
+    />
+    <meta name="theme-color" content="#0b0b0d" />
+    <meta name="color-scheme" content="dark light" />
 
-    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="canonical" href={canonical} />
+
+    <!-- hreflang: tell Google/Bing which URL serves which audience -->
+    <link rel="alternate" hreflang="es" href={esHref} />
+    <link rel="alternate" hreflang="en" href={enHref} />
+    <link rel="alternate" hreflang="x-default" href={esHref} />
+
+    <!-- Feed + LLM discovery -->
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="jw-agent-toolkit Novedades"
+      href="/rss.xml"
+    />
+    <link
+      rel="alternate"
+      type="text/plain"
+      title="LLMs.txt site map"
+      href="/llms.txt"
+    />
+    <link
+      rel="alternate"
+      type="text/plain"
+      title="LLMs.txt full corpus"
+      href="/llms-full.txt"
+    />
+
+    <!-- OpenGraph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:url" content={canonical} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:locale:alternate" content={ogLocaleAlternate} />
+    {
+      ogType === "article" && publishedTime && (
+        <meta property="article:published_time" content={publishedTime} />
+      )
+    }
+    {
+      ogType === "article" && modifiedTime && (
+        <meta property="article:modified_time" content={modifiedTime} />
+      )
+    }
+    {
+      ogType === "article" && (
+        <meta property="article:author" content="Elias Morales" />
+      )
+    }
+
+    <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:site" content={TWITTER_HANDLE} />
+    <meta name="twitter:creator" content={TWITTER_HANDLE} />
+    <meta name="twitter:url" content={canonical} />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -76,6 +231,8 @@ const lang = getLangFromUrl(Astro.url);
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,30..100&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
     />
+
+    <JsonLd data={graph} />
 
     <title>{fullTitle}</title>
   </head>

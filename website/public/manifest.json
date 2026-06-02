@@ -1,0 +1,19 @@
+{
+  "name": "jw-agent-toolkit",
+  "short_name": "jw-toolkit",
+  "description": "Toolkit técnico independiente para acceso programático a contenido público de jw.org. Monorepo Python con CLI, MCP, RAG y agentes.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#0b0b0d",
+  "background_color": "#0b0b0d",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -7,16 +7,80 @@ interface Props {
   description?: string;
   section?: string;
   sourcePath?: string;
+  /** ISO-8601 publish/modify dates surfaced from frontmatter when present. */
+  publishedTime?: string;
+  modifiedTime?: string;
 }
 
-const { title, description, section, sourcePath } = Astro.props;
+const { title, description, section, sourcePath, publishedTime, modifiedTime } =
+  Astro.props;
 
 const lang = getLangFromUrl(Astro.url);
 const isEn = lang === "en";
 const prefix = isEn ? "/en" : "";
+
+const siteUrl = Astro.site ?? new URL("https://jw-agent-toolkit.vercel.app/");
+const canonical = new URL(Astro.url.pathname, siteUrl).href;
+
+// --- Schema.org: TechArticle + BreadcrumbList for this doc -------------------
+
+const techArticle: Record<string, unknown> = {
+  "@type": "TechArticle",
+  "@id": canonical + "#article",
+  headline: title,
+  url: canonical,
+  inLanguage: isEn ? "en" : "es",
+  isPartOf: { "@id": new URL("/#website", siteUrl).href },
+  author: { "@id": new URL("/#organization", siteUrl).href },
+  publisher: { "@id": new URL("/#organization", siteUrl).href },
+  mainEntityOfPage: canonical,
+  ...(description ? { description } : {}),
+  ...(publishedTime ? { datePublished: publishedTime } : {}),
+  ...(modifiedTime ? { dateModified: modifiedTime } : {}),
+};
+
+// Build a BreadcrumbList from the URL segments. We skip the locale segment
+// when present and label segments with their human-readable form.
+const segments = Astro.url.pathname
+  .replace(/\/$/, "")
+  .split("/")
+  .filter(Boolean)
+  .filter((s) => s !== "en");
+
+const breadcrumbItems = [
+  {
+    "@type": "ListItem",
+    position: 1,
+    name: isEn ? "Home" : "Inicio",
+    item: new URL(isEn ? "/en/" : "/", siteUrl).href,
+  },
+];
+
+let acc = isEn ? "/en" : "";
+segments.forEach((seg, idx) => {
+  acc += "/" + seg;
+  breadcrumbItems.push({
+    "@type": "ListItem",
+    position: idx + 2,
+    name: seg.replace(/[-_]/g, " "),
+    item: new URL(acc, siteUrl).href,
+  });
+});
+
+const breadcrumb = {
+  "@type": "BreadcrumbList",
+  itemListElement: breadcrumbItems,
+};
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout
+  title={title}
+  description={description}
+  ogType="article"
+  publishedTime={publishedTime}
+  modifiedTime={modifiedTime}
+  extraJsonLd={[techArticle, breadcrumb]}
+>
   <div class="mx-auto max-w-7xl px-4 pb-24 pt-10 sm:px-6">
     <div class="grid gap-12 lg:grid-cols-[260px_1fr]">
       <aside class="hidden lg:block">

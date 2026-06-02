@@ -1,0 +1,28 @@
+---
+/**
+ * Render a JSON-LD <script> block. Pass any Schema.org object as `data`;
+ * arrays produce a single @graph payload for tooling that prefers it.
+ *
+ * Usage:
+ *   <JsonLd data={{ "@context": "https://schema.org", "@type": "WebSite", ... }} />
+ *   <JsonLd data={[orgSchema, websiteSchema, breadcrumbSchema]} />
+ */
+
+interface Props {
+  data: Record<string, unknown> | Array<Record<string, unknown>>;
+}
+
+const { data } = Astro.props;
+
+const payload = Array.isArray(data)
+  ? { "@context": "https://schema.org", "@graph": data }
+  : data;
+
+// Defense in depth: refuse to emit </script> sequences from the payload.
+const serialized = JSON.stringify(payload).replace(
+  /<\/script/gi,
+  "<\\/script",
+);
+---
+
+<script type="application/ld+json" is:inline set:html={serialized} />
