@@ -7,8 +7,8 @@ Steps:
   3. Extract paragraphs + scripture references from each.
   4. Build Findings sorted by source relevance.
 
-Output: AgentResult with findings ready for an LLM to synthesize into prose
-with citations.
+Every decision (kept / dropped / warning) is mirrored to the active
+AgentTracer (Fase 43). Without `--trace` the tracer is a no-op.
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ from jw_core.clients.wol import WOLClient
 from jw_core.parsers.article import parse_article
 
 from jw_agents.base import AgentResult, Citation, Finding
+from jw_agents.tracing import AgentTracer, get_active_tracer
 
 
 async def research_topic(
@@ -31,10 +32,13 @@ async def research_topic(
     max_excerpts_per_article: int = 3,
     cdn: CDNClient | None = None,
     wol: WOLClient | None = None,
+    trace: AgentTracer | None = None,
 ) -> AgentResult:
     """Search jw.org for a topic and harvest excerpts from top articles."""
+    tr = trace if trace is not None else get_active_tracer()
     result = AgentResult(query=topic, agent_name="research_topic")
     result.metadata["language"] = language
+    result.metadata["trace_id"] = str(tr.trace_id)
 
     owned_cdn = False
     owned_wol = False
@@ -45,60 +49,81 @@ async def research_topic(
         wol = WOLClient()
         owned_wol = True
 
-    try:
-        data = await cdn.search(topic, filter_type="all", language=language, limit=top_n)
-    except Exception as e:
-        result.warnings.append(f"CDN search failed: {e}")
-        if owned_cdn:
-            await cdn.aclose()
-        if owned_wol:
-            await wol.aclose()
-        return result
-
-    items = _flatten_search(data, limit=top_n)
-    result.metadata["search_hits"] = len(items)
-    if not items:
-        result.warnings.append("No search results.")
-        if owned_cdn:
-            await cdn.aclose()
-        if owned_wol:
-            await wol.aclose()
-        return result
-
-    # Fetch the top K articles.
-    fetched = 0
-    for item in items:
-        if fetched >= fetch_top_k:
-            break
-        url = _wol_url_from(item)
-        if not url:
-            continue
+    with tr.step(
+        "cdn_search",
+        input_digest={"q_len": len(topic), "limit": top_n},
+    ) as step:
+        kept_count = 0
+        dropped_count = 0
         try:
-            html = await wol.fetch(url)
-        except Exception as e:
-            result.warnings.append(f"Fetch failed for {url}: {e}")
-            continue
-        article = parse_article(html)
-        title = article.title or item.get("title", "")
-        for i, p in enumerate(article.paragraphs[:max_excerpts_per_article]):
-            result.findings.append(
-                Finding(
-                    summary=f"Excerpt from “{title}”",
-                    excerpt=p,
-                    citation=Citation(
-                        url=url,
-                        title=title,
-                        kind="article",
-                        metadata={"paragraph_index": i + 1},
-                    ),
+            try:
+                data = await cdn.search(
+                    topic, filter_type="all", language=language, limit=top_n
                 )
-            )
-        fetched += 1
+            except Exception as e:
+                result.warnings.append(f"CDN search failed: {e}")
+                tr.warn(f"cdn search failed: {e}", step="cdn_search")
+                data = {"results": []}
 
-    if owned_cdn:
-        await cdn.aclose()
-    if owned_wol:
-        await wol.aclose()
+            items = _flatten_search(data, limit=top_n)
+            result.metadata["search_hits"] = len(items)
+            step.note_hits(len(items))
+            if not items:
+                result.warnings.append("No search results.")
+                return result
+
+            fetched = 0
+            for item in items:
+                if fetched >= fetch_top_k:
+                    break
+                url = _wol_url_from(item)
+                if not url:
+                    tr.dropped(source="cdn_search", reason="no_url")
+                    dropped_count += 1
+                    continue
+                try:
+                    html = await wol.fetch(url)
+                except Exception as e:
+                    result.warnings.append(f"Fetch failed for {url}: {e}")
+                    tr.dropped(
+                        source="cdn_search",
+                        reason=f"fetch_failed:{type(e).__name__}",
+                        citation_url=url,
+                    )
+                    dropped_count += 1
+                    continue
+                article = parse_article(html)
+                title = article.title or item.get("title", "")
+                for i, p in enumerate(
+                    article.paragraphs[:max_excerpts_per_article]
+                ):
+                    result.findings.append(
+                        Finding(
+                            summary=f"Excerpt from “{title}”",
+                            excerpt=p,
+                            citation=Citation(
+                                url=url,
+                                title=title,
+                                kind="article",
+                                metadata={"paragraph_index": i + 1},
+                            ),
+                        )
+                    )
+                    tr.kept(
+                        source="cdn_search",
+                        citation_url=url,
+                        reason=f"paragraph {i + 1}",
+                    )
+                    kept_count += 1
+                fetched += 1
+        finally:
+            if owned_cdn:
+                await cdn.aclose()
+            if owned_wol:
+                await wol.aclose()
+            step.note_kept(kept_count)
+            step.note_dropped(dropped_count)
+
     return result
 
 
