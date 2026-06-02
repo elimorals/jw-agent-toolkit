@@ -291,3 +291,7 @@ curl -s http://localhost:8765/healthz
 ### Fase 45 — semantic-chunking (chunking por unidad de pensamiento)
 
 | Fase 45 (semantic-chunking) | ✅ Nuevo | `packages/jw-rag/src/jw_rag/chunkers/` subpackage (paragraph/semantic/llm + protocol + fakes) + `continuation_markers.json` es/en/pt + `get_chunker()` router con env var `JW_CHUNKER` + `LLMChunker` con cache hit >95% en `~/.jw-agent-toolkit/chunk-cache/` + benchmark NDCG@10 (`jw_eval.bench.ndcg/chunker_bench`) con bootstrap CI95 + CLI `jw chunker-bench` con per-language ≥10% lift gate + MCP `set_chunker`. Backwards-compat: legacy `jw_rag.chunker.chunk_paragraphs` byte-stable via façade. |
+
+### Fase 43 — agent-tracing (debuggability local)
+
+| Fase 43 (agent-tracing) | ✅ Nuevo | `packages/jw-agents/src/jw_agents/tracing/` (schema Pydantic v1.0 con discriminated event union + Null/InMemory/Jsonl stores + contextvars ambient tracer + `AgentTracer` step/kept/dropped/warn + shared `--trace` flag installer + viewer CLI con view/list/gc + overhead guard). Tres agentes piloto instrumentados (`apologetics`, `verse_explainer`, `research_topic`); resto sigue verde gracias al fallback NO-OP. Bridge OpenTelemetry bajo extra `[otel]`. Wiring: `jw apologetics --trace`, `jw trace` group, MCP `apologetics(trace=true)` + `get_trace(trace_id)`. Cero red en tests; archivo JSONL bajo `$JW_TRACE_DIR`. |

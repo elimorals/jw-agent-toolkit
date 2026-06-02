@@ -883,6 +883,31 @@ sigue siendo façade re-exportando `Chunk` + `chunk_paragraphs`.
 - ✅ Sin nuevas deps de runtime: PyYAML ya estaba (eval).
 - ✅ Multilingual: es/en/pt con fixtures dedicadas; fallback gracioso a paragraph cuando detect_language() falla.
 
+## Fase 43 — agent-tracing ✅
+
+- **Estado**: Estable (2026-06-01).
+- **Spec**: `docs/superpowers/specs/2026-05-31-fase-43-agent-tracing-design.md`.
+- **Plan**: `docs/superpowers/plans/2026-05-31-fase-43-agent-tracing-plan.md`.
+- **Guía**: `docs/guias/agent-tracing.md`.
+
+Local-first JSONL traces que registran cada decisión interna de un agente
+(kept / dropped / warning) con `seq` monotónica y envelope `trace_complete`
+al cierre. `AgentTracer` con `step()` context manager + `kept/dropped/warn`
+helpers, three stores (`Null`/`InMemory`/`Jsonl`), `contextvars` ambient
+tracer (`use_tracer`), shared `--trace` flag installer (resuelve `path`,
+`-` para stdout, `DEFAULT` para `$JW_TRACE_DIR`). Viewer Typer
+(`jw trace view/list/gc`). Tres agentes piloto instrumentados:
+`apologetics`, `verse_explainer`, `research_topic`; resto NO-OP gracias al
+fallback. Bridge opt-in OpenTelemetry bajo extra `[otel]`. MCP
+`apologetics(trace=true)` + `get_trace(trace_id)` para replay.
+
+### Cobertura de tests
+
+- ✅ **40 tests tracing** (schema 10 + store 6 + context 4 + tracer 6 + flag 7 + viewer 4 + overhead 1 + otel 1 skipped/passing + integration apologetics 2 / verse_explainer 2 / research_topic 2).
+- ✅ Cero red; archivos JSONL bajo `tmp_path` en cada test.
+- ✅ CLI test (`jw apologetics --trace`) parsea envelope desde stdout/JSONL.
+- ✅ MCP test (`get_trace(trace_id)`) reconstruye eventos + envelope.
+
 ## Fase 40 — content-provenance
 
 - **Estado**: Estable (2026-05-31).
