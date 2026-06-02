@@ -1,12 +1,30 @@
-"""jw_finetune.synth.judge — 3-stage Q&A quality filter (Fase 44).
+"""jw_finetune.synth.judge — 3-stage Q&A quality filter.
 
-The public surface grows as later tasks land. After T1 only the Pydantic
-models are exported; T3 will add JudgeMode + cutoffs, T7 will add Judge +
-score_qa_pair, T8 will add build_judge.
+Public API:
+    from jw_finetune.synth.judge import (
+        score_qa_pair, build_judge, Judge,
+        QAScore, RejectionReason, JudgeMode, JudgeOverrides,
+    )
 """
 
 from __future__ import annotations
 
+from jw_finetune.synth.judge.factories import build_judge
+from jw_finetune.synth.judge.judge import Judge, score_qa_pair
 from jw_finetune.synth.judge.models import QAScore, RejectionReason
+from jw_finetune.synth.judge.thresholds import (
+    DEFAULT_CUTOFFS,
+    JudgeMode,
+    JudgeOverrides,
+)
 
-__all__ = ["QAScore", "RejectionReason"]
+__all__ = [
+    "DEFAULT_CUTOFFS",
+    "Judge",
+    "JudgeMode",
+    "JudgeOverrides",
+    "QAScore",
+    "RejectionReason",
+    "build_judge",
+    "score_qa_pair",
+]
