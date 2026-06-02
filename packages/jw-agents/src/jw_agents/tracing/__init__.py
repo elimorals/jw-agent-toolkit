@@ -11,6 +11,11 @@ See `docs/guias/agent-tracing.md` for usage and the spec at
 schema contract.
 """
 
+from jw_agents.tracing.context import (
+    get_active_tracer,
+    set_active_tracer,
+    use_tracer,
+)
 from jw_agents.tracing.schema import (
     TRACE_SCHEMA_VERSION,
     CustomEvent,
@@ -23,16 +28,31 @@ from jw_agents.tracing.schema import (
     TraceEventAdapter,
     WarningEvent,
 )
+from jw_agents.tracing.store import (
+    InMemoryTraceStore,
+    JsonlTraceStore,
+    NullTraceStore,
+    TraceStore,
+)
+from jw_agents.tracing.tracer import AgentTracer
 
 __all__ = [
     "TRACE_SCHEMA_VERSION",
+    "AgentTracer",
     "CustomEvent",
     "FindingDroppedEvent",
     "FindingKeptEvent",
+    "InMemoryTraceStore",
+    "JsonlTraceStore",
+    "NullTraceStore",
     "StepEndEvent",
     "StepStartEvent",
     "Trace",
     "TraceEvent",
     "TraceEventAdapter",
+    "TraceStore",
     "WarningEvent",
+    "get_active_tracer",
+    "set_active_tracer",
+    "use_tracer",
 ]
