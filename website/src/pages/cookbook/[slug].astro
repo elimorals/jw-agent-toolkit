@@ -1,0 +1,33 @@
+---
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("docs");
+  return entries
+    .filter((e) => /^cookbook\/\d+-/.test(e.id))
+    .map((entry) => {
+      const stem = entry.id.replace(/^cookbook\/\d+-/, "");
+      return {
+        params: { slug: stem },
+        props: { target: `/docs/${entry.id}` },
+      };
+    });
+}
+
+const { target } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+    <link rel="canonical" href={target} />
+    <title>Redirecting…</title>
+  </head>
+  <body>
+    <p>Redirecting to <a href={target}>{target}</a>…</p>
+    <script is:inline define:vars={{ target }}>
+      window.location.replace(target);
+    </script>
+  </body>
+</html>
