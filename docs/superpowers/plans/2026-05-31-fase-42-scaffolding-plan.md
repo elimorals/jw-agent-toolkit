@@ -99,7 +99,7 @@ Modifies:
 - Create: `packages/create-jw-agent/src/create_jw_agent/__init__.py`
 - Modify: `pyproject.toml` (root)
 
-- [ ] **Step 1: Write the pyproject.toml**
+- [x] **Step 1: Write the pyproject.toml**
 
 ```toml
 # packages/create-jw-agent/pyproject.toml
@@ -145,7 +145,7 @@ packages = ["src/create_jw_agent"]
 "src/create_jw_agent/lang" = "create_jw_agent/lang"
 ```
 
-- [ ] **Step 2: Write the README**
+- [x] **Step 2: Write the README**
 
 ```markdown
 # create-jw-agent
@@ -178,7 +178,7 @@ Scaffolder for [jw-agent-toolkit](https://github.com/eliascipre/jw-agent-toolkit
 Spec: [`docs/superpowers/specs/2026-05-31-fase-42-scaffolding-design.md`](https://github.com/eliascipre/jw-agent-toolkit/blob/main/docs/superpowers/specs/2026-05-31-fase-42-scaffolding-design.md).
 ```
 
-- [ ] **Step 3: Create the package `__init__.py`**
+- [x] **Step 3: Create the package `__init__.py`**
 
 ```python
 # packages/create-jw-agent/src/create_jw_agent/__init__.py
@@ -197,13 +197,13 @@ from create_jw_agent.validate import validate_project_name
 __all__ = ["__version__", "render_template", "validate_project_name"]
 ```
 
-- [ ] **Step 4: Register in workspace**
+- [x] **Step 4: Register in workspace**
 
 Edit root `pyproject.toml`:
 - In `[tool.uv.workspace] members = [...]` append `"packages/create-jw-agent"` and `"tools/pytest-cookbook"`.
 - In `[tool.uv.sources]` add `create-jw-agent = { workspace = true }` and `pytest-cookbook = { workspace = true }`.
 
-- [ ] **Step 5: Verify install + commit**
+- [x] **Step 5: Verify install + commit**
 
 ```bash
 uv sync --all-packages
@@ -223,7 +223,7 @@ Expected: `create-jw-agent 0.1.0`. Suite still green.
 - Create: `packages/create-jw-agent/tests/__init__.py`
 - Create: `packages/create-jw-agent/tests/test_validate.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # packages/create-jw-agent/tests/test_validate.py
@@ -296,14 +296,14 @@ def test_project_to_module_converts_kebab_to_snake() -> None:
 
 Also write `packages/create-jw-agent/tests/__init__.py` as an empty file.
 
-- [ ] **Step 2: Run test (expect failure)**
+- [x] **Step 2: Run test (expect failure)**
 
 ```bash
 uv run --package create-jw-agent pytest packages/create-jw-agent/tests/test_validate.py -v
 ```
 Expected: `ModuleNotFoundError: create_jw_agent.validate`.
 
-- [ ] **Step 3: Implement validate.py**
+- [x] **Step 3: Implement validate.py**
 
 ```python
 # packages/create-jw-agent/src/create_jw_agent/validate.py
@@ -360,14 +360,14 @@ def project_to_module(name: str) -> str:
     return name.replace("-", "_")
 ```
 
-- [ ] **Step 4: Run test (expect pass)**
+- [x] **Step 4: Run test (expect pass)**
 
 ```bash
 uv run --package create-jw-agent pytest packages/create-jw-agent/tests/test_validate.py -v
 ```
 Expected: 11 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/create-jw-agent/src/create_jw_agent/validate.py packages/create-jw-agent/tests
@@ -385,7 +385,7 @@ git commit -m "feat(create-jw-agent): name validation (PEP 503 + reserved prefix
 - Create: `packages/create-jw-agent/src/create_jw_agent/lang/pt.json`
 - Create: `packages/create-jw-agent/tests/test_i18n.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # packages/create-jw-agent/tests/test_i18n.py
@@ -442,14 +442,14 @@ def test_translator_supports_format_args() -> None:
     assert "/tmp/x" in out
 ```
 
-- [ ] **Step 2: Run test (expect failure)**
+- [x] **Step 2: Run test (expect failure)**
 
 ```bash
 uv run --package create-jw-agent pytest packages/create-jw-agent/tests/test_i18n.py -v
 ```
 Expected: `ModuleNotFoundError: create_jw_agent.i18n`.
 
-- [ ] **Step 3: Write the lang JSON files**
+- [x] **Step 3: Write the lang JSON files**
 
 ```json
 {
@@ -493,7 +493,7 @@ Save as `packages/create-jw-agent/src/create_jw_agent/lang/es.json`.
 ```
 Save as `packages/create-jw-agent/src/create_jw_agent/lang/pt.json`.
 
-- [ ] **Step 4: Implement i18n.py**
+- [x] **Step 4: Implement i18n.py**
 
 ```python
 # packages/create-jw-agent/src/create_jw_agent/i18n.py
@@ -551,7 +551,7 @@ def load_translator(lang: str) -> Translator:
     return Translator(lang=actual, table=json.loads(raw))
 ```
 
-- [ ] **Step 5: Run test (expect pass) + commit**
+- [x] **Step 5: Run test (expect pass) + commit**
 
 ```bash
 uv run --package create-jw-agent pytest packages/create-jw-agent/tests/test_i18n.py -v
@@ -573,7 +573,7 @@ git commit -m "feat(create-jw-agent): i18n loader with en/es/pt tables"
 - Create: `packages/create-jw-agent/src/create_jw_agent/templates/agent/pyproject.toml.j2` (stub for first render test)
 - Create: `packages/create-jw-agent/src/create_jw_agent/templates/agent/src/{{module}}/__init__.py.j2`
 
-- [ ] **Step 1: Write a minimal pair of templates for the test**
+- [x] **Step 1: Write a minimal pair of templates for the test**
 
 ```jinja
 # packages/create-jw-agent/src/create_jw_agent/templates/agent/pyproject.toml.j2
@@ -604,7 +604,7 @@ from {{ module }}.agent import {{ module }}
 __all__ = ["{{ module }}"]
 ```
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 ```python
 # packages/create-jw-agent/tests/test_render.py
@@ -670,14 +670,14 @@ def test_render_unknown_type_raises(tmp_path: Path) -> None:
         render_template(_ctx().model_copy(update={"type": "nonsense"}), tmp_path / "x")
 ```
 
-- [ ] **Step 3: Run test (expect failure)**
+- [x] **Step 3: Run test (expect failure)**
 
 ```bash
 uv run --package create-jw-agent pytest packages/create-jw-agent/tests/test_render.py -v
 ```
 Expected: `ModuleNotFoundError: create_jw_agent.render`.
 
-- [ ] **Step 4: Implement render.py**
+- [x] **Step 4: Implement render.py**
 
 ```python
 # packages/create-jw-agent/src/create_jw_agent/render.py
@@ -766,7 +766,7 @@ def render_template(ctx: RenderContext, dest: Path) -> None:
             out_path.write_bytes(src.read_bytes())
 ```
 
-- [ ] **Step 5: Run test (expect pass) + commit**
+- [x] **Step 5: Run test (expect pass) + commit**
 
 ```bash
 uv run --package create-jw-agent pytest packages/create-jw-agent/tests/test_render.py -v
@@ -794,7 +794,7 @@ git commit -m "feat(create-jw-agent): Jinja2 renderer with path-level module sub
 - Create: `packages/create-jw-agent/src/create_jw_agent/templates/agent/LICENSE.j2`
 - Create: `packages/create-jw-agent/tests/test_e2e_generated_project.py`
 
-- [ ] **Step 1: Write the failing E2E test**
+- [x] **Step 1: Write the failing E2E test**
 
 ```python
 # packages/create-jw-agent/tests/test_e2e_generated_project.py
@@ -844,7 +844,7 @@ def test_generated_agent_passes_its_own_tests(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stdout.decode() + result.stderr.decode()
 ```
 
-- [ ] **Step 2: Write the templates**
+- [x] **Step 2: Write the templates**
 
 ```jinja
 # packages/create-jw-agent/src/create_jw_agent/templates/agent/README.md.j2
@@ -1111,14 +1111,14 @@ target-version = "py313"
 select = ["E", "F", "W", "I", "UP", "B", "SIM"]
 ```
 
-- [ ] **Step 3: Run E2E test**
+- [x] **Step 3: Run E2E test**
 
 ```bash
 uv run --package create-jw-agent pytest packages/create-jw-agent/tests/test_e2e_generated_project.py -v
 ```
 Expected: pass (or `skip` if uv is not available — pure rendering still verified).
 
-- [ ] **Step 4: Quick sanity render manually**
+- [x] **Step 4: Quick sanity render manually**
 
 ```bash
 uv run --package create-jw-agent python -c "
@@ -1135,7 +1135,7 @@ shutil.rmtree(tmp)
 
 Expected output lists `demo/pyproject.toml`, `demo/README.md`, `demo/src/demo/agent.py`, `demo/tests/test_demo.py`, `demo/.github/workflows/ci.yml`, `demo/LICENSE`, etc.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/create-jw-agent/src/create_jw_agent/templates/agent packages/create-jw-agent/tests/test_e2e_generated_project.py
@@ -1153,7 +1153,7 @@ git commit -m "feat(create-jw-agent): complete agent template (CI-green on first
 - Create: `packages/create-jw-agent/src/create_jw_agent/templates/gen/...`
 - Modify: `packages/create-jw-agent/tests/test_render.py`
 
-- [ ] **Step 1: Write parametric test that exercises all 5 types**
+- [x] **Step 1: Write parametric test that exercises all 5 types**
 
 Append to `test_render.py`:
 
@@ -1183,14 +1183,14 @@ def test_render_each_type_emits_pyproject(tmp_path: Path, plugin_type: str) -> N
     assert expected_entry_groups[plugin_type] in pyproject
 ```
 
-- [ ] **Step 2: Run test (expect failure for non-agent types)**
+- [x] **Step 2: Run test (expect failure for non-agent types)**
 
 ```bash
 uv run --package create-jw-agent pytest packages/create-jw-agent/tests/test_render.py::test_render_each_type_emits_pyproject -v
 ```
 Expected: 4 failures (`unknown type` for parser/embedder/vlm/gen).
 
-- [ ] **Step 3: Create mirror templates**
+- [x] **Step 3: Create mirror templates**
 
 Copy the agent template tree four times, varying only:
 
@@ -1252,14 +1252,14 @@ class {{ module|capitalize }}Parser:
 
 Repeat the same surgical edits for embedder/vlm/gen (entry point + stub module). Reuse README, Makefile, .gitignore, ci.yml, LICENSE from agent (identical contents apart from "type: parser").
 
-- [ ] **Step 4: Run parametric test (expect pass)**
+- [x] **Step 4: Run parametric test (expect pass)**
 
 ```bash
 uv run --package create-jw-agent pytest packages/create-jw-agent/tests/test_render.py -v
 ```
 Expected: all `test_render_each_type_emits_pyproject[*]` pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/create-jw-agent/src/create_jw_agent/templates packages/create-jw-agent/tests/test_render.py
@@ -1280,7 +1280,7 @@ git commit -m "feat(create-jw-agent): parser/embedder/vlm/gen templates with mat
 - Create: `packages/create-jw-agent/tests/golden/gen_en.txt`
 - Modify: `packages/create-jw-agent/tests/test_render.py`
 
-- [ ] **Step 1: Append the snapshot test**
+- [x] **Step 1: Append the snapshot test**
 
 ```python
 GOLDEN_DIR = Path(__file__).parent / "golden"
@@ -1345,28 +1345,28 @@ def pytest_addoption(parser):
     parser.addoption("--snapshot-update", action="store_true", default=False)
 ```
 
-- [ ] **Step 2: First run — generate snapshots**
+- [x] **Step 2: First run — generate snapshots**
 
 ```bash
 uv run --package create-jw-agent pytest packages/create-jw-agent/tests/test_render.py -v --snapshot-update
 ```
 Expected: 7 snapshot files appear in `tests/golden/`. Test passes by virtue of self-overwrite.
 
-- [ ] **Step 3: Second run — verify deterministic**
+- [x] **Step 3: Second run — verify deterministic**
 
 ```bash
 uv run --package create-jw-agent pytest packages/create-jw-agent/tests/test_render.py -v
 ```
 Expected: 7 `test_render_matches_golden_snapshot` pass with no further snapshot mutation.
 
-- [ ] **Step 4: Inspect one snapshot**
+- [x] **Step 4: Inspect one snapshot**
 
 ```bash
 head -n 25 packages/create-jw-agent/tests/golden/agent_en.txt
 ```
 Expected: deterministic file-list with sizes (no timestamps, no absolute paths).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/create-jw-agent/tests/golden packages/create-jw-agent/tests/conftest.py packages/create-jw-agent/tests/test_render.py
@@ -1382,7 +1382,7 @@ git commit -m "test(create-jw-agent): golden snapshots for 5 types x 3 langs"
 - Create: `packages/create-jw-agent/tests/test_cli.py`
 - Create: `packages/create-jw-agent/tests/test_no_network.py`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```python
 # packages/create-jw-agent/tests/test_cli.py
@@ -1508,14 +1508,14 @@ def test_no_network_unless_check_pypi(monkeypatch: pytest.MonkeyPatch, tmp_path:
     assert calls == []
 ```
 
-- [ ] **Step 2: Run tests (expect failure)**
+- [x] **Step 2: Run tests (expect failure)**
 
 ```bash
 uv run --package create-jw-agent pytest packages/create-jw-agent/tests/test_cli.py packages/create-jw-agent/tests/test_no_network.py -v
 ```
 Expected: failures (`create_jw_agent.cli` missing).
 
-- [ ] **Step 3: Implement the CLI**
+- [x] **Step 3: Implement the CLI**
 
 ```python
 # packages/create-jw-agent/src/create_jw_agent/cli.py
@@ -1670,14 +1670,14 @@ def _root(
 
 Because `app` has a single command, we expose it as the script directly. Adjust `[project.scripts]` in `pyproject.toml` to `create-jw-agent = "create_jw_agent.cli:create"` if Typer would otherwise expect a subcommand. (Single-command typer apps work as `app = typer.Typer(); @app.command()` + setting `app` as entry point; verify with `runner.invoke(app, ["--help"])`.)
 
-- [ ] **Step 4: Run tests (expect pass)**
+- [x] **Step 4: Run tests (expect pass)**
 
 ```bash
 uv run --package create-jw-agent pytest packages/create-jw-agent/tests/test_cli.py packages/create-jw-agent/tests/test_no_network.py -v
 ```
 Expected: 8 + 1 passed.
 
-- [ ] **Step 5: Manual smoke + commit**
+- [x] **Step 5: Manual smoke + commit**
 
 ```bash
 uv run --package create-jw-agent create-jw-agent demo --no-interactive --output-dir /tmp/demo-cli
@@ -1701,7 +1701,7 @@ git commit -m "feat(create-jw-agent): Typer CLI with i18n, --check-pypi opt-in, 
 - Modify: `packages/jw-cli/src/jw_cli/main.py`
 - Create: `packages/jw-cli/tests/test_create_agent_wrapper.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # packages/jw-cli/tests/test_create_agent_wrapper.py
@@ -1731,14 +1731,14 @@ def test_create_agent_subcommand_reports_missing_binary(monkeypatch) -> None:
     assert "uvx" in result.stdout or "pipx" in result.stdout
 ```
 
-- [ ] **Step 2: Run test (expect failure)**
+- [x] **Step 2: Run test (expect failure)**
 
 ```bash
 uv run pytest packages/jw-cli/tests/test_create_agent_wrapper.py -v
 ```
 Expected: `create-agent` subcommand not found.
 
-- [ ] **Step 3: Implement the wrapper**
+- [x] **Step 3: Implement the wrapper**
 
 ```python
 # packages/jw-cli/src/jw_cli/commands/create_agent.py
@@ -1799,14 +1799,14 @@ from jw_cli.commands.create_agent import app as create_agent_app
 app.add_typer(create_agent_app, name="create-agent")
 ```
 
-- [ ] **Step 4: Run test (expect pass)**
+- [x] **Step 4: Run test (expect pass)**
 
 ```bash
 uv run pytest packages/jw-cli/tests/test_create_agent_wrapper.py -v
 ```
 Expected: 2 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/jw-cli/src/jw_cli/commands/create_agent.py packages/jw-cli/src/jw_cli/main.py packages/jw-cli/src/jw_cli/commands/__init__.py packages/jw-cli/tests/test_create_agent_wrapper.py
@@ -1823,7 +1823,7 @@ git commit -m "feat(jw-cli): add 'jw create-agent' wrapper that delegates to cre
 - Create: `tools/pytest-cookbook/src/pytest_cookbook/plugin.py`
 - Create: `tools/pytest-cookbook/tests/test_plugin.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tools/pytest-cookbook/tests/test_plugin.py
@@ -1888,14 +1888,14 @@ def test_no_op_when_no_marker(pytester: pytest.Pytester) -> None:
     assert result.ret in (0, 5)
 ```
 
-- [ ] **Step 2: Run test (expect failure — plugin missing)**
+- [x] **Step 2: Run test (expect failure — plugin missing)**
 
 ```bash
 uv run pytest tools/pytest-cookbook/tests/test_plugin.py -v
 ```
 Expected: collection error, plugin not loaded.
 
-- [ ] **Step 3: Write the pyproject and implement the plugin**
+- [x] **Step 3: Write the pyproject and implement the plugin**
 
 ```toml
 # tools/pytest-cookbook/pyproject.toml
@@ -2029,14 +2029,14 @@ class _CookbookMarkdown(pytest.Module):
         return _module_from_source(source, f"pytest_cookbook_{self.path.stem}", self.path)
 ```
 
-- [ ] **Step 4: Run test (expect pass)**
+- [x] **Step 4: Run test (expect pass)**
 
 ```bash
 uv run pytest tools/pytest-cookbook/tests/test_plugin.py -v
 ```
 Expected: 3 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tools/pytest-cookbook
@@ -2059,7 +2059,7 @@ git commit -m "feat(pytest-cookbook): plugin collects ```python ``` blocks tagge
 - Create: `docs/cookbook/tests/__init__.py`
 - Create: `docs/cookbook/tests/test_cookbook.py`
 
-- [ ] **Step 1: Write shared fakes + conftest**
+- [x] **Step 1: Write shared fakes + conftest**
 
 ```python
 # docs/cookbook/_common/__init__.py
@@ -2170,7 +2170,7 @@ def john_3_16() -> FakeBibleRef:
     return FakeBibleRef(book="John", chapter=3, verse=16)
 ```
 
-- [ ] **Step 2: Write the cookbook README**
+- [x] **Step 2: Write the cookbook README**
 
 ```markdown
 # Cookbook
@@ -2195,7 +2195,7 @@ Every block tagged `# test` is executed offline in CI by [`pytest-cookbook`](../
 | 12 | Capacitor app | [`/cookbook/capacitor-app`](12-capacitor-app.md) |
 ```
 
-- [ ] **Step 3: Write recipes 01–04**
+- [x] **Step 3: Write recipes 01–04**
 
 ```markdown
 # Resolve a Bible reference
@@ -2409,7 +2409,7 @@ The real `jw_finetune.dataset.from_jwpub(path)` does the same extraction over JW
 Recipe 05 — add a parser plugin.
 ```
 
-- [ ] **Step 4: Write the cookbook test harness**
+- [x] **Step 4: Write the cookbook test harness**
 
 ```python
 # docs/cookbook/tests/__init__.py
@@ -2438,7 +2438,7 @@ def test_recipe_exists(recipe: str) -> None:
     assert (COOKBOOK_DIR / recipe).exists()
 ```
 
-- [ ] **Step 5: Run the plugin against the cookbook**
+- [x] **Step 5: Run the plugin against the cookbook**
 
 ```bash
 uv run pytest --collect-from-markdown docs/cookbook -v
@@ -2460,7 +2460,7 @@ git commit -m "feat(cookbook): recipes 01-04 + offline fakes (executable via pyt
 - Create: `docs/cookbook/07-add-nli.md`
 - Create: `docs/cookbook/08-publish-to-pypi.md`
 
-- [ ] **Step 1: Write recipe 05**
+- [x] **Step 1: Write recipe 05**
 
 ```markdown
 # Add a parser
@@ -2515,7 +2515,7 @@ Plugin SDK Fase 41 declares `Parser` as a `Protocol` with one method `parse(raw:
 Recipe 06 — custom embedder.
 ```
 
-- [ ] **Step 2: Write recipe 06**
+- [x] **Step 2: Write recipe 06**
 
 ```markdown
 # Custom embedder
@@ -2573,7 +2573,7 @@ The Embedder Protocol only requires `embed(list[str]) -> list[list[float]]`. Det
 Recipe 07 — NLI fidelity wrap.
 ```
 
-- [ ] **Step 3: Write recipe 07**
+- [x] **Step 3: Write recipe 07**
 
 ```markdown
 # Add NLI fidelity wrap
@@ -2635,7 +2635,7 @@ Fase 39 introduced `fidelity_wrap` that runs an NLI model over `(citation_text, 
 Recipe 08 — publish to PyPI.
 ```
 
-- [ ] **Step 4: Write recipe 08**
+- [x] **Step 4: Write recipe 08**
 
 ```markdown
 # Publish to PyPI
@@ -2701,7 +2701,7 @@ PyPI only enforces `name`, `version`, and a build system. The entry point group 
 Recipe 09 — trace an agent run.
 ```
 
-- [ ] **Step 5: Run plugin against expanded cookbook + commit**
+- [x] **Step 5: Run plugin against expanded cookbook + commit**
 
 ```bash
 uv run pytest --collect-from-markdown docs/cookbook -v
@@ -2723,7 +2723,7 @@ git commit -m "feat(cookbook): recipes 05-08 (parser, embedder, NLI wrap, PyPI p
 - Create: `docs/cookbook/11-browser-extension.md`
 - Create: `docs/cookbook/12-capacitor-app.md`
 
-- [ ] **Step 1: Write recipe 09**
+- [x] **Step 1: Write recipe 09**
 
 ```markdown
 # Trace an agent run
@@ -2787,7 +2787,7 @@ Fase 43's tracer is a structured logger: each `record(...)` emits one span, batc
 Recipe 10 — calibrate a golden case.
 ```
 
-- [ ] **Step 2: Write recipe 10**
+- [x] **Step 2: Write recipe 10**
 
 ```markdown
 # Calibrate a golden case
@@ -2846,7 +2846,7 @@ def test_golden_case_yaml_shape():
 Recipe 11 — browser extension (Fase 48).
 ```
 
-- [ ] **Step 3: Write recipe 11 with skip frontmatter**
+- [x] **Step 3: Write recipe 11 with skip frontmatter**
 
 ```markdown
 # Browser extension
@@ -2900,7 +2900,7 @@ Recipe 12 — Capacitor app.
 
 The marker `# test skip-until-fase-48` makes `pytest-cookbook` skip this block until Fase 48 lands. Extend the plugin to honor `skip-until-fase-N` markers — done in Step 5.
 
-- [ ] **Step 4: Write recipe 12**
+- [x] **Step 4: Write recipe 12**
 
 ```markdown
 # Capacitor app
@@ -2954,7 +2954,7 @@ Capacitor adds native wrappers around any web app. The JS SDK from Fase 47 ships
 Back to the cookbook index — explore Fase 22 (eval), Fase 39 (NLI), Fase 41 (SDK).
 ```
 
-- [ ] **Step 5: Extend pytest-cookbook to honor `skip-until-fase-N`**
+- [x] **Step 5: Extend pytest-cookbook to honor `skip-until-fase-N`**
 
 Patch `tools/pytest-cookbook/src/pytest_cookbook/plugin.py` in `_extract_blocks`:
 
@@ -3001,7 +3001,7 @@ def test_should_be_skipped():
     assert "skipped" in result.stdout.str().lower()
 ```
 
-- [ ] **Step 6: Run the plugin + commit**
+- [x] **Step 6: Run the plugin + commit**
 
 ```bash
 uv run pytest --collect-from-markdown docs/cookbook -v
@@ -3021,7 +3021,7 @@ git commit -m "feat(cookbook): recipes 09-12 incl. skip-until-fase markers"
 - Create: `.github/workflows/cookbook-tests.yml`
 - Modify: `.github/workflows/ci.yml`
 
-- [ ] **Step 1: Write the new workflow**
+- [x] **Step 1: Write the new workflow**
 
 ```yaml
 # .github/workflows/cookbook-tests.yml
@@ -3057,7 +3057,7 @@ jobs:
         run: uv run pytest tools/pytest-cookbook/tests -v
 ```
 
-- [ ] **Step 2: Hook into main CI**
+- [x] **Step 2: Hook into main CI**
 
 Append to `.github/workflows/ci.yml` jobs section:
 
@@ -3066,21 +3066,21 @@ Append to `.github/workflows/ci.yml` jobs section:
     uses: ./.github/workflows/cookbook-tests.yml
 ```
 
-- [ ] **Step 3: Validate workflow syntax locally**
+- [x] **Step 3: Validate workflow syntax locally**
 
 ```bash
 uv run python -c "import yaml, pathlib; [yaml.safe_load(pathlib.Path(p).read_text()) for p in ['.github/workflows/cookbook-tests.yml', '.github/workflows/ci.yml']]; print('ok')"
 ```
 Expected: `ok`.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add .github/workflows/cookbook-tests.yml .github/workflows/ci.yml
 git commit -m "ci: add cookbook-tests workflow (12 recipes + scaffolder + plugin)"
 ```
 
-- [ ] **Step 5: Push and verify on GitHub**
+- [x] **Step 5: Push and verify on GitHub**
 
 ```bash
 git push origin <branch>
@@ -3095,7 +3095,7 @@ Expected: cookbook-tests job green within 10 min.
 **Files:**
 - Create: `.github/workflows/publish-create-jw-agent.yml`
 
-- [ ] **Step 1: Write the workflow**
+- [x] **Step 1: Write the workflow**
 
 ```yaml
 # .github/workflows/publish-create-jw-agent.yml
@@ -3129,19 +3129,19 @@ jobs:
           attestations: true
 ```
 
-- [ ] **Step 2: Validate locally**
+- [x] **Step 2: Validate locally**
 
 ```bash
 uv run python -c "import yaml; yaml.safe_load(open('.github/workflows/publish-create-jw-agent.yml')); print('ok')"
 ```
 
-- [ ] **Step 3: Document the trusted-publishing setup**
+- [x] **Step 3: Document the trusted-publishing setup**
 
 Append to `docs/guias/scaffolding.md` (will exist after Task 17):
 
 > Configure once: in PyPI project settings → Publishing → Add trusted publisher with owner=`eliascipre`, repo=`jw-agent-toolkit`, workflow=`publish-create-jw-agent.yml`, environment=`pypi`. No API tokens needed.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add .github/workflows/publish-create-jw-agent.yml
@@ -3156,7 +3156,7 @@ git commit -m "ci: trusted-publishing workflow for create-jw-agent (tag triggere
 - Modify: `website/src/content.config.ts` (only if cookbook glob is missing)
 - Create: `website/src/pages/cookbook/[slug].astro` (alias redirect)
 
-- [ ] **Step 1: Audit current content.config.ts**
+- [x] **Step 1: Audit current content.config.ts**
 
 ```bash
 grep -n "cookbook" website/src/content.config.ts || echo "needs cookbook glob"
@@ -3164,7 +3164,7 @@ grep -n "cookbook" website/src/content.config.ts || echo "needs cookbook glob"
 
 If the glob already covers `docs/cookbook/**`, no edit needed. Otherwise extend the existing `docs` collection.
 
-- [ ] **Step 2: Write the alias page**
+- [x] **Step 2: Write the alias page**
 
 ```astro
 ---
@@ -3185,21 +3185,21 @@ const target = `/docs/cookbook/${slug}`;
 <script>window.location.replace({`"${target}"`})</script>
 ```
 
-- [ ] **Step 3: Verify build**
+- [x] **Step 3: Verify build**
 
 ```bash
 cd website && npm install --silent && npm run build
 ```
 Expected: no errors. `dist/cookbook/resolve-bible-reference/index.html` present.
 
-- [ ] **Step 4: Quick smoke on Pagefind index**
+- [x] **Step 4: Quick smoke on Pagefind index**
 
 ```bash
 test -f website/dist/pagefind/pagefind.js && echo "Pagefind index built"
 ```
 Expected: `Pagefind index built`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add website/src/pages/cookbook
@@ -3214,7 +3214,7 @@ git commit -m "feat(website): /cookbook/<slug> alias redirects to /docs/cookbook
 - Create: `docs/guias/scaffolding.md`
 - Modify: `docs/README.md`
 
-- [ ] **Step 1: Write the guide**
+- [x] **Step 1: Write the guide**
 
 ```markdown
 # Scaffolding y Cookbook (Fase 42)
@@ -3276,7 +3276,7 @@ Cobertura inicial: 10 recetas activas + 2 que esperan Fase 47/48.
 | Snapshot rojo tras editar plantilla | golden desfasado | `pytest --snapshot-update` |
 ```
 
-- [ ] **Step 2: Link from `docs/README.md`**
+- [x] **Step 2: Link from `docs/README.md`**
 
 Add (alphabetical position):
 
@@ -3284,7 +3284,7 @@ Add (alphabetical position):
 - [Scaffolding y Cookbook](guias/scaffolding.md) — `create-jw-agent` + 12 recetas ejecutables en CI.
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add docs/guias/scaffolding.md docs/README.md
@@ -3299,13 +3299,13 @@ git commit -m "docs(scaffolding): user guide for create-jw-agent + executable co
 - Modify: `docs/VISION_AUDIT.md`
 - Modify: `docs/ROADMAP.md`
 
-- [ ] **Step 1: Add VISION_AUDIT row**
+- [x] **Step 1: Add VISION_AUDIT row**
 
 ```markdown
 | Fase 42 (scaffolding + cookbook) | ✅ Nuevo | `create-jw-agent` standalone + 12 recetas ejecutables + CI bloqueante |
 ```
 
-- [ ] **Step 2: Append Fase 42 section to ROADMAP**
+- [x] **Step 2: Append Fase 42 section to ROADMAP**
 
 ```markdown
 ## Fase 42 — Scaffolding + Cookbook ejecutable ✅
@@ -3334,14 +3334,14 @@ git commit -m "docs(scaffolding): user guide for create-jw-agent + executable co
 - ✅ Suite global sin regresiones.
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add docs/VISION_AUDIT.md docs/ROADMAP.md
 git commit -m "docs(roadmap): land Fase 42 — create-jw-agent + executable cookbook"
 ```
 
-- [ ] **Step 4: Run lint + format**
+- [x] **Step 4: Run lint + format**
 
 ```bash
 uv run ruff check packages/create-jw-agent tools/pytest-cookbook docs/cookbook/_common
@@ -3349,7 +3349,7 @@ uv run ruff format --check packages/create-jw-agent tools/pytest-cookbook docs/c
 ```
 Expected: zero violations.
 
-- [ ] **Step 5: Run the entire test suite**
+- [x] **Step 5: Run the entire test suite**
 
 ```bash
 uv run pytest packages/ tools/ --collect-from-markdown docs/cookbook -v --tb=short
@@ -3359,7 +3359,7 @@ Expected:
 - New tests (~35 from create-jw-agent + 4 from pytest-cookbook + 12 from cookbook recipes) green or appropriately skipped.
 - Zero regressions.
 
-- [ ] **Step 6: End-to-end smoke**
+- [x] **Step 6: End-to-end smoke**
 
 ```bash
 rm -rf /tmp/timer-test
@@ -3373,7 +3373,7 @@ rm -rf /tmp/timer-test
 ```
 Expected: total wall-time ≤ 10 min on cold cache, ≤ 2 min on warm. All tests green inside generated project.
 
-- [ ] **Step 7: Final polish commit if needed**
+- [x] **Step 7: Final polish commit if needed**
 
 If anything wobbled (a doc typo, an extra empty line), one final `docs(scaffolding): polish` commit. Otherwise, nothing to do.
 

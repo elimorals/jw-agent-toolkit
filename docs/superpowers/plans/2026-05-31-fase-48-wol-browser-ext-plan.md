@@ -81,7 +81,7 @@ Modifies:
 - Create: `apps/wol-browser-extension/README.md`
 - Modify: `pnpm-workspace.yaml`
 
-- [ ] **Step 1: Write the failing test (scaffold sanity)**
+- [x] **Step 1: Write the failing test (scaffold sanity)**
 
 ```typescript
 // apps/wol-browser-extension/tests/unit/manifest.spec.ts
@@ -117,12 +117,12 @@ describe("manifest v3 contract", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd apps/wol-browser-extension && pnpm vitest run tests/unit/manifest.spec.ts`
 Expected: FAIL — `manifest.json` does not exist.
 
-- [ ] **Step 3: Create the manifest, tsconfig, vite config and package.json**
+- [x] **Step 3: Create the manifest, tsconfig, vite config and package.json**
 
 ```json
 // apps/wol-browser-extension/package.json
@@ -270,7 +270,7 @@ packages:
   - "apps/*"          # add this if not present
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 ```bash
 cd apps/wol-browser-extension
@@ -279,7 +279,7 @@ pnpm vitest run tests/unit/manifest.spec.ts
 ```
 Expected: 5 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/wol-browser-extension pnpm-workspace.yaml
@@ -296,7 +296,7 @@ git commit -m "feat(wol-ext): scaffold workspace + manifest v3 with localhost-on
 - Create: `apps/wol-browser-extension/src/api.ts`
 - Create: `apps/wol-browser-extension/tests/unit/api.spec.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```typescript
 // apps/wol-browser-extension/tests/unit/api.spec.ts
@@ -408,12 +408,12 @@ describe("JwApiClient", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run tests/unit/api.spec.ts`
 Expected: FAIL — `JwApiClient` missing.
 
-- [ ] **Step 3: Implement config, types and api**
+- [x] **Step 3: Implement config, types and api**
 
 ```typescript
 // apps/wol-browser-extension/src/config.ts
@@ -611,12 +611,12 @@ Fix:
     }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm vitest run tests/unit/api.spec.ts`
 Expected: 7 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/wol-browser-extension/src/config.ts apps/wol-browser-extension/src/types.ts apps/wol-browser-extension/src/api.ts apps/wol-browser-extension/tests/unit/api.spec.ts
@@ -632,7 +632,7 @@ git commit -m "feat(wol-ext): JwApiClient with hard localhost allow-list and exp
 - Create: `apps/wol-browser-extension/tests/unit/verse_detector.spec.ts`
 - Create: `apps/wol-browser-extension/tests/playwright/fixture_pages/john_3_es.html`
 
-- [ ] **Step 1: Write the fixture HTML (minimal repro of WOL DOM)**
+- [x] **Step 1: Write the fixture HTML (minimal repro of WOL DOM)**
 
 ```html
 <!-- apps/wol-browser-extension/tests/playwright/fixture_pages/john_3_es.html -->
@@ -656,7 +656,7 @@ git commit -m "feat(wol-ext): JwApiClient with hard localhost allow-list and exp
 </html>
 ```
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 ```typescript
 // apps/wol-browser-extension/tests/unit/verse_detector.spec.ts
@@ -721,12 +721,12 @@ describe("buildReferenceFromUrl", () => {
 });
 ```
 
-- [ ] **Step 3: Run test to verify it fails**
+- [x] **Step 3: Run test to verify it fails**
 
 Run: `pnpm vitest run tests/unit/verse_detector.spec.ts`
 Expected: FAIL — module missing.
 
-- [ ] **Step 4: Implement the detector**
+- [x] **Step 4: Implement the detector**
 
 ```typescript
 // apps/wol-browser-extension/src/dom/verse_detector.ts
@@ -799,12 +799,12 @@ export function detectVerses(
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `pnpm vitest run tests/unit/verse_detector.spec.ts`
 Expected: 6 passed.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/wol-browser-extension/src/dom/verse_detector.ts apps/wol-browser-extension/tests/unit/verse_detector.spec.ts apps/wol-browser-extension/tests/playwright/fixture_pages/john_3_es.html
@@ -821,7 +821,7 @@ git commit -m "feat(wol-ext): verse detector + URL→chapter parser with golden 
 - Create: `apps/wol-browser-extension/src/dom/styles.css`
 - Create: `apps/wol-browser-extension/tests/unit/button_injector.spec.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```typescript
 // apps/wol-browser-extension/tests/unit/button_injector.spec.ts
@@ -909,12 +909,12 @@ describe("injectButtonsForVerses", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run tests/unit/button_injector.spec.ts`
 Expected: FAIL — module missing.
 
-- [ ] **Step 3: Implement injector, tooltip and styles**
+- [x] **Step 3: Implement injector, tooltip and styles**
 
 ```typescript
 // apps/wol-browser-extension/src/dom/button_injector.ts
@@ -1141,12 +1141,12 @@ span.verse:hover + .jw-ext-verse-actions {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm vitest run tests/unit/button_injector.spec.ts`
 Expected: 5 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/wol-browser-extension/src/dom/button_injector.ts apps/wol-browser-extension/src/dom/tooltip.ts apps/wol-browser-extension/src/dom/styles.css apps/wol-browser-extension/tests/unit/button_injector.spec.ts
@@ -1164,7 +1164,7 @@ git commit -m "feat(wol-ext): idempotent button injector + tooltip/toast helpers
 - Create: `apps/wol-browser-extension/src/i18n/pt.json`
 - Create: `apps/wol-browser-extension/tests/unit/i18n.spec.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```typescript
 // apps/wol-browser-extension/tests/unit/i18n.spec.ts
@@ -1199,12 +1199,12 @@ describe("i18n", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run tests/unit/i18n.spec.ts`
 Expected: FAIL — module missing.
 
-- [ ] **Step 3: Implement i18n + locale files**
+- [x] **Step 3: Implement i18n + locale files**
 
 ```json
 // apps/wol-browser-extension/src/i18n/en.json
@@ -1307,12 +1307,12 @@ export function detectLanguage(href: string): Language {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm vitest run tests/unit/i18n.spec.ts`
 Expected: 5 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/wol-browser-extension/src/i18n apps/wol-browser-extension/tests/unit/i18n.spec.ts
@@ -1327,7 +1327,7 @@ git commit -m "feat(wol-ext): i18n en/es/pt with URL-based detection and en fall
 - Create: `apps/wol-browser-extension/src/content_script.ts`
 - Create: `apps/wol-browser-extension/src/background.ts`
 
-- [ ] **Step 1: Write the content_script smoke test (DOM only)**
+- [x] **Step 1: Write the content_script smoke test (DOM only)**
 
 ```typescript
 // apps/wol-browser-extension/tests/unit/content_script.spec.ts
@@ -1378,12 +1378,12 @@ describe("content_script.run", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run tests/unit/content_script.spec.ts`
 Expected: FAIL — module missing.
 
-- [ ] **Step 3: Implement content_script and background**
+- [x] **Step 3: Implement content_script and background**
 
 ```typescript
 // apps/wol-browser-extension/src/content_script.ts
@@ -1567,12 +1567,12 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 });
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm vitest run tests/unit/content_script.spec.ts`
 Expected: 2 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/wol-browser-extension/src/content_script.ts apps/wol-browser-extension/src/background.ts apps/wol-browser-extension/tests/unit/content_script.spec.ts
@@ -1588,7 +1588,7 @@ git commit -m "feat(wol-ext): content_script wires detector→injector→tooltip
 - Create: `apps/wol-browser-extension/src/popup/popup.ts`
 - Create: `apps/wol-browser-extension/src/popup/popup.css`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```typescript
 // apps/wol-browser-extension/tests/unit/popup.spec.ts
@@ -1638,12 +1638,12 @@ describe("popup", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run tests/unit/popup.spec.ts`
 Expected: FAIL — module missing.
 
-- [ ] **Step 3: Implement popup**
+- [x] **Step 3: Implement popup**
 
 ```html
 <!-- apps/wol-browser-extension/src/popup/popup.html -->
@@ -1809,12 +1809,12 @@ if (typeof window !== "undefined" && document.getElementById("root")) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm vitest run tests/unit/popup.spec.ts`
 Expected: 2 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/wol-browser-extension/src/popup apps/wol-browser-extension/tests/unit/popup.spec.ts
@@ -1829,7 +1829,7 @@ git commit -m "feat(wol-ext): popup UI for vault path + language + health check"
 - Modify: `packages/jw-mcp/src/jw_mcp/rest_api.py`
 - Create: `packages/jw-mcp/tests/test_cors_origins.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # packages/jw-mcp/tests/test_cors_origins.py
@@ -1900,12 +1900,12 @@ def test_cors_preflight_options() -> None:
     assert "POST" in (r.headers.get("access-control-allow-methods") or "")
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest packages/jw-mcp/tests/test_cors_origins.py -v`
 Expected: FAIL — current code uses `allow_origins=["*"]`; `test_cors_blocks_*` fail because `*` answers ACAO=`*` for every origin.
 
-- [ ] **Step 3: Tighten CORS in `rest_api.py`**
+- [x] **Step 3: Tighten CORS in `rest_api.py`**
 
 Replace the existing block:
 
@@ -1939,17 +1939,17 @@ app.add_middleware(
 )
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest packages/jw-mcp/tests/test_cors_origins.py -v`
 Expected: 6 passed.
 
-- [ ] **Step 5: Run full jw-mcp suite to confirm no regression**
+- [x] **Step 5: Run full jw-mcp suite to confirm no regression**
 
 Run: `uv run pytest packages/jw-mcp -q`
 Expected: all green.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add packages/jw-mcp/src/jw_mcp/rest_api.py packages/jw-mcp/tests/test_cors_origins.py
@@ -1964,7 +1964,7 @@ git commit -m "feat(jw-mcp): tighten CORS to wol.jw.org + extension regex (BREAK
 - Modify: `packages/jw-mcp/src/jw_mcp/rest_api.py`
 - Create: `packages/jw-mcp/tests/test_cross_references_endpoint.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # packages/jw-mcp/tests/test_cross_references_endpoint.py
@@ -2015,12 +2015,12 @@ def test_cross_references_each_entry_has_url_and_verse() -> None:
         assert ref["url"].startswith("https://wol.jw.org/")
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest packages/jw-mcp/tests/test_cross_references_endpoint.py -v`
 Expected: FAIL — endpoint missing returns 404.
 
-- [ ] **Step 3: Add the endpoint and request model**
+- [x] **Step 3: Add the endpoint and request model**
 
 In `packages/jw-mcp/src/jw_mcp/rest_api.py`, after the existing schemas section, add:
 
@@ -2074,12 +2074,12 @@ async def post_cross_references(req: CrossRefRequest) -> dict[str, Any]:
     return {"refs": refs, "reference": ref.display(), "language": req.language}
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest packages/jw-mcp/tests/test_cross_references_endpoint.py -v`
 Expected: 3 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/jw-mcp/src/jw_mcp/rest_api.py packages/jw-mcp/tests/test_cross_references_endpoint.py
@@ -2096,7 +2096,7 @@ git commit -m "feat(jw-mcp): POST /api/v1/cross_references endpoint for the WOL 
 
 This task addresses Spec Risk #7 (user points `vaultPath` at `~/.ssh`). The endpoint MUST refuse to write outside an Obsidian vault, detected by the presence of `.obsidian/` somewhere in the path ancestry.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # packages/jw-mcp/tests/test_vault_append_endpoint.py
@@ -2233,12 +2233,12 @@ def test_vault_append_creates_subdir_when_missing(tmp_path: Path) -> None:
     assert "Verses" in written.parts
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `uv run pytest packages/jw-mcp/tests/test_vault_append_endpoint.py -v`
 Expected: 6 FAIL — endpoint missing.
 
-- [ ] **Step 3: Implement the endpoint with validation**
+- [x] **Step 3: Implement the endpoint with validation**
 
 Add to `packages/jw-mcp/src/jw_mcp/rest_api.py`:
 
@@ -2366,12 +2366,12 @@ async def post_vault_append(req: VaultAppendRequest) -> dict[str, Any]:
     }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `uv run pytest packages/jw-mcp/tests/test_vault_append_endpoint.py -v`
 Expected: 6 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/jw-mcp/src/jw_mcp/rest_api.py packages/jw-mcp/tests/test_vault_append_endpoint.py
@@ -2386,7 +2386,7 @@ git commit -m "feat(jw-mcp): POST /api/v1/vault/append with .obsidian/ marker + 
 - Create: `apps/wol-browser-extension/.eslintrc.cjs`
 - Create: `apps/wol-browser-extension/tests/unit/no_external_calls.spec.ts`
 
-- [ ] **Step 1: Write the failing static check test**
+- [x] **Step 1: Write the failing static check test**
 
 ```typescript
 // apps/wol-browser-extension/tests/unit/no_external_calls.spec.ts
@@ -2432,12 +2432,12 @@ describe("static guard: no external URLs in src/", () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to confirm it passes for current src**
+- [x] **Step 2: Run the test to confirm it passes for current src**
 
 Run: `pnpm vitest run tests/unit/no_external_calls.spec.ts`
 Expected: passes (only `verse_detector.ts` may contain `wol.jw.org` in a literal regex; we whitelist that path explicitly).
 
-- [ ] **Step 3: Add ESLint rule for runtime fetch guards**
+- [x] **Step 3: Add ESLint rule for runtime fetch guards**
 
 ```javascript
 // apps/wol-browser-extension/.eslintrc.cjs
@@ -2478,12 +2478,12 @@ module.exports = {
 };
 ```
 
-- [ ] **Step 4: Run lint to confirm it passes**
+- [x] **Step 4: Run lint to confirm it passes**
 
 Run: `pnpm lint`
 Expected: 0 errors.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/wol-browser-extension/.eslintrc.cjs apps/wol-browser-extension/tests/unit/no_external_calls.spec.ts
@@ -2500,7 +2500,7 @@ git commit -m "feat(wol-ext): eslint rule + static test forbidding non-localhost
 - Create: `apps/wol-browser-extension/tests/playwright/extension.spec.ts`
 - Create: `apps/wol-browser-extension/tests/playwright/fixture_pages/john_3_en.html`
 
-- [ ] **Step 1: Build the dist bundle (needed by Playwright)**
+- [x] **Step 1: Build the dist bundle (needed by Playwright)**
 
 ```bash
 cd apps/wol-browser-extension
@@ -2508,7 +2508,7 @@ pnpm build
 ```
 Expected: `dist/` directory created with `manifest.json` + bundled scripts.
 
-- [ ] **Step 2: Write Playwright config**
+- [x] **Step 2: Write Playwright config**
 
 ```typescript
 // apps/wol-browser-extension/tests/playwright/playwright.config.ts
@@ -2532,7 +2532,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 3: Write the mock backend**
+- [x] **Step 3: Write the mock backend**
 
 ```typescript
 // apps/wol-browser-extension/tests/playwright/mock_backend.ts
@@ -2642,7 +2642,7 @@ export async function startMockBackend(port = 8765): Promise<MockBackend> {
 }
 ```
 
-- [ ] **Step 4: Write the John 3 English fixture**
+- [x] **Step 4: Write the John 3 English fixture**
 
 ```html
 <!-- apps/wol-browser-extension/tests/playwright/fixture_pages/john_3_en.html -->
@@ -2665,7 +2665,7 @@ export async function startMockBackend(port = 8765): Promise<MockBackend> {
 </html>
 ```
 
-- [ ] **Step 5: Write the failing E2E test**
+- [x] **Step 5: Write the failing E2E test**
 
 ```typescript
 // apps/wol-browser-extension/tests/playwright/extension.spec.ts
@@ -2775,7 +2775,7 @@ test("clicking save-vault without configured vault path shows error toast", asyn
 
 > **Note for the implementer**: the test framework here uses a manual bootstrap because Playwright + file:// URLs do not trigger the content_script's hostname gate. Two strategies are acceptable: (a) use `addInitScript` to override `window.location` semantics, or (b) modify the auto-boot in `content_script.ts` to also accept a `__JW_TEST_URL__` global when the protocol is `file:` during E2E. Pick (b) and gate behind an `if (process.env.NODE_ENV === 'test' || hostname matches)`. Update `content_script.ts` accordingly before running these tests.
 
-- [ ] **Step 6: Patch content_script to honor `__JW_TEST_URL__`**
+- [x] **Step 6: Patch content_script to honor `__JW_TEST_URL__`**
 
 In `apps/wol-browser-extension/src/content_script.ts`, replace the auto-boot bottom block with:
 
@@ -2805,7 +2805,7 @@ if (_shouldBoot()) {
 
 Also pass `_bootHref()` into `buildReferenceFromUrl` and `detectLanguage` inside `run()` (replace `window.location.href` references with a `getHref()` helper that returns the override when present).
 
-- [ ] **Step 7: Run E2E tests**
+- [x] **Step 7: Run E2E tests**
 
 ```bash
 cd apps/wol-browser-extension
@@ -2814,7 +2814,7 @@ pnpm test:e2e
 ```
 Expected: 4 passed.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add apps/wol-browser-extension/src/content_script.ts apps/wol-browser-extension/tests/playwright
@@ -2830,7 +2830,7 @@ git commit -m "test(wol-ext): playwright E2E with mocked WOL fixture + mocked lo
 
 This is the **bloqueante** test of Spec Risk #3. Anything reaching the network that isn't `localhost:8765` or `file://` or `wol.jw.org` is a hard fail.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```typescript
 // apps/wol-browser-extension/tests/playwright/privacy.spec.ts
@@ -2919,12 +2919,12 @@ test("background health-check does not call anything but localhost", async () =>
 });
 ```
 
-- [ ] **Step 2: Run test**
+- [x] **Step 2: Run test**
 
 Run: `pnpm test:privacy`
 Expected: 2 passed. If FAIL: track the offending URL in `external[]` and remove the leak.
 
-- [ ] **Step 3: Add to CI as a blocking job**
+- [x] **Step 3: Add to CI as a blocking job**
 
 Append to `.github/workflows/wol-extension.yml` (Task 14):
 
@@ -2934,7 +2934,7 @@ Append to `.github/workflows/wol-extension.yml` (Task 14):
   working-directory: apps/wol-browser-extension
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add apps/wol-browser-extension/tests/playwright/privacy.spec.ts
@@ -2949,7 +2949,7 @@ git commit -m "test(wol-ext): BLOCKING privacy test asserting zero non-localhost
 - Create: `apps/wol-browser-extension/scripts/package.mjs`
 - Create: `.github/workflows/wol-extension.yml`
 
-- [ ] **Step 1: Write the package script**
+- [x] **Step 1: Write the package script**
 
 ```javascript
 // apps/wol-browser-extension/scripts/package.mjs
@@ -3007,7 +3007,7 @@ cd apps/wol-browser-extension
 pnpm add -D archiver
 ```
 
-- [ ] **Step 2: Run package locally**
+- [x] **Step 2: Run package locally**
 
 ```bash
 pnpm build
@@ -3015,7 +3015,7 @@ pnpm package
 ```
 Expected: `dist-zip/jw-toolkit-wol-0.1.0.zip` created, size <800KB.
 
-- [ ] **Step 3: Write GitHub Releases workflow**
+- [x] **Step 3: Write GitHub Releases workflow**
 
 ```yaml
 # .github/workflows/wol-extension.yml
@@ -3100,7 +3100,7 @@ jobs:
           files: dist-zip/*.zip
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add apps/wol-browser-extension/scripts/package.mjs apps/wol-browser-extension/package.json .github/workflows/wol-extension.yml
@@ -3117,7 +3117,7 @@ git commit -m "feat(wol-ext): pnpm package script + CI workflow with release-zip
 - Modify: `docs/VISION_AUDIT.md`
 - Modify: `docs/ROADMAP.md`
 
-- [ ] **Step 1: Write the guide**
+- [x] **Step 1: Write the guide**
 
 ```markdown
 # Guía: extensión WOL del JW Agent Toolkit
@@ -3187,7 +3187,7 @@ uv run uvicorn jw_mcp.rest_api:app --port 8765
   bíblico tienen UI inline.
 ```
 
-- [ ] **Step 2: Add to the docs index and vision audit**
+- [x] **Step 2: Add to the docs index and vision audit**
 
 In `docs/guias/README.md`, add bullet:
 
@@ -3203,7 +3203,7 @@ In `docs/VISION_AUDIT.md`, add a row to the phases table (date 2026-05-31):
 
 In `docs/ROADMAP.md`, mark Fase 48 as shipped with link to the guide.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add docs/guias/wol-browser-ext.md docs/guias/README.md docs/VISION_AUDIT.md docs/ROADMAP.md
@@ -3216,7 +3216,7 @@ git commit -m "docs(wol-ext): user guide + roadmap + vision audit"
 
 **Files:** none (verification only)
 
-- [ ] **Step 1: Full local cycle**
+- [x] **Step 1: Full local cycle**
 
 ```bash
 cd apps/wol-browser-extension
@@ -3232,7 +3232,7 @@ ls -la dist-zip/
 ```
 Expected: every command green; `dist-zip/jw-toolkit-wol-0.1.0.zip` <800KB.
 
-- [ ] **Step 2: Backend regression**
+- [x] **Step 2: Backend regression**
 
 ```bash
 uv run pytest packages/jw-mcp -q
@@ -3240,7 +3240,7 @@ uv run pytest packages -q
 ```
 Expected: full Python suite green, including the new CORS / cross-refs / vault-append tests, and no regression in the 1984 existing tests.
 
-- [ ] **Step 3: Manual smoke**
+- [x] **Step 3: Manual smoke**
 
 1. Run `uv run uvicorn jw_mcp.rest_api:app --port 8765`.
 2. Load the unpacked extension into Chrome from `apps/wol-browser-extension/dist/`.
@@ -3250,7 +3250,7 @@ Expected: full Python suite green, including the new CORS / cross-refs / vault-a
 6. Click "Explicar" on John 3:16 → tooltip with markdown.
 7. Click "Guardar a Obsidian" → file appears in `<vault>/Verses/Juan_3_16.md`.
 
-- [ ] **Step 4: Tag a candidate release**
+- [x] **Step 4: Tag a candidate release**
 
 ```bash
 git tag wol-ext/v0.1.0
@@ -3260,7 +3260,7 @@ git push origin wol-ext/v0.1.0
 Then create a GitHub release pointing at the tag; the `release` job of the
 workflow attaches the zip.
 
-- [ ] **Step 5: Commit (only if anything changed during verify)**
+- [x] **Step 5: Commit (only if anything changed during verify)**
 
 If verification revealed nothing to fix, no commit is needed. Otherwise:
 
