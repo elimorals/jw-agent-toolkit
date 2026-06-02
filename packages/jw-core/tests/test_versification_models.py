@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import pytest
-from pydantic import ValidationError
-
 from jw_core.versification.models import (
     MappingResult,
     Tradition,
     VerseCoord,
     VersificationMapping,
 )
+from pydantic import ValidationError
 
 
 def test_verse_coord_basic() -> None:

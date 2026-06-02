@@ -104,6 +104,13 @@ app.add_typer(brain_app, name="brain", help="Second-brain (Fase 49).")
 from jw_agents.tracing.viewer import app as _trace_app
 
 app.add_typer(_trace_app, name="trace", help="Inspect agent traces (Fase 43).")
+from jw_cli.commands.versification import versification_app
+
+app.add_typer(
+    versification_app,
+    name="versification",
+    help="Map Bible refs between numbering traditions (Fase 46).",
+)
 app.command(name="chunker-bench", help="Benchmark chunker variants (Fase 45).")(chunker_bench_cmd)
 app.command(
     name="create-agent",

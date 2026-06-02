@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_core.versification.mapping import to_canonical
 
 

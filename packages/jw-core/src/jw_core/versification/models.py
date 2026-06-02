@@ -48,7 +48,7 @@ class VersificationMapping(BaseModel):
     )
 
     @model_validator(mode="after")
-    def _require_trilingual_explanation(self) -> "VersificationMapping":
+    def _require_trilingual_explanation(self) -> VersificationMapping:
         required = {"en", "es", "pt"}
         present = {
             k

@@ -932,6 +932,28 @@ en `data/extract.py` con `dump_rejected_path` para audit.
 - ✅ Cero red; todos los providers fakes/monkeypatched.
 - ✅ Golden 50-pair fixture (25 keep + 25 reject) cubre es/en/pt; LOOSE accuracy 0.86 (target 0.85, LLM+NLI pushes to 0.90+), STRICT accuracy 1.00.
 
+## Fase 46 — canonical-versification ✅
+
+- **Estado**: Estable (2026-06-01).
+- **Spec**: `docs/superpowers/specs/2026-05-31-fase-46-canonical-versification-design.md`.
+- **Plan**: `docs/superpowers/plans/2026-05-31-fase-46-canonical-versification-plan.md`.
+- **Guía**: `docs/guias/versification.md`.
+
+Mapeo bidireccional de (book, chapter, verse) entre las cuatro tradiciones
+de numeración relevantes para el toolkit (`nwt` default, `masoretic`,
+`lxx`, `vulgate`). Catálogo curado de 30 entradas seed contra fuentes
+académicas (Tov 2012, BHS apparatus, NETS prefaces) con explicaciones
+trilingües en/es/pt originales del maintainer (no copia, GPL-3.0 safe).
+`to_canonical` idempotente y lossless en round-trip; `explain` retorna
+prosa localizada; CLI `jw versification {map,explain,list}`.
+
+### Cobertura de tests
+
+- ✅ **29 tests offline**: 10 models + 4 registry + 8 mapping + 4 explain + 3 CLI.
+- ✅ Cero red; catálogo embebido vía importlib.resources con lru_cache(1).
+- ✅ Casos famosos cubiertos: Joel 2:28 → 3:1, Malachi 4 → 3:19, Psalm 51 superscript, LXX Psalm 50, round-trip preserving.
+- ✅ Sin regresiones en los 1005 tests de jw-core.
+
 ## Fase 40 — content-provenance
 
 - **Estado**: Estable (2026-05-31).
