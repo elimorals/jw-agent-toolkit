@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_finetune.synth.judge.heuristics import (
     cites_jw_publication,
     has_minimum_substance,

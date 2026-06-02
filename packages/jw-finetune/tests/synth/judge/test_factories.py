@@ -6,7 +6,6 @@ We never touch real provider classes here — we patch the import points.
 from __future__ import annotations
 
 import pytest
-
 from jw_finetune.synth.judge import factories
 from jw_finetune.synth.judge.factories import (
     build_judge,

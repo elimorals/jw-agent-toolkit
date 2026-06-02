@@ -38,6 +38,7 @@ Orientadas a casos de uso. Cada una es autocontenida con código de ejemplo.
 - [Semantic chunking (Fase 45)](guias/semantic-chunking.md) — chunking por unidad de pensamiento: continuation/closure markers es/en/pt + `LLMChunker` con cache + NDCG@10 bench con per-language lift gate. CLI `jw chunker-bench`, MCP `set_chunker`. Backwards-compat byte-stable.
 - [Extensión WOL para el navegador](guias/wol-browser-ext.md) — Fase 48: extensión Chrome/Edge/Firefox que añade botones inline en `wol.jw.org` (📖 Explicar / 🔗 Refs / 📝 Obsidian). 100% local, 3 capas de defensa contra requests externos.
 - [Agent tracing (Fase 43)](guias/agent-tracing.md) — trazas JSONL local-first que registran cada decisión interna del agente (kept/dropped/warn/step). CLI `jw apologetics --trace`, viewer `jw trace {view,list,gc}`, MCP `get_trace`. Bridge OpenTelemetry opt-in bajo extra `[otel]`.
+- [Synth Judge (Fase 44)](guias/synth-judge.md) — filtro de calidad 3-etapa (heurísticas always-on + LLM pedagógico opt-in + NLI Fase 39 opt-in) sobre Q&A sintético antes de `data/train.jsonl`. CLI `--judge=off/loose/strict`, env `JW_SYNTH_JUDGE_LLM/NLI`, per-recipe overrides, dump de rejected para audit.
 - [Resolver citas bíblicas](guias/resolver-citas-biblicas.md) — Usar `parse_reference`, manejar idiomas, construir URLs.
 - [Usar los clientes HTTP](guias/usar-clientes-http.md) — CDN, WOL, Mediator, PubMedia, TopicIndex: patrones comunes.
 - [Infraestructura Fase 9](guias/infraestructura-fase9.md) — Cache SQLite, throttler per-host, telemetría opt-in, factory unificado.

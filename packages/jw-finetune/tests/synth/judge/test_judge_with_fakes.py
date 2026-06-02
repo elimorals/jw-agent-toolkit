@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_finetune.synth.judge.judge import Judge, score_qa_pair
 from jw_finetune.synth.judge.models import QAScore
 from jw_finetune.synth.judge.thresholds import JudgeMode, JudgeOverrides

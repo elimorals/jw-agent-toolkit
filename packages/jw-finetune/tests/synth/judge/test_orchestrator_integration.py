@@ -5,11 +5,10 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from jw_rag.chunker import Chunk
-
 from jw_finetune.synth.judge import Judge, JudgeMode, JudgeOverrides
 from jw_finetune.synth.orchestrator import synthesize_chunk
 from jw_finetune.synth.provider import LLMRequest, LLMResponse
+from jw_rag.chunker import Chunk
 
 
 class FakeSynthProvider:

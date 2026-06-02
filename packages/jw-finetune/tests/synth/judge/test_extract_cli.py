@@ -6,11 +6,10 @@ import json
 from pathlib import Path
 from typing import Any
 
-from jw_rag.chunker import Chunk
-
 from jw_finetune.data.extract import run_extract_with_judge
 from jw_finetune.synth.judge import JudgeMode
 from jw_finetune.synth.provider import LLMRequest, LLMResponse
+from jw_rag.chunker import Chunk
 
 
 class FakeSynthProvider:

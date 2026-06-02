@@ -15,7 +15,6 @@ When a signal is None (stage didn't run), it contributes neutral 0.0.
 from __future__ import annotations
 
 import pytest
-
 from jw_finetune.synth.judge.scoring import compute_overall
 
 

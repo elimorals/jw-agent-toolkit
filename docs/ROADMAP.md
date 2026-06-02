@@ -908,6 +908,30 @@ fallback. Bridge opt-in OpenTelemetry bajo extra `[otel]`. MCP
 - ✅ CLI test (`jw apologetics --trace`) parsea envelope desde stdout/JSONL.
 - ✅ MCP test (`get_trace(trace_id)`) reconstruye eventos + envelope.
 
+## Fase 44 — synth-judge ✅
+
+- **Estado**: Estable (2026-06-01).
+- **Spec**: `docs/superpowers/specs/2026-05-31-fase-44-synth-judge-design.md`.
+- **Plan**: `docs/superpowers/plans/2026-05-31-fase-44-synth-judge-plan.md`.
+- **Guía**: `docs/guias/synth-judge.md`.
+
+Filtro de calidad de 3 etapas para Q&A sintético antes de que llegue a
+`data/train.jsonl`. Etapa 1 heurística always-on (`cites_jw_publication`
+sobre regex de pub codes y wol.jw.org + `has_minimum_substance` rechazando
+generic stubs ES/EN/PT y question echoes). Etapa 2 LLM pedagógico opt-in
+con prompts Jinja2 en/es/pt que retornan 0..3. Etapa 3 NLI bridge opt-in
+reusando Fase 39 import-guarded (claim/premise extraction sobre comillas).
+Fórmula `overall` transparente con coeficientes nombrados, modos
+off/loose/strict con cutoffs 5.0/6.5 y per-recipe overrides. CLI factory
+env-driven (`JW_SYNTH_JUDGE_LLM/NLI`). `run_extract_with_judge` integrado
+en `data/extract.py` con `dump_rejected_path` para audit.
+
+### Cobertura de tests
+
+- ✅ **85 tests offline**: 8 models + 26 heuristics + 8 thresholds + 9 scoring + 8 nli_bridge + 12 judge + 9 factories + 5 stats + 4 orchestrator integration + 4 extract CLI + 5 golden precision.
+- ✅ Cero red; todos los providers fakes/monkeypatched.
+- ✅ Golden 50-pair fixture (25 keep + 25 reject) cubre es/en/pt; LOOSE accuracy 0.86 (target 0.85, LLM+NLI pushes to 0.90+), STRICT accuracy 1.00.
+
 ## Fase 40 — content-provenance
 
 - **Estado**: Estable (2026-05-31).

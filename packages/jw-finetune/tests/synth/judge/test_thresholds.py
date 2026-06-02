@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_finetune.synth.judge.thresholds import (
     DEFAULT_CUTOFFS,
     JudgeMode,
