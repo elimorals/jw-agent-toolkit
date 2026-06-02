@@ -101,6 +101,9 @@ app.add_typer(constrained_app, name="constrained")
 app.add_typer(provenance_app, name="provenance", help="Content provenance checks (Fase 40).")
 app.add_typer(plugins_app, name="plugins", help="Manage community plugins (Fase 41).")
 app.add_typer(brain_app, name="brain", help="Second-brain (Fase 49).")
+from jw_agents.tracing.viewer import app as _trace_app
+
+app.add_typer(_trace_app, name="trace", help="Inspect agent traces (Fase 43).")
 app.command(name="chunker-bench", help="Benchmark chunker variants (Fase 45).")(chunker_bench_cmd)
 app.command(
     name="create-agent",
