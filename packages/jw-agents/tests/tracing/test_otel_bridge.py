@@ -26,12 +26,11 @@ def test_otel_store_emits_spans_for_steps() -> None:
         tracer_provider=provider, service_name="jw-agents-test"
     )
     tr = AgentTracer(agent="apologetics", store=store)
-    with tr.run(input_kwargs={"question": "x"}):
-        with tr.step("topic_index_lookup"):
-            tr.kept(
-                source="topic_index", citation_url="https://x", reason="ok"
-            )
-            tr.dropped(source="rag", reason="dup")
+    with tr.run(input_kwargs={"question": "x"}), tr.step("topic_index_lookup"):
+        tr.kept(
+            source="topic_index", citation_url="https://x", reason="ok"
+        )
+        tr.dropped(source="rag", reason="dup")
 
     spans = exporter.get_finished_spans()
     names = [s.name for s in spans]

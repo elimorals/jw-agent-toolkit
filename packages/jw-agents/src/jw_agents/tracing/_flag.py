@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
 
@@ -34,7 +34,7 @@ def _default_root() -> Path:
 
 
 def _auto_name(agent: str) -> Path:
-    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    day = datetime.now(UTC).strftime("%Y-%m-%d")
     return _default_root() / f"{agent}-{day}-{uuid.uuid4().hex[:8]}.jsonl"
 
 

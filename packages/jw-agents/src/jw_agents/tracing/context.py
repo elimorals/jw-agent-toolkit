@@ -8,20 +8,21 @@ gives us async-task-safe, per-context propagation.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from contextlib import contextmanager
 from contextvars import ContextVar, Token
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from jw_agents.tracing.tracer import AgentTracer
 
-_active: ContextVar["AgentTracer | None"] = ContextVar(
+_active: ContextVar[AgentTracer | None] = ContextVar(
     "jw_active_tracer", default=None
 )
-_NULL: "AgentTracer | None" = None
+_NULL: AgentTracer | None = None
 
 
-def _null_singleton() -> "AgentTracer":
+def _null_singleton() -> AgentTracer:
     global _NULL
     if _NULL is None:
         from jw_agents.tracing.store import NullTraceStore
@@ -31,7 +32,7 @@ def _null_singleton() -> "AgentTracer":
     return _NULL
 
 
-def get_active_tracer() -> "AgentTracer":
+def get_active_tracer() -> AgentTracer:
     """Return the ambient tracer; falls back to the shared NO-OP singleton."""
 
     tr = _active.get()
@@ -40,7 +41,7 @@ def get_active_tracer() -> "AgentTracer":
     return tr
 
 
-def set_active_tracer(tracer: "AgentTracer") -> Token["AgentTracer | None"]:
+def set_active_tracer(tracer: AgentTracer) -> Token[AgentTracer | None]:
     """Set the ambient tracer for the current context.
 
     Returns a Token. Callers MUST `token.reset()` to restore the previous
@@ -51,7 +52,7 @@ def set_active_tracer(tracer: "AgentTracer") -> Token["AgentTracer | None"]:
 
 
 @contextmanager
-def use_tracer(tracer: "AgentTracer") -> Iterator["AgentTracer"]:
+def use_tracer(tracer: AgentTracer) -> Iterator[AgentTracer]:
     """Bind `tracer` as the ambient tracer for the duration of the block."""
 
     token = _active.set(tracer)

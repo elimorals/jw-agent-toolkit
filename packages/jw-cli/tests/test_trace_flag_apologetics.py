@@ -7,9 +7,8 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from typer.testing import CliRunner
-
 from jw_cli.main import app
+from typer.testing import CliRunner
 
 
 class _FakeTopic:

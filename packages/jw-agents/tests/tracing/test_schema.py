@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
-from pydantic import ValidationError
-
 from jw_agents.tracing.schema import (
     TRACE_SCHEMA_VERSION,
     CustomEvent,
@@ -20,10 +18,11 @@ from jw_agents.tracing.schema import (
     TraceEventAdapter,
     WarningEvent,
 )
+from pydantic import ValidationError
 
 
 def _now() -> datetime:
-    return datetime(2026, 5, 31, 12, 0, 0, tzinfo=timezone.utc)
+    return datetime(2026, 5, 31, 12, 0, 0, tzinfo=UTC)
 
 
 def test_step_start_minimal() -> None:

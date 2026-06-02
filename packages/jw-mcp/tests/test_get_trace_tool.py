@@ -6,7 +6,6 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
-
 from jw_agents.tracing.store import JsonlTraceStore
 from jw_agents.tracing.tracer import AgentTracer
 
@@ -21,9 +20,8 @@ async def test_get_trace_finds_recent_jsonl(
     tracer = AgentTracer(
         agent="apologetics", store=JsonlTraceStore(path=target)
     )
-    with tracer.run(input_kwargs={"question": "x"}, language="en"):
-        with tracer.step("noop"):
-            tracer.kept(source="t", citation_url="https://x", reason="ok")
+    with tracer.run(input_kwargs={"question": "x"}, language="en"), tracer.step("noop"):
+        tracer.kept(source="t", citation_url="https://x", reason="ok")
 
     from jw_mcp.server import get_trace
 

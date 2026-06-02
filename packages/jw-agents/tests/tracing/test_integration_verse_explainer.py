@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_agents.tracing.schema import FindingKeptEvent, StepStartEvent
 from jw_agents.tracing.store import InMemoryTraceStore
 from jw_agents.tracing.tracer import AgentTracer

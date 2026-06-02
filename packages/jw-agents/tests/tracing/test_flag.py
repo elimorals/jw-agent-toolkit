@@ -5,14 +5,13 @@ from __future__ import annotations
 from pathlib import Path
 
 import typer
-from typer.testing import CliRunner
-
 from jw_agents.tracing._flag import (
     DEFAULT_TRACE_DIR_ENV,
     resolve_trace_target,
     tracer_from_target,
 )
 from jw_agents.tracing.store import JsonlTraceStore, NullTraceStore
+from typer.testing import CliRunner
 
 
 def test_resolve_target_none_returns_none() -> None:
@@ -62,9 +61,8 @@ def test_typer_flag_integration(tmp_path: Path, monkeypatch) -> None:
             resolve_trace_target(trace, agent="demo") if trace is not None else None
         )
         tr = tracer_from_target(target, agent="demo")
-        with tr.run(input_kwargs={"question": question}):
-            with tr.step("noop"):
-                pass
+        with tr.run(input_kwargs={"question": question}), tr.step("noop"):
+            pass
 
     runner = CliRunner()
     res = runner.invoke(app, ["x", "--trace", "DEFAULT"])

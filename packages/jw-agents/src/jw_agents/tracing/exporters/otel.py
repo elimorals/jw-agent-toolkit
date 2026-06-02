@@ -39,13 +39,13 @@ class OTelTraceStore:
     def __init__(
         self,
         *,
-        tracer_provider: "TracerProvider | None" = None,
+        tracer_provider: TracerProvider | None = None,
         service_name: str | None = None,
     ) -> None:
         try:
             from opentelemetry import trace as _otel
             from opentelemetry.sdk.resources import Resource
-            from opentelemetry.sdk.trace import TracerProvider as _TP
+            from opentelemetry.sdk.trace import TracerProvider as _TracerProvider  # noqa: N814
         except ImportError as exc:
             raise RuntimeError(
                 "OTelTraceStore requires the [otel] extra. "
@@ -59,7 +59,7 @@ class OTelTraceStore:
                     or os.environ.get("OTEL_SERVICE_NAME", "jw-agents")
                 }
             )
-            tracer_provider = _TP(resource=resource)
+            tracer_provider = _TracerProvider(resource=resource)
         self._tp = tracer_provider
         self._otel_tracer = _otel.get_tracer(
             "jw_agents.tracing", tracer_provider=tracer_provider
@@ -147,7 +147,7 @@ class OTelTraceStore:
         pass
 
 
-def store_from_env() -> "OTelTraceStore | None":
+def store_from_env() -> OTelTraceStore | None:
     """Construct an OTel store from environment if configured, else None.
 
     Recognized:

@@ -13,8 +13,8 @@ from __future__ import annotations
 import json
 import re
 import time
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 
 import typer
 

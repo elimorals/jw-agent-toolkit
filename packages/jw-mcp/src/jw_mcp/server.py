@@ -3362,9 +3362,17 @@ async def verify_provenance(
 
 from jw_brain.server import (
     second_brain_compile as _sb_compile_impl,
+)
+from jw_brain.server import (
     second_brain_lint as _sb_lint_impl,
+)
+from jw_brain.server import (
     second_brain_query as _sb_query_impl,
+)
+from jw_brain.server import (
     second_brain_snapshot as _sb_snapshot_impl,
+)
+from jw_brain.server import (
     second_brain_status as _sb_status_impl,
 )
 
@@ -3474,7 +3482,6 @@ async def get_trace(trace_id: str) -> dict[str, Any]:
     """
 
     import json as _json
-    from pathlib import Path as _Path
     from uuid import UUID
 
     from jw_agents.tracing._flag import _default_root

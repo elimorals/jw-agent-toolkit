@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_agents.research_topic import research_topic
 from jw_agents.tracing.schema import (
     FindingDroppedEvent,

@@ -12,31 +12,29 @@ time on I/O and parsing, not on the tracer itself).
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 import pytest
-
 from jw_agents.tracing.store import JsonlTraceStore, NullTraceStore
 from jw_agents.tracing.tracer import AgentTracer
 
 
 def _workload(tracer: AgentTracer) -> None:
-    with tracer.run(input_kwargs={"question": "x"}):
-        with tracer.step("compute") as step:
-            for i in range(2000):
-                if i % 3 == 0:
-                    tracer.kept(
-                        source="rag",
-                        citation_url="https://x",
-                        score=0.5,
-                        reason="ok",
-                    )
-                else:
-                    tracer.dropped(source="rag", reason="dup")
-            step.note_hits(2000)
-            step.note_kept(666)
-            step.note_dropped(1334)
+    with tracer.run(input_kwargs={"question": "x"}), tracer.step("compute") as step:
+        for i in range(2000):
+            if i % 3 == 0:
+                tracer.kept(
+                    source="rag",
+                    citation_url="https://x",
+                    score=0.5,
+                    reason="ok",
+                )
+            else:
+                tracer.dropped(source="rag", reason="dup")
+        step.note_hits(2000)
+        step.note_kept(666)
+        step.note_dropped(1334)
 
 
 def _time(fn: Callable[[], None], repeats: int = 3) -> float:

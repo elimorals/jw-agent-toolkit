@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_agents.tracing.schema import (
     StepEndEvent,
     StepStartEvent,
@@ -62,10 +61,8 @@ def test_tracer_warns_increments_envelope_counter() -> None:
 def test_tracer_step_records_error_on_exception() -> None:
     store = InMemoryTraceStore()
     tr = AgentTracer(agent="x", store=store)
-    with tr.run(input_kwargs={}):
-        with pytest.raises(RuntimeError):
-            with tr.step("explode"):
-                raise RuntimeError("boom")
+    with tr.run(input_kwargs={}), pytest.raises(RuntimeError), tr.step("explode"):
+        raise RuntimeError("boom")
     ends = [e for e in store.events if isinstance(e, StepEndEvent)]
     assert len(ends) == 1
     assert ends[0].error is not None and "boom" in ends[0].error
@@ -84,9 +81,8 @@ def test_tracer_envelope_contains_trace_id() -> None:
 def test_tracer_writes_to_jsonl_store(tmp_path: Path) -> None:
     target = tmp_path / "t.jsonl"
     tr = AgentTracer(agent="apologetics", store=JsonlTraceStore(path=target))
-    with tr.run(input_kwargs={"question": "x"}):
-        with tr.step("s"):
-            tr.kept(source="t", citation_url="https://x", reason="ok")
+    with tr.run(input_kwargs={"question": "x"}), tr.step("s"):
+        tr.kept(source="t", citation_url="https://x", reason="ok")
     text = target.read_text(encoding="utf-8")
     assert "step_start" in text
     assert "finding_kept" in text
@@ -97,10 +93,8 @@ def test_tracer_writes_to_jsonl_store(tmp_path: Path) -> None:
 def test_nested_steps_keep_independent_counters() -> None:
     store = InMemoryTraceStore()
     tr = AgentTracer(agent="x", store=store)
-    with tr.run(input_kwargs={}):
-        with tr.step("outer"):
-            with tr.step("inner"):
-                tr.kept(source="x", citation_url="https://x", reason="r")
+    with tr.run(input_kwargs={}), tr.step("outer"), tr.step("inner"):
+        tr.kept(source="x", citation_url="https://x", reason="r")
     starts = [e.name for e in store.events if isinstance(e, StepStartEvent)]
     ends = [e.name for e in store.events if isinstance(e, StepEndEvent)]
     assert starts == ["outer", "inner"]

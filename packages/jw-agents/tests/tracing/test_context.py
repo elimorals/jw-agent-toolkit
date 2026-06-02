@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 
 import pytest
-
 from jw_agents.tracing.context import (
     get_active_tracer,
     set_active_tracer,

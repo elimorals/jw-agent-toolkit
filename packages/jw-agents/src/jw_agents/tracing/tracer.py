@@ -18,9 +18,10 @@ read the ambient tracer (e.g. from inside a sub-helper).
 from __future__ import annotations
 
 import time
+from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import datetime, timezone
-from typing import Any, Iterator
+from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID, uuid4
 
 from jw_agents.tracing.schema import (
@@ -35,7 +36,7 @@ from jw_agents.tracing.store import NullTraceStore, TraceStore
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class _StepHandle:
@@ -84,7 +85,7 @@ class AgentTracer:
         *,
         input_kwargs: dict[str, Any],
         language: str | None = None,
-    ) -> Iterator["AgentTracer"]:
+    ) -> Iterator[AgentTracer]:
         """Bind run-level metadata, emit envelope on exit."""
 
         self._started = _now()

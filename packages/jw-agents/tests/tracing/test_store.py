@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
 import pytest
-
 from jw_agents.tracing.schema import (
     FindingKeptEvent,
     StepEndEvent,
@@ -23,7 +22,7 @@ from jw_agents.tracing.store import (
 
 
 def _now() -> datetime:
-    return datetime(2026, 5, 31, 12, 0, 0, tzinfo=timezone.utc)
+    return datetime(2026, 5, 31, 12, 0, 0, tzinfo=UTC)
 
 
 def _envelope(tid) -> Trace:

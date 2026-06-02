@@ -4,13 +4,12 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
-from typer.testing import CliRunner
-
 from jw_agents.tracing.viewer import app as trace_app
+from typer.testing import CliRunner
 
 
 def _write_trace(
@@ -104,7 +103,7 @@ def test_gc_deletes_old_files(tmp_path: Path, monkeypatch) -> None:
     new = tmp_path / "apologetics-2026-05-31-bbbb.jsonl"
     _write_trace(old)
     _write_trace(new)
-    past = datetime.now(timezone.utc) - timedelta(days=90)
+    past = datetime.now(UTC) - timedelta(days=90)
     os.utime(old, (past.timestamp(), past.timestamp()))
     runner = CliRunner()
     res = runner.invoke(trace_app, ["gc", "--older-than", "30d"])

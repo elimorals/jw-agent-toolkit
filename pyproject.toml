@@ -73,6 +73,11 @@ ignore = [
     "SIM103",
     # SIM113: enumerate vs manual index — taste.
     "SIM113",
+    # SIM117: nested `with` statements that share the same line read better
+    # nested when each context has distinct semantics (e.g. tracer.run that
+    # opens an envelope vs tracer.step that opens a step). Combining them
+    # hides the nesting.
+    "SIM117",
     # UP042: `class X(str, Enum)` is a legitimate pattern in Python 3.13.
     # The "use StrEnum" suggestion changes serialization semantics in
     # ways that would break our JSON-by-value contracts.
@@ -87,6 +92,8 @@ ignore = [
 # in defaults — that IS the framework's interface, B008 is a false positive.
 "packages/jw-cli/src/jw_cli/commands/*.py" = ["B008"]
 "packages/jw-gen/src/jw_gen/cli.py" = ["B008"]
+# The viewer is itself a Typer app; same B008 rationale applies.
+"packages/jw-agents/src/jw_agents/tracing/viewer.py" = ["B008"]
 # jw-gen exception classes deliberately use semantic names (SafetyRefused
 # reads as "safety refused the request"; NoProviderAvailable reads as a
 # state, not an error). Both inherit from RuntimeError/Exception so the
