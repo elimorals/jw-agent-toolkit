@@ -1,3 +1,5 @@
+import { displayName, type Language } from "@jw-agent-toolkit/core";
+
 import type { VerseTarget } from "../types";
 
 export interface ChapterContext {
@@ -6,21 +8,17 @@ export interface ChapterContext {
   chapter: number;
 }
 
-// Numeric book-id to localized name lookup. Limited to common cases —
-// full localization stays server-side; this is only a UI hint, not a parse.
-const BOOK_NUM_TO_NAME_ES: Record<number, string> = {
-  1: "Génesis",
-  43: "Juan",
-  44: "Hechos",
-  45: "Romanos",
-};
-
-const BOOK_NUM_TO_NAME_EN: Record<number, string> = {
-  1: "Genesis",
-  43: "John",
-  44: "Acts",
-  45: "Romans",
-};
+/**
+ * Map a WOL URL language segment to the language code recognized by
+ * `@jw-agent-toolkit/core`. The package today supports en/es/pt; everything
+ * else falls back to English so the UI still gets a recognizable label.
+ */
+function normalizeLang(lang: string): Language {
+  const lower = lang.toLowerCase();
+  if (lower.startsWith("es")) return "es";
+  if (lower.startsWith("pt")) return "pt";
+  return "en";
+}
 
 /**
  * Parse a canonical WOL bible URL of the form
@@ -48,9 +46,15 @@ export function buildReferenceFromUrl(href: string): ChapterContext | null {
   if (!bookGroup || !chapGroup || !langGroup) return null;
   const bookNum = Number(bookGroup);
   const chapter = Number(chapGroup);
-  const lang = langGroup.toLowerCase();
-  const table = lang === "en" ? BOOK_NUM_TO_NAME_EN : BOOK_NUM_TO_NAME_ES;
-  const book = table[bookNum] ?? `[book ${bookNum}]`;
+  if (!Number.isFinite(bookNum) || bookNum < 1 || bookNum > 66) return null;
+  if (!Number.isFinite(chapter) || chapter < 1) return null;
+  const lang = normalizeLang(langGroup);
+  // The package's `displayName` covers all 66 books in en/es/pt, replacing
+  // the four hardcoded names that used to live here. If the language is
+  // unsupported it returns the English form; if the book number is out of
+  // range we already bailed above so the `?? ` fallback is only defense
+  // against a future package downgrade.
+  const book = displayName(bookNum, lang) ?? `[book ${bookNum}]`;
   return { book, chapter };
 }
 

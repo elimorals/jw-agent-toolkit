@@ -108,4 +108,43 @@ describe("buildReferenceFromUrl", () => {
       buildReferenceFromUrl("https://wol.jw.org/es/wol/h/r4/lp-s"),
     ).toBeNull();
   });
+
+  // The previous implementation hardcoded names for 4 books (Genesis, John,
+  // Acts, Romans) and rendered every other book as "[book N]". The package
+  // ports the full 66-book table; these tests pin that contract.
+  it("resolves a Psalm in Spanish via @jw-agent-toolkit/core", () => {
+    const ctx = buildReferenceFromUrl(
+      "https://wol.jw.org/es/wol/b/r4/lp-s/nwt/E/2024/19/23",
+    );
+    expect(ctx).toEqual({ book: "Salmos", chapter: 23 });
+  });
+
+  it("resolves Hebrews in English via @jw-agent-toolkit/core", () => {
+    const ctx = buildReferenceFromUrl(
+      "https://wol.jw.org/en/wol/b/r1/lp-e/nwt/E/2024/58/11",
+    );
+    expect(ctx).toEqual({ book: "Hebrews", chapter: 11 });
+  });
+
+  it("resolves Revelation in Portuguese via @jw-agent-toolkit/core", () => {
+    const ctx = buildReferenceFromUrl(
+      "https://wol.jw.org/pt/wol/b/r5/lp-t/nwt/E/2024/66/21",
+    );
+    expect(ctx).toEqual({ book: "Apocalipse", chapter: 21 });
+  });
+
+  it("returns null for out-of-range book numbers", () => {
+    expect(
+      buildReferenceFromUrl(
+        "https://wol.jw.org/es/wol/b/r4/lp-s/nwt/E/2024/99/3",
+      ),
+    ).toBeNull();
+  });
+
+  it("falls back to English when the language segment is unknown", () => {
+    const ctx = buildReferenceFromUrl(
+      "https://wol.jw.org/de/wol/b/r4/lp-s/nwt/E/2024/43/3",
+    );
+    expect(ctx).toEqual({ book: "John", chapter: 3 });
+  });
 });

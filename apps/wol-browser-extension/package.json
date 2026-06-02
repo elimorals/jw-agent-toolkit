@@ -14,6 +14,9 @@
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@jw-agent-toolkit/core": "file:../../packages/jw-core-js"
+  },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.27",
     "@playwright/test": "^1.46.0",
