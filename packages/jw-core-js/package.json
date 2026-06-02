@@ -1,0 +1,61 @@
+{
+  "name": "@jw-agent-toolkit/core",
+  "version": "0.1.0-mvp",
+  "description": "Minimal TypeScript port of jw-core: Bible reference parser, BibleRef, WOL URL builder, canonical book table, versification (Fase 46) mapping. Companion to the Python monorepo.",
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./books": {
+      "types": "./dist/books.d.ts",
+      "import": "./dist/books.js",
+      "require": "./dist/books.cjs"
+    },
+    "./versification": {
+      "types": "./dist/versification.d.ts",
+      "import": "./dist/versification.js",
+      "require": "./dist/versification.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "keywords": [
+    "bible",
+    "reference-parser",
+    "wol",
+    "jw",
+    "jehovahs-witnesses"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elimorals/jw-agent-toolkit.git",
+    "directory": "packages/jw-core-js"
+  },
+  "homepage": "https://jw-agent-toolkit.vercel.app/paquetes/jw-core",
+  "publishConfig": {
+    "access": "public"
+  }
+}

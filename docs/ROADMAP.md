@@ -932,6 +932,47 @@ en `data/extract.py` con `dump_rejected_path` para audit.
 - ✅ Cero red; todos los providers fakes/monkeypatched.
 - ✅ Golden 50-pair fixture (25 keep + 25 reject) cubre es/en/pt; LOOSE accuracy 0.86 (target 0.85, LLM+NLI pushes to 0.90+), STRICT accuracy 1.00.
 
+## Fase 47 — jw-core-js Minimal 🟡 MVP
+
+- **Estado**: MVP estable (2026-06-01). Roadmap post-MVP pendiente.
+- **Spec**: `docs/superpowers/specs/2026-05-31-fase-47-jw-core-js-minimal-design.md`.
+- **Plan**: `docs/superpowers/plans/2026-05-31-fase-47-jw-core-js-minimal-plan.md` (123 tasks; MVP cubre ~20).
+- **Guía**: `docs/guias/jw-core-js.md`.
+
+Port TypeScript del subset crítico de `jw-core` para superficies que no
+pueden ejecutar Python (extensión WOL, futura Capacitor móvil, web
+playground). Paquete publicable a npm como `@jw-agent-toolkit/core` con
+dual ESM+CJS, tipos `.d.ts`, build via `tsup`, tests via `vitest`.
+
+Surface MVP: `parseReference` + `parseAllReferences` + `BibleRef` (con
+`display()`, `wolUrl(lang, pub?)`, `toJSON()`), tabla `BOOKS` 66 × en/es/pt,
+`getLanguageConfig`, port de F46 versification (`toCanonical`, `explain`,
+`loadCatalog`).
+
+Contrato anti-drift: `shared/data/bible_references_golden.json` consumido
+por la suite Python (`test_golden_fixture_parity.py`) y la suite
+TypeScript (`tests/parser.test.ts`). Cualquier drift falla CI en uno u
+otro lado.
+
+### Cobertura de tests (MVP)
+
+- ✅ **40 tests TypeScript** (Vitest): 25 parser + 6 wol_url + 9 versification.
+- ✅ **17 tests Python** (pytest parametrizado sobre el fixture compartido).
+- ✅ Build: ESM 52KB + CJS 53KB + DTS 3KB.
+
+### Pendiente post-MVP (5 buckets, ~100 tasks)
+
+- **A: parsers extras** — `parseVerse`, `parseStudyNotes`, `parseCrossReferences`, `parseArticle`.
+- **B: HTTP clients** — `WOLClient`, `CDNClient`, `TopicIndexClient`.
+- **C: JWPUB/EPUB con Web Crypto** — port del AES-128-CBC del Python.
+- **D: Operacional** — cache IndexedDB, throttle TokenBucket, telemetría opt-in, provenance models.
+- **E: Multi-locale** — hoy en/es/pt; Python ya tiene 17 locales (`book_locales`).
+
+Integración con Fase 48 (WOL ext) pendiente: añadir el paquete como
+`optionalDependencies`, usar `parseReference` en `reference_parser.ts`
+con fallback al parser local, eliminar el marker `skip-until-fase=47` de
+la receta 12 (Capacitor app) del cookbook.
+
 ## Fase 46 — canonical-versification ✅
 
 - **Estado**: Estable (2026-06-01).
