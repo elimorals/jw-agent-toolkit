@@ -18,6 +18,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from jw_rag.chunker import Chunk
 
 from jw_finetune.data.formats import QAPair
+from jw_finetune.synth.judge import Judge
 from jw_finetune.synth.provider import LLMProvider, LLMRequest
 from jw_finetune.synth.validators import lang_matches, length_ok
 
@@ -80,8 +81,16 @@ def synthesize_chunk(
     n_pairs: int = 3,
     temperature: float = 0.5,
     max_tokens: int = 1024,
+    judge: Judge | None = None,
 ) -> SynthResult:
-    """Generate validated Q&A pairs from a single chunk."""
+    """Generate validated Q&A pairs from a single chunk.
+
+    If a `judge` is provided, every pair that passes the heuristic validators
+    is then scored. Pairs the judge rejects are counted in `result.rejected`
+    instead of being persisted. Pairs that survive carry their score in
+    `metadata["judge_score"]` as a JSON string for JSONL roundtripping.
+    """
+
     template_name = _TEMPLATE_FOR_STYLE.get(qa_style)
     if not template_name:
         raise ValueError(f"Unknown qa_style: {qa_style!r}")
@@ -130,17 +139,31 @@ def synthesize_chunk(
         if not lang_matches(a, language):
             result.rejected += 1
             continue
+
+        metadata = {
+            "pub_code": str(chunk.metadata.get("pub_code", "")),
+            "section_ref": str(chunk.metadata.get("section_ref", "")),
+            "qa_style": qa_style,
+        }
+
+        if judge is not None:
+            score = judge.score(question=q, answer=a, language=language)
+            if not score.kept:
+                result.rejected += 1
+                continue
+            metadata["judge_score"] = json.dumps(
+                score.model_dump(exclude_none=True),
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+
         result.pairs.append(
             QAPair(
                 question=q,
                 answer=a,
                 source_chunk_id=chunk.id,
                 language=language,
-                metadata={
-                    "pub_code": str(chunk.metadata.get("pub_code", "")),
-                    "section_ref": str(chunk.metadata.get("section_ref", "")),
-                    "qa_style": qa_style,
-                },
+                metadata=metadata,
             )
         )
     return result
