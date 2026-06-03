@@ -122,6 +122,33 @@ def restore_references(
     return _REF_TOKEN_RE.sub(replace, masked_text)
 
 
+def translate_preserving_references(
+    text: str,
+    *,
+    source: str,
+    target: str,
+    provider: object | None = None,
+) -> str:
+    """Translate `text` from `source` to `target`, keeping Bible refs intact.
+
+    Flow:
+      1. Mask references (`Juan 3:16` → `<<REF:0>>`).
+      2. Hand masked text to the provider (NLLB by default).
+      3. Restore references rendered in `target`'s book naming.
+
+    If no provider is passed, instantiates `NLLBProvider()` lazily — that
+    avoids loading torch/ctranslate2 at import time for callers that only
+    want `mask_references`.
+    """
+    if provider is None:
+        from jw_core.translation_providers.nllb import NLLBProvider
+
+        provider = NLLBProvider()
+    masked = mask_references(text)
+    translated = provider.translate(masked.text, source=source, target=target)  # type: ignore[attr-defined]
+    return restore_references(translated, masked.references, target_language=target)
+
+
 def render_reference(
     *,
     book_num: int,
