@@ -1,3 +1,9 @@
+---
+title: "NLLB-200 translation con preservación de referencias (Fase 54)"
+description: "200 idiomas vía CTranslate2 INT8. is_commercial_safe=False. Cero alucinación numérica en versículos."
+date: "2026-06-02"
+---
+
 # Guía — NLLB-200 translation con preservación de referencias (Fase 54)
 
 > Traducir texto entre **200 idiomas** vía NLLB-200 (Meta) corriendo

@@ -6,40 +6,49 @@ interface PhaseRow {
   title: string;
   tier: string;
   status: "shipped" | "planned";
-  release: "22-32" | "33-38" | "39-48";
+  release: "22-32" | "33-38" | "39-48" | "49-56";
 }
 
 const phases: PhaseRow[] = [
-  // 22-32 entregadas
-  { number: 22, title: "eval-doctrinal", tier: "T1 Confianza", status: "shipped", release: "22-32" },
-  { number: 23, title: "citation-validator", tier: "T1 Confianza", status: "shipped", release: "22-32" },
-  { number: 24, title: "study-conductor", tier: "T2 Alto valor", status: "shipped", release: "22-32" },
-  { number: 25, title: "news-monitor", tier: "T2 Alto valor", status: "shipped", release: "22-32" },
-  { number: 26, title: "student-parts", tier: "T3 Especializado", status: "shipped", release: "22-32" },
-  { number: 27, title: "pioneer-report", tier: "T3 Especializado", status: "shipped", release: "22-32" },
-  { number: 28, title: "concordance", tier: "T3 Especializado", status: "shipped", release: "22-32" },
+  // 22-32 shipped
+  { number: 22, title: "eval-doctrinal", tier: "T1 Trust", status: "shipped", release: "22-32" },
+  { number: 23, title: "citation-validator", tier: "T1 Trust", status: "shipped", release: "22-32" },
+  { number: 24, title: "study-conductor", tier: "T2 High value", status: "shipped", release: "22-32" },
+  { number: 25, title: "news-monitor", tier: "T2 High value", status: "shipped", release: "22-32" },
+  { number: 26, title: "student-parts", tier: "T3 Specialised", status: "shipped", release: "22-32" },
+  { number: 27, title: "pioneer-report", tier: "T3 Specialised", status: "shipped", release: "22-32" },
+  { number: 28, title: "concordance", tier: "T3 Specialised", status: "shipped", release: "22-32" },
   { number: 29, title: "letter-composer", tier: "T4 UX", status: "shipped", release: "22-32" },
   { number: 30, title: "kingdom-songs", tier: "T4 UX", status: "shipped", release: "22-32" },
   { number: 31, title: "exporter", tier: "T4 UX", status: "shipped", release: "22-32" },
   { number: 32, title: "life-topics", tier: "T4 UX", status: "shipped", release: "22-32" },
-  // 33-38 entregadas
-  { number: 33, title: "embed-rerank", tier: "T1 Núcleo", status: "shipped", release: "33-38" },
-  { number: 34, title: "audio-premium", tier: "T1 Núcleo", status: "shipped", release: "33-38" },
-  { number: 35, title: "constrained-decoding", tier: "T2 Habilitador", status: "shipped", release: "33-38" },
-  { number: 36, title: "vlm-ocr", tier: "T2 Habilitador", status: "shipped", release: "33-38" },
-  { number: 37, title: "colpali-visual", tier: "T3 Especializado", status: "shipped", release: "33-38" },
-  { number: 38, title: "jw-gen (8º paquete)", tier: "T4 UX", status: "shipped", release: "33-38" },
-  // 39-48 planeadas
-  { number: 39, title: "nli-runtime", tier: "T1 Confianza runtime", status: "planned", release: "39-48" },
-  { number: 40, title: "content-provenance", tier: "T1 Confianza runtime", status: "planned", release: "39-48" },
-  { number: 41, title: "plugin-sdk", tier: "T2 Comunidad", status: "planned", release: "39-48" },
-  { number: 42, title: "scaffolding", tier: "T2 Comunidad", status: "planned", release: "39-48" },
-  { number: 43, title: "agent-tracing", tier: "T2 Comunidad", status: "planned", release: "39-48" },
-  { number: 44, title: "synth-judge", tier: "T2 Comunidad", status: "planned", release: "39-48" },
-  { number: 45, title: "semantic-chunking", tier: "T3 Frontera", status: "planned", release: "39-48" },
-  { number: 46, title: "canonical-versification", tier: "T3 Frontera", status: "planned", release: "39-48" },
-  { number: 47, title: "jw-core-js-minimal", tier: "T4 Superficie JS", status: "planned", release: "39-48" },
-  { number: 48, title: "wol-browser-ext", tier: "T4 Superficie JS", status: "planned", release: "39-48" },
+  // 33-38 shipped
+  { number: 33, title: "embed-rerank", tier: "T1 Core", status: "shipped", release: "33-38" },
+  { number: 34, title: "audio-premium", tier: "T1 Core", status: "shipped", release: "33-38" },
+  { number: 35, title: "constrained-decoding", tier: "T2 Enabler", status: "shipped", release: "33-38" },
+  { number: 36, title: "vlm-ocr", tier: "T2 Enabler", status: "shipped", release: "33-38" },
+  { number: 37, title: "colpali-visual", tier: "T3 Specialised", status: "shipped", release: "33-38" },
+  { number: 38, title: "jw-gen (8th package)", tier: "T4 UX", status: "shipped", release: "33-38" },
+  // 39-48 shipped
+  { number: 39, title: "nli-runtime", tier: "T1 Runtime trust", status: "shipped", release: "39-48" },
+  { number: 40, title: "content-provenance", tier: "T1 Runtime trust", status: "shipped", release: "39-48" },
+  { number: 41, title: "plugin-sdk", tier: "T2 Community", status: "shipped", release: "39-48" },
+  { number: 42, title: "scaffolding", tier: "T2 Community", status: "shipped", release: "39-48" },
+  { number: 43, title: "agent-tracing", tier: "T2 Community", status: "shipped", release: "39-48" },
+  { number: 44, title: "synth-judge", tier: "T2 Community", status: "shipped", release: "39-48" },
+  { number: 45, title: "semantic-chunking", tier: "T3 Frontier", status: "shipped", release: "39-48" },
+  { number: 46, title: "canonical-versification", tier: "T3 Frontier", status: "shipped", release: "39-48" },
+  { number: 47, title: "jw-core-js-minimal", tier: "T4 JS surface", status: "shipped", release: "39-48" },
+  { number: 48, title: "wol-browser-ext", tier: "T4 JS surface", status: "shipped", release: "39-48" },
+  // 49-56 shipped — jw-core complete + JS bridge
+  { number: 49, title: "second-brain", tier: "T1 Persistent memory", status: "shipped", release: "49-56" },
+  { number: 50, title: "jwpub-writer", tier: "T2 Generation", status: "shipped", release: "49-56" },
+  { number: 51, title: "organized-app schemas", tier: "T2 Interop", status: "shipped", release: "49-56" },
+  { number: 52, title: "jwlibrary-writer", tier: "T2 Generation", status: "shipped", release: "49-56" },
+  { number: 53, title: "omnilingual-asr", tier: "T1 Multilingual SOTA", status: "shipped", release: "49-56" },
+  { number: 54, title: "nllb-translation", tier: "T1 Multilingual SOTA", status: "shipped", release: "49-56" },
+  { number: 55, title: "multilingual wire-up", tier: "T1 Integration", status: "shipped", release: "49-56" },
+  { number: 56, title: "jw-core-js close-out", tier: "T4 JS surface", status: "shipped", release: "49-56" },
 ];
 
 const shippedCount = phases.filter((p) => p.status === "shipped").length;
@@ -48,61 +57,72 @@ const plannedCount = phases.filter((p) => p.status === "planned").length;
 const releases = [
   {
     id: "22-32",
-    title: "Release 22-32 · Ecosistema discipulado",
+    title: "Release 22-32 · Discipleship ecosystem",
     description:
-      "11 fases ortogonales que cierran el ciclo de discipulado activo + infraestructura de confianza inicial.",
-    href: "/novedades",
+      "11 orthogonal phases that close the active-discipleship loop plus an initial trust baseline.",
+    href: "/en/whats-new",
     color: "text-[var(--color-accent)]",
   },
   {
     id: "33-38",
-    title: "Release 33-38 · Núcleo al SOTA",
+    title: "Release 33-38 · Core at SOTA",
     description:
-      "6 fases que suben el techo técnico: embeddings + audio + gramáticas + VLM + visual + generación. Octavo paquete (jw-gen) introducido.",
-    href: "/novedades-33-48",
+      "6 phases that raise the technical ceiling: embeddings + audio + grammars + VLM + visual + generation. Eighth package (jw-gen) introduced.",
+    href: "/en/whats-new-33-48",
     color: "text-[#f0b97a]",
   },
   {
     id: "39-48",
-    title: "Release 39-48 · Confianza runtime + comunidad + JS",
+    title: "Release 39-48 · Runtime trust + community + JS",
     description:
-      "10 fases planeadas con specs + plans completos. NLI en vivo, provenance, plugin SDK, scaffolding, tracing, judge, chunking, versification, TS port, browser ext.",
-    href: "/novedades-33-48",
+      "10 shipped phases: live NLI, provenance, plugin SDK, scaffolding, tracing, judge, chunking, versification, TS port and browser extension.",
+    href: "/en/whats-new-33-48",
     color: "text-[#c4a7e7]",
+  },
+  {
+    id: "49-56",
+    title: "Release 49-56 · jw-core complete + multilingual SOTA",
+    description:
+      "8 phases that complete jw-core: persistent second-brain, JWPUB/.jwlibrary writers, organized-app schemas, Omnilingual ASR (1672 languages), NLLB-200, multilingual wire-up and JS bridge close-out with anti-drift CI.",
+    href: "/en/whats-new-49-56",
+    color: "text-[#7ab0e3]",
   },
 ];
 ---
 
 <BaseLayout
-  title="Roadmap maestro — Fases 22 a 48"
-  description="Vista consolidada de 27 fases del jw-agent-toolkit organizadas por release (22-32 + 33-38 + 39-48) y por tier técnico. 17 entregadas, 10 planeadas con specs+plans completos."
+  title="Master roadmap — Phases 22 through 56"
+  description="Consolidated view of 35 jw-agent-toolkit phases organised by release (22-32 + 33-38 + 39-48 + 49-56) and by technical tier. All 35 shipped: discipleship ecosystem, core at SOTA, runtime trust + community + JS frontier, multilingual SOTA with 1672 languages via Omnilingual ASR."
 >
   <section class="grid-noise relative overflow-hidden border-b border-[var(--color-line-subtle)]">
     <div class="mx-auto max-w-7xl px-4 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20">
       <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
         <span class="inline-block h-px w-8 bg-[var(--color-accent)] align-middle"></span>
-        <span class="ml-2">Roadmap maestro · 27 fases</span>
+        <span class="ml-2">Master roadmap · 35 phases</span>
       </p>
       <h1 class="mt-6 max-w-3xl text-balance font-display text-[clamp(1.85rem,5vw,3.4rem)] leading-[1.05]">
         <span class="text-[var(--color-ink-primary)]">De librería técnica a </span>
         <span class="text-[var(--color-accent)]">plataforma adoptable</span>
       </h1>
       <p class="mt-6 max-w-2xl text-[16px] leading-relaxed text-[var(--color-ink-secondary)]">
-        Tres releases consecutivas que cubren <strong class="text-[var(--color-ink-primary)]">discipulado completo</strong>,
-        <strong class="text-[var(--color-ink-primary)]">núcleo técnico al SOTA</strong> y
-        <strong class="text-[var(--color-ink-primary)]">confianza en runtime + comunidad + frontera JS</strong>.
-        Mismo flujo en cada fase: brainstorming → spec aprobado → plan TDD bite-sized → implementación red-green-commit → audit.
+        Four consecutive releases covering <strong class="text-[var(--color-ink-primary)]">complete discipleship</strong>,
+        <strong class="text-[var(--color-ink-primary)]">technical core at SOTA</strong>,
+        <strong class="text-[var(--color-ink-primary)]">runtime trust + community + JS frontier</strong> and
+        <strong class="text-[var(--color-ink-primary)]">multilingual SOTA with 1672 languages via Omnilingual ASR</strong>.
+        Same flow on every phase: brainstorming → approved spec → bite-sized TDD plan → red-green-commit implementation → audit.
       </p>
 
-      <div class="mt-10 grid grid-cols-3 gap-4">
+      <div class="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3">
         <div class="rounded-sm border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 p-4">
-          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-accent)]">Entregadas</p>
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-accent)]">Shipped</p>
           <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{shippedCount}</p>
         </div>
-        <div class="rounded-sm border border-[#f0b97a]/40 bg-[#f0b97a]/5 p-4">
-          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[#f0b97a]">Planeadas</p>
-          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{plannedCount}</p>
-        </div>
+        {plannedCount > 0 && (
+          <div class="rounded-sm border border-[#f0b97a]/40 bg-[#f0b97a]/5 p-4">
+            <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[#f0b97a]">Planned</p>
+            <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{plannedCount}</p>
+          </div>
+        )}
         <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
           <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Total</p>
           <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{phases.length}</p>
@@ -115,9 +135,9 @@ const releases = [
   <section class="border-b border-[var(--color-line-subtle)]">
     <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
       <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
-        ▌ 3 releases
+        ▌ 4 releases
       </h2>
-      <div class="mt-6 grid gap-6 md:grid-cols-3">
+      <div class="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {releases.map((r) => (
           <a
             href={r.href}
@@ -141,7 +161,7 @@ const releases = [
   <section>
     <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
       <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
-        ▌ Tabla maestra · 27 fases (22 → 48)
+        ▌ Master table · 35 phases (22 → 56)
       </h2>
 
       <div class="mt-6 overflow-x-auto">
@@ -194,7 +214,7 @@ const releases = [
   <section class="border-t border-[var(--color-line-subtle)] bg-[var(--color-surface-1)]">
     <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
       <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
-        ▌ Reglas duras que respetan las 27 fases
+        ▌ Hard rules that 35 phases respect
       </h2>
       <ul class="mt-6 grid gap-x-10 gap-y-3 text-[14px] text-[var(--color-ink-secondary)] sm:grid-cols-2">
         <li><span class="text-[var(--color-accent)]">→</span> Sin LLM en el camino crítico — parsers/agentes/stores determinísticos.</li>

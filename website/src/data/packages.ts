@@ -24,14 +24,14 @@ export const packages: PackageInfo[] = [
     tagline: "El núcleo determinístico",
     color: "cyan",
     short:
-      "Librería principal: 6 clientes HTTP, 9 parsers, modelos Pydantic, registro de idiomas y la infraestructura de Fase 9 (cache, throttle, telemetría).",
+      "Librería principal: 6 clientes HTTP, 9 parsers, writers JWPUB/.jwlibrary, 5 providers ASR (Omnilingual 1672 idiomas) + 1 TS (NLLB-200), schemas organized-app, infraestructura F9 y crypto compartido.",
     about:
-      "El corazón del toolkit. Todo lo demás depende de jw-core, y jw-core no depende de nada del workspace. Aquí viven los clientes HTTP que hablan con jw.org, los parsers determinísticos que convierten HTML/JSON/EPUB/JWPUB en modelos Pydantic, y la infraestructura compartida: cache SQLite con TTL, throttle por host (token bucket), telemetría opt-in para drift de API y autenticación JWT aislada.",
+      "El corazón del toolkit. Todo lo demás depende de jw-core, y jw-core no depende de nada del workspace. Aquí viven los clientes HTTP que hablan con jw.org, los parsers determinísticos que convierten HTML/JSON/EPUB/JWPUB en modelos Pydantic, los writers que generan .jwpub y .jwlibrary nativos para JW Library, los providers de ASR (Deepgram, Whisper, Omnilingual 1672 idiomas via venv Python 3.12) y traducción (NLLB-200 CC-BY-NC con preservación de refs), los schemas Pydantic de sws2apps/organized-app, y la infraestructura compartida: cache SQLite con TTL, throttle por host, telemetría opt-in y autenticación JWT.",
     highlights: [
-      "6 clientes · 9 parsers · 17 locales",
+      "6 clientes · 9 parsers · 3 writers · 17 locales",
+      "ASR 1672 idiomas (Omnilingual) + NLLB-200",
       "Cache · Throttle · Telemetría opt-in",
-      "JWPUB decrypt AES-128-CBC",
-      "Sin LLM en el camino crítico",
+      "Crypto JWPUB AES-128-CBC ↔ writer simétrico",
     ],
     features: [
       {
@@ -39,20 +39,24 @@ export const packages: PackageInfo[] = [
         body: "CDNClient (búsqueda + JWT), WOLClient (capítulos, texto diario, fetch arbitrario, cross-refs), MediatorClient (idiomas + finder), PubMediaClient (descargas), TopicIndexClient (guía de investigación), WeblangClient (catálogo de idiomas). Todos opcionalmente con cache + throttle + telemetría.",
       },
       {
-        title: "Parsers determinísticos",
-        body: "parse_reference (multiidioma), Article (HTML → modelo), DailyText, Verse (limpia pronunciación · marcas inline · asteriscos), StudyNote + CrossReference (matching headword↔versículo 100%), TopicIndex, Epub, JWPUB descifrado.",
+        title: "Parsers + Writers determinísticos",
+        body: "Parsers: parse_reference (multiidioma), Article, DailyText, Verse, StudyNote + CrossReference, TopicIndex, Epub, JWPUB descifrado (F5.5), .jwlibrary backup (F19). Writers nuevos: jwpub builder (F50, simétrico al descifrador) y jw_library_backup writer (F52, cierra el read-write loop con JW Library nativo).",
       },
       {
-        title: "Modelos Pydantic",
-        body: "BibleRef · Verse · StudyNote · CrossReference · Article · Section · TopicSubject/Subheading/Citation · Epub · EpubDocument · JwpubMetadata · LanguageMetadata. Validación estricta en boundaries de sistema.",
+        title: "Modelos Pydantic + schemas organized-app",
+        body: "Modelos propios: BibleRef · Verse · StudyNote · Article · Epub · JwpubMetadata · LanguageMetadata. F51 portó verbatim los schemas de sws2apps/organized-app (MIT) — PersonType, SchedWeekType, WeekType, AssignmentCode, MeetingAttendanceType, FieldServiceGroupType, UserFieldServiceMonthlyReportType — con envelope CRDT Timestamped[T].",
       },
       {
-        title: "Infraestructura Fase 9",
-        body: "DiskCache (SQLite + TTL + WAL) · TokenBucket throttle (2 req/s, burst 5) · Telemetry (opt-in fingerprinting de respuesta para detectar drift) · JWTManager · factory unificado de clientes.",
+        title: "Audio: ASR + TTS multi-provider (F34 + F53)",
+        body: "ASR providers con auto-routing por idioma: Deepgram (~16 idiomas, streaming), faster-whisper (local), Omnilingual ASR (1672 idiomas via venv Python 3.12 dedicado, F53). TTS: Kokoro · Edge · System · ElevenLabs · Piper · XTTSv2 · F5. Routers F55.1 escogen el mejor disponible sin que el caller los nombre.",
       },
       {
-        title: "Descifrado JWPUB",
-        body: "Implementación AES-128-CBC sobre zlib con derivación de clave SHA256(lang_symbol_year) XOR magic constant. Descubierto por gokusander/jwpub-toolkit (MIT), portado a Python en parsers.jwpub desde Fase 5.5.",
+        title: "Traducción NLLB-200 con preservación de refs (F54)",
+        body: "translate_preserving_references() enmascara cada cita bíblica antes del modelo y la restaura en el idioma destino — cero alucinación numérica. NLLBProvider con CTranslate2 INT8 (200 idiomas, CC-BY-NC). is_commercial_safe=False chequeable a runtime; el router F55.1 filtra estructuralmente.",
+      },
+      {
+        title: "Infraestructura Fase 9 + crypto compartido",
+        body: "DiskCache (SQLite + TTL + WAL) · TokenBucket throttle · Telemetry opt-in · JWTManager · factory unificado de clientes. F50 añadió jwpub_crypto: XOR_KEY, compute_key_iv, encrypt_blob (nuevo), decrypt_blob — una sola fuente de verdad compartida por parser y writer JWPUB.",
       },
     ],
     install: "uv sync --package jw-core",
@@ -69,11 +73,14 @@ ref.chapter, ref.verses   # (3, [16])`,
     },
     dependsOn: [],
     exports: [
-      "parse_reference",
+      "parse_reference · translate_preserving_references",
       "BibleRef · Verse · StudyNote · CrossReference",
       "CDNClient · WOLClient · MediatorClient · PubMediaClient",
+      "writers.jwpub.JwpubBuilder · writers.jw_library_backup.write_backup",
+      "audio.transcription.get_asr_provider · OmnilingualProvider",
+      "translation_providers.get_translation_provider · NLLBProvider",
+      "models_organized.PersonType · SchedWeekType · WeekType",
       "DiskCache · Throttler · Telemetry · JWTManager",
-      "Article · TopicSubject · Epub · JwpubMetadata",
     ],
     referenceHref: "/docs/referencia/jw-core",
     guideHref: "/docs/guias/usar-clientes-http",
@@ -84,19 +91,19 @@ ref.chapter, ref.verses   # (3, [16])`,
     tagline: "Terminal para mortales",
     color: "warm",
     short:
-      "CLI Typer + Rich con 8 comandos. Resuelve citas, descarga publicaciones, consulta el texto diario, busca y navega — sin abrir el navegador.",
+      "CLI Typer + Rich con 13+ comandos top-level (verse · search · daily · download · jwpub build · library · omnilingual · translate · transcribe · …). Wrapper directo sobre jw-core con output Rich o JSON.",
     about:
-      "Construida con Typer + Rich para que cualquier usuario que sepa abrir un terminal pueda usar el toolkit sin escribir Python. Cada comando es un wrapper directo sobre los métodos de jw-core, con output legible o pipeable a otras herramientas Unix.",
+      "Construida con Typer + Rich para que cualquier usuario que sepa abrir un terminal pueda usar el toolkit sin escribir Python. Cada comando es un wrapper directo sobre los métodos de jw-core, con output legible o pipeable a otras herramientas Unix. Tras F55, los subcomandos cubren todo el workflow multilingüe: generar publicaciones nativas, escribir backups de JW Library, transcribir en 1672 idiomas y traducir preservando refs bíblicas.",
     highlights: [
-      "8 comandos: verse · search · daily · ...",
+      "13+ comandos: verse · search · daily · …",
+      "F55: jw jwpub build · library · omnilingual · translate",
       "Typer + Rich · 7 idiomas",
-      "Pipeable a herramientas Unix",
       "Output JSON con --json",
     ],
     features: [
       {
-        title: "8 comandos top-level",
-        body: "jw verse <ref> · jw search <q> · jw daily · jw download <pub> · jw languages · jw chapter <ref> · jw jwpub <file> · jw topic <subject>. Cada uno con --lang, --json y flags específicos.",
+        title: "Comandos top-level (13+)",
+        body: "Núcleo: jw verse · search · daily · download · languages · chapter · jwpub inspect · topic. F55 multilingüe: jw jwpub build (empaquetar HTML+media como .jwpub), jw library {inspect, re-export, from-notes} (escribir .jwlibrary), jw omnilingual {install, status, transcribe, supports} (1672 idiomas), jw translate (NLLB con preservación refs), jw transcribe (router automático).",
       },
       {
         title: "Output bonito o legible-por-máquinas",

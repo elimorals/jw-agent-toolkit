@@ -1,3 +1,9 @@
+---
+title: "Omnilingual ASR para 1672 idiomas (Fase 53)"
+description: "Provider Meta Apache 2.0 vía venv Python 3.12 dedicado. Quechua, Kinyarwanda, Aymara, Guaraní confirmados."
+date: "2026-06-02"
+---
+
 # Guía — Omnilingual ASR para 1672 idiomas (Fase 53)
 
 > Transcribir audio de jw-broadcast, asambleas, Salón del Reino o

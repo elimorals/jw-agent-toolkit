@@ -1,3 +1,9 @@
+---
+title: "Polyglot Python: venv per feature"
+description: "Patrón arquitectónico de F53 para usar librerías ML pesadas con cadencias de soporte Python distintas a la del monorepo."
+date: "2026-06-02"
+---
+
 # Concepto — Polyglot Python: venv per feature
 
 > Patrón arquitectónico introducido en Fase 53 (Omnilingual ASR) para

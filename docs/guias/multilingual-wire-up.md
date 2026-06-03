@@ -1,3 +1,9 @@
+---
+title: "Wire-up multilingüe (Fase 55)"
+description: "Los 8 call sites que convierten F50-F54 de islas portadas en capacidades del toolkit."
+date: "2026-06-02"
+---
+
 # Guía — Wire-up multilingüe (Fase 55)
 
 > Cómo el toolkit pasa de "tener los proveedores instalados" a "los usa

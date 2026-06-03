@@ -1,3 +1,9 @@
+---
+title: "Escritor de backups .jwlibrary (Fase 52)"
+description: "Generar .jwlibrary con notas/highlights desde agentes. Cierra read-write loop con JW Library nativo."
+date: "2026-06-02"
+---
+
 # Guía — Escritor de backups .jwlibrary (Fase 52)
 
 > Generar archivos `.jwlibrary` (notas, marcadores, highlights, bookmarks)

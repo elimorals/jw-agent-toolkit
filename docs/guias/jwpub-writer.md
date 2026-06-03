@@ -1,3 +1,9 @@
+---
+title: "Generador de publicaciones .jwpub (Fase 50)"
+description: "Empaquetar HTML+media como .jwpub cifrado importable en JW Library. Port de darioragusa/html2jwpub (MIT)."
+date: "2026-06-02"
+---
+
 # Guía — Generador de publicaciones .jwpub (Fase 50)
 
 > Empaquetar HTML+media como un archivo `.jwpub` cifrado que **JW Library

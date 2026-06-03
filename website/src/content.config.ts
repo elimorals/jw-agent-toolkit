@@ -20,6 +20,8 @@ const docs = defineCollection({
   schema: z.object({
     title: z.string().optional(),
     description: z.string().optional(),
+    /** ISO date for the RSS feed. Falls back to a baseline when absent. */
+    date: z.string().optional(),
   }),
 });
 

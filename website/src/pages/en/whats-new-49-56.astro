@@ -1,0 +1,309 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+interface Phase {
+  number: number;
+  tier: 1 | 2 | 3 | 4;
+  title: string;
+  tagline: string;
+  description: string;
+  tests?: number;
+  commits?: number;
+  whatWasDone: string[];
+  guideHref?: string;
+}
+
+const phases: Phase[] = [
+  {
+    number: 49,
+    tier: 1,
+    title: "second-brain",
+    tagline: "Karpathy-style persistent memory + GraphRAG",
+    description:
+      "Compiler that extracts knowledge from the toolkit into a queryable graph. Dual backend DuckDB/Neo4j, Wiki over Obsidian with human_edited honored. Multi-tenant. BrainDomain plugins via F41.",
+    tests: 95,
+    commits: 22,
+    whatWasDone: [
+      "Karpathy-style: extracts entities and relationships from the toolkit code and docs.",
+      "Swappable backends: DuckDB (zero-config) or Neo4j (relationship-heavy).",
+      "Wiki on Obsidian: operator edits set human_edited=true and the compiler preserves them.",
+      "CLI: jw brain {init, compile, query, lint, status, snapshot, list}.",
+      "MCP tools: second_brain_query, second_brain_status, second_brain_compile.",
+      "F41 plugins: builtin TJ domain + financial fixture.",
+    ],
+    guideHref: "/docs/guias/second-brain",
+  },
+  {
+    number: 50,
+    tier: 2,
+    title: "jwpub-writer",
+    tagline: "Generate native .jwpub files JW Library imports",
+    description:
+      "Closes the F5.5 (decrypt) symmetric loop. Port of darioragusa/html2jwpub (MIT, Swift): SHA-256+XOR key/IV, AES-128-CBC encrypt, zlib deflate, SQLite manifest + outer ZIP. Shared crypto module jw_core.jwpub_crypto.",
+    tests: 9,
+    commits: 1,
+    whatWasDone: [
+      "JwpubBuilder.add_document() / add_media() / build() — API symmetric to the parser.",
+      "750-line SQLite schema lifted verbatim from html2jwpub dbQuery.swift.",
+      "encrypt_blob() (new) + decrypt_blob() (existing) share the XOR_KEY constant.",
+      "New CLI: jw jwpub build <folder> --out --symbol --year --lang.",
+      "Tests parametrised by content size (10/100/1000/10000) cover PKCS7 boundary.",
+      "Round-trip verified: builder → parser → identical bytes.",
+    ],
+    guideHref: "/docs/guias/jwpub-writer",
+  },
+  {
+    number: 51,
+    tier: 2,
+    title: "organized-app schemas",
+    tagline: "Pydantic v2 verbatim port from sws2apps/organized-app",
+    description:
+      "Port of the TypeScript types from organized-app (MIT) — the React PWA used by hundreds of congregations. Enables interop without depending on React/Firebase. The CRDT envelope Timestamped[T] preserves updatedAt per field.",
+    tests: 10,
+    commits: 1,
+    whatWasDone: [
+      "PersonType with publisher_baptized/unbaptized/midweek_meeting_student histories.",
+      "SchedWeekType with full midweek (chairman, TGW, AYF parts 1-4, LC, CBS) and weekend.",
+      "WeekType IntEnum (NORMAL=1, MEMORIAL=5, WATCHTOWER_STUDY=13, NO_MEETING=20).",
+      "AssignmentCode IntEnum 100-300 (MM_BibleReading=100, MINISTRY_HOURS_CREDIT=300).",
+      "UserFieldServiceMonthlyReportType — post-2023 S-21 layout.",
+      "Tests verify enum values verbatim TS + JSON envelope round-trip with by_alias.",
+    ],
+    guideHref: "/docs/guias/organized-app-schemas",
+  },
+  {
+    number: 52,
+    tier: 2,
+    title: "jwlibrary-writer",
+    tagline: "Write .jwlibrary backups from agents and scripts",
+    description:
+      "Closes the read-write loop with the official JW Library app (Phase 19 was read-only). Port of erykjj/jwlmanager (MIT). The libjwlCore-based merge stays out (closed-source binary blob). write_backup() packs the userData.db; update_backup() offers extract → modify(conn) → repack.",
+    tests: 9,
+    commits: 1,
+    whatWasDone: [
+      "write_backup(out, *, user_data_db_path, ...) — userData.db + manifest + SHA-256 + ZIP.",
+      "update_backup(in, out, modify_fn) — round-trip extract → callback → repack.",
+      "PRAGMA user_version propagates to manifest.schemaVersion.",
+      "LastModified UPDATE re-stamps each repack (tolerant if the table is missing).",
+      "New CLI: jw library {inspect, re-export, from-notes}.",
+      "from-notes: agents produce notes JSON → .jwlibrary importable in JW Library.",
+    ],
+    guideHref: "/docs/guias/jwlibrary-writer",
+  },
+  {
+    number: 53,
+    tier: 1,
+    title: "omnilingual-asr",
+    tagline: "Meta Omnilingual ASR — 1672 languages, Apache 2.0",
+    description:
+      "Integrates facebookresearch/omnilingual-asr as a first-class provider. Polyglot Python: fairseq2 has no cp313 wheels, so OmnilingualProvider lives in a dedicated Python 3.12 venv and runs via subprocess JSON. Quechua, Kinyarwanda, Aymara, Guarani all confirmed.",
+    tests: 16,
+    commits: 1,
+    whatWasDone: [
+      "OmnilingualProvider fires a worker in a dedicated 3.12 venv (~/.jw-core/omnilingual/venv).",
+      "1672 languages — the long tail that Deepgram (~16) and Whisper-large-v3 (~99) miss.",
+      "ISO-639-1 → FLORES-200 mapping curated for JW cases (qu → quy_Latn, rw → kin_Latn).",
+      "Default model: omniASR_CTC_300M (Mac M1/M2 8GB). 7B-Unlimited for server GPU.",
+      "New CLI: jw omnilingual {install, status, transcribe, supports}.",
+      "End-to-end verified: real install plus quechua/kinyarwanda/aymara/guarani support.",
+    ],
+    guideHref: "/docs/guias/omnilingual-asr",
+  },
+  {
+    number: 54,
+    tier: 1,
+    title: "nllb-translation",
+    tagline: "NLLB-200 with exact Bible reference preservation",
+    description:
+      "NLLBProvider wraps Meta's NLLB-200 (200 languages, CC-BY-NC-4.0) backed by CTranslate2 INT8 (~7 GB on M-series). is_commercial_safe = False at the attribute level — the router filters it structurally. translate_preserving_references() masks refs before the model and restores them in the target language.",
+    tests: 10,
+    commits: 1,
+    whatWasDone: [
+      "CTranslate2 4.7+ has cp313 wheels — runs in-process (no separate venv).",
+      "ISO → FLORES map with explicit low-resource entries (yor_Latn, kin_Latn, swh_Latn).",
+      "is_commercial_safe = False — the F55.1 router filters NLLB when commercial=True.",
+      "translate_preserving_references(text, source, target, provider) in jw_core.translation.",
+      "Zero numeric hallucination on verses: the model never sees the reference.",
+      "10 tests with ctranslate2/transformers mocked — no 7 GB weights download in CI.",
+    ],
+    guideHref: "/docs/guias/nllb-translation",
+  },
+  {
+    number: 55,
+    tier: 1,
+    title: "multilingual wire-up",
+    tagline: "8 call sites that activate F50-F54 in the toolkit",
+    description:
+      "Converts F50-F54 from ported islands into actual capabilities. Without this, the modules existed but nobody called them. Honest pre-F55 audit: zero uses across agents and CLI beyond tests.",
+    tests: 24,
+    commits: 1,
+    whatWasDone: [
+      "F55.1 — get_asr_provider(language) auto-routes Quechua → Omnilingual without naming it.",
+      "F55.1 — get_translation_provider(commercial=True) excludes NLLB on licence grounds.",
+      "F55.2 — jw translate CLI + MCP translate_preserving_refs tool.",
+      "F55.3 — jw library CLI: agents → JW Library importable .jwlibrary.",
+      "F55.4 — jw jwpub build CLI: HTML+media → native .jwpub.",
+      "F55.5 — parse/write_organized_backup() — JSON ↔ Pydantic models.",
+      "F55.6 — bridge ministry.MonthlyReport ↔ post-2023 organized S-21.",
+      "F55.7 — cross_lingual_research agent: query A → corpus B → results in A with refs intact.",
+      "F55.8 — broadcasting.transcribe_and_index_audio + optional translate_to flag.",
+    ],
+    guideHref: "/docs/guias/multilingual-wire-up",
+  },
+  {
+    number: 56,
+    tier: 4,
+    title: "jw-core-js close-out",
+    tagline: "Close F47 MVP honestly with anti-drift CI",
+    description:
+      "Audit revealed 3 ROADMAP F47 lies: F48 was already integrated (not pending), cookbook 12 already passes, buckets B/C/D/E have no real justification (Capacitor mobile is vaporware). F56 fixes the docs, closes the real Python↔TS parity gap, and adds a blocking CI workflow.",
+    tests: 24,
+    commits: 2,
+    whatWasDone: [
+      "F56.1 — Honest ROADMAP + guide: 3 inconsistencies fixed; buckets B/C/D/E deferred.",
+      "F56.2 — Language type re-exported from core, dedup in F48 (-7 LOC).",
+      "F56.3 — Fixture 17 → 174 cases + verifying detected_language + raw_match.",
+      "F56.4 — .github/workflows/cross-lang.yml + Makefile dump-shared-data + git diff --exit-code.",
+      "F56.5 — BibleRef.fromWolUrl() + langFromWolPath() (pure inverse of wolUrl).",
+      "F48 verse_detector.ts: -35 LOC delegating URL parsing to core. Thin-adapter pattern.",
+      "Final cross-stack: 174 Python + 212 TS + 41 extension = 427 tests green.",
+    ],
+    guideHref: "/docs/guias/jw-core-js",
+  },
+];
+
+const tierMeta: Record<1 | 2 | 3 | 4, { label: string; color: string }> = {
+  1: { label: "T1 Multilingual SOTA + integration", color: "text-[var(--color-accent)]" },
+  2: { label: "T2 Generation and interop", color: "text-[#f0b97a]" },
+  3: { label: "T3 Frontier", color: "text-[#c4a7e7]" },
+  4: { label: "T4 JS surface", color: "text-[#7ab0e3]" },
+};
+
+const totalTests = phases.reduce((sum, p) => sum + (p.tests ?? 0), 0);
+const totalCommits = phases.reduce((sum, p) => sum + (p.commits ?? 0), 0);
+---
+
+<BaseLayout
+  title="Release 49-56 — jw-core complete + multilingual SOTA"
+  description="Eight phases that close the jw-core cycle: persistent second-brain, JWPUB/.jwlibrary writers, organized-app schemas, Omnilingual ASR for 1672 languages, NLLB-200, multilingual wire-up and JS bridge close-out with anti-drift CI."
+>
+  <!-- ───────── Hero ───────── -->
+  <section class="grid-noise relative overflow-hidden border-b border-[var(--color-line-subtle)]">
+    <div class="mx-auto max-w-7xl px-4 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20">
+      <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        <span class="inline-block h-px w-8 bg-[var(--color-accent)] align-middle"></span>
+        <span class="ml-2">Release 49-56 · jw-core complete + JS bridge</span>
+      </p>
+      <h1 class="mt-6 max-w-3xl text-balance font-display text-[clamp(1.85rem,5vw,3.4rem)] leading-[1.05]">
+        <span class="text-[var(--color-ink-primary)]">The toolkit speaks</span>
+        <span class="text-[var(--color-accent)]">1672 languages</span>
+      </h1>
+      <p class="mt-6 max-w-3xl text-[16px] leading-relaxed text-[var(--color-ink-secondary)]">
+        Eight phases that move from <strong class="text-[var(--color-ink-primary)]">"jw-core almost complete"</strong> to
+        <strong class="text-[var(--color-ink-primary)]">"jw-core is the official multilingual SDK"</strong>.
+        Persistent second-brain, native JWPUB and .jwlibrary generation, interop schemas for organized-app,
+        Omnilingual ASR (1672 languages), NLLB-200 (200 languages, with exact Bible reference preservation), wire-up
+        across 8 call sites and an honest close-out of the JS bridge with anti-drift Python↔TypeScript CI.
+      </p>
+
+      <div class="mt-10 grid grid-cols-3 gap-4">
+        <div class="rounded-sm border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-accent)]">Phases</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{phases.length}</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">New tests</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{totalTests}+</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Commits</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{totalCommits}+</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── Phases ───────── -->
+  {phases.map((phase) => (
+    <section class="border-b border-[var(--color-line-subtle)]">
+      <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+        <article class="grid gap-8 lg:grid-cols-[280px_1fr]">
+          <header class="space-y-3">
+            <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">
+              Phase {phase.number}
+            </p>
+            <h4 class="font-display text-[26px] leading-tight text-[var(--color-ink-primary)]">
+              {phase.title}
+            </h4>
+            <p class={`text-[14px] italic ${tierMeta[phase.tier].color}`}>{phase.tagline}</p>
+            <div class="flex flex-wrap gap-3 pt-2 font-mono text-[11px] text-[var(--color-ink-tertiary)]">
+              <span class="rounded-sm border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 px-2 py-1 text-[var(--color-accent)]">
+                ✅ Shipped
+              </span>
+              {phase.tests && (
+                <span class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] px-2 py-1">
+                  🧪 {phase.tests} tests
+                </span>
+              )}
+              {phase.commits && (
+                <span class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] px-2 py-1">
+                  ⊜ {phase.commits} commit{phase.commits === 1 ? "" : "s"}
+                </span>
+              )}
+              <span class={`rounded-sm border ${tierMeta[phase.tier].color.replace("text-", "border-")}/40 px-2 py-1 ${tierMeta[phase.tier].color}`}>
+                {tierMeta[phase.tier].label}
+              </span>
+            </div>
+            {phase.guideHref && (
+              <a
+                href={phase.guideHref}
+                class="inline-flex items-center gap-1.5 pt-2 font-mono text-[11px] text-[var(--color-accent)] no-underline hover:underline"
+              >
+                Technical guide →
+              </a>
+            )}
+          </header>
+          <div class="space-y-6">
+            <p class="text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">{phase.description}</p>
+            <div>
+              <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+                What shipped
+              </p>
+              <ul class="mt-3 space-y-1.5 text-[14px] leading-relaxed text-[var(--color-ink-primary)]">
+                {phase.whatWasDone.map((item) => (
+                  <li class="flex gap-2">
+                    <span class="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-[var(--color-accent)]"></span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  ))}
+
+  <!-- ───────── Footer CTA ───────── -->
+  <section>
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ More
+      </h2>
+      <div class="mt-12 flex flex-wrap gap-4">
+        <a
+          href="/en/whats-new-33-48"
+          class="inline-flex items-center gap-2 rounded-sm border border-[var(--color-line)] bg-transparent px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-ink-primary)] no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+        >
+          ← Phases 33-48
+        </a>
+        <a
+          href="/en/roadmap"
+          class="inline-flex items-center gap-2 rounded-sm bg-[var(--color-accent)] px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-surface-base)] no-underline transition-opacity hover:opacity-90"
+        >
+          Master roadmap 22-56 →
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

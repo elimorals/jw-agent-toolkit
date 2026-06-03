@@ -1,3 +1,9 @@
+---
+title: "Schemas organized-app en Pydantic v2 (Fase 51)"
+description: "Port verbatim de los tipos TS de sws2apps/organized-app: PersonType, SchedWeekType, S-21 post-2023."
+date: "2026-06-02"
+---
+
 # Guía — Schemas organized-app en Pydantic v2 (Fase 51)
 
 > Modelos Pydantic v2 portados verbatim de `sws2apps/organized-app` (MIT) —
