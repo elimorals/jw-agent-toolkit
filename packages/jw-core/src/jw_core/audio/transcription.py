@@ -1,18 +1,27 @@
-"""Transcription via faster-whisper (optional, local).
+"""Transcription — faster-whisper (default), Deepgram, Omnilingual (1672 langs).
 
-VISION.md item: "Whisper local para dictar notas durante estudio personal".
+Original VISION.md item: "Whisper local para dictar notas durante estudio
+personal". Phase 54.1 adds a provider registry + auto-router: callers can
+request a transcription by language and the toolkit picks the best provider
+that supports it.
 
-This module is OPTIONAL — only loads `faster-whisper` if the user has
-it installed (`pip install faster-whisper`). Otherwise `transcribe_file`
-raises `TranscriptionError`.
+Routing logic (in `get_asr_provider`):
 
-We use `faster-whisper` (CTranslate2 backend) rather than `openai/whisper`
-because it runs in <2× real-time on a Mac without GPU.
+  1. Explicit `name` argument wins.
+  2. `JW_ASR_PROVIDER` env var (same semantics).
+  3. If the requested `language` is in a provider's `languages_supported`,
+     prefer that provider.
+  4. Fallback chain: Deepgram → Whisper → Omnilingual.
+
+The fallback chain places Omnilingual last (heaviest) but it's the ONLY
+provider that covers the long tail of 1600+ languages JW publishes in.
+For any language Deepgram doesn't claim, the router prefers Omnilingual.
 """
 
 from __future__ import annotations
 
 import logging
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -83,6 +92,95 @@ def transcribe_file(
         duration=info.duration,
         segments=segments,
     )
+
+
+# ── Provider registry + router (F54.1) ─────────────────────────────────
+
+
+def _all_providers() -> list[type]:
+    """Lazy import to avoid loading optional deps at module-level."""
+    from jw_core.audio.asr_providers import ASRProvider  # noqa: F401
+    from jw_core.audio.asr_providers.deepgram import DeepgramProvider
+    from jw_core.audio.asr_providers.omnilingual import OmnilingualProvider
+    from jw_core.audio.asr_providers.whisper_turbo import WhisperTurboProvider
+
+    return [DeepgramProvider, WhisperTurboProvider, OmnilingualProvider]
+
+
+DEFAULT_ASR_CHAIN: list[str] = ["deepgram", "whisper-turbo", "omnilingual"]
+
+
+def _provider_by_name(name: str) -> type | None:
+    for cls in _all_providers():
+        if cls.name == name:
+            return cls
+    return None
+
+
+def get_asr_provider(name: str | None = None, *, language: str | None = None):  # type: ignore[no-untyped-def]
+    """Return an available ASR provider.
+
+    Resolution:
+      1. Explicit `name`.
+      2. `JW_ASR_PROVIDER` env.
+      3. By `language` (provider whose `languages_supported` covers it,
+         with Deepgram preferred for high-resource for latency).
+      4. DEFAULT_ASR_CHAIN — first available wins.
+    """
+    requested = name or os.getenv("JW_ASR_PROVIDER")
+    if requested:
+        cls = _provider_by_name(requested)
+        if cls is None:
+            known = [c.name for c in _all_providers()]
+            raise TranscriptionError(f"Unknown ASR provider {requested!r}. Known: {known}")
+        instance = cls()
+        if not instance.is_available():
+            raise TranscriptionError(f"Provider {requested!r} not available on this machine.")
+        return instance
+
+    # Language-aware routing: if the language is mainstream → Deepgram;
+    # otherwise → Omnilingual (covers the long tail).
+    if language:
+        lang_iso = language.split("_")[0].lower()
+        for entry_name in DEFAULT_ASR_CHAIN:
+            cls = _provider_by_name(entry_name)
+            if cls is None:
+                continue
+            if lang_iso in cls.languages_supported:
+                instance = cls()
+                if instance.is_available():
+                    return instance
+        # Omnilingual is the catch-all when nobody else claims the lang.
+        omni_cls = _provider_by_name("omnilingual")
+        if omni_cls is not None:
+            omni = omni_cls()
+            if omni.is_available():
+                return omni
+
+    for entry_name in DEFAULT_ASR_CHAIN:
+        cls = _provider_by_name(entry_name)
+        if cls is None:
+            continue
+        instance = cls()
+        if instance.is_available():
+            return instance
+
+    raise TranscriptionError(
+        "No ASR provider available. Options: DEEPGRAM_API_KEY for Deepgram, "
+        "`pip install faster-whisper`, or `jw omnilingual install` for 1672 languages."
+    )
+
+
+def list_asr_providers() -> list[dict[str, object]]:
+    return [
+        {
+            "name": cls.name,
+            "available": cls().is_available(),
+            "languages_supported_count": len(cls.languages_supported),
+            "target": getattr(cls, "target", "cpu"),
+        }
+        for cls in _all_providers()
+    ]
 
 
 def estimate_real_time_factor(model_size: str) -> float:

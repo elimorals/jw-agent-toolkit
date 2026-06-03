@@ -50,6 +50,7 @@ data/
 # Secretos
 .env
 .env.local
+.envrc.local
 
 # Remember plugin local state (autosave logs, no necesarios en remote)
 .remember/

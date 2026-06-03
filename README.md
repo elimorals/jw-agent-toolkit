@@ -34,7 +34,15 @@ uv run jw search "amor"
 
 ## Licencia
 
-GPL-3.0-only. Incorpora código derivado de [`jwlib`](https://github.com/allejok96/jwlib) (allejok96, GPL-3.0).
+GPL-3.0-only. Incorpora código derivado de:
+
+- [`jwlib`](https://github.com/allejok96/jwlib) — allejok96, GPL-3.0 (broadcasting/parser)
+- [`gokusander/jwpub-toolkit`](https://github.com/gokusander/jwpub-toolkit) — MIT (algoritmo de descifrado JWPUB, Fase 5.5)
+- [`darioragusa/html2jwpub`](https://github.com/darioragusa/html2jwpub) — MIT (algoritmo de generación JWPUB + schema SQLite, Fase 50)
+- [`sws2apps/organized-app`](https://github.com/sws2apps/organized-app) — MIT (schemas `src/definition/` portados a Pydantic v2 en `jw_core.models_organized`, Fase 51)
+- [`erykjj/jwlmanager`](https://github.com/erykjj/jwlmanager) — MIT (pipeline de escritura `.jwlibrary` portado a `jw_core.writers.jw_library_backup`, Fase 52; el merge basado en `libjwlCore` queda fuera)
+- [`facebookresearch/omnilingual-asr`](https://github.com/facebookresearch/omnilingual-asr) — Apache-2.0 (ASR Meta para 1672 idiomas, integrado en `jw_core.audio.asr_providers.omnilingual` vía venv Python 3.12 dedicado; bootstrap: `jw omnilingual install`, Fase 53)
+- [`facebook/nllb-200`](https://huggingface.co/facebook/nllb-200-3.3B) — **CC-BY-NC-4.0** (NLLB-200 Meta para 200 idiomas, integrado en `jw_core.translation_providers.nllb` vía CTranslate2 INT8; `is_commercial_safe=False`. Extra: `uv add 'jw-core[translation-nllb]'`, Fase 54)
 
 ## Estado
 

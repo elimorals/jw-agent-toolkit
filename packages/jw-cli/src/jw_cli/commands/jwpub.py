@@ -1,4 +1,9 @@
-"""`jw jwpub` — inspect or extract a downloaded JWPUB file."""
+"""`jw jwpub` — inspect, extract, or BUILD a JWPUB.
+
+Sub-commands:
+  inspect <path>     metadata + TOC (default; --extract decrypts text).
+  build <folder>     pack HTML+media as a .jwpub (F54.4, uses writers.jwpub).
+"""
 
 from __future__ import annotations
 
@@ -6,13 +11,17 @@ from pathlib import Path
 
 import typer
 from jw_core.parsers.jwpub import JwpubError, parse_jwpub, parse_jwpub_metadata
+from jw_core.writers.jwpub import JwpubBuilder
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
 console = Console()
 
+jwpub_app = typer.Typer(help="Inspect or build .jwpub publications.")
 
+
+@jwpub_app.command("inspect")
 def jwpub_cmd(
     path: Path = typer.Argument(..., exists=True, help="Path to a .jwpub file"),
     extract: bool = typer.Option(
@@ -82,3 +91,55 @@ def jwpub_cmd(
                 border_style="green",
             )
         )
+
+
+@jwpub_app.command("build")
+def jwpub_build(
+    folder: Path = typer.Argument(..., exists=True, file_okay=False, help="Folder with *.html files (+ optional same-named subfolders for media)."),
+    out: Path = typer.Option(..., "--out", "-o", help="Output .jwpub path."),
+    symbol: str = typer.Option(..., "--symbol", "-s", help="Publication symbol, e.g. `ex22`."),
+    title: str = typer.Option(..., "--title", "-t", help="Publication title."),
+    year: int = typer.Option(..., "--year", "-y", help="Publication year."),
+    meps_language_index: int = typer.Option(0, "--lang", "-l", help="MEPS language id (0 = English)."),
+    issue_tag_number: int = typer.Option(0, "--issue", help="Issue tag number for periodicals (e.g. w22 → 20220600)."),
+) -> None:
+    """Pack a folder of HTML+media into a `.jwpub` (F54.4).
+
+    Layout expected:
+
+        folder/
+          chapter1.html
+          chapter1/
+            image1.jpg
+            audio1.mp3
+          chapter2.html
+
+    The output is a fully-formed `.jwpub` consumable by JW Library nativo.
+    """
+    html_files = sorted(folder.glob("*.html"))
+    if not html_files:
+        console.print(f"[red]No *.html files found in {folder}[/red]")
+        raise typer.Exit(code=1)
+
+    builder = JwpubBuilder(
+        symbol=symbol,
+        title=title,
+        year=year,
+        meps_language_index=meps_language_index,
+        issue_tag_number=issue_tag_number,
+    )
+    for html in html_files:
+        media_dir = html.with_suffix("")
+        media: list[Path] = []
+        if media_dir.is_dir():
+            for m in sorted(media_dir.iterdir()):
+                if m.is_file():
+                    media.append(m)
+        builder.add_document(
+            title=html.stem,
+            content=html.read_text(encoding="utf-8"),
+            media=media,
+        )
+    written = builder.build(out)
+    console.print(f"[green]Wrote[/green] {written} ({len(html_files)} documents)")
+

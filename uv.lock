@@ -2711,12 +2711,21 @@ dependencies = [
     { name = "jw-rag" },
 ]
 
+[package.optional-dependencies]
+otel = [
+    { name = "opentelemetry-exporter-otlp-proto-grpc" },
+    { name = "opentelemetry-sdk" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "httpx", specifier = ">=0.27.0" },
     { name = "jw-core", editable = "packages/jw-core" },
     { name = "jw-rag", editable = "packages/jw-rag" },
+    { name = "opentelemetry-exporter-otlp-proto-grpc", marker = "extra == 'otel'", specifier = ">=1.27.0" },
+    { name = "opentelemetry-sdk", marker = "extra == 'otel'", specifier = ">=1.27.0" },
 ]
+provides-extras = ["otel"]
 
 [[package]]
 name = "jw-brain"
@@ -2846,6 +2855,12 @@ nli-openai = [
 pdf = [
     { name = "weasyprint" },
 ]
+translation-nllb = [
+    { name = "ctranslate2" },
+    { name = "huggingface-hub" },
+    { name = "sentencepiece" },
+    { name = "transformers" },
+]
 tts-elevenlabs = [
     { name = "elevenlabs" },
 ]
@@ -2903,6 +2918,7 @@ requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.12.0" },
     { name = "brotli", specifier = ">=1.1.0" },
     { name = "coqui-tts", marker = "extra == 'tts-xtts'", specifier = ">=0.24.0" },
+    { name = "ctranslate2", marker = "extra == 'translation-nllb'", specifier = ">=4.7.0" },
     { name = "deepgram-sdk", marker = "extra == 'asr-deepgram'", specifier = ">=3.7.0" },
     { name = "defusedxml", specifier = ">=0.7.1" },
     { name = "elevenlabs", marker = "extra == 'tts-elevenlabs'", specifier = ">=1.5.0" },
@@ -2911,6 +2927,7 @@ requires-dist = [
     { name = "genanki", marker = "extra == 'anki'", specifier = ">=0.13.1,<1.0" },
     { name = "httpx", specifier = ">=0.27.0" },
     { name = "httpx", marker = "extra == 'vlm-api-qwen'", specifier = ">=0.27.0" },
+    { name = "huggingface-hub", marker = "extra == 'translation-nllb'", specifier = ">=0.24.0" },
     { name = "huggingface-hub", marker = "extra == 'tts-kokoro'", specifier = ">=0.24.0" },
     { name = "jinja2", specifier = ">=3.1.3" },
     { name = "jw-core", extras = ["asr-turbo", "asr-deepgram"], marker = "extra == 'asr-premium'", editable = "packages/jw-core" },
@@ -2934,15 +2951,17 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.9.0" },
     { name = "pytesseract", marker = "extra == 'vlm-tesseract'", specifier = ">=0.3.10" },
     { name = "python-docx", marker = "extra == 'docx'", specifier = ">=1.1.0" },
+    { name = "sentencepiece", marker = "extra == 'translation-nllb'", specifier = ">=0.2.0" },
     { name = "soundfile", marker = "extra == 'tts-kokoro'", specifier = ">=0.12.1" },
     { name = "torch", marker = "extra == 'nli-all'", specifier = ">=2.4" },
     { name = "torch", marker = "extra == 'nli-local'", specifier = ">=2.4" },
     { name = "transformers", marker = "extra == 'nli-all'", specifier = ">=4.45,<5.0" },
     { name = "transformers", marker = "extra == 'nli-local'", specifier = ">=4.45,<5.0" },
+    { name = "transformers", marker = "extra == 'translation-nllb'", specifier = ">=4.45.0" },
     { name = "vllm", marker = "extra == 'vlm-nvidia'", specifier = ">=0.6.0" },
     { name = "weasyprint", marker = "extra == 'pdf'", specifier = ">=62.3" },
 ]
-provides-extras = ["pdf", "docx", "anki", "tts-kokoro", "tts-xtts", "tts-f5", "tts-elevenlabs", "asr-deepgram", "asr-turbo", "tts-premium", "asr-premium", "audio-premium", "grammar-claude", "grammar-openai", "grammar-local", "vlm-anthropic", "vlm-openai", "vlm-api-qwen", "vlm-mlx", "vlm-nvidia", "vlm-cpu", "vlm-tesseract", "nli-anthropic", "nli-openai", "nli-local", "nli-all"]
+provides-extras = ["pdf", "docx", "anki", "tts-kokoro", "tts-xtts", "tts-f5", "tts-elevenlabs", "asr-deepgram", "asr-turbo", "translation-nllb", "tts-premium", "asr-premium", "audio-premium", "grammar-claude", "grammar-openai", "grammar-local", "vlm-anthropic", "vlm-openai", "vlm-api-qwen", "vlm-mlx", "vlm-nvidia", "vlm-cpu", "vlm-tesseract", "nli-anthropic", "nli-openai", "nli-local", "nli-all"]
 
 [[package]]
 name = "jw-eval"
@@ -3053,8 +3072,8 @@ requires-dist = [
     { name = "mlx", marker = "extra == 'mlx'", specifier = ">=0.18.0" },
     { name = "mlx-lm", marker = "extra == 'mlx'", specifier = ">=0.18.0" },
     { name = "ollama", marker = "extra == 'synth'", specifier = ">=0.4.0" },
-    { name = "psutil", marker = "extra == 'monitor'", specifier = ">=6.0.0" },
-    { name = "psutil", marker = "extra == 'tui'", specifier = ">=6.0.0" },
+    { name = "psutil", marker = "extra == 'monitor'", specifier = ">=5.9.5,<8" },
+    { name = "psutil", marker = "extra == 'tui'", specifier = ">=5.9.5,<8" },
     { name = "pydantic", specifier = ">=2.0.0" },
     { name = "pyyaml", specifier = ">=6.0.0" },
     { name = "rich", specifier = ">=13.0.0" },
@@ -3211,7 +3230,7 @@ requires-dist = [
     { name = "jw-core", editable = "packages/jw-core" },
     { name = "mlx", marker = "extra == 'visual-mlx'", specifier = ">=0.18.0" },
     { name = "mlx-vlm", marker = "extra == 'visual-mlx'", specifier = ">=0.0.13" },
-    { name = "numpy", specifier = ">=2.0.0" },
+    { name = "numpy", specifier = ">=1.26.0,<3" },
     { name = "openai", marker = "extra == 'openai'", specifier = ">=1.50.0" },
     { name = "pdf2image", marker = "extra == 'visual'", specifier = ">=1.17.0" },
     { name = "pdf2image", marker = "extra == 'visual-mlx'", specifier = ">=1.17.0" },
@@ -4537,6 +4556,75 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/b4/1c/125e1c936c0873796771b7f04f6c93b9f1bf5d424cea90fda94a99f61da8/opentelemetry_api-1.42.1.tar.gz", hash = "sha256:56c63bea9f77b62856be8c47600474acad853b2924b99b1687c4cb6297166716", size = 72296, upload-time = "2026-05-21T16:32:49.335Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a3/ca/9520cc1f3dfbbd03ac5903bbf55833e257bc64b1cf30fa8b0d6df374d821/opentelemetry_api-1.42.1-py3-none-any.whl", hash = "sha256:51a69edacadbc03a8950ace1c4c21099cacc538820ac2c9e36277e78cebba714", size = 61311, upload-time = "2026-05-21T16:32:28.822Z" },
+]
+
+[[package]]
+name = "opentelemetry-exporter-otlp-proto-common"
+version = "1.42.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "opentelemetry-proto" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0e/9c/216acfeaedadf2e1937f4373929b20f73197c5c4a2546d4f584b7fa63813/opentelemetry_exporter_otlp_proto_common-1.42.1.tar.gz", hash = "sha256:04f1f01fb597c4249dfcd7f8b861c902c2102369d376d9d346ff38de4469a2ee", size = 21433, upload-time = "2026-05-21T16:32:55.526Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d6/43/2375e7612e1121a4518c17603b6e0b03ad94f565aafad53f464dc5be2bf6/opentelemetry_exporter_otlp_proto_common-1.42.1-py3-none-any.whl", hash = "sha256:f48d395ab815b444da118868977e9798ea354c25737d5cf39578ae894011c140", size = 17327, upload-time = "2026-05-21T16:32:33.387Z" },
+]
+
+[[package]]
+name = "opentelemetry-exporter-otlp-proto-grpc"
+version = "1.42.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "googleapis-common-protos" },
+    { name = "grpcio" },
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-exporter-otlp-proto-common" },
+    { name = "opentelemetry-proto" },
+    { name = "opentelemetry-sdk" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/87/87/ca7fc790dfdbcf4f9e9aab14a39ef1b7508ead13707e283de0b3131478d2/opentelemetry_exporter_otlp_proto_grpc-1.42.1.tar.gz", hash = "sha256:975c4461f167dd8ed8857d68d3b6b25f3d272eab896f6a9470d0f5b90e2faf15", size = 27140, upload-time = "2026-05-21T16:32:56.162Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/89/2b/28ba5b128f47fe8c3bab541000d6feb4b5a9bd26623ca013406f01c0fb60/opentelemetry_exporter_otlp_proto_grpc-1.42.1-py3-none-any.whl", hash = "sha256:0ae1177e2038b18a929b3098215243631ef91136cba26b7e2b12790ceb7e87cc", size = 19617, upload-time = "2026-05-21T16:32:34.278Z" },
+]
+
+[[package]]
+name = "opentelemetry-proto"
+version = "1.42.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "protobuf" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b4/55/63eac3e1089b768ba014091fdd2ae8a9a440c821ef5e2b786909c94c8836/opentelemetry_proto-1.42.1.tar.gz", hash = "sha256:c6a51e6b4f05ae63565f3a113217f3d2bfaec68f78c02d7a6c85f9010d1cfca6", size = 45839, upload-time = "2026-05-21T16:33:03.937Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/41/9d/171c02c84a76940b7e601805b3bb536985aded9168fbcc9ba52f0a730fa2/opentelemetry_proto-1.42.1-py3-none-any.whl", hash = "sha256:dedb74cba2886c59c7789b227a7a670613025a07489040050aedff6e5c0fb43c", size = 71782, upload-time = "2026-05-21T16:32:44.867Z" },
+]
+
+[[package]]
+name = "opentelemetry-sdk"
+version = "1.42.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-semantic-conventions" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/40/f7/b390bd9bfd703bf98a68fea1f27786c6872331fd617164a54b8a59bdc008/opentelemetry_sdk-1.42.1.tar.gz", hash = "sha256:8c834e8f8c9ba4171d4ec843d0cb8a67e4c7394d3f9e9297e582cbd9456ddbf7", size = 239262, upload-time = "2026-05-21T16:33:04.641Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8f/6b/4287766cfbde577ae2272e8884abac325aeaac0d64f41c61d5b8cc595105/opentelemetry_sdk-1.42.1-py3-none-any.whl", hash = "sha256:083cd4bbfaa5aa7b5a9e552430d9951219967cfb27aa61feb13a77aba1fc839d", size = 170907, upload-time = "2026-05-21T16:32:45.894Z" },
+]
+
+[[package]]
+name = "opentelemetry-semantic-conventions"
+version = "0.63b1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "opentelemetry-api" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/93/99/4d7dd6df64795951413ce6e815f8cf1eb191daf7196ae86574589643d5f3/opentelemetry_semantic_conventions-0.63b1.tar.gz", hash = "sha256:3daf963611334b365e98a57438183eb012d3bfb40b2d931a9af613476b8701a9", size = 148340, upload-time = "2026-05-21T16:33:05.455Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cb/7a/7fe66f5f3682b1dd47d88cc4e11f1c6c0966b737de2d16671146e23c39a5/opentelemetry_semantic_conventions-0.63b1-py3-none-any.whl", hash = "sha256:dfe5ef4dee82586b746f522b818ceb298d00b3d59f660042bd79404bff8d0682", size = 203713, upload-time = "2026-05-21T16:32:47.016Z" },
 ]
 
 [[package]]

@@ -59,6 +59,7 @@ from jw_cli.commands.chunker_bench import chunker_bench_cmd
 from jw_cli.commands.constrained import constrained_app
 from jw_cli.commands.create_agent import create_agent_cmd
 from jw_cli.commands.image import image_app
+from jw_cli.commands.omnilingual import omnilingual_app
 from jw_cli.commands.plugins import app as plugins_app
 from jw_cli.commands.provenance import provenance_app
 from jw_cli.commands.rag import rag_app
@@ -78,7 +79,7 @@ app.command(name="daily")(daily.daily_cmd)
 app.command(name="languages")(languages.languages_cmd)
 app.command(name="download")(download.download_cmd)
 app.command(name="chapter")(chapter.chapter_cmd)
-app.command(name="jwpub")(jwpub.jwpub_cmd)
+app.add_typer(jwpub.jwpub_app, name="jwpub")
 app.command(name="topic")(topic.topic_cmd)
 app.command(name="workbook")(workbook.workbook_command)
 app.command(name="student")(student.student_command)
@@ -97,10 +98,16 @@ app.command(name="life")(life.life_cmd)
 app.command(name="eval")(eval_module.eval_cmd)
 app.command(name="say")(say.say_cmd)
 app.command(name="transcribe")(transcribe.transcribe_cmd)
+from jw_cli.commands.library import library_app
+from jw_cli.commands.translate import translate_cmd
+
+app.command(name="translate", help="Translate preserving Bible refs (F54.2, NLLB-200).")(translate_cmd)
+app.add_typer(library_app, name="library", help="JW Library backup IO (F54.3).")
 app.add_typer(constrained_app, name="constrained")
 app.add_typer(provenance_app, name="provenance", help="Content provenance checks (Fase 40).")
 app.add_typer(plugins_app, name="plugins", help="Manage community plugins (Fase 41).")
 app.add_typer(brain_app, name="brain", help="Second-brain (Fase 49).")
+app.add_typer(omnilingual_app, name="omnilingual", help="Omnilingual ASR worker venv (Fase 53).")
 from jw_agents.tracing.viewer import app as _trace_app
 
 app.add_typer(_trace_app, name="trace", help="Inspect agent traces (Fase 43).")

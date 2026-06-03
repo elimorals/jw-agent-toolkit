@@ -212,3 +212,73 @@ def deeplink_for_segment(source_url: str, start: float) -> str:
     if "?" in source_url:
         return f"{source_url}&t={seconds}s"
     return f"{source_url}?t={seconds}s"
+
+
+# ── F54.8 — audio ingest for low-resource broadcasts ────────────────────
+
+
+def transcribe_and_index_audio(
+    index: BroadcastingIndex,
+    audio_path: Path | str,
+    *,
+    video_id: str,
+    title: str = "",
+    language: str | None = None,
+    source_url: str = "",
+    translate_to: str | None = None,
+) -> int:
+    """Transcribe an audio file and store it as an indexed broadcast.
+
+    Two new paths the existing VTT pipeline can't serve:
+
+      1. **Broadcasts in low-resource languages (qu, rw, ay, gn, …)** that
+         JW publishes without official subtitles. The F54.1 router picks
+         Omnilingual automatically when the language is outside Deepgram's
+         16-language list.
+      2. **Cross-lingual indexing**: if `translate_to` is set, the
+         transcript is translated (preserving Bible refs) before insertion.
+         A Spanish broadcast can be searched in English, etc.
+
+    Args:
+        audio_path: WAV/FLAC/MP3 file on disk.
+        language: ISO-639-1 hint for the ASR router. Omit to autodetect.
+        translate_to: ISO-639-1 target language for the indexed transcript.
+            If None, store in the source language.
+
+    Returns:
+        Number of segments indexed.
+    """
+    from jw_core.audio.transcription import get_asr_provider
+
+    audio_path = Path(audio_path)
+    provider = get_asr_provider(language=language)
+    result = provider.transcribe(audio_path, language=language)
+
+    text = result.text
+    out_language = result.language or language or "und"
+    if translate_to:
+        from jw_core.translation import translate_preserving_references
+        from jw_core.translation_providers import get_translation_provider
+
+        translator = get_translation_provider(source=out_language, target=translate_to)
+        text = translate_preserving_references(text, source=out_language, target=translate_to, provider=translator)
+        out_language = translate_to
+
+    # Synthetic single segment spanning the audio.
+    segments = result.segments or [VTTSegment(start=0.0, end=result.duration, text=text)]
+    if translate_to:
+        # We translated the WHOLE transcript; fold it back into one segment so
+        # we don't ship per-segment translations that may have lost context.
+        segments = [VTTSegment(start=0.0, end=result.duration, text=text)]
+
+    return index.index_video(
+        IndexedVideo(
+            video_id=video_id,
+            title=title,
+            language=out_language,
+            duration_seconds=result.duration,
+            source_url=source_url,
+            subtitle_url="",
+            segments=segments,
+        )
+    )

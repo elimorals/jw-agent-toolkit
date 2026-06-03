@@ -1743,32 +1743,35 @@ def transcribe_audio(
     audio_path: str,
     language: str = "",
     model_size: str = "auto",
-    provider: str = "whisper_turbo",
+    provider: str = "",
 ) -> dict[str, Any]:
-    """Transcribe an audio file via whisper_turbo (local) or deepgram (API).
+    """Transcribe an audio file via the best-available ASR provider (F54.1 router).
 
-    `model_size="auto"` chooses the largest Whisper variant that fits the
-    available VRAM. `language` empty = autodetect.
+    Routing (when `provider=""`):
+      - High-resource languages (en, es, fr, …) → Deepgram if API key set.
+      - Long-tail languages (qu, rw, ay, gn, …) → Omnilingual (1672 langs).
+      - Fallback → faster-whisper local.
+
+    Pass `provider` to force a specific one (`deepgram`, `whisper-turbo`,
+    `omnilingual`). `language=""` = autodetect.
     """
     from pathlib import Path as _Path
 
-    if provider == "deepgram":
-        from jw_core.audio.asr_providers.deepgram import DeepgramProvider
+    from jw_core.audio.transcription import TranscriptionError, get_asr_provider
 
-        p = DeepgramProvider()
-    else:
-        from jw_core.audio.asr_providers.whisper_turbo import WhisperTurboProvider
-
-        p = WhisperTurboProvider()
-    result = p.transcribe(
-        _Path(audio_path),
-        language=language or None,
-        model_size=model_size,
-    )
+    path = _Path(audio_path).expanduser()
+    if not path.is_file():
+        return {"error": f"audio file not found: {audio_path}"}
+    try:
+        p = get_asr_provider(provider or None, language=language or None)
+        result = p.transcribe(path, language=language or None, model_size=model_size)
+    except TranscriptionError as exc:
+        return {"error": str(exc)}
     return {
         "text": result.text,
         "language": result.language,
         "duration": result.duration,
+        "provider": p.name,
     }
 
 
@@ -3519,6 +3522,50 @@ async def get_trace(trace_id: str) -> dict[str, Any]:
                 "events": events[:-1],
             }
     return {"error": f"no trace with id={trace_id} under {root}"}
+
+
+# ────────────────────────────────────────────────────────────────────────
+# F54.2 — translate_preserving_refs
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+def translate_preserving_refs(
+    text: str,
+    source: str,
+    target: str,
+) -> dict[str, Any]:
+    """Translate text from `source` to `target`, keeping Bible references intact.
+
+    Uses Meta NLLB-200 (200 languages, CC-BY-NC — non-commercial use only).
+    Bible references like "Juan 3:16" are masked before translation and
+    restored in the target language's book naming. The model never sees the
+    book/chapter/verse — zero risk of numeric hallucination.
+
+    Args:
+        text: Source text.
+        source: ISO-639-1 (`es`) or FLORES-200 (`spa_Latn`).
+        target: Same format as source.
+
+    Returns:
+        `{"text": "<translated>", "provider": "nllb-200", "commercial_safe": false}`
+        or `{"error": "..."}` if no provider is available.
+    """
+    from jw_core.translation import translate_preserving_references
+    from jw_core.translation_providers import TranslationError, get_translation_provider
+
+    try:
+        provider = get_translation_provider(source=source, target=target)
+    except TranslationError as exc:
+        return {"error": str(exc)}
+    out = translate_preserving_references(text, source=source, target=target, provider=provider)
+    return {
+        "text": out,
+        "source": source,
+        "target": target,
+        "provider": provider.name,
+        "commercial_safe": provider.is_commercial_safe,
+    }
 
 
 # ────────────────────────────────────────────────────────────────────────

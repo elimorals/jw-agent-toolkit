@@ -156,14 +156,15 @@ def test_jwpub_command_lists_toc_when_file_present() -> None:
     pub_path = Path("data/jwpub_test/ti_E.jwpub")
     if not pub_path.exists():
         return  # silent skip — no fixture in this env
-    result = _run("jwpub", str(pub_path), "--max", "3", timeout=60.0)
+    # F54.4: `jwpub` is now a sub-app with `inspect` as the inspection sub-command.
+    result = _run("jwpub", "inspect", str(pub_path), "--max", "3", timeout=60.0)
     assert result.returncode == 0
     assert "Trinity" in result.stdout or "TRINITY" in result.stdout
 
 
 def test_jwpub_command_rejects_missing_file() -> None:
     """When `path` doesn't exist, Typer's `exists=True` should reject it."""
-    result = _run("jwpub", "/nonexistent/path/to/file.jwpub")
+    result = _run("jwpub", "inspect", "/nonexistent/path/to/file.jwpub")
     assert result.returncode != 0
 
 
