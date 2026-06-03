@@ -1018,3 +1018,203 @@ Encaja en la taxonomía de cuatro capas L0–L3 — Fase 40 ocupa L2
 - ✅ Cero regresiones en los 2079+ tests existentes (incluye protocol contract: tool MCP `verify_provenance` registrada).
 - ✅ Sin nuevas deps: reusa `httpx` (Fase 23) + Pydantic 2 + stdlib `hashlib`/`unicodedata`.
 - ✅ Backwards-compat: `AgentResult`s pre-Fase 40 producen verdict `no_record` sin llamar al fetcher.
+
+## Fase 50 — jwpub-writer ✅
+
+- **Estado**: Estable (2026-06-03).
+- **Guía**: `docs/guias/jwpub-writer.md`.
+
+Cierra el ciclo simétrico de Fase 5.5 (descifrado JWPUB). Port del
+algoritmo de generación de `darioragusa/html2jwpub` (MIT, Swift) a Python:
+`JwpubBuilder` en `jw_core.writers.jwpub` empaqueta HTML+media como
+`.jwpub` cifrado consumible por JW Library nativo (SHA-256+XOR para
+derivar key/IV, AES-128-CBC encrypt, zlib deflate del Content, SQLite
+manifest + ZIP outer).
+
+Crypto compartido extraído de `parsers/jwpub.py` a `jw_core.jwpub_crypto`:
+`XOR_KEY`, `compute_key_iv()`, `decrypt_blob()` (existente), `encrypt_blob()`
+(nuevo). Una sola fuente de verdad para la constante mágica de JW.
+
+Casos de uso desbloqueados: empaquetar golden fixtures como `.jwpub`,
+publicar traducciones custom de publicaciones (compone con Fase 54 NLLB),
+exportar datasets de fine-tuning como publicación nativa.
+
+### Cobertura de tests
+
+- ✅ **9 tests round-trip**: builder→parser idéntico, content sizes
+  parametrizados (PKCS7 boundary), Watchtower con `issueTagNumber`, media
+  bundled en inner ZIP.
+- ✅ CLI `jw jwpub build <folder> --symbol --year --lang` añadida en F55.4.
+- ✅ Sin regresión: 1031 tests jw-core pre-existentes siguen verdes.
+
+## Fase 51 — organized-app schemas (Pydantic v2) ✅
+
+- **Estado**: Estable (2026-06-03).
+- **Guía**: `docs/guias/organized-app-schemas.md`.
+
+Port de los tipos TypeScript de `sws2apps/organized-app` (MIT) — la PWA
+React usada por cientos de congregaciones — a Pydantic v2 en
+`jw_core.models_organized`. Schemas portados: `PersonType`,
+`SchedWeekType`, `WeekType` (con enum `Week`), `AssignmentCode`
+(IntEnum 100–300), `MeetingAttendanceType`, `FieldServiceGroupType`,
+`UserFieldServiceMonthlyReportType` (layout post-2023 S-21), y la
+envolvente CRDT `Timestamped[T]`.
+
+Habilita interoperabilidad con el ecosistema organized-app **sin
+depender de su runtime React/Firebase**. La PWA exporta backups JSON;
+ahora el toolkit los lee y escribe nativamente (ver F55.5).
+
+### Cobertura de tests
+
+- ✅ **10 tests sanidad**: enum values coinciden verbatim con TS, JSON
+  envelopes round-trip via `model_dump(by_alias=True)`, `_deleted` alias
+  preservado, weekend skeleton mínimo construible.
+
+## Fase 52 — .jwlibrary writer ✅
+
+- **Estado**: Estable (2026-06-03).
+- **Guía**: `docs/guias/jwlibrary-writer.md`.
+
+Cierra el read-write loop con la app oficial JW Library (Fase 19 fue
+solo lectura). Port del export pipeline Python de `erykjj/jwlmanager`
+(MIT) a `jw_core.writers.jw_library_backup`. Dos funciones:
+`write_backup(out, *, user_data_db_path, ...)` empaqueta un userData.db
+como `.jwlibrary` (manifest + SHA-256 hash + LastModified stamp + ZIP).
+`update_backup(in_path, out_path, modify_fn)` hace el flujo
+extract → callback `modify(conn)` → repack.
+
+El **merge** de jwlmanager vive en un blob nativo opaco
+(`libjwlCore.{so,dylib,dll}`) — NO se portó; ese sigue requiriendo la
+app GUI original. El toolkit cubre el flujo de export/writing puro, que
+es el que los agentes necesitan para sintetizar backups con notas.
+
+CLI `jw library {inspect,re-export,from-notes}` añadida en F55.3.
+
+### Cobertura de tests
+
+- ✅ **9 tests round-trip**: write→parse idéntico, hash SHA-256 verificado
+  contra bytes DB, LastModified re-stamping, ausencia tolerada cuando
+  el DB no tiene esa tabla, callback `modify(conn)` aplicado en
+  `update_backup`, errores de archivo no-zip raised.
+
+## Fase 53 — Omnilingual ASR (1672 idiomas) ✅
+
+- **Estado**: Estable (2026-06-03). End-to-end verificado.
+- **Guía**: `docs/guias/omnilingual-asr.md`.
+
+Integra `facebookresearch/omnilingual-asr` (Apache 2.0) como proveedor
+ASR de primera clase. Cubre **1672 idiomas** — incluyendo cientos de
+lenguas low-resource (quechua, kinyarwanda, aymara, guaraní, lenguas
+bantúes, lenguas del Pacífico) que ni Deepgram ni Whisper-large-v3
+cubren con calidad usable.
+
+### Arquitectura "polyglot Python"
+
+`fairseq2` (dep transitiva de omnilingual-asr) NO publica wheels para
+CPython 3.13. El toolkit es 3.13. La solución: `OmnilingualProvider`
+instala un **venv dedicado en Python 3.12** (`~/.jw-core/omnilingual/venv`)
+y dispara un worker via `subprocess.run(...)` con I/O por JSON.
+Patrón "venv-per-feature" — el sobrecosto es un cold-start (~300ms) por
+transcripción, despreciable frente al modelo (segundos).
+
+Bootstrap: `jw omnilingual install` (requiere `libsndfile` a nivel OS:
+`brew install libsndfile`). El worker script `omnilingual_worker.py`
+NO importa `jw_core`, así el venv 3.12 queda mínimo.
+
+### Comandos CLI
+
+`jw omnilingual {install, status, transcribe, supports}`. Por ejemplo:
+
+```bash
+jw omnilingual install
+jw omnilingual supports kin_Latn  # → yes
+jw omnilingual transcribe audio.wav --lang qu
+```
+
+### Dependencia knock-on
+
+Para que `fairseq2` coexistiera en el mismo workspace:
+- `psutil>=6` en jw-finetune → relajado a `>=5.9.5,<8`.
+- `numpy>=2` en jw-rag → relajado a `>=1.26,<3`.
+
+Ambos paquetes solo usan APIs estables disponibles desde 5.9/1.26.
+
+### Cobertura de tests
+
+- ✅ **16 tests** con `subprocess` mockeado: venv detection, lang
+  normalization ISO→FLORES, error propagation del worker, env override,
+  model card override.
+- ✅ End-to-end real verificado: 1672 supported_langs, quechua/kinyarwanda/
+  aymara/guaraní confirmados; primera transcripción descarga el modelo.
+
+## Fase 54 — NLLB-200 translation con ref-preservation ✅
+
+- **Estado**: Estable (2026-06-03).
+- **Guía**: `docs/guias/nllb-translation.md`.
+
+Proveedor `NLLBProvider` en `jw_core.translation_providers.nllb` envuelve
+NLLB-200 de Meta (200 idiomas) con backend CTranslate2 INT8 (~7 GB en
+Mac M-series unified memory). Encoder-decoder especializado: no
+alucina en low-resource donde GPT/Claude fallan.
+
+### License-as-attribute
+
+NLLB-200 ships bajo **CC-BY-NC-4.0** — no comercial. El proveedor expone
+`is_commercial_safe = False`. El router F55.1 lo respeta: con
+`get_translation_provider(commercial=True)` el caller excluye NLLB sin
+auditar código. La política de licencia se vuelve **chequeable, no
+narrativa**.
+
+### Ref preservation
+
+Función pública `translate_preserving_references(text, source, target,
+provider)` en `jw_core.translation`:
+
+1. Mask de refs bíblicas: `Juan 3:16` → `<<REF:0>>`.
+2. Provider traduce solo texto opaco (sin libro/capítulo/versículo).
+3. Restore en el idioma destino con el book naming correcto.
+
+Cero riesgo de alucinación numérica en versículos, que es **donde más
+fallan los LLMs generales**. Compone con F55.7 (cross_lingual_research)
+para queries multilenguaje.
+
+### Cobertura de tests
+
+- ✅ **10 tests** con `ctranslate2`/`transformers` mockeados — sin
+  descarga de pesos en CI: routing FLORES correcto, empty input
+  short-circuit, error propagation, env override, license flag, wrapper
+  mask/restore verificado con echo-provider.
+
+## Fase 55 — Wire-up multilingüe (integración F50-F54) ✅
+
+- **Estado**: Estable (2026-06-03).
+- **Guía**: `docs/guias/multilingual-wire-up.md`.
+
+Convierte F50–F54 de islas portadas en capacidades del toolkit reales.
+Ocho sub-fases de wire-up, cada una añade un call site:
+
+| Sub-fase | Punto de conexión |
+|---|---|
+| F55.1 | Router automático ASR + translation con `get_asr_provider(language=...)` y `get_translation_provider(commercial=...)`. Quechua/Kinyarwanda → Omnilingual sin que el caller los nombre. |
+| F55.2 | `jw translate` CLI + MCP `translate_preserving_refs`; refactor de MCP `transcribe_audio` para usar router. |
+| F55.3 | `jw library {inspect, re-export, from-notes}` — agentes pueden generar `.jwlibrary` consumible por JW Library nativo. |
+| F55.4 | `jw jwpub build` — empaquetar HTML+media como `.jwpub` cifrado nativo. |
+| F55.5 | `parse_organized_backup()` / `write_organized_backup()` en `integrations/organized_app.py` — IO del backup JSON de la PWA. |
+| F55.6 | `ministry/organized_bridge.py` — converter `MonthlyReport` ↔ `UserFieldServiceMonthlyReportType` con reglas post-2023 S-21. |
+| F55.7 | `jw_agents.cross_lingual_research` — query en A → traduce → busca corpus B → traduce excerpts back, refs preservados ambas direcciones. |
+| F55.8 | `audio/broadcasting.transcribe_and_index_audio` usa router F55.1 + opcional `translate_to` para indexar transmisiones low-resource en otro idioma. |
+
+### Cobertura de tests
+
+- ✅ **24 tests** de wire-up nuevos.
+- ✅ **1887 tests totales pasando** en jw-core/jw-agents/jw-cli (zero
+  regresión post-renumeración y refactor `jw jwpub` → sub-app).
+
+### Por qué importan los call sites
+
+Las fases F50-F54 portaron código limpio y testeado, pero **ningún módulo
+del toolkit los invocaba**. Auditoría honesta: un `grep -rn "models_organized"`
+fuera de `tests/` arrojaba cero coincidencias. F55 cambia eso —
+8 puntos de integración con la convención: pequeños (≤50 LOC c/u) pero
+multiplicativos. La integración profunda es el efecto de muchos wires,
+no de un módulo grande.

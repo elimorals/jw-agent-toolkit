@@ -54,6 +54,10 @@ Ver [docs/ROADMAP.md](docs/ROADMAP.md). **Fases 0-10 completadas**, incluyendo:
 
 **166 tests passing + 4 skipped** (corren sin red gracias a cassettes).
 
+Después de Fases 50-55 (jwpub-writer plus organized-schemas plus
+jwlibrary-writer plus Omnilingual ASR plus NLLB-200 plus wire-up):
+**1887 tests passing** en jw-core/jw-agents/jw-cli.
+
 ## Documentación
 
 Toda la documentación detallada vive en [`docs/`](docs/):
