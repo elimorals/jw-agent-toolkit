@@ -15,6 +15,12 @@ dependencies = [
     "jinja2>=3.1.3",
     "Pillow>=10.0.0",
 ]
+# Meta Omnilingual ASR (F52) is first-class but cannot live in the main
+# install: `fairseq2` only ships wheels for cp310-cp312. The toolkit runs
+# Python 3.13. So we install Omnilingual into a SEPARATE venv on Python 3.12
+# and the OmnilingualProvider in `jw_core.audio.asr_providers.omnilingual`
+# drives it via subprocess. See `jw_core/audio/asr_providers/omnilingual_worker.py`.
+# Bootstrap with `jw omnilingual install` (creates ~/.jw-core/omnilingual/venv).
 
 [project.optional-dependencies]
 pdf = [
@@ -37,6 +43,14 @@ tts-f5 = ["f5-tts>=0.4.0"]
 tts-elevenlabs = ["elevenlabs>=1.5.0"]
 asr-deepgram = ["deepgram-sdk>=3.7.0"]
 asr-turbo = ["faster-whisper>=1.1.0"]
+# NLLB-200 translation (F53). CC-BY-NC-4.0 — non-commercial only.
+# CTranslate2 4.7+ has cp313 wheels so this lives in-process (no separate venv).
+translation-nllb = [
+    "ctranslate2>=4.7.0",
+    "transformers>=4.45.0",
+    "sentencepiece>=0.2.0",
+    "huggingface_hub>=0.24.0",
+]
 tts-premium = ["jw-core[tts-kokoro,tts-elevenlabs]"]
 asr-premium = ["jw-core[asr-turbo,asr-deepgram]"]
 audio-premium = ["jw-core[tts-kokoro,asr-turbo]"]

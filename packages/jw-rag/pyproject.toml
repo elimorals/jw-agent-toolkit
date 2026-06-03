@@ -7,7 +7,10 @@ requires-python = ">=3.13"
 license = "GPL-3.0-only"
 dependencies = [
     "jw-core",
-    "numpy>=2.0.0",
+    # NumPy: 1.26+ supports everything we use (asarray/cosine/argpartition).
+    # Lower bound chosen to coexist with fairseq2 (≤1.x) that ships with
+    # Omnilingual ASR in jw-core.
+    "numpy>=1.26.0,<3",
     "rank-bm25>=0.2.2",
     "httpx>=0.27.0",
 ]
