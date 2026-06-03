@@ -48,6 +48,15 @@ JSON sibling is regenerated and the JS package picks up the new aliases.
 
 ## What is intentionally pending (post-MVP roadmap)
 
+> **Status update F56 (2026-06-03)**: tras auditoría, los buckets A–E
+> quedan **diferidos** salvo que aparezca una app Capacitor real en
+> `apps/`. Hoy F48 sólo usa `displayName` + tipo `Language` (~5% del
+> MVP); el resto no tiene consumidores. Lo que sí se ejecuta como F56
+> aparece arriba en la sección "Estado de buckets post-MVP".
+>
+> Las descripciones de los buckets A–E debajo se mantienen como
+> referencia histórica y guía para cuando llegue Capacitor.
+
 The Fase 47 spec lists 123 tasks total. The MVP covers the first ~20
 (scaffold + parser + BibleRef + WOL URL + book table + versification +
 fixture + Vitest + Python parity). The remaining buckets:
@@ -127,18 +136,52 @@ re-running the parity suite. No code changes expected.
    cd packages/jw-core-js && npm test
    ```
 
-## Integration plan with Fase 48 (WOL extension)
+## Estado de integración con Fase 48 (WOL extension)
 
-Today the extension's `verse_detector.ts` and `reference_parser.ts` use
-hand-rolled regexes against a small alias set. Once `@jw-agent-toolkit/core`
-ships to npm:
+**Completada** en commit `8ed5901`. La extensión consume el paquete vía
+`file:../../packages/jw-core-js` declarado en `dependencies` (no
+`optionalDependencies` como decía el plan original — la dep es
+mandatoria; ya no hay parser local de nombres de libros).
 
-1. Add the package as an `optionalDependencies` entry of the extension.
-2. In `reference_parser.ts`, try `parseReference` first; fall back to the
-   existing local parser on import failure.
-3. Recipe 12 (`docs/cookbook/12-capacitor-app.md`) currently has a
-   `skip-until-fase=47` marker — remove it once `@jw-agent-toolkit/core`
-   is published, since the recipe only needs `parseReference` and `wolUrl`.
+APIs efectivamente usadas hoy desde `apps/wol-browser-extension/src/dom/verse_detector.ts`:
 
-Both of these are out of scope for the MVP commit but ready to be picked up
-as soon as the package has its first npm release.
+- `displayName(bookNum, lang)` — resuelve nombre localizado de 66 libros.
+- tipo `Language` — anotaciones de tipo.
+
+Lo que F48 **no** usa del MVP (porque vive in-page con el DOM cargado):
+
+- `parseReference` / `parseAllReferences` — la ext detecta versículos
+  por DOM (`span.v`), no por texto libre.
+- `BibleRef.wolUrl()` — la ext ya está dentro de WOL.
+- `toCanonical` / `explain` — no expone discrepancias de versificación.
+
+## Receta 12 (Capacitor) cookbook
+
+`docs/cookbook/12-capacitor-app.md` **no tiene marker `skip-until-fase`**
+y pasa desde el MVP. Es un guardián de metadata: valida que el shape
+de `package.json` con `@capacitor/core` declarado sea coherente y que
+`bible_references_golden.json` contenga "Juan 3:16". **No instala
+Capacitor ni compila para iOS/Android.** Es una promesa estática.
+
+## Estado de buckets post-MVP
+
+Auditoría F56 (2026-06-03): los buckets A/B/C/D/E del plan formal están
+**diferidos** porque la única justificación real (app Capacitor móvil)
+es vaporware — cero código en `apps/`, `capacitor.config.ts` no existe,
+VISION.md no la menciona. F49 second-brain explicita "mobile compile
+remoto vía REST API de jw-mcp" como estrategia móvil del proyecto.
+
+Lo que sí se ejecuta como F56:
+
+- Fix ROADMAP (esta sección, las antes mentían).
+- Quick win F48 (dedup tipo `Language`).
+- Ampliar `bible_references_golden.json` a ≥100 casos + verificar
+  `detectedLanguage` (el campo no se chequeaba antes — drift silencioso).
+- Workflow `cross-lang.yml` CI bloqueante (el contrato anti-drift que
+  el plan prometía).
+- Mini-bucket nuevo: `BibleRef.fromWolUrl(href)` + `langFromWolPath(href)`,
+  inverso puro de `wolUrl()`. Permite a F48 ahorrar ~50 LOC de regex
+  propias. Sin Web Crypto, sin fetch.
+
+Cuando aparezca código real Capacitor, reabrir los buckets en orden
+A → B → C.

@@ -831,7 +831,7 @@ en `RenderContext.build`, sanitización en `_safe_replace_value` (rechaza `/`,
 
 - ✅ **create-jw-agent**: validación PEP 503 + i18n parity (3 idiomas) + render security (5 path-traversal regressions) + golden snapshots parametrizados sobre 5 templates + CLI no-network guarantee.
 - ✅ **pytest-cookbook plugin**: parsing de fences + marker injection + `__file__` inyectado en `exec()` namespace.
-- ✅ **Cookbook**: 10 recetas pasan (01-08, 10, 11) + 2 skip por marker `skip-until-fase` (09 F43-pendiente, 12 F47-pendiente).
+- ✅ **Cookbook**: 12 recetas pasan (01-12). Receta 09 desbloqueada por F43 agent-tracing; receta 12 (validación shape de `package.json` Capacitor) pasa desde el MVP F47 — solo valida metadata, no compila Capacitor.
 - ✅ CI: nuevos jobs `cookbook-tests` y `create-jw-agent` (E2E scaffold smoke + assertion de archivos clave).
 - ✅ Trusted publishing workflow OIDC (`.github/workflows/publish-create-jw-agent.yml`) on tag `create-jw-agent-v*`, verifica match tag↔pyproject version.
 - ✅ Astro site: el glob `**/*.md` en `website/src/content.config.ts` ya indexa `docs/cookbook/*.md` sin cambios.
@@ -960,18 +960,53 @@ otro lado.
 - ✅ **17 tests Python** (pytest parametrizado sobre el fixture compartido).
 - ✅ Build: ESM 52KB + CJS 53KB + DTS 3KB.
 
-### Pendiente post-MVP (5 buckets, ~100 tasks)
+### Estado real post-MVP (auditoría F56)
 
-- **A: parsers extras** — `parseVerse`, `parseStudyNotes`, `parseCrossReferences`, `parseArticle`.
-- **B: HTTP clients** — `WOLClient`, `CDNClient`, `TopicIndexClient`.
-- **C: JWPUB/EPUB con Web Crypto** — port del AES-128-CBC del Python.
-- **D: Operacional** — cache IndexedDB, throttle TokenBucket, telemetría opt-in, provenance models.
-- **E: Multi-locale** — hoy en/es/pt; Python ya tiene 17 locales (`book_locales`).
+**Integración F48 (WOL ext): completada** en commit `8ed5901`. El paquete se
+consume como `dependencies` mandatoria (no `optionalDependencies`),
+exportando `displayName` + tipo `Language` desde `verse_detector.ts`.
+**No hay fallback** al parser local porque la dep es mandatoria. F48 usa
+sólo ~5% de la superficie del MVP; el resto sirve a futuras superficies.
 
-Integración con Fase 48 (WOL ext) pendiente: añadir el paquete como
-`optionalDependencies`, usar `parseReference` en `reference_parser.ts`
-con fallback al parser local, eliminar el marker `skip-until-fase=47` de
-la receta 12 (Capacitor app) del cookbook.
+**Cookbook receta 12** (Capacitor): pasa desde el MVP, valida shape de
+`package.json` con `@capacitor/core` declarado. No instala ni compila
+Capacitor — es un guardián de metadata.
+
+**Buckets B/C/D/E del plan formal: diferidos** hasta que aparezca código
+Capacitor real en `apps/` (hoy NO existe; cero `capacitor.config.ts`,
+`AndroidManifest.xml`, `Info.plist`). VISION.md no menciona Capacitor;
+F49 second-brain explicita que la estrategia móvil del proyecto es
+"thin client REST sobre jw-mcp", no app nativa con jw-core-js embebido.
+Sin presión real de uso, esos buckets son sobre-engineering.
+
+**Mini-buckets F56 con ROI inmediato para F48** (ejecutados):
+
+- **F56.1** — esta misma corrección del ROADMAP.
+- **F56.2** — re-export `Language` desde core, dedup de `normalizeLang`.
+- **F56.3** — ampliar `bible_references_golden.json` a ≥100 casos y
+  verificar `detectedLanguage`. El "anti-drift" del MVP era ficción con
+  17 fixtures sin checkear el campo.
+- **F56.4** — workflow `cross-lang.yml` bloqueante en CI + target
+  `dump-shared-data` con `git diff --exit-code`.
+- **F56.5** — `BibleRef.fromWolUrl(href)` + `langFromWolPath(href)`,
+  inverso puro de `wolUrl()`. Permite a F48 ahorrar ~50 LOC de regex
+  propias en `verse_detector.ts`. Sin Web Crypto, sin fetch.
+
+### Buckets formalmente diferidos
+
+Sin código Capacitor que los justifique, estos buckets NO se ejecutan:
+
+- **A** — parsers HTML (`parseVerse`, `parseStudyNotes`, `parseArticle`).
+  F48 vive in-page con el DOM ya cargado; no los necesita. Sólo serviría
+  a un consumidor offline-first móvil.
+- **B** — `WOLClient` / `CDNClient` con `fetch` nativo. Misma razón.
+- **C** — JWPUB Web Crypto (AES-128-CBC + zlib). Caro y sin usuarios.
+- **D** — IndexedDB cache, throttle TokenBucket, telemetría opt-in.
+- **E** — Multi-locale extendido (hoy en/es/pt; Python tiene 17). F48
+  no usa el resto; aceptado como deuda técnica.
+
+Si en el futuro aparece `apps/capacitor-app/` con `capacitor.config.ts`
+y screenshots reales, reabrir A→C en ese orden de prioridad.
 
 ## Fase 46 — canonical-versification ✅
 

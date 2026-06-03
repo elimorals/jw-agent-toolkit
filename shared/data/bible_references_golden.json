@@ -1,0 +1,1746 @@
+{
+  "version": "2.0",
+  "description": "Golden Bible reference parse cases shared between jw-core (Python) and jw-core-js (TypeScript). Both implementations must agree on every field including detected_language and raw_match. Regenerate via `make dump-shared-data` — CI fails on uncommitted regeneration.",
+  "cases": [
+    {
+      "input": "Genesis 1:1",
+      "book_num": 1,
+      "book_canonical": "Genesis",
+      "chapter": 1,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "genesis 1:1"
+    },
+    {
+      "input": "Génesis 1:1",
+      "book_num": 1,
+      "book_canonical": "Genesis",
+      "chapter": 1,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "genesis 1:1"
+    },
+    {
+      "input": "Gênesis 1:1",
+      "book_num": 1,
+      "book_canonical": "Genesis",
+      "chapter": 1,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "genesis 1:1"
+    },
+    {
+      "input": "Exodus 20:3",
+      "book_num": 2,
+      "book_canonical": "Exodus",
+      "chapter": 20,
+      "verse_start": 3,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "exodus 20:3"
+    },
+    {
+      "input": "Éxodo 20:3",
+      "book_num": 2,
+      "book_canonical": "Exodus",
+      "chapter": 20,
+      "verse_start": 3,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "exodo 20:3"
+    },
+    {
+      "input": "Êxodo 20:3",
+      "book_num": 2,
+      "book_canonical": "Exodus",
+      "chapter": 20,
+      "verse_start": 3,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "exodo 20:3"
+    },
+    {
+      "input": "Leviticus 19:18",
+      "book_num": 3,
+      "book_canonical": "Leviticus",
+      "chapter": 19,
+      "verse_start": 18,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "leviticus 19:18"
+    },
+    {
+      "input": "Levítico 19:18",
+      "book_num": 3,
+      "book_canonical": "Leviticus",
+      "chapter": 19,
+      "verse_start": 18,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "levitico 19:18"
+    },
+    {
+      "input": "Numbers 6:24",
+      "book_num": 4,
+      "book_canonical": "Numbers",
+      "chapter": 6,
+      "verse_start": 24,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "numbers 6:24"
+    },
+    {
+      "input": "Números 6:24",
+      "book_num": 4,
+      "book_canonical": "Numbers",
+      "chapter": 6,
+      "verse_start": 24,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "numeros 6:24"
+    },
+    {
+      "input": "Deuteronomy 6:4",
+      "book_num": 5,
+      "book_canonical": "Deuteronomy",
+      "chapter": 6,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "deuteronomy 6:4"
+    },
+    {
+      "input": "Deuteronomio 6:4",
+      "book_num": 5,
+      "book_canonical": "Deuteronomy",
+      "chapter": 6,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "deuteronomio 6:4"
+    },
+    {
+      "input": "Deuteronômio 6:4",
+      "book_num": 5,
+      "book_canonical": "Deuteronomy",
+      "chapter": 6,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "deuteronomio 6:4"
+    },
+    {
+      "input": "Joshua 1:9",
+      "book_num": 6,
+      "book_canonical": "Joshua",
+      "chapter": 1,
+      "verse_start": 9,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "joshua 1:9"
+    },
+    {
+      "input": "Josué 1:9",
+      "book_num": 6,
+      "book_canonical": "Joshua",
+      "chapter": 1,
+      "verse_start": 9,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "josue 1:9"
+    },
+    {
+      "input": "1 Samuel 17:45",
+      "book_num": 9,
+      "book_canonical": "1 Samuel",
+      "chapter": 17,
+      "verse_start": 45,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "1 samuel 17:45"
+    },
+    {
+      "input": "2 Kings 5:14",
+      "book_num": 12,
+      "book_canonical": "2 Kings",
+      "chapter": 5,
+      "verse_start": 14,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "2 kings 5:14"
+    },
+    {
+      "input": "2 Reyes 5:14",
+      "book_num": 12,
+      "book_canonical": "2 Kings",
+      "chapter": 5,
+      "verse_start": 14,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "2 reyes 5:14"
+    },
+    {
+      "input": "2 Reis 5:14",
+      "book_num": 12,
+      "book_canonical": "2 Kings",
+      "chapter": 5,
+      "verse_start": 14,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "2 reis 5:14"
+    },
+    {
+      "input": "1 Chronicles 29:11",
+      "book_num": 13,
+      "book_canonical": "1 Chronicles",
+      "chapter": 29,
+      "verse_start": 11,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "1 chronicles 29:11"
+    },
+    {
+      "input": "1 Crónicas 29:11",
+      "book_num": 13,
+      "book_canonical": "1 Chronicles",
+      "chapter": 29,
+      "verse_start": 11,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "1 cronicas 29:11"
+    },
+    {
+      "input": "1 Crônicas 29:11",
+      "book_num": 13,
+      "book_canonical": "1 Chronicles",
+      "chapter": 29,
+      "verse_start": 11,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "1 cronicas 29:11"
+    },
+    {
+      "input": "Nehemiah 8:10",
+      "book_num": 16,
+      "book_canonical": "Nehemiah",
+      "chapter": 8,
+      "verse_start": 10,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "nehemiah 8:10"
+    },
+    {
+      "input": "Nehemías 8:10",
+      "book_num": 16,
+      "book_canonical": "Nehemiah",
+      "chapter": 8,
+      "verse_start": 10,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "nehemias 8:10"
+    },
+    {
+      "input": "Neemias 8:10",
+      "book_num": 16,
+      "book_canonical": "Nehemiah",
+      "chapter": 8,
+      "verse_start": 10,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "neemias 8:10"
+    },
+    {
+      "input": "Esther 4:14",
+      "book_num": 17,
+      "book_canonical": "Esther",
+      "chapter": 4,
+      "verse_start": 14,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "esther 4:14"
+    },
+    {
+      "input": "Ester 4:14",
+      "book_num": 17,
+      "book_canonical": "Esther",
+      "chapter": 4,
+      "verse_start": 14,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "ester 4:14"
+    },
+    {
+      "input": "Job 1:21",
+      "book_num": 18,
+      "book_canonical": "Job",
+      "chapter": 1,
+      "verse_start": 21,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "job 1:21"
+    },
+    {
+      "input": "Psalm 23:1",
+      "book_num": 19,
+      "book_canonical": "Psalms",
+      "chapter": 23,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "psalm 23:1"
+    },
+    {
+      "input": "Salmos 23:1",
+      "book_num": 19,
+      "book_canonical": "Psalms",
+      "chapter": 23,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "salmos 23:1"
+    },
+    {
+      "input": "Salmo 23:1",
+      "book_num": 19,
+      "book_canonical": "Psalms",
+      "chapter": 23,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "salmo 23:1"
+    },
+    {
+      "input": "Proverbs 3:5",
+      "book_num": 20,
+      "book_canonical": "Proverbs",
+      "chapter": 3,
+      "verse_start": 5,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "proverbs 3:5"
+    },
+    {
+      "input": "Proverbios 3:5",
+      "book_num": 20,
+      "book_canonical": "Proverbs",
+      "chapter": 3,
+      "verse_start": 5,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "proverbios 3:5"
+    },
+    {
+      "input": "Provérbios 3:5",
+      "book_num": 20,
+      "book_canonical": "Proverbs",
+      "chapter": 3,
+      "verse_start": 5,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "proverbios 3:5"
+    },
+    {
+      "input": "Ecclesiastes 3:1",
+      "book_num": 21,
+      "book_canonical": "Ecclesiastes",
+      "chapter": 3,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "ecclesiastes 3:1"
+    },
+    {
+      "input": "Eclesiastés 3:1",
+      "book_num": 21,
+      "book_canonical": "Ecclesiastes",
+      "chapter": 3,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "eclesiastes 3:1"
+    },
+    {
+      "input": "Eclesiastes 3:1",
+      "book_num": 21,
+      "book_canonical": "Ecclesiastes",
+      "chapter": 3,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "eclesiastes 3:1"
+    },
+    {
+      "input": "Song of Solomon 2:4",
+      "book_num": 22,
+      "book_canonical": "Song of Solomon",
+      "chapter": 2,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "song of solomon 2:4"
+    },
+    {
+      "input": "Cantares 2:4",
+      "book_num": 22,
+      "book_canonical": "Song of Solomon",
+      "chapter": 2,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "cantares 2:4"
+    },
+    {
+      "input": "Cântico 2:4",
+      "book_num": 22,
+      "book_canonical": "Song of Solomon",
+      "chapter": 2,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "cantico 2:4"
+    },
+    {
+      "input": "Isaiah 53:5",
+      "book_num": 23,
+      "book_canonical": "Isaiah",
+      "chapter": 53,
+      "verse_start": 5,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "isaiah 53:5"
+    },
+    {
+      "input": "Isaías 53:5",
+      "book_num": 23,
+      "book_canonical": "Isaiah",
+      "chapter": 53,
+      "verse_start": 5,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "isaias 53:5"
+    },
+    {
+      "input": "Jeremiah 29:11",
+      "book_num": 24,
+      "book_canonical": "Jeremiah",
+      "chapter": 29,
+      "verse_start": 11,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "jeremiah 29:11"
+    },
+    {
+      "input": "Jeremías 29:11",
+      "book_num": 24,
+      "book_canonical": "Jeremiah",
+      "chapter": 29,
+      "verse_start": 11,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "jeremias 29:11"
+    },
+    {
+      "input": "Jeremias 29:11",
+      "book_num": 24,
+      "book_canonical": "Jeremiah",
+      "chapter": 29,
+      "verse_start": 11,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "jeremias 29:11"
+    },
+    {
+      "input": "Lamentations 3:22",
+      "book_num": 25,
+      "book_canonical": "Lamentations",
+      "chapter": 3,
+      "verse_start": 22,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "lamentations 3:22"
+    },
+    {
+      "input": "Lamentaciones 3:22",
+      "book_num": 25,
+      "book_canonical": "Lamentations",
+      "chapter": 3,
+      "verse_start": 22,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "lamentaciones 3:22"
+    },
+    {
+      "input": "Lamentações 3:22",
+      "book_num": 25,
+      "book_canonical": "Lamentations",
+      "chapter": 3,
+      "verse_start": 22,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "lamentacoes 3:22"
+    },
+    {
+      "input": "Ezekiel 18:32",
+      "book_num": 26,
+      "book_canonical": "Ezekiel",
+      "chapter": 18,
+      "verse_start": 32,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "ezekiel 18:32"
+    },
+    {
+      "input": "Ezequiel 18:32",
+      "book_num": 26,
+      "book_canonical": "Ezekiel",
+      "chapter": 18,
+      "verse_start": 32,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "ezequiel 18:32"
+    },
+    {
+      "input": "Daniel 12:3",
+      "book_num": 27,
+      "book_canonical": "Daniel",
+      "chapter": 12,
+      "verse_start": 3,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "daniel 12:3"
+    },
+    {
+      "input": "Hosea 6:6",
+      "book_num": 28,
+      "book_canonical": "Hosea",
+      "chapter": 6,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "hosea 6:6"
+    },
+    {
+      "input": "Oseas 6:6",
+      "book_num": 28,
+      "book_canonical": "Hosea",
+      "chapter": 6,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "oseas 6:6"
+    },
+    {
+      "input": "Oseias 6:6",
+      "book_num": 28,
+      "book_canonical": "Hosea",
+      "chapter": 6,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "oseias 6:6"
+    },
+    {
+      "input": "Joel 2:28",
+      "book_num": 29,
+      "book_canonical": "Joel",
+      "chapter": 2,
+      "verse_start": 28,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "joel 2:28"
+    },
+    {
+      "input": "Amos 5:24",
+      "book_num": 30,
+      "book_canonical": "Amos",
+      "chapter": 5,
+      "verse_start": 24,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "amos 5:24"
+    },
+    {
+      "input": "Amós 5:24",
+      "book_num": 30,
+      "book_canonical": "Amos",
+      "chapter": 5,
+      "verse_start": 24,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "amos 5:24"
+    },
+    {
+      "input": "Obadiah 1:15",
+      "book_num": 31,
+      "book_canonical": "Obadiah",
+      "chapter": 1,
+      "verse_start": 15,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "obadiah 1:15"
+    },
+    {
+      "input": "Abdías 1:15",
+      "book_num": 31,
+      "book_canonical": "Obadiah",
+      "chapter": 1,
+      "verse_start": 15,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "abdias 1:15"
+    },
+    {
+      "input": "Obadias 1:15",
+      "book_num": 31,
+      "book_canonical": "Obadiah",
+      "chapter": 1,
+      "verse_start": 15,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "obadias 1:15"
+    },
+    {
+      "input": "Jonah 2:1",
+      "book_num": 32,
+      "book_canonical": "Jonah",
+      "chapter": 2,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "jonah 2:1"
+    },
+    {
+      "input": "Jonás 2:1",
+      "book_num": 32,
+      "book_canonical": "Jonah",
+      "chapter": 2,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "jonas 2:1"
+    },
+    {
+      "input": "Micah 6:8",
+      "book_num": 33,
+      "book_canonical": "Micah",
+      "chapter": 6,
+      "verse_start": 8,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "micah 6:8"
+    },
+    {
+      "input": "Miqueas 6:8",
+      "book_num": 33,
+      "book_canonical": "Micah",
+      "chapter": 6,
+      "verse_start": 8,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "miqueas 6:8"
+    },
+    {
+      "input": "Miquéias 6:8",
+      "book_num": 33,
+      "book_canonical": "Micah",
+      "chapter": 6,
+      "verse_start": 8,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "miqueias 6:8"
+    },
+    {
+      "input": "Habakkuk 2:4",
+      "book_num": 35,
+      "book_canonical": "Habakkuk",
+      "chapter": 2,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "habakkuk 2:4"
+    },
+    {
+      "input": "Habacuc 2:4",
+      "book_num": 35,
+      "book_canonical": "Habakkuk",
+      "chapter": 2,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "habacuc 2:4"
+    },
+    {
+      "input": "Habacuque 2:4",
+      "book_num": 35,
+      "book_canonical": "Habakkuk",
+      "chapter": 2,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "habacuque 2:4"
+    },
+    {
+      "input": "Haggai 2:7",
+      "book_num": 37,
+      "book_canonical": "Haggai",
+      "chapter": 2,
+      "verse_start": 7,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "haggai 2:7"
+    },
+    {
+      "input": "Hageo 2:7",
+      "book_num": 37,
+      "book_canonical": "Haggai",
+      "chapter": 2,
+      "verse_start": 7,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "hageo 2:7"
+    },
+    {
+      "input": "Zechariah 4:6",
+      "book_num": 38,
+      "book_canonical": "Zechariah",
+      "chapter": 4,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "zechariah 4:6"
+    },
+    {
+      "input": "Zacarías 4:6",
+      "book_num": 38,
+      "book_canonical": "Zechariah",
+      "chapter": 4,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "zacarias 4:6"
+    },
+    {
+      "input": "Zacarias 4:6",
+      "book_num": 38,
+      "book_canonical": "Zechariah",
+      "chapter": 4,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "zacarias 4:6"
+    },
+    {
+      "input": "Malachi 3:6",
+      "book_num": 39,
+      "book_canonical": "Malachi",
+      "chapter": 3,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "malachi 3:6"
+    },
+    {
+      "input": "Malaquías 3:6",
+      "book_num": 39,
+      "book_canonical": "Malachi",
+      "chapter": 3,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "malaquias 3:6"
+    },
+    {
+      "input": "Malaquias 3:6",
+      "book_num": 39,
+      "book_canonical": "Malachi",
+      "chapter": 3,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "malaquias 3:6"
+    },
+    {
+      "input": "Matthew 5:3",
+      "book_num": 40,
+      "book_canonical": "Matthew",
+      "chapter": 5,
+      "verse_start": 3,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "matthew 5:3"
+    },
+    {
+      "input": "Mateo 5:3",
+      "book_num": 40,
+      "book_canonical": "Matthew",
+      "chapter": 5,
+      "verse_start": 3,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "mateo 5:3"
+    },
+    {
+      "input": "Mateus 5:3",
+      "book_num": 40,
+      "book_canonical": "Matthew",
+      "chapter": 5,
+      "verse_start": 3,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "mateus 5:3"
+    },
+    {
+      "input": "Mark 16:15",
+      "book_num": 41,
+      "book_canonical": "Mark",
+      "chapter": 16,
+      "verse_start": 15,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "mark 16:15"
+    },
+    {
+      "input": "Marcos 16:15",
+      "book_num": 41,
+      "book_canonical": "Mark",
+      "chapter": 16,
+      "verse_start": 15,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "marcos 16:15"
+    },
+    {
+      "input": "Luke 6:31",
+      "book_num": 42,
+      "book_canonical": "Luke",
+      "chapter": 6,
+      "verse_start": 31,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "luke 6:31"
+    },
+    {
+      "input": "Lucas 6:31",
+      "book_num": 42,
+      "book_canonical": "Luke",
+      "chapter": 6,
+      "verse_start": 31,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "lucas 6:31"
+    },
+    {
+      "input": "John 3:16",
+      "book_num": 43,
+      "book_canonical": "John",
+      "chapter": 3,
+      "verse_start": 16,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "john 3:16"
+    },
+    {
+      "input": "Juan 3:16",
+      "book_num": 43,
+      "book_canonical": "John",
+      "chapter": 3,
+      "verse_start": 16,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "juan 3:16"
+    },
+    {
+      "input": "João 3:16",
+      "book_num": 43,
+      "book_canonical": "John",
+      "chapter": 3,
+      "verse_start": 16,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "joao 3:16"
+    },
+    {
+      "input": "Acts 17:11",
+      "book_num": 44,
+      "book_canonical": "Acts",
+      "chapter": 17,
+      "verse_start": 11,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "acts 17:11"
+    },
+    {
+      "input": "Hechos 17:11",
+      "book_num": 44,
+      "book_canonical": "Acts",
+      "chapter": 17,
+      "verse_start": 11,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "hechos 17:11"
+    },
+    {
+      "input": "Atos 17:11",
+      "book_num": 44,
+      "book_canonical": "Acts",
+      "chapter": 17,
+      "verse_start": 11,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "atos 17:11"
+    },
+    {
+      "input": "Romans 8:28",
+      "book_num": 45,
+      "book_canonical": "Romans",
+      "chapter": 8,
+      "verse_start": 28,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "romans 8:28"
+    },
+    {
+      "input": "Romanos 8:28",
+      "book_num": 45,
+      "book_canonical": "Romans",
+      "chapter": 8,
+      "verse_start": 28,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "romanos 8:28"
+    },
+    {
+      "input": "1 Corinthians 13:4",
+      "book_num": 46,
+      "book_canonical": "1 Corinthians",
+      "chapter": 13,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "1 corinthians 13:4"
+    },
+    {
+      "input": "1 Corintios 13:4",
+      "book_num": 46,
+      "book_canonical": "1 Corinthians",
+      "chapter": 13,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "1 corintios 13:4"
+    },
+    {
+      "input": "1 Coríntios 13:4",
+      "book_num": 46,
+      "book_canonical": "1 Corinthians",
+      "chapter": 13,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "1 corintios 13:4"
+    },
+    {
+      "input": "2 Corinthians 5:17",
+      "book_num": 47,
+      "book_canonical": "2 Corinthians",
+      "chapter": 5,
+      "verse_start": 17,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "2 corinthians 5:17"
+    },
+    {
+      "input": "2 Corintios 5:17",
+      "book_num": 47,
+      "book_canonical": "2 Corinthians",
+      "chapter": 5,
+      "verse_start": 17,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "2 corintios 5:17"
+    },
+    {
+      "input": "2 Coríntios 5:17",
+      "book_num": 47,
+      "book_canonical": "2 Corinthians",
+      "chapter": 5,
+      "verse_start": 17,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "2 corintios 5:17"
+    },
+    {
+      "input": "Galatians 5:22",
+      "book_num": 48,
+      "book_canonical": "Galatians",
+      "chapter": 5,
+      "verse_start": 22,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "galatians 5:22"
+    },
+    {
+      "input": "Gálatas 5:22",
+      "book_num": 48,
+      "book_canonical": "Galatians",
+      "chapter": 5,
+      "verse_start": 22,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "galatas 5:22"
+    },
+    {
+      "input": "Ephesians 4:32",
+      "book_num": 49,
+      "book_canonical": "Ephesians",
+      "chapter": 4,
+      "verse_start": 32,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "ephesians 4:32"
+    },
+    {
+      "input": "Efesios 4:32",
+      "book_num": 49,
+      "book_canonical": "Ephesians",
+      "chapter": 4,
+      "verse_start": 32,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "efesios 4:32"
+    },
+    {
+      "input": "Efésios 4:32",
+      "book_num": 49,
+      "book_canonical": "Ephesians",
+      "chapter": 4,
+      "verse_start": 32,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "efesios 4:32"
+    },
+    {
+      "input": "Philippians 4:13",
+      "book_num": 50,
+      "book_canonical": "Philippians",
+      "chapter": 4,
+      "verse_start": 13,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "philippians 4:13"
+    },
+    {
+      "input": "Filipenses 4:13",
+      "book_num": 50,
+      "book_canonical": "Philippians",
+      "chapter": 4,
+      "verse_start": 13,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "filipenses 4:13"
+    },
+    {
+      "input": "Colossians 3:23",
+      "book_num": 51,
+      "book_canonical": "Colossians",
+      "chapter": 3,
+      "verse_start": 23,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "colossians 3:23"
+    },
+    {
+      "input": "Colosenses 3:23",
+      "book_num": 51,
+      "book_canonical": "Colossians",
+      "chapter": 3,
+      "verse_start": 23,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "colosenses 3:23"
+    },
+    {
+      "input": "1 Thessalonians 5:17",
+      "book_num": 52,
+      "book_canonical": "1 Thessalonians",
+      "chapter": 5,
+      "verse_start": 17,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "1 thessalonians 5:17"
+    },
+    {
+      "input": "1 Tesalonicenses 5:17",
+      "book_num": 52,
+      "book_canonical": "1 Thessalonians",
+      "chapter": 5,
+      "verse_start": 17,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "1 tesalonicenses 5:17"
+    },
+    {
+      "input": "1 Timothy 6:10",
+      "book_num": 54,
+      "book_canonical": "1 Timothy",
+      "chapter": 6,
+      "verse_start": 10,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "1 timothy 6:10"
+    },
+    {
+      "input": "1 Timoteo 6:10",
+      "book_num": 54,
+      "book_canonical": "1 Timothy",
+      "chapter": 6,
+      "verse_start": 10,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "1 timoteo 6:10"
+    },
+    {
+      "input": "1 Timóteo 6:10",
+      "book_num": 54,
+      "book_canonical": "1 Timothy",
+      "chapter": 6,
+      "verse_start": 10,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "1 timoteo 6:10"
+    },
+    {
+      "input": "Titus 2:11",
+      "book_num": 56,
+      "book_canonical": "Titus",
+      "chapter": 2,
+      "verse_start": 11,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "titus 2:11"
+    },
+    {
+      "input": "Tito 2:11",
+      "book_num": 56,
+      "book_canonical": "Titus",
+      "chapter": 2,
+      "verse_start": 11,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "tito 2:11"
+    },
+    {
+      "input": "Philemon 1:6",
+      "book_num": 57,
+      "book_canonical": "Philemon",
+      "chapter": 1,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "philemon 1:6"
+    },
+    {
+      "input": "Filemón 1:6",
+      "book_num": 57,
+      "book_canonical": "Philemon",
+      "chapter": 1,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "filemon 1:6"
+    },
+    {
+      "input": "Hebrews 11:1",
+      "book_num": 58,
+      "book_canonical": "Hebrews",
+      "chapter": 11,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "hebrews 11:1"
+    },
+    {
+      "input": "Hebreos 11:1",
+      "book_num": 58,
+      "book_canonical": "Hebrews",
+      "chapter": 11,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "hebreos 11:1"
+    },
+    {
+      "input": "Hebreus 11:1",
+      "book_num": 58,
+      "book_canonical": "Hebrews",
+      "chapter": 11,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "hebreus 11:1"
+    },
+    {
+      "input": "James 1:5",
+      "book_num": 59,
+      "book_canonical": "James",
+      "chapter": 1,
+      "verse_start": 5,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "james 1:5"
+    },
+    {
+      "input": "Santiago 1:5",
+      "book_num": 59,
+      "book_canonical": "James",
+      "chapter": 1,
+      "verse_start": 5,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "santiago 1:5"
+    },
+    {
+      "input": "Tiago 1:5",
+      "book_num": 59,
+      "book_canonical": "James",
+      "chapter": 1,
+      "verse_start": 5,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "tiago 1:5"
+    },
+    {
+      "input": "1 Peter 5:7",
+      "book_num": 60,
+      "book_canonical": "1 Peter",
+      "chapter": 5,
+      "verse_start": 7,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "1 peter 5:7"
+    },
+    {
+      "input": "1 Pedro 5:7",
+      "book_num": 60,
+      "book_canonical": "1 Peter",
+      "chapter": 5,
+      "verse_start": 7,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "1 pedro 5:7"
+    },
+    {
+      "input": "Jude 1:21",
+      "book_num": 65,
+      "book_canonical": "Jude",
+      "chapter": 1,
+      "verse_start": 21,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "jude 1:21"
+    },
+    {
+      "input": "Judas 1:21",
+      "book_num": 65,
+      "book_canonical": "Jude",
+      "chapter": 1,
+      "verse_start": 21,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "judas 1:21"
+    },
+    {
+      "input": "Revelation 21:4",
+      "book_num": 66,
+      "book_canonical": "Revelation",
+      "chapter": 21,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "revelation 21:4"
+    },
+    {
+      "input": "Apocalipsis 21:4",
+      "book_num": 66,
+      "book_canonical": "Revelation",
+      "chapter": 21,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "apocalipsis 21:4"
+    },
+    {
+      "input": "Apocalipse 21:4",
+      "book_num": 66,
+      "book_canonical": "Revelation",
+      "chapter": 21,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "apocalipse 21:4"
+    },
+    {
+      "input": "Gen 1:1",
+      "book_num": 1,
+      "book_canonical": "Genesis",
+      "chapter": 1,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "gen 1:1"
+    },
+    {
+      "input": "Gn 1:1",
+      "book_num": 1,
+      "book_canonical": "Genesis",
+      "chapter": 1,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "gn 1:1"
+    },
+    {
+      "input": "Gên 1:1",
+      "book_num": 1,
+      "book_canonical": "Genesis",
+      "chapter": 1,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "gen 1:1"
+    },
+    {
+      "input": "Ex 20:3",
+      "book_num": 2,
+      "book_canonical": "Exodus",
+      "chapter": 20,
+      "verse_start": 3,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "ex 20:3"
+    },
+    {
+      "input": "Éx 20:3",
+      "book_num": 2,
+      "book_canonical": "Exodus",
+      "chapter": 20,
+      "verse_start": 3,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "ex 20:3"
+    },
+    {
+      "input": "Êx 20:3",
+      "book_num": 2,
+      "book_canonical": "Exodus",
+      "chapter": 20,
+      "verse_start": 3,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "ex 20:3"
+    },
+    {
+      "input": "Mt 5:7",
+      "book_num": 40,
+      "book_canonical": "Matthew",
+      "chapter": 5,
+      "verse_start": 7,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "mt 5:7"
+    },
+    {
+      "input": "Mc 16:15",
+      "book_num": 41,
+      "book_canonical": "Mark",
+      "chapter": 16,
+      "verse_start": 15,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "mc 16:15"
+    },
+    {
+      "input": "Lc 6:31",
+      "book_num": 42,
+      "book_canonical": "Luke",
+      "chapter": 6,
+      "verse_start": 31,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "lc 6:31"
+    },
+    {
+      "input": "Jn 3:16",
+      "book_num": 43,
+      "book_canonical": "John",
+      "chapter": 3,
+      "verse_start": 16,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "jn 3:16"
+    },
+    {
+      "input": "Ro 8:28",
+      "book_num": 45,
+      "book_canonical": "Romans",
+      "chapter": 8,
+      "verse_start": 28,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "ro 8:28"
+    },
+    {
+      "input": "1Co 13:4",
+      "book_num": 46,
+      "book_canonical": "1 Corinthians",
+      "chapter": 13,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "1co 13:4"
+    },
+    {
+      "input": "Heb 11:1",
+      "book_num": 58,
+      "book_canonical": "Hebrews",
+      "chapter": 11,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "heb 11:1"
+    },
+    {
+      "input": "Ap 21:4",
+      "book_num": 66,
+      "book_canonical": "Revelation",
+      "chapter": 21,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "ap 21:4"
+    },
+    {
+      "input": "Re 21:4",
+      "book_num": 66,
+      "book_canonical": "Revelation",
+      "chapter": 21,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "re 21:4"
+    },
+    {
+      "input": "1 Co 13:4",
+      "book_num": 46,
+      "book_canonical": "1 Corinthians",
+      "chapter": 13,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "1 co 13:4"
+    },
+    {
+      "input": "2 Co 5:17",
+      "book_num": 47,
+      "book_canonical": "2 Corinthians",
+      "chapter": 5,
+      "verse_start": 17,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "2 co 5:17"
+    },
+    {
+      "input": "Stg 1:5",
+      "book_num": 59,
+      "book_canonical": "James",
+      "chapter": 1,
+      "verse_start": 5,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "stg 1:5"
+    },
+    {
+      "input": "John 3:16-18",
+      "book_num": 43,
+      "book_canonical": "John",
+      "chapter": 3,
+      "verse_start": 16,
+      "verse_end": 18,
+      "detected_language": "en",
+      "raw_match": "john 3:16-18"
+    },
+    {
+      "input": "Juan 3:16-18",
+      "book_num": 43,
+      "book_canonical": "John",
+      "chapter": 3,
+      "verse_start": 16,
+      "verse_end": 18,
+      "detected_language": "es",
+      "raw_match": "juan 3:16-18"
+    },
+    {
+      "input": "João 3:16-18",
+      "book_num": 43,
+      "book_canonical": "John",
+      "chapter": 3,
+      "verse_start": 16,
+      "verse_end": 18,
+      "detected_language": "pt",
+      "raw_match": "joao 3:16-18"
+    },
+    {
+      "input": "Romans 8:28-30",
+      "book_num": 45,
+      "book_canonical": "Romans",
+      "chapter": 8,
+      "verse_start": 28,
+      "verse_end": 30,
+      "detected_language": "en",
+      "raw_match": "romans 8:28-30"
+    },
+    {
+      "input": "Salmos 23:1-3",
+      "book_num": 19,
+      "book_canonical": "Psalms",
+      "chapter": 23,
+      "verse_start": 1,
+      "verse_end": 3,
+      "detected_language": "es",
+      "raw_match": "salmos 23:1-3"
+    },
+    {
+      "input": "1 Corinthians 13:4-8",
+      "book_num": 46,
+      "book_canonical": "1 Corinthians",
+      "chapter": 13,
+      "verse_start": 4,
+      "verse_end": 8,
+      "detected_language": "en",
+      "raw_match": "1 corinthians 13:4-8"
+    },
+    {
+      "input": "Génesis 1:1-3",
+      "book_num": 1,
+      "book_canonical": "Genesis",
+      "chapter": 1,
+      "verse_start": 1,
+      "verse_end": 3,
+      "detected_language": "en",
+      "raw_match": "genesis 1:1-3"
+    },
+    {
+      "input": "Psalm 23",
+      "book_num": 19,
+      "book_canonical": "Psalms",
+      "chapter": 23,
+      "verse_start": null,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "psalm 23"
+    },
+    {
+      "input": "John 3",
+      "book_num": 43,
+      "book_canonical": "John",
+      "chapter": 3,
+      "verse_start": null,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "john 3"
+    },
+    {
+      "input": "Apocalipsis 21",
+      "book_num": 66,
+      "book_canonical": "Revelation",
+      "chapter": 21,
+      "verse_start": null,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "apocalipsis 21"
+    },
+    {
+      "input": "Genesis 50:20",
+      "book_num": 1,
+      "book_canonical": "Genesis",
+      "chapter": 50,
+      "verse_start": 20,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "genesis 50:20"
+    },
+    {
+      "input": "Psalm 119:105",
+      "book_num": 19,
+      "book_canonical": "Psalms",
+      "chapter": 119,
+      "verse_start": 105,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "psalm 119:105"
+    },
+    {
+      "input": "Salmos 150:6",
+      "book_num": 19,
+      "book_canonical": "Psalms",
+      "chapter": 150,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "salmos 150:6"
+    },
+    {
+      "input": "Matthew 28:19",
+      "book_num": 40,
+      "book_canonical": "Matthew",
+      "chapter": 28,
+      "verse_start": 19,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "matthew 28:19"
+    },
+    {
+      "input": "Acts 28:31",
+      "book_num": 44,
+      "book_canonical": "Acts",
+      "chapter": 28,
+      "verse_start": 31,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "acts 28:31"
+    },
+    {
+      "input": "Revelation 22:21",
+      "book_num": 66,
+      "book_canonical": "Revelation",
+      "chapter": 22,
+      "verse_start": 21,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "revelation 22:21"
+    },
+    {
+      "input": "1 John 4:8",
+      "book_num": 62,
+      "book_canonical": "1 John",
+      "chapter": 4,
+      "verse_start": 8,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "1 john 4:8"
+    },
+    {
+      "input": "2 John 1:6",
+      "book_num": 63,
+      "book_canonical": "2 John",
+      "chapter": 1,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "2 john 1:6"
+    },
+    {
+      "input": "3 John 1:4",
+      "book_num": 64,
+      "book_canonical": "3 John",
+      "chapter": 1,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "3 john 1:4"
+    },
+    {
+      "input": "1 Juan 4:8",
+      "book_num": 62,
+      "book_canonical": "1 John",
+      "chapter": 4,
+      "verse_start": 8,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "1 juan 4:8"
+    },
+    {
+      "input": "2 Juan 1:6",
+      "book_num": 63,
+      "book_canonical": "2 John",
+      "chapter": 1,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "2 juan 1:6"
+    },
+    {
+      "input": "3 Juan 1:4",
+      "book_num": 64,
+      "book_canonical": "3 John",
+      "chapter": 1,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "3 juan 1:4"
+    },
+    {
+      "input": "1 João 4:8",
+      "book_num": 62,
+      "book_canonical": "1 John",
+      "chapter": 4,
+      "verse_start": 8,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "1 joao 4:8"
+    },
+    {
+      "input": "2 João 1:6",
+      "book_num": 63,
+      "book_canonical": "2 John",
+      "chapter": 1,
+      "verse_start": 6,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "2 joao 1:6"
+    },
+    {
+      "input": "3 João 1:4",
+      "book_num": 64,
+      "book_canonical": "3 John",
+      "chapter": 1,
+      "verse_start": 4,
+      "verse_end": null,
+      "detected_language": "pt",
+      "raw_match": "3 joao 1:4"
+    },
+    {
+      "input": "Mateo 1:1",
+      "book_num": 40,
+      "book_canonical": "Matthew",
+      "chapter": 1,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "mateo 1:1"
+    },
+    {
+      "input": "Mat 1:1",
+      "book_num": 40,
+      "book_canonical": "Matthew",
+      "chapter": 1,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "es",
+      "raw_match": "mat 1:1"
+    },
+    {
+      "input": "Mt 1:1",
+      "book_num": 40,
+      "book_canonical": "Matthew",
+      "chapter": 1,
+      "verse_start": 1,
+      "verse_end": null,
+      "detected_language": "en",
+      "raw_match": "mt 1:1"
+    }
+  ]
+}

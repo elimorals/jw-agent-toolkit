@@ -22,7 +22,11 @@ interface Case {
   chapter: number;
   verse_start: number | null;
   verse_end: number | null;
-  language: string;
+  /** v2.0+ fixture fields; absent in legacy entries. F56.3. */
+  detected_language?: "en" | "es" | "pt";
+  raw_match?: string;
+  /** v1.0 legacy field — kept for backwards-compat display only. */
+  language?: string;
 }
 
 const fixture = JSON.parse(readFileSync(FIXTURE, "utf-8")) as {
@@ -31,7 +35,8 @@ const fixture = JSON.parse(readFileSync(FIXTURE, "utf-8")) as {
 
 describe("parseReference against shared golden fixture", () => {
   for (const c of fixture.cases) {
-    it(`parses "${c.input}" (${c.language})`, () => {
+    const langLabel = c.detected_language ?? c.language ?? "?";
+    it(`parses "${c.input}" (${langLabel})`, () => {
       const ref = parseReference(c.input);
       expect(ref, `expected a match for ${c.input}`).not.toBeNull();
       const r = ref as BibleRef;
@@ -40,6 +45,17 @@ describe("parseReference against shared golden fixture", () => {
       expect(r.chapter).toBe(c.chapter);
       expect(r.verseStart).toBe(c.verse_start);
       expect(r.verseEnd).toBe(c.verse_end);
+      // F56.3: verify detected_language and raw_match when present.
+      // Legacy v1.0 entries lack these fields and stay backwards-compat.
+      if (c.detected_language !== undefined) {
+        expect(
+          r.detectedLanguage,
+          `language drift on "${c.input}": parser=${r.detectedLanguage} fixture=${c.detected_language}`,
+        ).toBe(c.detected_language);
+      }
+      if (c.raw_match !== undefined) {
+        expect(r.rawMatch).toBe(c.raw_match);
+      }
     });
   }
 });

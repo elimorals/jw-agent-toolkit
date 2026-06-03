@@ -1,0 +1,62 @@
+name: cross-lang parity
+
+# F56.4 — verify Python (jw-core) and TypeScript (jw-core-js) agree on
+# every row of shared/data/bible_references_golden.json. A drift in
+# either parser fails this workflow and blocks merges.
+#
+# Also re-generates the fixture from the Python parser as ground truth
+# and fails if the working tree is dirty (uncommitted regenerated cases).
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  parity:
+    name: Parity Python ↔ TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Python 3.13
+        run: uv python install 3.13
+
+      - name: Install Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Python deps (jw-core only — light)
+        run: uv sync --package jw-core
+
+      - name: Install JS deps
+        working-directory: packages/jw-core-js
+        run: npm ci
+
+      - name: Run Python parity suite
+        run: uv run pytest packages/jw-core/tests/test_golden_fixture_parity.py -v
+
+      - name: Run TypeScript parity suite
+        working-directory: packages/jw-core-js
+        run: npm test -- --reporter=verbose
+
+      - name: Regenerate fixture and assert tree is clean
+        run: |
+          make dump-shared-data
+          if ! git diff --exit-code --quiet shared/data/bible_references_golden.json; then
+            echo "::error::shared/data/bible_references_golden.json is out of sync."
+            echo "Run 'make dump-shared-data' locally and commit the regenerated file."
+            git diff --stat shared/data/bible_references_golden.json
+            exit 1
+          fi
