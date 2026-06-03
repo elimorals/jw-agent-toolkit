@@ -20,7 +20,7 @@
  */
 
 export { parseReference, parseAllReferences, ReferenceParser } from "./parser.js";
-export { BibleRef } from "./BibleRef.js";
+export { BibleRef, langFromWolPath } from "./BibleRef.js";
 export type { BibleRefInput } from "./BibleRef.js";
 export {
   BOOKS,

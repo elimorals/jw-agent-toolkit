@@ -101,4 +101,91 @@ export class BibleRef {
       rawMatch: this.rawMatch,
     };
   }
+
+  /**
+   * Inverse of `wolUrl()`: parse a canonical WOL bible URL back into a
+   * `BibleRef`. Returns `null` for non-WOL URLs or unrecognized shapes.
+   * F56.5.
+   *
+   * Accepts both chapter-level and verse-level URLs:
+   *   https://wol.jw.org/es/wol/b/r4/lp-s/nwtsty/43/3
+   *   https://wol.jw.org/es/wol/b/r4/lp-s/nwtsty/43/3#study=discover&v=43:3:16
+   *
+   * The path segments between `/wol/b/` and the trailing `<book>/<chapter>`
+   * vary across editions; we only constrain the prefix and the two trailing
+   * numeric segments. The verse is read from the optional `#v=B:C:V` anchor.
+   */
+  static fromWolUrl(href: string): BibleRef | null {
+    let url: URL;
+    try {
+      url = new URL(href);
+    } catch {
+      return null;
+    }
+    if (url.hostname !== "wol.jw.org") return null;
+    const m = url.pathname.match(
+      /^\/(?<lang>[a-z]{1,3})\/wol\/b\/.+\/(?<book>\d{1,2})\/(?<chap>\d{1,3})$/i,
+    );
+    if (!m?.groups) return null;
+    const bookStr = m.groups["book"];
+    const chapStr = m.groups["chap"];
+    const langSeg = m.groups["lang"];
+    if (!bookStr || !chapStr || !langSeg) return null;
+    const bookNum = Number(bookStr);
+    const chapter = Number(chapStr);
+    if (!Number.isFinite(bookNum) || bookNum < 1 || bookNum > 66) return null;
+    if (!Number.isFinite(chapter) || chapter < 1) return null;
+
+    // Optional verse from #v=BB:CC:VV anchor.
+    let verseStart: number | null = null;
+    const fragMatch = url.hash.match(/v=(\d+):(\d+):(\d+)/);
+    if (fragMatch && fragMatch[3]) {
+      const v = Number(fragMatch[3]);
+      if (Number.isFinite(v) && v > 0) verseStart = v;
+    }
+
+    const lang = langFromWolPath(href) ?? "en";
+    const canonical = canonicalName(bookNum) ?? `Book${bookNum}`;
+    return new BibleRef({
+      bookNum,
+      bookCanonical: canonical,
+      chapter,
+      verseStart,
+      verseEnd: null,
+      detectedLanguage: lang,
+      rawMatch: href,
+    });
+  }
+}
+
+/**
+ * Map a WOL URL or URL language segment to a supported `Language`.
+ * WOL uses `/e/`, `/s/`, `/t/` segments and ISO-639-1 codes (`en`, `es`,
+ * `pt-BR`). We accept either a full URL or a bare segment ("pt-BR",
+ * "es", "/t/wol/..."). Returns `null` when the language is not one of
+ * the three the package supports. F56.5.
+ */
+export function langFromWolPath(input: string): Language | null {
+  if (!input) return null;
+  // Extract the candidate segment.
+  let segment = input;
+  if (input.includes("://") || input.startsWith("/")) {
+    try {
+      const url = input.startsWith("/") ? `https://wol.jw.org${input}` : input;
+      const u = new URL(url);
+      segment = u.pathname.split("/").filter(Boolean)[0] ?? "";
+    } catch {
+      return null;
+    }
+  }
+  const lower = segment.toLowerCase();
+  // WOL legacy single-letter codes.
+  if (lower === "e") return "en";
+  if (lower === "s") return "es";
+  if (lower === "t") return "pt";
+  // Standard ISO-639-1 prefixes.
+  if (lower.startsWith("es")) return "es";
+  if (lower.startsWith("pt")) return "pt";
+  if (lower.startsWith("en")) return "en";
+  return null;
 }

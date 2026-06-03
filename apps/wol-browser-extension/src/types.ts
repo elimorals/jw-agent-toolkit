@@ -1,4 +1,8 @@
-export type Language = "en" | "es" | "pt";
+// Re-exported from @jw-agent-toolkit/core to keep a single source of truth.
+// The extension cannot define its own `Language` because verse_detector.ts
+// imports `displayName(bookNum, lang: Language)` from the core package; the
+// types would silently drift if redeclared here. F56.2.
+export type { Language } from "@jw-agent-toolkit/core";
 export type Template =
   | "plain"
   | "link"
