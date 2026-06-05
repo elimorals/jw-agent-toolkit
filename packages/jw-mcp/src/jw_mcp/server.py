@@ -3898,30 +3898,56 @@ async def recap_previous_session(
 # ────────────────────────────────────────────────────────────────────────
 
 
+def _meeting_cache_root_for(congregation_name: str) -> Any:  # -> Path
+    """Cache root for a given congregation.
+
+    Matches ``jw_meeting_media.cli._cache_root_for`` semantics so the CLI
+    and the MCP share the exact same on-disk layout: the legacy "default"
+    congregation maps to ``$JW_MEETING_HOME`` directly, while explicit
+    congregations live under ``$JW_MEETING_HOME/<name>/``.
+    """
+    import os
+    from pathlib import Path as _PMM_Path
+
+    base = _PMM_Path(
+        os.environ.get("JW_MEETING_HOME", "~/.jw-agent-toolkit/meetings")
+    ).expanduser()
+    if congregation_name == "default":
+        return base
+    return base / congregation_name
+
+
 @mcp.tool
 async def meeting_discover_week(
-    language: str, year: int, week: int, kind: str = "midweek"
+    language: str,
+    year: int,
+    week: int,
+    kind: str = "midweek",
+    congregation: str | None = None,
 ) -> dict[str, Any]:
     """Descubre el programa semanal del workbook JW desde wol.jw.org.
 
-    Persiste el programa parseado en `~/.jw-agent-toolkit/meetings/meetings.db`
-    para uso posterior por `meeting_download_media` y la ventana presenter.
+    Persiste el programa parseado en el cache de la congregación
+    seleccionada (``$JW_MEETING_HOME/<congregation>/meetings.db``) para uso
+    posterior por ``meeting_download_media`` y la ventana presenter.
+
+    F57.16: ``congregation`` opcional. Si se omite y hay varias
+    registradas, devuelve un error pidiendo el nombre explícito. Sin
+    registry, usa "default" (compat con pre-F57.16).
     """
     try:
-        from pathlib import Path as _PMM_Path
-
+        from jw_meeting_media.congregation import resolve_congregation
         from jw_meeting_media.models import MeetingKind
         from jw_meeting_media.program_client import MeetingProgramClient
         from jw_meeting_media.storage import MeetingStorage
 
+        cong = resolve_congregation(name=congregation)
         client = MeetingProgramClient()
         program = await client.fetch_week(
             language=language, year=year, week=week, kind=MeetingKind(kind)
         )
         await client.aclose()
-        storage = MeetingStorage(
-            _PMM_Path("~/.jw-agent-toolkit/meetings/meetings.db").expanduser()
-        )
+        storage = MeetingStorage(_meeting_cache_root_for(cong.name) / "meetings.db")
         storage.save_program(program)
         return {
             "language": program.language,
@@ -3930,6 +3956,7 @@ async def meeting_discover_week(
             "section_count": len(program.sections),
             "item_count": sum(len(s.items) for s in program.sections),
             "source_url": program.source_url,
+            "congregation": cong.name,
         }
     except Exception as exc:
         return {"error": f"{type(exc).__name__}: {exc}"}
@@ -3937,22 +3964,26 @@ async def meeting_discover_week(
 
 @mcp.tool
 async def meeting_download_media(
-    language: str, year: int, week: int, kind: str = "midweek"
+    language: str,
+    year: int,
+    week: int,
+    kind: str = "midweek",
+    congregation: str | None = None,
 ) -> dict[str, Any]:
     """Descarga toda la media del programa semanal al cache local.
 
-    Requiere que `meeting_discover_week` haya sido llamado antes para el mismo
-    idioma/año/semana/kind.
+    Requiere que ``meeting_discover_week`` haya sido llamado antes para
+    la misma combinación de idioma/año/semana/kind/congregación.
     """
     try:
-        from pathlib import Path as _PMM_Path
-
+        from jw_meeting_media.congregation import resolve_congregation
         from jw_meeting_media.downloader import Downloader
         from jw_meeting_media.media_resolver import MediaResolver
         from jw_meeting_media.models import MeetingKind
         from jw_meeting_media.storage import MeetingStorage
 
-        cache_root = _PMM_Path("~/.jw-agent-toolkit/meetings").expanduser()
+        cong = resolve_congregation(name=congregation)
+        cache_root = _meeting_cache_root_for(cong.name)
         storage = MeetingStorage(cache_root / "meetings.db")
         program = storage.load_program(
             language=language, year=year, week=week, kind=MeetingKind(kind)
@@ -3962,7 +3993,12 @@ async def meeting_download_media(
 
         resolver = MediaResolver()
         dl = Downloader(cache_root=cache_root / "media")
-        results: dict[str, Any] = {"succeeded": 0, "failed": 0, "items": []}
+        results: dict[str, Any] = {
+            "succeeded": 0,
+            "failed": 0,
+            "items": [],
+            "congregation": cong.name,
+        }
         for sec in program.sections:
             for item in sec.items:
                 for ref in item.media_refs:
@@ -3991,22 +4027,27 @@ async def meeting_download_media(
 
 
 @mcp.tool
-async def meeting_list_programs() -> dict[str, Any]:
-    """Lista programas semanales ya descargados."""
+async def meeting_list_programs(
+    congregation: str | None = None,
+) -> dict[str, Any]:
+    """Lista programas semanales ya descargados para una congregación."""
     try:
         import sqlite3
         from contextlib import closing
-        from pathlib import Path as _PMM_Path
 
-        db = _PMM_Path("~/.jw-agent-toolkit/meetings/meetings.db").expanduser()
+        from jw_meeting_media.congregation import resolve_congregation
+
+        cong = resolve_congregation(name=congregation)
+        db = _meeting_cache_root_for(cong.name) / "meetings.db"
         if not db.exists():
-            return {"programs": []}
+            return {"programs": [], "congregation": cong.name}
         with closing(sqlite3.connect(db)) as conn:
             rows = conn.execute(
                 "SELECT language, year, week, kind, saved_at FROM programs "
                 "ORDER BY year DESC, week DESC"
             ).fetchall()
         return {
+            "congregation": cong.name,
             "programs": [
                 {
                     "language": r[0],
@@ -4016,8 +4057,57 @@ async def meeting_list_programs() -> dict[str, Any]:
                     "saved_at": r[4],
                 }
                 for r in rows
-            ]
+            ],
         }
+    except Exception as exc:
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
+@mcp.tool
+async def meeting_list_congregations() -> dict[str, Any]:
+    """Lista las congregaciones registradas en el TOML registry.
+
+    F57.16. Devuelve cada congregación con su ``name``, ``language``,
+    ``notes``, y los ``weekend_kind`` / ``midweek_kind`` labels.
+    """
+    try:
+        from jw_meeting_media.congregation import load_registry
+
+        registry = load_registry()
+        return {
+            "count": len(registry),
+            "congregations": [
+                {
+                    "name": c.name,
+                    "language": c.language,
+                    "weekend_kind": c.weekend_kind,
+                    "midweek_kind": c.midweek_kind,
+                    "notes": c.notes,
+                }
+                for c in registry.values()
+            ],
+        }
+    except Exception as exc:
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
+@mcp.tool
+async def meeting_add_congregation(
+    name: str, language: str, notes: str = ""
+) -> dict[str, Any]:
+    """Registra una nueva congregación en el TOML registry. F57.16.
+
+    El ``name`` se usa también como nombre del subdirectorio
+    ``$JW_MEETING_HOME/<name>/`` donde quedarán aislados los programas y
+    la media descargada para esa congregación.
+    """
+    try:
+        from jw_meeting_media.congregation import Congregation, save_congregation
+
+        save_congregation(
+            Congregation(name=name, language=language, notes=notes)
+        )
+        return {"ok": True, "name": name, "language": language}
     except Exception as exc:
         return {"error": f"{type(exc).__name__}: {exc}"}
 
