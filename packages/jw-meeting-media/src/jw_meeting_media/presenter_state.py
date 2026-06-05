@@ -61,3 +61,40 @@ class PresenterManager:
 
     def destroy(self, session_id: str) -> None:
         self._sessions.pop(session_id, None)
+
+    def reorder(self, session_id: str, *, from_index: int, to_index: int) -> None:
+        """Mueve un item de la cola; ajusta cursor para que apunte al mismo item.
+
+        Reglas de cursor:
+        - Si el cursor apuntaba al item movido → sigue al item (cursor = to_index).
+        - Si el item se quitó por encima del cursor y se reinsertó por debajo
+          (o viceversa), el cursor se desplaza ±1 para no perder el ítem actual.
+        """
+        state = self.get_state(session_id)
+        if not (0 <= from_index < len(state.queue)):
+            raise IndexError(f"from_index {from_index} out of range")
+        if not (0 <= to_index < len(state.queue)):
+            raise IndexError(f"to_index {to_index} out of range")
+        if from_index == to_index:
+            return
+        item = state.queue.pop(from_index)
+        state.queue.insert(to_index, item)
+        # Adjust cursor so it tracks the item it pointed to before the move.
+        if state.cursor == from_index:
+            state.cursor = to_index
+        elif from_index < state.cursor <= to_index:
+            state.cursor -= 1
+        elif to_index <= state.cursor < from_index:
+            state.cursor += 1
+
+    def add_item(self, session_id: str, item) -> None:
+        """Añade un MeetingItem al final de la cola (no toca cursor)."""
+        state = self.get_state(session_id)
+        state.queue.append(item)
+
+    def jump_to(self, session_id: str, index: int) -> None:
+        """Salta el cursor al índice indicado. Lanza IndexError si out of range."""
+        state = self.get_state(session_id)
+        if not (0 <= index < len(state.queue)):
+            raise IndexError(f"index {index} out of range")
+        state.cursor = index
