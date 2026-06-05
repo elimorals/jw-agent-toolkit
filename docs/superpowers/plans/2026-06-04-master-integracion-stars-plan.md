@@ -144,6 +144,6 @@ Si algún día se reconsidera, abrir nuevo análisis (`docs/conceptos/integracio
 | F62 — marker-markitdown | ✅ 2026-06-04 | ✅ 2026-06-05 | — |
 | F64 — whisperx-asr | ✅ 2026-06-04 | ✅ 2026-06-05 | — |
 | F61 — letta-memory | ✅ 2026-06-04 | ✅ 2026-06-05 | — |
-| F57 — jw-meeting-media | ✅ 2026-06-04 | ⬜ | — |
+| F57 — jw-meeting-media | ✅ 2026-06-04 | ✅ 2026-06-05 | — |
 
 **Total**: 6 planes, ~51 tasks bite-sized, ~112 tests nuevos esperados.
