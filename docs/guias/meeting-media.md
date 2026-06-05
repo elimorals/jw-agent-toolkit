@@ -111,27 +111,123 @@ Implementación: Tauri 2 expone dos commands custom
 (p.ej. `vite dev` preview standalone) el selector se oculta
 automáticamente.
 
+## Multi-congregación (F57.16)
+
+Un mismo install puede gestionar varias congregaciones simultáneamente
+(p.ej. dos asignaciones en idiomas distintos), manteniendo programas y
+descargas aisladas por congregación.
+
+### Registry TOML
+
+Las congregaciones se registran en
+`~/.jw-agent-toolkit/meetings/congregations.toml`:
+
+```toml
+[congregations.norte]
+language = "es"
+weekend_kind = "weekend"
+midweek_kind = "midweek"
+notes = "Sala del Reino Norte"
+
+[congregations.sur]
+language = "en"
+notes = "Spanish-English bilingual"
+```
+
+Cada congregación tiene su propio cache dedicado en
+`~/.jw-agent-toolkit/meetings/<name>/{meetings.db,media/...}`. La
+congregación implícita `default` mantiene el layout legacy
+(`~/.jw-agent-toolkit/meetings/` directo) para compatibilidad con
+installs pre-F57.16.
+
+### CLI `jw meeting congregation`
+
+```bash
+# Registrar
+jw meeting congregation add norte --language es --notes "Sala Norte"
+jw meeting congregation add sur --language en
+
+# Listar
+jw meeting congregation list
+#   norte [es] — Sala Norte
+#   sur [en]
+
+# Resolver la congregación por defecto (depende del estado del registry)
+jw meeting congregation default
+# multiple congregations registered (['norte', 'sur']); specify --congregation NAME
+
+# Eliminar
+jw meeting congregation remove sur
+```
+
+### Flag `--congregation` en discover/download/list
+
+Todos los comandos del programa aceptan `--congregation NAME` (o `-c`):
+
+```bash
+# Descarga aislada por congregación
+jw meeting discover --congregation norte --year 2026 --week 23
+jw meeting download --congregation norte --year 2026 --week 23
+
+# Listado por congregación
+jw meeting list --congregation norte
+```
+
+Reglas de resolución:
+
+- Si solo hay 1 congregación registrada, se usa automáticamente.
+- Si hay varias y no se especifica `--congregation`, el comando falla
+  con error explícito.
+- Si NO hay registry, se usa la congregación implícita `default` y se
+  acepta `--language` directamente (compat legacy).
+- El `language` de cada congregación actúa como default cuando se omite
+  `--language` en `discover`/`download`.
+
+### MCP tools nuevos
+
+```
+@jw-agent-toolkit meeting_list_congregations
+@jw-agent-toolkit meeting_add_congregation
+  name: norte
+  language: es
+  notes: Sala Norte
+```
+
+Las tools existentes (`meeting_discover_week`, `meeting_download_media`,
+`meeting_list_programs`) ahora aceptan un parámetro opcional
+`congregation: str`. El payload de respuesta incluye un campo
+`congregation` con el nombre resuelto.
+
 ## Uso MCP
 
-Cuatro tools expuestas a clientes MCP:
+Seis tools expuestas a clientes MCP:
 
 ```
 @jw-agent-toolkit meeting_discover_week
   language: es
   year: 2026
   week: 23
+  congregation: norte    # opcional (F57.16)
 
 @jw-agent-toolkit meeting_download_media
   language: es
   year: 2026
   week: 23
+  congregation: norte    # opcional (F57.16)
 
 @jw-agent-toolkit meeting_list_programs
+  congregation: norte    # opcional (F57.16)
 
 @jw-agent-toolkit meeting_open_presenter
   language: es
   year: 2026
   week: 23
+
+@jw-agent-toolkit meeting_list_congregations          # F57.16
+
+@jw-agent-toolkit meeting_add_congregation            # F57.16
+  name: norte
+  language: es
 ```
 
 ## Limitaciones de F57 MVP
