@@ -3,7 +3,23 @@
 
 NO usa LLMs en el path crítico: parsers procedurales sobre JWPUB ya descifrado.
 
-Los re-exports concretos (BibleLoader, models, ...) se exponen conforme
-los módulos se implementen en F58.2+. Mientras tanto el package es importable
-como skeleton para que tests y futuros submódulos puedan habitarlo.
+Los re-exports de runtime (BibleLoader, parsers) se añaden conforme los
+módulos se implementen en F58.3+. Los modelos Pydantic intermediarios ya
+están expuestos.
 """
+
+from jw_brain.imports.bible.models import (
+    BibleKgPassage,
+    BibleKgPeriod,
+    BibleKgPerson,
+    BibleKgPlace,
+    InsightEntry,
+)
+
+__all__ = [
+    "BibleKgPassage",
+    "BibleKgPeriod",
+    "BibleKgPerson",
+    "BibleKgPlace",
+    "InsightEntry",
+]
