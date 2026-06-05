@@ -92,6 +92,23 @@ class VectorStore:
         """Return the unique `source_id` values currently indexed."""
         return {c.source_id for c in self._chunks if c.source_id}
 
+    def has_source(self, source_id: str) -> bool:
+        """True if at least one chunk in the store carries this `source_id`.
+
+        Used by loaders (F62) to skip re-ingesting a file whose
+        content-hash matches an existing source — gives idempotency
+        without scanning the entire chunk list at call sites.
+        """
+        return any(c.source_id == source_id for c in self._chunks)
+
+    def list_chunks(self) -> list[Chunk]:
+        """Shallow copy of every chunk currently indexed.
+
+        Read-only helper for tests and small ad-hoc scripts. Don't use
+        on production-size stores — for those rely on the search APIs.
+        """
+        return list(self._chunks)
+
     # ── Search ─────────────────────────────────────────────────────────
 
     def vector_search(self, query: str, top_k: int = 10) -> list[SearchHit]:

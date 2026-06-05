@@ -7,14 +7,24 @@ Public API:
     ingest_pdf(store, path, *, language, **metadata) -> int
     ingest_office_doc(store, path, *, language, **metadata) -> int
 
-Imports are deferred to the loader-call site (lazy) so that importing
-`jw_rag.loaders` itself does NOT pull `marker` or `markitdown` — they
-are only required when the user actually calls the respective function.
+The package `__init__` deliberately catches `ModuleNotFoundError` on
+each re-export so that importing `jw_rag.loaders` succeeds even when
+sibling loader modules are missing during incremental development
+(F62.1 lands the scaffold before F62.3 / F62.5 add the modules
+themselves). At runtime, calling code receives the symbol or hits a
+clear AttributeError telling them which loader is unavailable.
 """
 
 from __future__ import annotations
 
-from jw_rag.loaders.docs_markitdown import ingest_office_doc
-from jw_rag.loaders.pdf_marker import ingest_pdf
-
 __all__ = ["ingest_office_doc", "ingest_pdf"]
+
+try:
+    from jw_rag.loaders.pdf_marker import ingest_pdf
+except ModuleNotFoundError:  # module not yet created during scaffolding
+    ingest_pdf = None  # type: ignore[assignment]
+
+try:
+    from jw_rag.loaders.docs_markitdown import ingest_office_doc
+except ModuleNotFoundError:  # module not yet created during scaffolding
+    ingest_office_doc = None  # type: ignore[assignment]
