@@ -98,13 +98,41 @@ def transcribe_file(
 
 
 def _all_providers() -> list[type]:
-    """Lazy import to avoid loading optional deps at module-level."""
-    from jw_core.audio.asr_providers import ASRProvider  # noqa: F401
-    from jw_core.audio.asr_providers.deepgram import DeepgramProvider
-    from jw_core.audio.asr_providers.omnilingual import OmnilingualProvider
-    from jw_core.audio.asr_providers.whisper_turbo import WhisperTurboProvider
+    """Lazy import to avoid loading optional deps at module-level.
 
-    return [DeepgramProvider, WhisperTurboProvider, OmnilingualProvider]
+    Cada provider se importa con try/except aislado para que un import
+    error no tumbe el registry entero.
+    """
+    from jw_core.audio.asr_providers import ASRProvider  # noqa: F401
+
+    out: list[type] = []
+    try:
+        from jw_core.audio.asr_providers.deepgram import DeepgramProvider
+
+        out.append(DeepgramProvider)
+    except ImportError:
+        pass
+    try:
+        from jw_core.audio.asr_providers.whisper_turbo import WhisperTurboProvider
+
+        out.append(WhisperTurboProvider)
+    except ImportError:
+        pass
+    try:
+        # F64: whisperX provider (lazy: la dep `whisperx` se valida en is_available()).
+        # El módulo en sí no importa `whisperx` al cargar — sólo a la hora de transcribir.
+        from jw_core.audio.asr_providers.whisperx import WhisperXProvider
+
+        out.append(WhisperXProvider)
+    except ImportError:
+        pass
+    try:
+        from jw_core.audio.asr_providers.omnilingual import OmnilingualProvider
+
+        out.append(OmnilingualProvider)
+    except ImportError:
+        pass
+    return out
 
 
 DEFAULT_ASR_CHAIN: list[str] = ["deepgram", "whisper-turbo", "omnilingual"]
