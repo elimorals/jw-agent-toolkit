@@ -345,6 +345,73 @@ def import_bible_cmd(
     typer.echo(json.dumps(out, indent=2))
 
 
+@brain_app.command("learn-headwords")
+def learn_headwords_cmd(
+    insight: Path = typer.Option(
+        ...,
+        "--insight",
+        help="Ruta a un .jwpub del Insight on the Scriptures.",
+    ),
+    brain: Path | None = typer.Option(None, "--brain", help="Brain home path."),
+) -> None:
+    """Extrae cabezales del Insight JWPUB del usuario y los persiste localmente.
+
+    F58.14 — útil para auditar qué fracción del Insight del usuario cubre
+    el catálogo built-in de jw-brain. La extracción se guarda en
+    `<brain>/extracted_headwords.json` (NO se redistribuye). El JWPUB debe
+    haber sido descargado oficialmente desde jw.org.
+    """
+
+    from jw_brain.imports.bible.expanded_headwords import (
+        EXPANDED_PERSON_HEADWORDS,
+        EXPANDED_PLACE_HEADWORDS,
+    )
+    from jw_brain.imports.bible.headword_extractor import (
+        extract_headwords_from_jwpub,
+        persist_to_brain,
+    )
+    from jw_brain.imports.bible.parser_insight import (
+        PERSON_HEADWORDS,
+        PLACE_HEADWORDS,
+    )
+
+    brain_path = _resolve_brain_path(brain)
+    if not (brain_path / "config.toml").exists():
+        typer.echo(
+            f"ERROR: no brain at {brain_path}. Run `jw brain init` first.",
+            err=True,
+        )
+        raise typer.Exit(code=2)
+
+    insight_path = Path(insight).expanduser().resolve()
+    if not insight_path.exists():
+        typer.echo(f"ERROR: insight jwpub not found at {insight_path}", err=True)
+        raise typer.Exit(code=2)
+
+    headwords = extract_headwords_from_jwpub(insight_path)
+    target = persist_to_brain(headwords, brain_path)
+
+    builtin = (
+        PERSON_HEADWORDS
+        | PLACE_HEADWORDS
+        | EXPANDED_PERSON_HEADWORDS
+        | EXPANDED_PLACE_HEADWORDS
+    )
+    lower = {h.strip().lower() for h in headwords if h.strip()}
+    covered = lower & builtin
+    total = max(len(lower), 1)
+    typer.echo(json.dumps({
+        "brain": str(brain_path),
+        "extracted_path": str(target),
+        "n_headwords_total": len(headwords),
+        "n_headwords_unique": len(lower),
+        "n_builtin_covers": len(covered),
+        "coverage_pct": round(100.0 * len(covered) / total, 2),
+        "note": "Catálogo built-in cubre nombres del canon común; el "
+                "resto puede ser conceptos teológicos o cabezales no curados.",
+    }, indent=2))
+
+
 @brain_app.command("snapshot")
 def snapshot_cmd(
     brain: Path | None = typer.Option(None, "--brain"),

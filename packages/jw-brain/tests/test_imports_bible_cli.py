@@ -60,6 +60,51 @@ def test_import_bible_periods_only(
     assert "10" in result.stdout  # 10 periodos
 
 
+def test_learn_headwords_reports_coverage(
+    runner: CliRunner,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """F58.14 — `jw brain learn-headwords` extrae cabezales y reporta cobertura.
+
+    El fixture mini tiene 3 cabezales (Abraham, Jerusalem, Moses), todos
+    cubiertos por el catálogo built-in → coverage_pct esperado: 100.0.
+    """
+    from jw_brain.multi_tenant import load_registry, save_registry
+
+    reg = tmp_path / "registry.toml"
+    monkeypatch.setattr(
+        "jw_brain.cli.register_brain",
+        lambda alias, path: save_registry({**load_registry(reg), alias: path}, reg),
+    )
+    monkeypatch.setattr("jw_brain.cli.load_registry", lambda: load_registry(reg))
+
+    brain_home = tmp_path / "brain"
+    brain_home.mkdir()
+    runner.invoke(brain_app, ["init", "--brain", str(brain_home)])
+
+    result = runner.invoke(
+        brain_app,
+        [
+            "learn-headwords",
+            "--brain",
+            str(brain_home),
+            "--insight",
+            str(FIXTURE),
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+    assert "extracted_headwords.json" in result.stdout
+    assert "n_headwords_unique" in result.stdout
+    assert "coverage_pct" in result.stdout
+    # Los 3 del fixture (Abraham, Jerusalem, Moses) están todos en built-in.
+    assert "100.0" in result.stdout
+
+    # Verifica side-effect: archivo persistido.
+    extracted = brain_home / "extracted_headwords.json"
+    assert extracted.exists()
+
+
 def test_import_bible_with_insight_jwpub(
     runner: CliRunner,
     tmp_path: Path,
