@@ -1364,7 +1364,11 @@ no de un módulo grande.
   arquitectónico clean-room), `docs/guias/meeting-media.md` (guía
   operativa con atribución explícita).
 - ⬜ Monitor externo automático (MVP+1).
-- ⬜ Drag-and-drop UI para añadir media extra (MVP+1).
+- ✅ Drag-and-drop UI implementado (F57.14): sidebar con cola,
+  reordering por drag, click-to-jump y drop de archivos del SO al
+  presenter. Backend: `PresenterManager.reorder/add_item/jump_to`
+  + endpoints REST `/presenter/sessions/{sid}/reorder|add|jump`.
+  Tests: 5 nuevos (presenter_state) + 3 nuevos (rest_presenter).
 - ⬜ Multi-congregación (MVP+1).
 - ⬜ Catálogo Memorial / eventos especiales (MVP+1).
 - ⬜ Zoom screen sharing (futuro).

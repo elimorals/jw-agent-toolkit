@@ -70,6 +70,23 @@ curl -X POST http://localhost:8765/presenter/sessions/abc-123/next
    - **Flecha izquierda**: prev
    - **Escape**: stop
 
+### Drag-and-drop en el presenter (F57.14)
+
+La sidebar izquierda muestra la cola completa con números. Tres
+gestos están soportados:
+
+- **Click** sobre un item: salta el cursor a ese punto del programa
+  (POST `/presenter/sessions/{sid}/jump?index=N`).
+- **Arrastrar** un item de la cola sobre otro: reordena el
+  programa (POST `/presenter/sessions/{sid}/reorder` con
+  `{from_index, to_index}`). El cursor se ajusta automáticamente
+  para no perder el ítem activo.
+- **Drop** desde el explorador del SO al recuadro punteado de la
+  parte inferior: añade el archivo (imagen, video o audio) al final
+  de la cola como `MeetingItem` ad-hoc (POST
+  `/presenter/sessions/{sid}/add`). En Tauri 2 se usa el path
+  absoluto del FS expuesto por `file.path`.
+
 ## Uso MCP
 
 Cuatro tools expuestas a clientes MCP:
@@ -100,7 +117,6 @@ Cuatro tools expuestas a clientes MCP:
 - Sin sync cloud (Dropbox/OneDrive).
 - Sin background music con auto-stop.
 - Sin multi-monitor automático (Tauri 2.x: feature manual).
-- Sin drag-and-drop UI para añadir media extra.
 - Sin catálogo Memorial / eventos especiales.
 
 Esas features quedan para sprints posteriores.
