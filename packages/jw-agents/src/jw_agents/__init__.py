@@ -23,6 +23,7 @@ from jw_agents.letter_composer import letter_composer
 from jw_agents.meeting_helper import meeting_helper
 from jw_agents.presentation_builder import list_audiences, presentation_builder
 from jw_agents.public_talk_outline import public_talk_outline
+from jw_agents.recap_session import recap_previous_session
 from jw_agents.research_topic import research_topic
 from jw_agents.reverse_citation_lookup import reverse_citation_lookup
 from jw_agents.revisit_tracker import Revisit, RevisitStore, plan_next_visit
@@ -48,6 +49,7 @@ __all__ = [
     "public_talk_outline",
     "read_article_aloud",
     "read_verse_aloud",
+    "recap_previous_session",
     "research_topic",
     "reverse_citation_lookup",
     "search_broadcasting",
