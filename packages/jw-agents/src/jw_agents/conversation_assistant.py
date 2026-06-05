@@ -10,9 +10,15 @@ Pipeline:
 This is the door-to-door / informal-witness companion: structured,
 verifiable, and language-aware. The agent answers the OBJECTION, not
 the person — the LLM uses the result to craft a respectful reply.
+
+Memoria opt-in (F61): si se pasa `memory=` y `session_id=`, el agente
+registra la pregunta y respuesta para informar futuras conversaciones.
+Sin memory, comportamiento idéntico al legacy.
 """
 
 from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from jw_core.clients.cdn import CDNClient
 from jw_core.clients.topic_index import TopicIndexClient
@@ -23,6 +29,9 @@ from jw_core.parsers.study_notes import parse_study_notes, study_notes_for_verse
 from jw_core.parsers.verse import get_verse
 
 from jw_agents.base import AgentResult, Citation, Finding
+
+if TYPE_CHECKING:
+    from jw_agents.memory import MemoryStore
 
 _LANG_MAP = {"E": "en", "S": "es", "T": "pt"}
 
@@ -35,11 +44,23 @@ async def conversation_assistant(
     cdn: CDNClient | None = None,
     wol: WOLClient | None = None,
     max_subheadings: int = 6,
+    memory: "MemoryStore | None" = None,
+    session_id: str | None = None,
 ) -> AgentResult:
     """Match `text` to a known objection and harvest authoritative answers."""
     result = AgentResult(query=text, agent_name="conversation_assistant")
     iso = _LANG_MAP.get(language.upper(), language.lower())
     result.metadata["language"] = language
+
+    # F61 memory: recall previous objections before processing
+    recalled_objections: list = []
+    if memory is not None and session_id is not None:
+        try:
+            recalled_objections = memory.recall(
+                session_id=session_id, kind="objection", limit=5
+            )
+        except Exception as exc:
+            result.warnings.append(f"memory recall failed: {exc}")
 
     objection = find_objection(text, language=iso)
     if objection is None:
@@ -84,6 +105,32 @@ async def conversation_assistant(
             await cdn.aclose()
         if owned_wol:
             await wol.aclose()
+
+    # F61 memory: record question + answer post-process
+    if memory is not None and session_id is not None:
+        from datetime import datetime, timezone
+
+        from jw_agents.memory import MemoryRecord
+
+        try:
+            memory.record(MemoryRecord(
+                session_id=session_id,
+                timestamp=datetime.now(timezone.utc),
+                kind="question",
+                content=text,
+                metadata={"language": language},
+            ))
+            if result.findings:
+                memory.record(MemoryRecord(
+                    session_id=session_id,
+                    timestamp=datetime.now(timezone.utc),
+                    kind="answer",
+                    content="; ".join(f.summary for f in result.findings[:3]),
+                    metadata={"finding_count": len(result.findings)},
+                ))
+        except Exception as exc:
+            result.warnings.append(f"memory record failed: {exc}")
+        result.metadata["recalled_objections"] = len(recalled_objections)
 
     return result
 

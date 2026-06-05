@@ -16,6 +16,7 @@ otel = [
     "opentelemetry-sdk>=1.27.0",
     "opentelemetry-exporter-otlp-proto-grpc>=1.27.0",
 ]
+memory-letta = ["letta-client>=0.3"]
 
 [build-system]
 requires = ["hatchling"]

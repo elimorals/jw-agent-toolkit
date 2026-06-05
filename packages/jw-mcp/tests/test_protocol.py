@@ -167,6 +167,10 @@ _EXPECTED_TOOLS = {
     # Phase 62 — marker + markitdown loaders
     "ingest_pdf",
     "ingest_office_doc",
+    # Phase 61 — memory persistence opt-in
+    "memory_record",
+    "memory_recall",
+    "memory_forget_session",
 }
 
 
