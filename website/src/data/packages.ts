@@ -24,13 +24,13 @@ export const packages: PackageInfo[] = [
     tagline: "El núcleo determinístico",
     color: "cyan",
     short:
-      "Librería principal: 6 clientes HTTP, 9 parsers, writers JWPUB/.jwlibrary, 5 providers ASR (Omnilingual 1672 idiomas) + 1 TS (NLLB-200), schemas organized-app, infraestructura F9 y crypto compartido.",
+      "Librería principal: 6 clientes HTTP, 10 parsers (incluye wol_url BibleRef.from_wol_url F58.4), writers JWPUB/.jwlibrary, 6 providers ASR (Omnilingual 1672 idiomas + whisperX diarizado F64) + NLLB-200, schemas organized-app, speakers/voiceprints (F64.7) e infra F9.",
     about:
-      "El corazón del toolkit. Todo lo demás depende de jw-core, y jw-core no depende de nada del workspace. Aquí viven los clientes HTTP que hablan con jw.org, los parsers determinísticos que convierten HTML/JSON/EPUB/JWPUB en modelos Pydantic, los writers que generan .jwpub y .jwlibrary nativos para JW Library, los providers de ASR (Deepgram, Whisper, Omnilingual 1672 idiomas via venv Python 3.12) y traducción (NLLB-200 CC-BY-NC con preservación de refs), los schemas Pydantic de sws2apps/organized-app, y la infraestructura compartida: cache SQLite con TTL, throttle por host, telemetría opt-in y autenticación JWT.",
+      "El corazón del toolkit. Todo lo demás depende de jw-core, y jw-core no depende de nada del workspace. Aquí viven los clientes HTTP que hablan con jw.org, los parsers determinísticos que convierten HTML/JSON/EPUB/JWPUB en modelos Pydantic, los writers que generan .jwpub y .jwlibrary nativos para JW Library, los providers de ASR (Deepgram, Whisper, Omnilingual 1672 idiomas via venv Python 3.12, whisperX diarizado F64) y traducción (NLLB-200 CC-BY-NC con preservación de refs), los schemas Pydantic de sws2apps/organized-app, el voiceprint store opt-in (F64.7) y la infraestructura compartida: cache SQLite con TTL, throttle por host, telemetría opt-in y autenticación JWT.",
     highlights: [
-      "6 clientes · 9 parsers · 3 writers · 17 locales",
-      "ASR 1672 idiomas (Omnilingual) + NLLB-200",
-      "Cache · Throttle · Telemetría opt-in",
+      "6 clientes · 10 parsers · 3 writers · 17 locales",
+      "ASR 1672 idiomas + whisperX diarizado",
+      "VoiceprintStore + SpeakerNameMapper opt-in",
       "Crypto JWPUB AES-128-CBC ↔ writer simétrico",
     ],
     features: [
@@ -40,15 +40,15 @@ export const packages: PackageInfo[] = [
       },
       {
         title: "Parsers + Writers determinísticos",
-        body: "Parsers: parse_reference (multiidioma), Article, DailyText, Verse, StudyNote + CrossReference, TopicIndex, Epub, JWPUB descifrado (F5.5), .jwlibrary backup (F19). Writers nuevos: jwpub builder (F50, simétrico al descifrador) y jw_library_backup writer (F52, cierra el read-write loop con JW Library nativo).",
+        body: "Parsers: parse_reference (multiidioma), Article, DailyText, Verse, StudyNote + CrossReference, TopicIndex, Epub, JWPUB descifrado (F5.5), .jwlibrary backup (F19) y wol_url (F58.4: BibleRef.from_wol_url, port del lado JS F56.5). Writers: jwpub builder (F50, simétrico al descifrador) y jw_library_backup writer (F52, cierra el read-write loop con JW Library nativo).",
       },
       {
         title: "Modelos Pydantic + schemas organized-app",
         body: "Modelos propios: BibleRef · Verse · StudyNote · Article · Epub · JwpubMetadata · LanguageMetadata. F51 portó verbatim los schemas de sws2apps/organized-app (MIT) — PersonType, SchedWeekType, WeekType, AssignmentCode, MeetingAttendanceType, FieldServiceGroupType, UserFieldServiceMonthlyReportType — con envelope CRDT Timestamped[T].",
       },
       {
-        title: "Audio: ASR + TTS multi-provider (F34 + F53)",
-        body: "ASR providers con auto-routing por idioma: Deepgram (~16 idiomas, streaming), faster-whisper (local), Omnilingual ASR (1672 idiomas via venv Python 3.12 dedicado, F53). TTS: Kokoro · Edge · System · ElevenLabs · Piper · XTTSv2 · F5. Routers F55.1 escogen el mejor disponible sin que el caller los nombre.",
+        title: "Audio: ASR + TTS multi-provider (F34 + F53 + F64)",
+        body: "ASR providers con auto-routing por idioma: Deepgram (~16 idiomas, streaming), faster-whisper (local), Omnilingual ASR (1672 idiomas via venv Python 3.12 dedicado, F53), whisperX (F64, word-level timestamps + diarización pyannote, opt-in via extras [asr-whisperx]). DiarizedSegment + DiarizedResult extienden TranscriptionResult sin breaking. Speakers (F64.7): VoiceprintStore sqlite con Fernet opt-in JW_VOICEPRINT_KEY + SpeakerNameMapper cosine sim — mapea speaker_id → nombre real opt-in. TTS: Kokoro · Edge · System · ElevenLabs · Piper · XTTSv2 · F5. Routers F55.1 escogen el mejor disponible.",
       },
       {
         title: "Traducción NLLB-200 con preservación de refs (F54)",
@@ -75,9 +75,11 @@ ref.chapter, ref.verses   # (3, [16])`,
     exports: [
       "parse_reference · translate_preserving_references",
       "BibleRef · Verse · StudyNote · CrossReference",
+      "parsers.wol_url.parse_wol_url · BibleRef.from_wol_url",
       "CDNClient · WOLClient · MediatorClient · PubMediaClient",
       "writers.jwpub.JwpubBuilder · writers.jw_library_backup.write_backup",
-      "audio.transcription.get_asr_provider · OmnilingualProvider",
+      "audio.transcription.get_asr_provider · OmnilingualProvider · WhisperXProvider",
+      "audio.speakers.VoiceprintStore · SpeakerNameMapper · DiarizedSegment",
       "translation_providers.get_translation_provider · NLLBProvider",
       "models_organized.PersonType · SchedWeekType · WeekType",
       "DiskCache · Throttler · Telemetry · JWTManager",
@@ -152,19 +154,23 @@ jw search "fe" --json | jq '.results[].title'`,
     tagline: "Puente con tu agente",
     color: "violet",
     short:
-      "Servidor Model Context Protocol que expone 40+ herramientas a Claude Desktop, Claude Code o cualquier cliente MCP. Tu IA habla con jw.org sin saber HTTP.",
+      "Servidor Model Context Protocol que expone 100+ herramientas a Claude Desktop, Claude Code o cualquier cliente MCP. Cubre F57-F66: meeting_* (6), second_brain_* (5), ingest_pdf/office_doc, transcribe_audio_diarized, memory_record/recall/forget_session + recap_previous_session.",
     about:
-      "El componente que convierte el toolkit en algo que tu agente de IA puede usar. Implementado con FastMCP, expone cada parser y cliente de jw-core (más el RAG y los agentes) como tools accesibles vía el protocolo MCP estándar. Funciona sobre stdio para Claude Desktop/Code o sobre SSE para otros clientes.",
+      "El componente que convierte el toolkit en algo que tu agente de IA puede usar. Implementado con FastMCP, expone cada parser y cliente de jw-core (más el RAG, los agentes, el second-brain F49+F66, los loaders externos F62, la memoria persistente F61, el ASR diarizado F64 y la reunión-en-vivo F57) como tools accesibles vía el protocolo MCP estándar. Funciona sobre stdio para Claude Desktop/Code o sobre SSE para otros clientes.",
     highlights: [
-      "40+ tools sobre stdio MCP",
+      "100+ tools sobre stdio MCP",
       "FastMCP · Claude/IDE compatible",
-      "RAG y agentes integrados",
+      "RAG + agentes + brain + meeting",
       "Cache + throttle compartido",
     ],
     features: [
       {
-        title: "40+ herramientas registradas",
+        title: "100+ herramientas registradas",
         body: "resolve_reference · get_chapter · get_daily_text · search_content · get_article · get_verse · get_study_notes · get_cross_references · compare_translations · list_languages · download_publication · jwpub_extract · topic_subjects · ... más 5 finetune tools.",
+      },
+      {
+        title: "F57-F66 tools (16 nuevas)",
+        body: "second_brain_status/query/compile/lint/snapshot (F49+F66) · ingest_pdf + ingest_office_doc (F62) · transcribe_audio_diarized (F64) · memory_record/recall/forget_session + recap_previous_session (F61+F61.8) · meeting_discover_week/download_media/list_programs/open_presenter/list_congregations/add_congregation (F57+F57.16). Plus drift fix _EXPECTED_TOOLS (get_trace F43 + translate_preserving_refs F54).",
       },
       {
         title: "Agentes high-level",
@@ -176,7 +182,7 @@ jw search "fe" --json | jq '.results[].title'`,
       },
       {
         title: "Setup en Claude Desktop",
-        body: "Una entrada en claude_desktop_config.json apuntando a 'uv run jw-mcp'. Reinicia Claude Desktop y ya tienes 40+ tools nuevas en tus conversaciones.",
+        body: "Una entrada en claude_desktop_config.json apuntando a 'uv run jw-mcp'. Reinicia Claude Desktop y ya tienes 100+ tools nuevas en tus conversaciones.",
       },
     ],
     install: "uv sync --package jw-mcp && uv run jw-mcp",
@@ -199,10 +205,12 @@ jw search "fe" --json | jq '.results[].title'`,
     },
     dependsOn: ["jw-core", "jw-rag", "jw-agents"],
     exports: [
-      "40+ MCP tools sobre stdio",
+      "100+ MCP tools sobre stdio",
       "Resources: file://jw/...",
       "Agentes: verse_explainer · research_topic · ...",
       "RAG: search_corpus con BM25 + vector + RRF",
+      "Brain: second_brain_* · Meeting: meeting_*",
+      "Memory: memory_record/recall + recap_previous_session",
     ],
     referenceHref: "/docs/referencia/jw-mcp",
     guideHref: "/docs/guias/conectar-mcp-a-claude-desktop",
@@ -230,6 +238,10 @@ jw search "fe" --json | jq '.results[].title'`,
       {
         title: "Ingesta unificada",
         body: "ingest_bible_chapters, ingest_articles, ingest_epub, ingest_jwpub. Todos producen Chunks con source_id para delete incremental.",
+      },
+      {
+        title: "Loaders externos (F62)",
+        body: "pdf_marker.ingest_pdf con marker-pdf (Apache-2.0, ~9 GB modelos opt-in via JW_MARKER_USE_GPU/JW_MARKER_USE_LLM) para Atalayas históricas escaneadas. docs_markitdown.ingest_office_doc (MIT) para .docx/.pptx/.xlsx compartidos en hermandad. Idempotencia sha256 con source_id pdf:<hash8> y doc:<ext>:<hash8>. JW signature regex (watch tower|jw.org|atalaya|kingdom hall) marca metadata.is_jw=True. Opt-in via extras [pdf-marker], [doc-markitdown], [loaders-all].",
       },
       {
         title: "Reciprocal Rank Fusion",
@@ -266,6 +278,7 @@ for r in results:
       "HybridStore · VectorStore · BM25Store",
       "Chunk · SearchResult",
       "ingest_bible_book · ingest_article · ingest_epub · ingest_jwpub",
+      "ingest_pdf (marker) · ingest_office_doc (markitdown)",
       "fusion: rrf · linear · max",
     ],
     referenceHref: "/docs/referencia/jw-rag",
@@ -303,6 +316,14 @@ for r in results:
         title: "apologetics",
         body: "Dada una objeción común ('Trinidad', 'infierno', 'Biblia se contradice'), devuelve respuesta estructurada con citas bíblicas + notas de estudio + texto enriquecido.",
       },
+      {
+        title: "Memoria persistente opt-in (F61)",
+        body: "MemoryStore Protocol + 3 backends: FakeMemoryStore (in-memory, default tests), SqliteMemoryStore (default user, Fernet opt-in via JW_MEMORY_KEY siguiendo precedente F25 RevisitStore), LettaMemoryStore (opt-in para multi-device via letta-client, extra [memory-letta]). conversation_assistant ahora acepta param memory: MemoryStore | None — preserva compat 100% (memory=None → comportamiento legacy). build_memory_store() factory env-driven.",
+      },
+      {
+        title: "Auto-recap entre sesiones (F61.8)",
+        body: "Agente nuevo recap_session.recap_previous_session() NO usa LLM (decisión arquitectónica: procedural y determinístico). Agrupa records de MemoryStore por session_id, filtra la sesión actual, ordena por last_timestamp desc, devuelve findings con summary corto + excerpts_by_kind en metadata. Útil al arrancar nueva sesión: 'continuemos con la sesión X de ayer'.",
+      },
     ],
     install: "uv sync --package jw-agents",
     usage: {
@@ -326,6 +347,8 @@ for f in result.findings:
       "verse_explainer · research_topic",
       "meeting_helper · apologetics",
       "Finding · AgentResult",
+      "memory.MemoryStore · SqliteMemoryStore · LettaMemoryStore",
+      "build_memory_store · recap_session.recap_previous_session",
       "Composición con agent_pipeline",
     ],
     referenceHref: "/docs/referencia/jw-agents",
@@ -534,6 +557,148 @@ jw gen image \\
     ],
     referenceHref: "/docs/guias/jw-gen",
     guideHref: "/docs/guias/jw-gen",
+  },
+  {
+    slug: "jw-brain",
+    name: "jw-brain",
+    tagline: "Second-brain + Bible Knowledge Graph",
+    color: "violet",
+    short:
+      "Karpathy-style second-brain con compiler dual-backend (DuckDB/Neo4j) + Wiki sobre Obsidian. F58 añadió BibleKnowledgeGraph JW-puro: 250 personas, 150 lugares con geocoordenadas, 10 periodos según cronología JW (607 a.E.C. para Jerusalén), CLI jw brain {init, compile, query, lint, import-bible, learn-headwords}.",
+    about:
+      "Construido en la Fase 49 como compiler que extrae el conocimiento del toolkit a un grafo consultable. La Fase 58 añadió el Bible Knowledge Graph JW-puro — versión propia derivada del Estudio Perspicaz de las Escrituras y NWT, NO portada de catálogos académicos inter-religiosos. Schema extendido con Period y Passage + 5 edges temporales (LIVED_IN_PERIOD, ACTIVE_IN_PERIOD, MENTIONED_IN_PASSAGE, LOCATED_IN_PASSAGE, PASSAGE_BELONGS_TO_PERIOD). Cronología JW estricta: 607 a.E.C. para destrucción de Jerusalén, no 587/586 a.E.C. del consenso académico. Atribución explícita a Watch Tower Bible and Tract Society of Pennsylvania.",
+    highlights: [
+      "GraphRAG DuckDB + Neo4j",
+      "BibleKG JW-puro (607 a.E.C.)",
+      "475 personas + 259 lugares + 16 geocoords",
+      "MCP tools second_brain_*",
+    ],
+    features: [
+      {
+        title: "Second-brain compiler (F49)",
+        body: "Compiler async dual-backend: DuckDB (zero-config, single-file) o Neo4j (relación-pesada, queries Cypher). Wiki sobre Obsidian con human_edited honored (re-compiles no sobreescriben ediciones manuales). Multi-tenant via registry ~/.jw-brain/registry.toml. BrainDomain plugins via F41 entry-points: TJ builtin + financial fixture.",
+      },
+      {
+        title: "Bible Knowledge Graph JW-puro (F58)",
+        body: "Schema extendido: Person, Place, Period (nuevo), Passage (nuevo). 5 edges nuevas LIVED_IN_PERIOD, ACTIVE_IN_PERIOD, MENTIONED_IN_PASSAGE, LOCATED_IN_PASSAGE, PASSAGE_BELONGS_TO_PERIOD. Loader procedural (NO LLM): BibleLoader.import_periods() materializa los 10 periodos curados; import_insight(jwpub) parsea cabezales del Insight on the Scriptures con catálogo PERSON_HEADWORDS+EXPANDED_PERSON_HEADWORDS (~250 figuras canon × ES+EN) y PLACE_HEADWORDS+EXPANDED_PLACE_HEADWORDS (~150 lugares × ES+EN).",
+      },
+      {
+        title: "Place geocoords + Period catalog (F58.13 + F58)",
+        body: "16 lugares principales con lat/lon, region, modern_name y eras_active: Jerusalem (31.78N, 35.24E, Judea), Babylon (32.54N, 44.42E, Mesopotamia, modern_name='Hillah, Iraq'), Rome, Athens, Ephesus, Nazareth, Bethlehem, etc. 10 periodos JW chronology: Era Patriarcal (2018-1657 a.E.C.), Cautiverio Egipcio, Jueces, Reino Unido, Reino Dividido, Cautiverio Babilónico (607-537 a.E.C., NO 587/586), Era Persa, Era Helenística, Era Romana, Era Cristiana Primitiva.",
+      },
+      {
+        title: "CLI 8 comandos + audit headwords (F58.14)",
+        body: "jw brain {init, compile, query, lint, status, snapshot, list, import-bible, learn-headwords}. import-bible --insight <jwpub> hidrata el grafo desde un JWPUB del Insight. learn-headwords --insight <jwpub> extrae cabezales del JWPUB del usuario y los persiste LOCALMENTE en <brain>/extracted_headwords.json (no se redistribuyen) — útil para auditar cobertura del catálogo built-in contra el Insight completo del usuario. Reporta % cobertura.",
+      },
+      {
+        title: "MCP tools expuestas (F66)",
+        body: "second_brain_status, second_brain_query, second_brain_compile, second_brain_lint, second_brain_snapshot — exponen el knowledge graph del jw-brain a Claude/Cursor/cualquier cliente MCP. Firma usa brain_path: str (path absoluto). Modo 'degraded' cuando jw-brain no instalado o no hay brain configurado.",
+      },
+      {
+        title: "Cobertura legal y atribución",
+        body: "Built-in headword catalogs usan solo nombres del canon bíblico (hechos factuales públicos, no copyright). User-extracted desde JWPUB del usuario se queda LOCAL — el toolkit no redistribuye. Cronología JW (607 a.E.C.) triple-anclada en código, comentarios y guía. Atribución obligatoria Watch Tower Bible and Tract Society of Pennsylvania visible en docs/guias/bible-knowledge-graph.md.",
+      },
+    ],
+    install: "uv sync --package jw-brain",
+    usage: {
+      language: "bash",
+      caption: "Inicializa un brain + importa Bible KG + query Cypher-style.",
+      code: `# 1. Init brain TJ
+jw brain init --brain personal --vault ~/obs/jw
+
+# 2. Importar periodos + Insight JWPUB
+jw brain import-bible --brain personal --periods-only
+jw brain import-bible --brain personal \\
+  --insight ~/jwpubs/it_S.jwpub --symbol it --meps-language 3
+
+# 3. Query: qué personas se mencionan en Génesis
+jw brain query "¿Qué personas viven en Jerusalén durante el reinado de Ezequías?" --brain personal
+
+# 4. Auditar cobertura del catálogo built-in
+jw brain learn-headwords --insight ~/jwpubs/it_S.jwpub --brain personal
+# → Built-in catalog covers 1842 / 2873 (64%)`,
+    },
+    dependsOn: ["jw-core"],
+    exports: [
+      "Compiler async + GraphBackend Protocol",
+      "DuckDBBackend · Neo4jBackend",
+      "BibleLoader · ALL_PERIODS · ALL_PLACES",
+      "InsightParser · EXPANDED_PERSON_HEADWORDS · EXPANDED_PLACE_HEADWORDS",
+      "CLI 9 comandos + MCP second_brain_* tools",
+    ],
+    referenceHref: "/docs/guias/bible-knowledge-graph",
+    guideHref: "/docs/guias/bible-knowledge-graph",
+  },
+  {
+    slug: "jw-meeting-media",
+    name: "jw-meeting-media",
+    tagline: "Reunión-en-vivo · clean-room",
+    color: "amber",
+    short:
+      "Descubrimiento programa semanal mwb/w desde WOL, descarga media (imágenes/videos/audio/JWPUB), presenter Tauri con drag-drop + monitor externo automático + multi-congregación. Implementación clean-room (NO portada del repo M³ AGPL-3.0).",
+    about:
+      "Construido en la Fase 57 como implementación clean-room (estricta política de NO leer src/ del proyecto AGPL-3.0 sircharlo/meeting-media-manager). Parser HTML del WOL diseñado inspeccionando DOM real con DevTools, no copiando código M³. Stack: Python (jw-core PubMediaClient + WOLClient) + Tauri 2.x vanilla JS para presenter. F57.14 añadió drag-drop UI (sidebar + reorder + add file), F57.15 monitor externo automático (Tauri windows API), F57.16 multi-congregación (TOML registry con backwards-compat).",
+    highlights: [
+      "Clean-room (no port AGPL)",
+      "Presenter Tauri + drag-drop",
+      "Monitor externo automático",
+      "Multi-congregación TOML",
+    ],
+    features: [
+      {
+        title: "MeetingProgramClient (F57)",
+        body: "HTTP client para wol.jw.org/{lang}/wol/meetings/{resource}/{lp_tag}/{year}/{week_num}. Parser BeautifulSoup sobre HTML del WOL con selectores semánticos (article.bodyTxt, h2, div.docSubContent, a.b, a.jsRef). Extrae secciones (Tesoros, Seamos mejores, Vida cristiana), items con bible_refs (parse_reference) y media_refs (imágenes CDN + videos jwbroadcasting + JWPUB linkeados).",
+      },
+      {
+        title: "Pipeline media: Resolver → Downloader → Storage",
+        body: "MediaResolver wrappea PubMediaClient para resolver video/audio refs con pub_code+track a URLs directas con sha256. Downloader idempotente: path scheme <cache>/<lang>/<year>/<week>/<filename>, skip si sha256 matches. MeetingStorage sqlite local: save_program(prog) + load_program(language, year, week, kind), mark_downloaded, get_download_info.",
+      },
+      {
+        title: "Presenter Tauri (F57 + F57.14)",
+        body: "Window declarativa Tauri 2.x en apps/desktop/src-tauri/tauri.conf.json. Frontend vanilla JS (sin Vue/React) sincronizado con PresenterManager Python vía REST (/presenter/sessions/{sid}/{state,play,pause,next,prev,stop,reorder,add,jump}). F57.14 añadió sidebar con cola de items, drag-drop nativo HTML5 para reordering + drop de archivos externos.",
+      },
+      {
+        title: "Monitor externo automático (F57.15)",
+        body: "Tauri commands en Rust: list_monitors devuelve MonitorInfo[] con name, width, height, x/y, scale, is_primary. move_presenter_to_monitor(name, fullscreen) reposiciona la ventana + set_fullscreen + focus. UI selector con dropdown menu en sidebar; fallback gracioso si solo 1 monitor.",
+      },
+      {
+        title: "Multi-congregación (F57.16)",
+        body: "Registry ~/.jw-agent-toolkit/meetings/congregations.toml. Comandos jw meeting congregation {add,list,remove}. Flag --congregation/-c en discover/download/list. resolve_congregation rules: name dado → lookup; sin name + 1 entry → auto; sin name + multiple → ValueError. Backwards-compat: sin registry → Congregation('default') con legacy cache root (no migration needed).",
+      },
+      {
+        title: "MCP tools + CLI (F57.10 + F57.12 + F57.16)",
+        body: "MCP tools: meeting_discover_week, meeting_download_media, meeting_list_programs, meeting_open_presenter, meeting_list_congregations, meeting_add_congregation. CLI: jw meeting {discover, download, list, congregation {add, list, remove}}. REST endpoints /presenter/* expuestos en jw_mcp.rest_api para que la ventana Tauri controle el estado.",
+      },
+    ],
+    install: "uv sync --package jw-meeting-media",
+    usage: {
+      language: "bash",
+      caption: "Workflow típico: registrar congregación, descubrir, descargar.",
+      code: `# 1. Registrar congregaciones
+jw meeting congregation add norte --language es --notes "Sala del Reino Norte"
+jw meeting congregation add sur --language en --notes "Bilingual ward"
+
+# 2. Descubrir el programa de la semana
+jw meeting discover --congregation norte --year 2026 --week 23
+
+# 3. Descargar toda la media de esa semana
+jw meeting download --congregation norte --year 2026 --week 23
+
+# 4. Abrir presenter Tauri
+# (en apps/desktop: yarn tauri dev)
+# Drag-drop archivos externos en el sidebar
+# Selector 🖥 mueve a monitor proyector + fullscreen`,
+    },
+    dependsOn: ["jw-core", "jw-mcp"],
+    exports: [
+      "MeetingProgramClient · MediaResolver · Downloader",
+      "MeetingStorage · Thumbnailer · PresenterManager",
+      "Congregation · load_registry · resolve_congregation",
+      "CLI: jw meeting {discover, download, list, congregation}",
+      "REST: /presenter/* · MCP: meeting_*",
+    ],
+    referenceHref: "/docs/guias/meeting-media",
+    guideHref: "/docs/guias/meeting-media",
   },
 ];
 
