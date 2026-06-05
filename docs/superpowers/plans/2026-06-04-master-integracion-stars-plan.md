@@ -141,7 +141,7 @@ Si algún día se reconsidera, abrir nuevo análisis (`docs/conceptos/integracio
 |---|---|---|---|
 | F58 — bible-knowledge-graph | ✅ 2026-06-04 | ✅ 2026-06-05 | — |
 | F66 — mcp-jw-brain | ✅ 2026-06-04 | ✅ 2026-06-04 | — |
-| F62 — marker-markitdown | ✅ 2026-06-04 | ⬜ | — |
+| F62 — marker-markitdown | ✅ 2026-06-04 | ✅ 2026-06-05 | — |
 | F64 — whisperx-asr | ✅ 2026-06-04 | ⬜ | — |
 | F61 — letta-memory | ✅ 2026-06-04 | ⬜ | — |
 | F57 — jw-meeting-media | ✅ 2026-06-04 | ⬜ | — |
