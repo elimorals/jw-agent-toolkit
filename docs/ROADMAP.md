@@ -1274,7 +1274,7 @@ no de un módulo grande.
 - ✅ Helper `DuckDBBackend.query_persons_in_book(book_num)` con test E2E.
 - ✅ Fixture sintético `insight_mini/it_mini.jwpub` (3 entradas) generado por script reusando `jw_core.writers.jwpub.JwpubBuilder`.
 - ✅ Guía `docs/guias/bible-knowledge-graph.md`.
-- ⬜ Catálogo ampliado a las miles de entradas del Insight (sprint siguiente).
+- ✅ Built-in expandido a ~250 personas + ~150 lugares del canon bíblico común (ES + EN); comando `jw brain learn-headwords` para auditar cobertura sobre el Insight completo del usuario (F58.14).
 - ✅ Geocoordenadas curadas de 16 lugares principales (jerusalem, babylon, rome, athens, etc.).
 - ⬜ Import desde NWT cross-references (más Passage).
 
