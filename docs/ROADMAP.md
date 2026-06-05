@@ -1315,7 +1315,7 @@ no de un módulo grande.
 - ✅ Decisión re-confirmada: NO se añade a `DEFAULT_ASR_CHAIN` (modelo pyannote ~2 GB no se descarga hasta selección explícita).
 - ✅ Fixtures audio reproducibles vía `gtts`+`ffmpeg` con fallback stdlib sine (`build_audio_fixtures.py`).
 - ✅ Guía operativa `docs/guias/asr-diarizacion.md`.
-- ⬜ Mapeo `speaker_id` → nombre real (futuro: integración con voiceprint del schedule organized-app, F51).
+- ✅ Voiceprint store opt-in con Fernet plus `SpeakerNameMapper` cosine matching (16 dim mock fixtures; integración con whisperx en F64.8 futuro).
 
 ## Fase 57 — jw-meeting-media subpkg ✅
 
