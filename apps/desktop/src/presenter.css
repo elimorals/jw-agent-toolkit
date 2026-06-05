@@ -115,3 +115,62 @@ main {
   margin-left: auto;
   font-weight: 500;
 }
+#monitor-selector {
+  margin-bottom: 0.8em;
+  position: relative;
+}
+#monitor-selector button {
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 0.4em 0.8em;
+  cursor: pointer;
+  font-size: 0.9em;
+  width: 100%;
+  text-align: left;
+}
+#monitor-selector button:hover {
+  background: #444;
+}
+#monitor-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #222;
+  border: 1px solid #444;
+  padding: 0.6em;
+  min-width: 220px;
+  z-index: 100;
+  margin-top: 0.2em;
+}
+#monitor-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.5em;
+}
+#monitor-list li {
+  padding: 0.5em;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+#monitor-list li:hover {
+  background: #333;
+}
+#monitor-list li.primary::after {
+  content: " (primario)";
+  color: #888;
+}
+#monitor-list li.empty {
+  color: #888;
+  font-style: italic;
+  cursor: default;
+}
+#monitor-list li.empty:hover {
+  background: transparent;
+}
+#monitor-menu label {
+  display: block;
+  font-size: 0.85em;
+  color: #ccc;
+}

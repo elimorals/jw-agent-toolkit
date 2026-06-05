@@ -1363,7 +1363,12 @@ no de un módulo grande.
 - ✅ Docs: `docs/conceptos/programa-semanal-mwb-w.md` (análisis
   arquitectónico clean-room), `docs/guias/meeting-media.md` (guía
   operativa con atribución explícita).
-- ⬜ Monitor externo automático (MVP+1).
+- ✅ Monitor externo selector + fullscreen (F57.15): Tauri
+  commands `list_monitors` y `move_presenter_to_monitor` en
+  `apps/desktop/src-tauri/src/main.rs`; UI selector 🖥 en el
+  sidebar del presenter con checkbox fullscreen. Si solo hay 1
+  monitor o falla la detección, el menú degrada sin crash. Fuera
+  de Tauri (vite dev) el selector se oculta.
 - ✅ Drag-and-drop UI implementado (F57.14): sidebar con cola,
   reordering por drag, click-to-jump y drop de archivos del SO al
   presenter. Backend: `PresenterManager.reorder/add_item/jump_to`

@@ -203,6 +203,86 @@ document.getElementById("play-pause").onclick = () => {
 document.getElementById("stop").onclick = () =>
   fetch(`${API}/presenter/sessions/${sessionId}/stop`, { method: "POST" });
 
+// ── External monitor selector (F57.15) ────────────────────────────────
+// Uses Tauri 2.x custom commands list_monitors + move_presenter_to_monitor
+// declared in src-tauri/src/main.rs. When not running inside Tauri (e.g.
+// `vite dev` preview), the selector is hidden so the UI degrades cleanly.
+
+const tauriInvoke =
+  (typeof window !== "undefined" &&
+    window.__TAURI__ &&
+    window.__TAURI__.core &&
+    window.__TAURI__.core.invoke) ||
+  null;
+
+async function refreshMonitorList() {
+  if (!tauriInvoke) return;
+  const list = document.getElementById("monitor-list");
+  list.innerHTML = "";
+  try {
+    const monitors = await tauriInvoke("list_monitors");
+    if (!monitors || monitors.length === 0) {
+      const li = document.createElement("li");
+      li.className = "empty";
+      li.textContent = "Sin monitores detectados";
+      list.appendChild(li);
+      return;
+    }
+    for (const m of monitors) {
+      const li = document.createElement("li");
+      li.textContent = `${m.name} ${m.width}×${m.height}`;
+      if (m.is_primary) li.classList.add("primary");
+      li.addEventListener("click", async () => {
+        const fullscreen = document.getElementById("fullscreen-checkbox")
+          .checked;
+        try {
+          await tauriInvoke("move_presenter_to_monitor", {
+            monitorName: m.name,
+            fullscreen,
+          });
+          document.getElementById("monitor-menu").hidden = true;
+        } catch (err) {
+          console.error("move_presenter_to_monitor failed", err);
+        }
+      });
+      list.appendChild(li);
+    }
+  } catch (err) {
+    console.error("list_monitors failed", err);
+    const li = document.createElement("li");
+    li.className = "empty";
+    li.textContent = "Error al listar monitores";
+    list.appendChild(li);
+  }
+}
+
+const $monitorBtn = document.getElementById("open-monitor-menu");
+if ($monitorBtn) {
+  $monitorBtn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    const menu = document.getElementById("monitor-menu");
+    if (menu.hidden) {
+      await refreshMonitorList();
+      menu.hidden = false;
+    } else {
+      menu.hidden = true;
+    }
+  });
+}
+
+document.addEventListener("click", (e) => {
+  const menu = document.getElementById("monitor-menu");
+  const selector = document.getElementById("monitor-selector");
+  if (!menu || !selector) return;
+  if (!menu.hidden && !selector.contains(e.target)) menu.hidden = true;
+});
+
+// Hide selector entirely if not running in Tauri (e.g. dev preview).
+if (!tauriInvoke) {
+  const sel = document.getElementById("monitor-selector");
+  if (sel) sel.style.display = "none";
+}
+
 document.addEventListener("keydown", (e) => {
   if (!sessionId) return;
   // Don't hijack space/arrows when typing in inputs (none today, but futureproof).
