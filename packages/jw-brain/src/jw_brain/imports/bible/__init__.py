@@ -8,6 +8,7 @@ módulos se implementen en F58.3+. Los modelos Pydantic intermediarios ya
 están expuestos.
 """
 
+from jw_brain.imports.bible.loader import BibleLoader, LoaderStats
 from jw_brain.imports.bible.models import (
     BibleKgPassage,
     BibleKgPeriod,
@@ -21,5 +22,7 @@ __all__ = [
     "BibleKgPeriod",
     "BibleKgPerson",
     "BibleKgPlace",
+    "BibleLoader",
     "InsightEntry",
+    "LoaderStats",
 ]
