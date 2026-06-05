@@ -40,10 +40,28 @@ const recommended = [
 ];
 
 const stats = [
-  { value: "8", label: "Paquetes Python", suffix: "" },
-  { value: "2k", label: "Tests passing", suffix: "+" },
-  { value: "88", label: "Herramientas MCP", suffix: "+" },
+  { value: "10", label: "Paquetes Python", suffix: "" },
+  { value: "2.6k", label: "Tests passing", suffix: "+" },
+  { value: "110", label: "Herramientas MCP", suffix: "+" },
   { value: "1672", label: "Idiomas ASR", suffix: "" },
+];
+
+const visionCategories: { label: string; status: "done" | "partial" | "pending"; phase?: string }[] = [
+  { label: "Reunión semanal", status: "done", phase: "F57" },
+  { label: "Ministerio", status: "partial", phase: "F12" },
+  { label: "Audio · TTS · Diarización", status: "done", phase: "F34+F64" },
+  { label: "Multimodal · OCR", status: "partial", phase: "F36+F62" },
+  { label: "Idiomas · LSM", status: "partial", phase: "F53+F8" },
+  { label: "Apologética", status: "done", phase: "F32" },
+  { label: "Infra operacional", status: "done", phase: "F9+F10" },
+  { label: "Privacidad local", status: "done", phase: "F61" },
+  { label: "Memoria · perfil", status: "done", phase: "F61.8" },
+  { label: "Familia · niños", status: "pending" },
+  { label: "Calendario", status: "done", phase: "F51" },
+  { label: "Accesibilidad", status: "pending" },
+  { label: "Personalización", status: "done", phase: "F57.16" },
+  { label: "Bible Knowledge Graph", status: "done", phase: "F58" },
+  { label: "Sync E2E", status: "pending" },
 ];
 ---
 
@@ -227,7 +245,7 @@ const stats = [
           <h2
             class="text-balance font-display text-[clamp(1.8rem,3.5vw,2.8rem)] leading-tight text-[var(--color-ink-primary)]"
           >
-            Seis paquetes, una sola dependencia: <span
+            Diez paquetes, una sola dependencia: <span
               class="italic text-[var(--color-accent)]"
               style="font-variation-settings: 'opsz' 96, 'SOFT' 60;"
               >jw-core</span
@@ -365,9 +383,10 @@ const stats = [
             Hacia un ecosistema completo de IA local.
           </h2>
           <p class="mt-4 text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">
-            Las Fases 0-21 ya entregaron lo fundamental. Lo que sigue son 13
-            categorías de gaps: reunión semanal, ministerio, audio, multimodal,
-            idiomas, privacidad local-first, sync E2E.
+            De las 15 categorías originales, 10 ya están entregadas (F57-F66
+            cerraron 5 nuevas: reunión semanal, audio diarización, privacidad
+            local, KG bíblico, personalización). Los gaps restantes (3) son
+            Familia/niños, Accesibilidad y Sync E2E.
           </p>
           <a
             href="/docs/vision"
@@ -380,32 +399,32 @@ const stats = [
 
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3" data-reveal-group>
           {
-            [
-              "Reunión semanal",
-              "Ministerio",
-              "Audio · TTS",
-              "Multimodal · OCR",
-              "Idiomas · LSM",
-              "Apologética",
-              "Op infraestructura",
-              "Privacidad local",
-              "Memoria · perfil",
-              "Familia · niños",
-              "Calendario",
-              "Accesibilidad",
-              "Personalización",
-            ].map((cat, i) => (
-              <div
-                class="rounded-[2px] border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-3"
-              >
-                <span class="font-mono text-[10px] text-[var(--color-ink-tertiary)]">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <p class="mt-1 text-[13px] font-medium text-[var(--color-ink-primary)]">
-                  {cat}
-                </p>
-              </div>
-            ))
+            visionCategories.map((cat, i) => {
+              const dotColor =
+                cat.status === "done"
+                  ? "bg-[var(--color-success)]"
+                  : cat.status === "partial"
+                    ? "bg-[var(--color-warm)]"
+                    : "bg-[var(--color-line)]";
+              return (
+                <div class="rounded-[2px] border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-3 flex items-start gap-2.5">
+                  <span class={`mt-[7px] inline-block size-1.5 shrink-0 rounded-full ${dotColor}`}></span>
+                  <div class="flex-1">
+                    <span class="font-mono text-[10px] text-[var(--color-ink-tertiary)]">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <p class="mt-0.5 text-[13px] font-medium text-[var(--color-ink-primary)]">
+                      {cat.label}
+                    </p>
+                    {cat.phase && (
+                      <p class="mt-0.5 font-mono text-[10px] text-[var(--color-ink-tertiary)]">
+                        {cat.phase}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })
           }
         </div>
       </div>
