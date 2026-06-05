@@ -195,3 +195,42 @@ def estimate_real_time_factor(model_size: str) -> float:
         "medium": 0.9,
         "large-v3": 2.0,
     }.get(model_size, 1.0)
+
+
+# ── F64: diarization (whisperX) — extiende sin modificar ─────────────────
+
+
+@dataclass
+class DiarizedSegment(TranscriptionSegment):
+    """Segmento con identificación de orador y refs bíblicas opcionales.
+
+    Subclase backwards-compatible de `TranscriptionSegment`: el código
+    que recibe la base sigue funcionando. La importación de `BibleRef`
+    se hace lazy en `field(default_factory=tuple)` para evitar ciclos.
+    """
+
+    # IMPORTANTE: la importación de BibleRef se hace en el módulo (top-level)
+    # debajo de esta clase para no introducir ciclos con jw_core.models
+    # (que sólo depende de jw_core.types/data). Si BibleRef llega a depender
+    # de jw_core.audio en el futuro, mover este import dentro del provider.
+    speaker_id: str | None = None
+    bible_refs: tuple["BibleRef", ...] = field(default_factory=tuple)
+
+
+@dataclass
+class DiarizedResult(TranscriptionResult):
+    """Result de transcripción con diarización.
+
+    Subclase backwards-compatible de `TranscriptionResult`: código que
+    espera la base sigue funcionando. `segments` se redeclara con tipo
+    más estrecho `list[DiarizedSegment]`; dataclass tolera el override
+    porque ambos campos tienen `default_factory`.
+    """
+
+    segments: list[DiarizedSegment] = field(default_factory=list)  # type: ignore[assignment]
+    speaker_count: int = 0
+
+
+# Lazy import para resolver el forward-ref `"BibleRef"` en DiarizedSegment.
+# Se hace al final para evitar cualquier ciclo durante la carga del módulo.
+from jw_core.models import BibleRef  # noqa: E402  (intentional late import)
