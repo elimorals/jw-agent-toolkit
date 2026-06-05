@@ -41,6 +41,10 @@ data/
 !shared/data/
 !shared/data/**
 *.jwpub
+# F58.6: synthetic mini Insight JWPUB — committed so parser tests stay
+# deterministic without redistributing copyrighted content. Built from
+# `build_fixture.py` in the same directory.
+!packages/jw-brain/tests/fixtures/insight_mini/it_mini.jwpub
 *.epub
 *.pdf
 *.mp3

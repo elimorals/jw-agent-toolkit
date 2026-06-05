@@ -91,5 +91,5 @@ def test_register_tj_domain_populates_both_registries() -> None:
 
     nreg, ereg = NodeRegistry(), EdgeRegistry()
     register_tj_domain(nreg, ereg)
-    assert len(nreg.all()) == 6
-    assert len(ereg.all()) == 6
+    assert len(nreg.all()) == 8
+    assert len(ereg.all()) == 11

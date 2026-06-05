@@ -1262,3 +1262,18 @@ no de un módulo grande.
 - ✅ Doc en `docs/referencia/jw-mcp.md`.
 - ⬜ Tool `second_brain_list` para enumerar brains registrados (futuro).
 - ⬜ Resolución por alias en lugar de path absoluto (futuro).
+
+## Fase 58 — Bible Knowledge Graph JW-puro ✅
+
+- ✅ Schema TJ ampliado con `Period`, `Passage` + 5 edges temporales (`LIVED_IN_PERIOD`, `ACTIVE_IN_PERIOD`, `MENTIONED_IN_PASSAGE`, `LOCATED_IN_PASSAGE`, `PASSAGE_BELONGS_TO_PERIOD`).
+- ✅ Catálogo curado de 10 periodos bíblicos según cronología JW (607 a.E.C. para destrucción de Jerusalén).
+- ✅ `BibleLoader.import_periods()` + `import_insight(jwpub_path)`.
+- ✅ Parser procedural de cabezales del Insight (PERSON_HEADWORDS plus PLACE_HEADWORDS).
+- ✅ Port a Python de `BibleRef.from_wol_url` (paridad con jw-core-js F56.5).
+- ✅ CLI `jw brain import-bible`.
+- ✅ Helper `DuckDBBackend.query_persons_in_book(book_num)` con test E2E.
+- ✅ Fixture sintético `insight_mini/it_mini.jwpub` (3 entradas) generado por script reusando `jw_core.writers.jwpub.JwpubBuilder`.
+- ✅ Guía `docs/guias/bible-knowledge-graph.md`.
+- ⬜ Catálogo ampliado a las miles de entradas del Insight (sprint siguiente).
+- ⬜ Geocoordenadas de Place (otro catálogo curado).
+- ⬜ Import desde NWT cross-references (más Passage).

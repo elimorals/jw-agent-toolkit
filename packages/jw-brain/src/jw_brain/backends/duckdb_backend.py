@@ -232,3 +232,74 @@ class DuckDBBackend:
             ).fetchall()
         )
         return {"n_nodes": n_nodes, "n_edges": n_edges, "by_type": by_type}
+
+    # ── F58.8 helpers — listing nodes/edges by type for loader/test
+    # introspection. Intentionally NOT in the Protocol: these are
+    # backend-concrete helpers, not contract.
+    def list_nodes(self, *, node_type: str) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            "SELECT canonical_id, properties, provenance FROM nodes WHERE node_type = ?",
+            [node_type],
+        ).fetchall()
+        out: list[dict[str, Any]] = []
+        for canonical_id, props_raw, prov_raw in rows:
+            props = json.loads(props_raw) if props_raw else {}
+            prov = json.loads(prov_raw) if prov_raw else {}
+            out.append(
+                {
+                    "canonical_id": canonical_id,
+                    "node_type": node_type,
+                    "properties": props,
+                    "provenance": prov,
+                }
+            )
+        return out
+
+    def list_edges(self, *, edge_type: str) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            "SELECT from_node, to_node, properties, provenance FROM edges WHERE edge_type = ?",
+            [edge_type],
+        ).fetchall()
+        out: list[dict[str, Any]] = []
+        for from_node, to_node, props_raw, prov_raw in rows:
+            props = json.loads(props_raw) if props_raw else {}
+            prov = json.loads(prov_raw) if prov_raw else {}
+            out.append(
+                {
+                    "edge_type": edge_type,
+                    "source_canonical_id": from_node,
+                    "target_canonical_id": to_node,
+                    "properties": props,
+                    "provenance": prov,
+                }
+            )
+        return out
+
+    # ── F58.10 query helpers — Cypher-style queries traducidas a SQL.
+    # Como `list_nodes` / `list_edges`, son helpers concretos del backend
+    # DuckDB y NO forman parte del Protocol (cada backend traduce a su
+    # dialecto: Neo4j directo en Cypher, DuckDB en SQL con json_extract).
+    def query_persons_in_book(self, book_num: int) -> list[dict[str, Any]]:
+        """Lista personas con `MENTIONED_IN_PASSAGE → Passage` en `book_num`.
+
+        Equivalente Cypher:
+            MATCH (p:Person)-[:MENTIONED_IN_PASSAGE]->(pa:Passage)
+            WHERE pa.book_num = $book_num
+            RETURN DISTINCT p.canonical_id, p.name
+        """
+        sql = """
+        SELECT DISTINCT
+            person.canonical_id AS canonical_id,
+            json_extract_string(person.properties, '$.name') AS name
+        FROM nodes AS person
+        JOIN edges AS e
+            ON e.from_node = person.canonical_id
+        JOIN nodes AS passage
+            ON passage.canonical_id = e.to_node
+        WHERE person.node_type = 'Person'
+          AND e.edge_type = 'MENTIONED_IN_PASSAGE'
+          AND passage.node_type = 'Passage'
+          AND CAST(json_extract_string(passage.properties, '$.book_num') AS INTEGER) = ?
+        """
+        rows = self._conn.execute(sql, [book_num]).fetchall()
+        return [{"canonical_id": canonical_id, "name": name} for canonical_id, name in rows]

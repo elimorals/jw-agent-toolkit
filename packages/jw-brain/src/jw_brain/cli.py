@@ -15,6 +15,7 @@ import asyncio
 import json
 import os
 from pathlib import Path
+from typing import Any
 
 import typer
 
@@ -273,6 +274,75 @@ def lint_cmd(
         "orphan_pages": [str(p) for p in orphans],
         "orphan_count": len(orphans),
     }, indent=2))
+
+
+@brain_app.command("import-bible")
+def import_bible_cmd(
+    brain: Path | None = typer.Option(None, "--brain", help="Brain home path."),
+    periods_only: bool = typer.Option(
+        False,
+        "--periods-only",
+        help="Solo importa el catálogo curado de 10 periodos (smoke rápido).",
+    ),
+    insight: Path | None = typer.Option(
+        None,
+        "--insight",
+        help="Ruta a un .jwpub del Insight on the Scriptures.",
+    ),
+    symbol: str = typer.Option(
+        "it",
+        "--symbol",
+        help="Publication symbol (e.g. 'it' para Insight on the Scriptures).",
+    ),
+    meps_language: int = typer.Option(
+        0,
+        "--meps-language",
+        help="MEPS language code (0=inglés).",
+    ),
+) -> None:
+    """Importa el bible knowledge graph (periodos + Insight) sin LLM."""
+
+    from jw_brain.imports.bible.loader import BibleLoader
+
+    brain_path = _resolve_brain_path(brain)
+    if not (brain_path / "config.toml").exists():
+        typer.echo(
+            f"ERROR: no brain at {brain_path}. Run `jw brain init` first.",
+            err=True,
+        )
+        raise typer.Exit(code=2)
+
+    cfg = load_brain_config(brain_path)
+    backend = get_backend(cfg.graph_backend, path=Path(cfg.graph_path))
+    loader = BibleLoader(backend=backend)
+
+    periods_stats = loader.import_periods()
+
+    insight_stats = None
+    if not periods_only and insight is not None:
+        insight_path = Path(insight).expanduser().resolve()
+        if not insight_path.exists():
+            typer.echo(f"ERROR: insight jwpub not found at {insight_path}", err=True)
+            raise typer.Exit(code=2)
+        insight_stats = loader.import_insight(
+            insight_path,
+            symbol=symbol,
+            meps_language=meps_language,
+        )
+
+    out: dict[str, Any] = {
+        "brain": str(brain_path),
+        "periods_upserted": periods_stats.periods_upserted,
+    }
+    if insight_stats is not None:
+        out["persons_upserted"] = insight_stats.persons_upserted
+        out["places_upserted"] = insight_stats.places_upserted
+        out["passages_upserted"] = insight_stats.passages_upserted
+        out["edges_upserted"] = insight_stats.edges_upserted
+        out["skipped_unclassified"] = insight_stats.skipped_unclassified
+        if insight_stats.warnings:
+            out["warnings"] = insight_stats.warnings
+    typer.echo(json.dumps(out, indent=2))
 
 
 @brain_app.command("snapshot")
