@@ -27,6 +27,10 @@ from dataclasses import dataclass
 from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
 from jw_core.models import JwpubDocument, JwpubMetadata
 
+from jw_brain.imports.bible.expanded_headwords import (
+    EXPANDED_PERSON_HEADWORDS,
+    EXPANDED_PLACE_HEADWORDS,
+)
 from jw_brain.imports.bible.models import InsightEntry, InsightKind
 
 # ── Catálogos de clasificación ──────────────────────────────────────────
@@ -109,13 +113,18 @@ def classify_entry_kind(headword: str) -> InsightKind | None:
 
     Normaliza con `strip()` + `rstrip(_PUNCT_STRIP)` + `lower()` antes de
     comparar contra los catálogos.
+
+    F58.14: consulta unión de `PERSON_HEADWORDS ∪ EXPANDED_PERSON_HEADWORDS`
+    y `PLACE_HEADWORDS ∪ EXPANDED_PLACE_HEADWORDS`. El catálogo expandido
+    cubre ~250 personas + ~150 lugares del canon bíblico común en ES/EN
+    (hechos factuales públicos, no contenido del Insight).
     """
     key = headword.strip().rstrip(_PUNCT_STRIP).lower()
     if not key:
         return None
-    if key in PERSON_HEADWORDS:
+    if key in PERSON_HEADWORDS or key in EXPANDED_PERSON_HEADWORDS:
         return "person"
-    if key in PLACE_HEADWORDS:
+    if key in PLACE_HEADWORDS or key in EXPANDED_PLACE_HEADWORDS:
         return "place"
     return None
 

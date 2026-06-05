@@ -50,6 +50,36 @@ def test_classify_entry_kind_unknown_returns_none() -> None:
     assert classify_entry_kind("") is None
 
 
+# ── F58.14: lookup expandido ───────────────────────────────────────────────
+
+
+def test_classify_includes_expanded_persons() -> None:
+    """Nombres del catálogo expandido (e.g. David, Solomon, Isaías) clasifican
+    como persona aunque no estén en PERSON_HEADWORDS original."""
+    assert classify_entry_kind("David") == "person"
+    assert classify_entry_kind("Solomon") == "person"
+    assert classify_entry_kind("Salomón") == "person"
+    assert classify_entry_kind("Isaías") == "person"
+    assert classify_entry_kind("Cornelius") == "person"
+    assert classify_entry_kind("Stephen") == "person"
+
+
+def test_classify_includes_expanded_places() -> None:
+    """Lugares del catálogo expandido clasifican como place."""
+    assert classify_entry_kind("Belén") == "place"
+    assert classify_entry_kind("Bethlehem") == "place"
+    assert classify_entry_kind("Antioquía") == "place"
+    assert classify_entry_kind("Damasco") == "place"
+    assert classify_entry_kind("Cesarea") == "place"
+    assert classify_entry_kind("Sardis") == "place"
+
+
+def test_classify_expanded_still_normalizes() -> None:
+    """Lookup expandido sigue normalizando whitespace/punctuación/case."""
+    assert classify_entry_kind("  DAVID.  ") == "person"
+    assert classify_entry_kind("bethlehem,") == "place"
+
+
 # ── InsightParser sobre fixture real ────────────────────────────────────
 
 
