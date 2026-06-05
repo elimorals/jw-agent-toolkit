@@ -346,3 +346,23 @@ Endpoints REST equivalentes:
 | `POST /api/v1/vault/index` | `index_obsidian_vault` |
 | `POST /api/v1/vault/export` | `export_jw_library_backup_to_vault` |
 | `GET /healthz` | (sin equivalente MCP — para health checks) |
+
+---
+
+## Fase 66 — Second Brain tools
+
+Las siguientes tools exponen el knowledge graph del `jw-brain` (F49+F58) a
+clientes MCP (Claude Desktop, Cursor, etc.). Todas reciben `brain_path`
+como **ruta absoluta** al directorio del brain (no alias del registry —
+la resolución por alias queda para sprint futuro).
+
+| Tool | Inputs | Returns |
+|---|---|---|
+| `second_brain_status` | `brain_path: str` | stats del brain (graph, raw, vault counts) |
+| `second_brain_query` | `brain_path: str`, `question: str`, `mode: str = "auto"` | answer + citations + confidence |
+| `second_brain_compile` | `brain_path: str`, `dry_run: bool = False`, `language: str = "es"` | counts de procesado |
+| `second_brain_lint` | `brain_path: str` | findings de orphan pages plus (TODO) NLI cross-publication |
+| `second_brain_snapshot` | `brain_path: str`, `label: str \| None = None` | path del snapshot |
+
+Cobertura E2E en `packages/jw-mcp/tests/test_jw_brain_tools.py` (5 tests
+sobre un brain DuckDB temporal inicializado por fixture).

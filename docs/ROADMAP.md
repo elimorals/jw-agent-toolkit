@@ -1253,3 +1253,12 @@ fuera de `tests/` arrojaba cero coincidencias. F55 cambia eso —
 8 puntos de integración con la convención: pequeños (≤50 LOC c/u) pero
 multiplicativos. La integración profunda es el efecto de muchos wires,
 no de un módulo grande.
+
+## Fase 66 — second brain expuesto vía MCP ✅
+
+- ✅ Tools `@mcp.tool` para `second_brain_status/compile/query/lint/snapshot` en `jw_mcp/server.py` (heredado de F49).
+- ✅ Tests E2E sobre temp DuckDB brain (`packages/jw-mcp/tests/test_jw_brain_tools.py`, 5 tests).
+- ✅ Fix de drift en `_EXPECTED_TOOLS` (añadidos `get_trace` y `translate_preserving_refs`).
+- ✅ Doc en `docs/referencia/jw-mcp.md`.
+- ⬜ Tool `second_brain_list` para enumerar brains registrados (futuro).
+- ⬜ Resolución por alias en lugar de path absoluto (futuro).

@@ -158,6 +158,10 @@ _EXPECTED_TOOLS = {
     "second_brain_query",
     "second_brain_lint",
     "second_brain_snapshot",
+    # Phase 43 — Trace inspector
+    "get_trace",
+    # Phase 54 — Translation preserving Bible references
+    "translate_preserving_refs",
 }
 
 
