@@ -38,9 +38,7 @@ def temp_brain(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     reg = tmp_path / "registry.toml"
     monkeypatch.setattr(
         "jw_brain.cli.register_brain",
-        lambda alias, path: save_registry(
-            {**load_registry(reg), alias: path}, reg
-        ),
+        lambda alias, path: save_registry({**load_registry(reg), alias: path}, reg),
     )
     monkeypatch.setattr("jw_brain.cli.load_registry", lambda: load_registry(reg))
 
@@ -89,10 +87,7 @@ async def test_second_brain_status_unknown_brain_returns_error_or_zero(
         result = await second_brain_status(brain_path=str(fake_path))
         assert isinstance(result, dict)
         # Either an explicit error field, or zero-stat response.
-        ok_shape = (
-            "error" in result
-            or result.get("graph", {}).get("n_nodes", 0) == 0
-        )
+        ok_shape = "error" in result or result.get("graph", {}).get("n_nodes", 0) == 0
         assert ok_shape, result
     except (FileNotFoundError, ValueError, RuntimeError):
         pass
@@ -117,9 +112,7 @@ async def test_second_brain_query_empty_brain_returns_no_error(
 async def test_second_brain_snapshot_creates_artifact(temp_brain: Path) -> None:
     from jw_mcp.server import second_brain_snapshot
 
-    result = await second_brain_snapshot(
-        brain_path=str(temp_brain), label="test_snapshot"
-    )
+    result = await second_brain_snapshot(brain_path=str(temp_brain), label="test_snapshot")
     assert "error" not in result, result
     # The implementation returns {"snapshot": "<path>"}; allow any of the
     # commonly-used keys for forward compatibility.
