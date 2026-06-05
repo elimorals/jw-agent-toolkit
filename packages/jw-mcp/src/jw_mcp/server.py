@@ -1275,6 +1275,102 @@ def ingest_epub(
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Tools: ingest_pdf + ingest_office_doc (Phase 62 — marker + markitdown)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+def ingest_pdf(
+    pdf_path: str,
+    language: str = "en",
+    chunker: str | None = None,
+) -> dict[str, Any]:
+    """Ingest a PDF into the RAG store using marker (CPU local by default).
+
+    Useful for históricas scanned Watchtowers, pre-EPUB JW publications,
+    and any PDF shared by hermanos. Automatic JW-signature detection
+    flags `metadata.is_jw=True` when applicable, allowing later filter
+    by congregation source vs. personal docs.
+
+    GPU/LLM acceleration is opt-in: set `JW_MARKER_USE_GPU=1` and/or
+    `JW_MARKER_USE_LLM=1` in the server's environment. By default
+    everything runs CPU-only with no remote LLM calls.
+
+    Args:
+        pdf_path: Absolute path to the PDF on disk.
+        language: ISO code stored on every chunk for later filtering.
+        chunker: Optional chunker name; None uses the default
+            (`paragraph` or `$JW_CHUNKER`).
+    """
+    try:
+        from jw_rag.loaders.pdf_marker import ingest_pdf as _impl
+    except ModuleNotFoundError as exc:
+        return {
+            "error": (
+                f"{exc}. Install with: uv add 'jw-rag[pdf-marker]'"
+            )
+        }
+
+    store = _get_rag_store()
+    try:
+        from pathlib import Path
+
+        n = _impl(store, Path(pdf_path), language=language, chunker=chunker)
+    except Exception as e:
+        return {"error": f"{type(e).__name__}: {e}"}
+    store.save()
+    return {
+        "pdf_path": pdf_path,
+        "language": language,
+        "chunks_added": n,
+        "store_total": store.count,
+    }
+
+
+@mcp.tool
+def ingest_office_doc(
+    doc_path: str,
+    language: str = "en",
+    chunker: str | None = None,
+) -> dict[str, Any]:
+    """Ingest a .docx/.pptx/.xlsx into the RAG store via markitdown.
+
+    Useful for talk outlines, programas de circuito, attendance
+    sheets, and other Office docs shared inside a congregation.
+
+    Args:
+        doc_path: Absolute path to the document.
+        language: ISO code stored on every chunk.
+        chunker: Optional chunker name; None uses the default.
+    """
+    try:
+        from jw_rag.loaders.docs_markitdown import (
+            ingest_office_doc as _impl,
+        )
+    except ModuleNotFoundError as exc:
+        return {
+            "error": (
+                f"{exc}. Install with: uv add 'jw-rag[doc-markitdown]'"
+            )
+        }
+
+    store = _get_rag_store()
+    try:
+        from pathlib import Path
+
+        n = _impl(store, Path(doc_path), language=language, chunker=chunker)
+    except Exception as e:
+        return {"error": f"{type(e).__name__}: {e}"}
+    store.save()
+    return {
+        "doc_path": doc_path,
+        "language": language,
+        "chunks_added": n,
+        "store_total": store.count,
+    }
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Tool: get_cache_stats (Phase 9)
 # ────────────────────────────────────────────────────────────────────────
 
