@@ -3847,6 +3847,154 @@ async def memory_forget_session(session_id: str) -> dict[str, Any]:
 
 
 # ────────────────────────────────────────────────────────────────────────
+# F57 — jw-meeting-media tools
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def meeting_discover_week(
+    language: str, year: int, week: int, kind: str = "midweek"
+) -> dict[str, Any]:
+    """Descubre el programa semanal del workbook JW desde wol.jw.org.
+
+    Persiste el programa parseado en `~/.jw-agent-toolkit/meetings/meetings.db`
+    para uso posterior por `meeting_download_media` y la ventana presenter.
+    """
+    try:
+        from pathlib import Path as _PMM_Path
+
+        from jw_meeting_media.models import MeetingKind
+        from jw_meeting_media.program_client import MeetingProgramClient
+        from jw_meeting_media.storage import MeetingStorage
+
+        client = MeetingProgramClient()
+        program = await client.fetch_week(
+            language=language, year=year, week=week, kind=MeetingKind(kind)
+        )
+        await client.aclose()
+        storage = MeetingStorage(
+            _PMM_Path("~/.jw-agent-toolkit/meetings/meetings.db").expanduser()
+        )
+        storage.save_program(program)
+        return {
+            "language": program.language,
+            "kind": program.kind.value,
+            "week_start": program.week_start.isoformat(),
+            "section_count": len(program.sections),
+            "item_count": sum(len(s.items) for s in program.sections),
+            "source_url": program.source_url,
+        }
+    except Exception as exc:
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
+@mcp.tool
+async def meeting_download_media(
+    language: str, year: int, week: int, kind: str = "midweek"
+) -> dict[str, Any]:
+    """Descarga toda la media del programa semanal al cache local.
+
+    Requiere que `meeting_discover_week` haya sido llamado antes para el mismo
+    idioma/año/semana/kind.
+    """
+    try:
+        from pathlib import Path as _PMM_Path
+
+        from jw_meeting_media.downloader import Downloader
+        from jw_meeting_media.media_resolver import MediaResolver
+        from jw_meeting_media.models import MeetingKind
+        from jw_meeting_media.storage import MeetingStorage
+
+        cache_root = _PMM_Path("~/.jw-agent-toolkit/meetings").expanduser()
+        storage = MeetingStorage(cache_root / "meetings.db")
+        program = storage.load_program(
+            language=language, year=year, week=week, kind=MeetingKind(kind)
+        )
+        if program is None:
+            return {"error": "program not found; call meeting_discover_week first"}
+
+        resolver = MediaResolver()
+        dl = Downloader(cache_root=cache_root / "media")
+        results: dict[str, Any] = {"succeeded": 0, "failed": 0, "items": []}
+        for sec in program.sections:
+            for item in sec.items:
+                for ref in item.media_refs:
+                    try:
+                        resolved = await resolver.resolve(ref)
+                        if not resolved.url:
+                            results["failed"] += 1
+                            continue
+                        local = await dl.download(
+                            resolved, language=language, year=year, week=week
+                        )
+                        storage.mark_downloaded(resolved, local_path=local)
+                        results["succeeded"] += 1
+                        results["items"].append(
+                            {"title": ref.title, "local_path": str(local)}
+                        )
+                    except Exception as exc:
+                        results["failed"] += 1
+                        results["items"].append(
+                            {"title": ref.title, "error": str(exc)}
+                        )
+        await dl.aclose()
+        return results
+    except Exception as exc:
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
+@mcp.tool
+async def meeting_list_programs() -> dict[str, Any]:
+    """Lista programas semanales ya descargados."""
+    try:
+        import sqlite3
+        from contextlib import closing
+        from pathlib import Path as _PMM_Path
+
+        db = _PMM_Path("~/.jw-agent-toolkit/meetings/meetings.db").expanduser()
+        if not db.exists():
+            return {"programs": []}
+        with closing(sqlite3.connect(db)) as conn:
+            rows = conn.execute(
+                "SELECT language, year, week, kind, saved_at FROM programs "
+                "ORDER BY year DESC, week DESC"
+            ).fetchall()
+        return {
+            "programs": [
+                {
+                    "language": r[0],
+                    "year": r[1],
+                    "week": r[2],
+                    "kind": r[3],
+                    "saved_at": r[4],
+                }
+                for r in rows
+            ]
+        }
+    except Exception as exc:
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
+@mcp.tool
+async def meeting_open_presenter(
+    language: str, year: int, week: int, kind: str = "midweek"
+) -> dict[str, Any]:
+    """Devuelve la URL relativa de la ventana presenter Tauri con query params.
+
+    El usuario (o cliente MCP) la abre desde la app desktop ya en ejecución.
+    """
+    return {
+        "presenter_url": (
+            f"presenter.html?language={language}&year={year}&week={week}&kind={kind}"
+        ),
+        "instructions": (
+            "Abre apps/desktop y la ventana 'presenter' debe estar visible. "
+            "Si no, ejecutar `yarn tauri dev` en apps/desktop."
+        ),
+    }
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
 

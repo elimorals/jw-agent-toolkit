@@ -171,6 +171,11 @@ _EXPECTED_TOOLS = {
     "memory_record",
     "memory_recall",
     "memory_forget_session",
+    # Phase 57 — jw-meeting-media (clean-room)
+    "meeting_discover_week",
+    "meeting_download_media",
+    "meeting_list_programs",
+    "meeting_open_presenter",
 }
 
 
