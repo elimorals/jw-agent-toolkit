@@ -51,6 +51,32 @@ def tj_node_specs() -> list[NodeTypeSpec]:
             wiki_page_template="place.md",
             obsidian_subdir="places/",
         ),
+        NodeTypeSpec(
+            name="Period",
+            canonical_id_pattern="period:{slug}",
+            properties={
+                "slug": str,
+                "name": str,
+                "start_year_bce": int,
+                "end_year_bce": int,
+                "end_year_ce": int,
+                "description": str,
+            },
+            wiki_page_template="period.md",
+            obsidian_subdir="periods/",
+        ),
+        NodeTypeSpec(
+            name="Passage",
+            canonical_id_pattern="passage:{book_num}:{chapter}",
+            properties={
+                "book_num": int,
+                "chapter": int,
+                "verse_start": int,
+                "verse_end": int,
+            },
+            wiki_page_template="passage.md",
+            obsidian_subdir="passages/",
+        ),
     ]
 
 
@@ -62,6 +88,11 @@ def tj_edge_specs() -> list[EdgeTypeSpec]:
         EdgeTypeSpec(name="CROSS_REFERENCES", sources=("Verse",), targets=("Verse",), directional=False),
         EdgeTypeSpec(name="CONTRADICTS", sources=("Publication",), targets=("Publication",), sensitive=True),
         EdgeTypeSpec(name="ABOUT", sources=("Verse",), targets=("Topic", "Concept", "Person", "Place")),
+        EdgeTypeSpec(name="LIVED_IN_PERIOD", sources=("Person",), targets=("Period",)),
+        EdgeTypeSpec(name="ACTIVE_IN_PERIOD", sources=("Place",), targets=("Period",)),
+        EdgeTypeSpec(name="MENTIONED_IN_PASSAGE", sources=("Person",), targets=("Passage",)),
+        EdgeTypeSpec(name="LOCATED_IN_PASSAGE", sources=("Place",), targets=("Passage",)),
+        EdgeTypeSpec(name="PASSAGE_BELONGS_TO_PERIOD", sources=("Passage",), targets=("Period",)),
     ]
 
 
