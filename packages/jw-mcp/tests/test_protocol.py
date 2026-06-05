@@ -162,6 +162,9 @@ _EXPECTED_TOOLS = {
     "get_trace",
     # Phase 54 — Translation preserving Bible references
     "translate_preserving_refs",
+    # Phase 62 — marker + markitdown loaders
+    "ingest_pdf",
+    "ingest_office_doc",
 }
 
 

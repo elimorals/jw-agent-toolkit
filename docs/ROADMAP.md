@@ -1277,3 +1277,16 @@ no de un módulo grande.
 - ⬜ Catálogo ampliado a las miles de entradas del Insight (sprint siguiente).
 - ⬜ Geocoordenadas de Place (otro catálogo curado).
 - ⬜ Import desde NWT cross-references (más Passage).
+
+## Fase 62 — marker plus markitdown loaders ✅
+
+- ✅ `jw_rag.loaders.pdf_marker.ingest_pdf()` con marker (CPU default, GPU/LLM opt-in via `JW_MARKER_USE_GPU` / `JW_MARKER_USE_LLM`).
+- ✅ `jw_rag.loaders.docs_markitdown.ingest_office_doc()` para `.docx` / `.pptx` / `.xlsx`.
+- ✅ Detección automática de firmas JW (Watch Tower, JW.ORG, Atalaya, Kingdom Hall, …) → `metadata.is_jw=True` para retrieval filtrable.
+- ✅ Idempotencia por sha256 del archivo (`pdf:<hash8>` / `doc:<ext>:<hash8>` como `source_id`).
+- ✅ Tools MCP `ingest_pdf` + `ingest_office_doc` (server.py registra ambas en `_EXPECTED_TOOLS`).
+- ✅ CLI `jw rag ingest-pdf` + `jw rag ingest-office` (exit 3 con hint si falta el extra opcional).
+- ✅ Fixtures sintéticos reproducibles (`atalaya_sample.pdf`, `programa_circuito.docx`) + 9 tests skipped-when-extra-absent via `pytest.importorskip`.
+- ✅ Extras `[pdf-marker]`, `[doc-markitdown]`, `[loaders-all]` en `packages/jw-rag/pyproject.toml`.
+- ✅ Guía operativa `docs/guias/historical-pdf-ingest.md`.
+- ⬜ Imagen-only PDF (escaneo puro sin texto extraíble): pendiente integración Tesseract fallback.

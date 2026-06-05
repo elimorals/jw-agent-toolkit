@@ -52,6 +52,13 @@ visual-mlx = [
     "playwright>=1.47.0",
 ]
 
+# Fase 62: external loaders for historical PDFs (marker) and Office docs (markitdown).
+# Both are opt-in extras to keep the base install slim. marker-pdf pulls torch +
+# transformers (~2 GB); markitdown[all] is much lighter.
+pdf-marker = ["marker-pdf>=1.0.0"]
+doc-markitdown = ["markitdown[all]>=0.0.1a"]
+loaders-all = ["jw-rag[pdf-marker,doc-markitdown]"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
