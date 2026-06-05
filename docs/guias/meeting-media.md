@@ -87,6 +87,30 @@ gestos están soportados:
   `/presenter/sessions/{sid}/add`). En Tauri 2 se usa el path
   absoluto del FS expuesto por `file.path`.
 
+### Monitor externo (F57.15)
+
+En la Sala del Reino, el laptop conectado al proyector tiene dos
+salidas: la pantalla del laptop (operador) y el proyector externo
+(audiencia). Clic en **🖥 Monitor** del sidebar para abrir el
+selector y mover el presenter al proyector.
+
+- El menú lista todos los monitores detectados con su resolución
+  y marca el primario.
+- Marca/desmarca **Fullscreen** antes de elegir destino (por
+  defecto activado).
+- Clic sobre un monitor: la ventana presenter salta a ese monitor,
+  recupera focus y entra a fullscreen si la opción está marcada.
+- Si solo hay 1 monitor (o no se detectan), el menú muestra el
+  estado pero no rompe la app: simplemente no hay destino al que
+  mover.
+
+Implementación: Tauri 2 expone dos commands custom
+(`list_monitors`, `move_presenter_to_monitor`) declarados en
+`apps/desktop/src-tauri/src/main.rs` e invocados desde
+`presenter.js` vía `window.__TAURI__.core.invoke`. Fuera de Tauri
+(p.ej. `vite dev` preview standalone) el selector se oculta
+automáticamente.
+
 ## Uso MCP
 
 Cuatro tools expuestas a clientes MCP:
@@ -116,7 +140,6 @@ Cuatro tools expuestas a clientes MCP:
 - Sin integración OBS Studio (scene switching).
 - Sin sync cloud (Dropbox/OneDrive).
 - Sin background music con auto-stop.
-- Sin multi-monitor automático (Tauri 2.x: feature manual).
 - Sin catálogo Memorial / eventos especiales.
 
 Esas features quedan para sprints posteriores.
