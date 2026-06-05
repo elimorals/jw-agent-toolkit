@@ -19,17 +19,30 @@ import pytest
 
 
 @pytest.fixture()
-def temp_brain(tmp_path: Path) -> Path:
+def temp_brain(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Initialize an empty TJ brain at ``tmp_path/brain``.
 
     Returns the absolute brain home path. The fixture relies on
     ``jw brain init`` to create the config.toml + raw/vault/graph
     skeleton; this is what the MCP wrappers expect.
+
+    The registry side effects of ``jw brain init`` are redirected to a
+    ``tmp_path`` file (precedent: ``test_multi_tenant.py``) so the test
+    does not mutate the user's real ``~/.jw-brain/registry.toml``.
     """
 
+    from jw_brain.cli import brain_app
+    from jw_brain.multi_tenant import load_registry, save_registry
     from typer.testing import CliRunner
 
-    from jw_brain.cli import brain_app
+    reg = tmp_path / "registry.toml"
+    monkeypatch.setattr(
+        "jw_brain.cli.register_brain",
+        lambda alias, path: save_registry(
+            {**load_registry(reg), alias: path}, reg
+        ),
+    )
+    monkeypatch.setattr("jw_brain.cli.load_registry", lambda: load_registry(reg))
 
     brain_home = tmp_path / "brain"
     brain_home.mkdir()
@@ -118,3 +131,12 @@ async def test_second_brain_snapshot_creates_artifact(temp_brain: Path) -> None:
     snap_path = Path(result[snap_key])
     assert snap_path.exists(), f"snapshot file missing: {snap_path}"
     assert "test_snapshot" in snap_path.name
+
+
+async def test_second_brain_lint_smoke(temp_brain: Path) -> None:
+    """Empty brain: lint must respond without error (no orphan pages yet)."""
+    from jw_mcp.server import second_brain_lint
+
+    result = await second_brain_lint(brain_path=str(temp_brain))
+    assert "error" not in result, result
+    assert isinstance(result, dict)
