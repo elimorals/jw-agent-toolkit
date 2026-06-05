@@ -3740,6 +3740,113 @@ def translate_preserving_refs(
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Tools: memory_record / memory_recall / memory_forget_session (Phase 61)
+# ────────────────────────────────────────────────────────────────────────
+
+
+_memory_store: Any | None = None
+
+
+def _get_memory_store() -> Any:
+    """Lazy singleton of the configured MemoryStore (respects JW_MEMORY_BACKEND)."""
+    global _memory_store
+    if _memory_store is None:
+        from jw_agents.memory import build_memory_store
+        _memory_store = build_memory_store()
+    return _memory_store
+
+
+@mcp.tool
+async def memory_record(
+    session_id: str,
+    kind: str,
+    content: str,
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Persist a record into the configured MemoryStore (Phase 61).
+
+    Backend is determined by `JW_MEMORY_BACKEND` env var (fake|sqlite|letta).
+
+    Args:
+        session_id: free-form session identifier (e.g. UUID, "daily-2026-06-04").
+        kind: one of 'question', 'answer', 'fact_recalled', 'preference', 'objection'.
+        content: text payload of the record.
+        metadata: free-form dict (BibleRefs, source URLs, language, etc.).
+    """
+    from datetime import datetime, timezone
+
+    from jw_agents.memory import MemoryRecord
+
+    valid_kinds = {"question", "answer", "fact_recalled", "preference", "objection"}
+    if kind not in valid_kinds:
+        return {"error": f"invalid kind: {kind}. Use one of {sorted(valid_kinds)}"}
+    try:
+        store = _get_memory_store()
+        store.record(MemoryRecord(
+            session_id=session_id,
+            timestamp=datetime.now(timezone.utc),
+            kind=kind,  # type: ignore[arg-type]
+            content=content,
+            metadata=metadata or {},
+        ))
+        return {"recorded": True, "session_id": session_id, "kind": kind}
+    except Exception as exc:
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
+@mcp.tool
+async def memory_recall(
+    session_id: str | None = None,
+    query: str | None = None,
+    kind: str | None = None,
+    limit: int = 10,
+) -> dict[str, Any]:
+    """Recall records from the MemoryStore filtered by session, kind and/or query.
+
+    All filters are AND-combined. With `query`, results are sorted by relevance
+    (substring/BM25); otherwise by `timestamp DESC`.
+
+    Returns `{records: [{session_id, timestamp, kind, content, metadata}], count}`.
+    """
+    try:
+        store = _get_memory_store()
+        records = store.recall(
+            session_id=session_id, query=query, kind=kind, limit=limit
+        )
+        return {
+            "records": [
+                {
+                    "session_id": r.session_id,
+                    "timestamp": r.timestamp.isoformat(),
+                    "kind": r.kind,
+                    "content": r.content,
+                    "metadata": r.metadata,
+                }
+                for r in records
+            ],
+            "count": len(records),
+        }
+    except Exception as exc:
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
+@mcp.tool
+async def memory_forget_session(session_id: str) -> dict[str, Any]:
+    """Delete all records for a given session_id.
+
+    Useful for 'forget today's conversation' or a privacy reset. Note that
+    the Letta backend does not support selective forget — switch to sqlite
+    if you need this feature.
+    """
+    try:
+        store = _get_memory_store()
+        n = store.forget(session_id=session_id)
+        return {"forgotten": n, "session_id": session_id}
+    except Exception as exc:
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
 
