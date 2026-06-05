@@ -1316,3 +1316,58 @@ no de un módulo grande.
 - ✅ Fixtures audio reproducibles vía `gtts`+`ffmpeg` con fallback stdlib sine (`build_audio_fixtures.py`).
 - ✅ Guía operativa `docs/guias/asr-diarizacion.md`.
 - ⬜ Mapeo `speaker_id` → nombre real (futuro: integración con voiceprint del schedule organized-app, F51).
+
+## Fase 57 — jw-meeting-media subpkg ✅
+
+> **Clean-room implementation.** Subpaquete inspirado en las features
+> del proyecto upstream M³ (`sircharlo/meeting-media-manager`, AGPL-3.0)
+> pero reimplementado desde cero observando README + estructura HTML
+> pública del WOL. NO contiene código portado. Resultado GPL-3.0-only.
+
+- ✅ Workspace member `packages/jw-meeting-media` con
+  `pyproject.toml` (deps: jw-core, pydantic, bs4, lxml, httpx, typer)
+  y extras `[thumbnails]`, `[audio-tags]`, `[all]`.
+- ✅ Modelos Pydantic `MeetingKind`, `MediaKind`, `MediaRef`,
+  `MeetingItem`, `MeetingSection`, `MeetingProgram`,
+  `PresenterSession` con `advance/rewind/current_item` helpers.
+- ✅ `MeetingProgramClient` (cliente HTTP + parser HTML del workbook
+  semanal WOL) reusa `jw_core.languages.get_language` para `resource`/`lp_tag`
+  y `parse_all_references` para extraer refs bíblicas inline.
+- ✅ Fixture HTML real capturado (semana 23/2026 español, 38 KB) en
+  `tests/fixtures/wol_mwb_2026_w23_es.html`.
+- ✅ `MediaResolver` envuelve `PubMediaClient` (F2) para refs
+  `kind=VIDEO|AUDIO` con `pub_code+track`; pass-through para
+  `IMAGE`/`JWPUB`.
+- ✅ `Downloader` con cache sha256 idempotente. Path scheme
+  `<cache>/<lang>/<year>/<week>/<basename>`.
+- ✅ `MeetingStorage` sqlite (tablas `programs` y `downloads`,
+  `PRAGMA user_version=1`) con `save_program/load_program`,
+  `mark_downloaded/is_downloaded/get_download_info`.
+- ✅ `Thumbnailer` (Pillow + ffmpeg subprocess) con cache
+  idempotente por sha256(input)+max_size.
+- ✅ `PresenterManager` (FSM in-memory, multi-sesión) expone
+  `create_session`, `play/pause/next_/prev/stop/destroy/get_state/list_sessions`.
+- ✅ CLI sub-app `jw meeting discover|download|list`.
+- ✅ REST endpoints `/presenter/sessions`, `/presenter/sessions/{sid}/state`,
+  `/play|pause|next|prev|stop` y `DELETE /presenter/sessions/{sid}` en
+  `jw_mcp.rest_api`.
+- ✅ Ventana Tauri secundaria `presenter` declarada en
+  `tauri.conf.json` (vanilla JS controller, atajos
+  Space/←/→/Esc). Multi-page Vite build verde.
+- ✅ MCP tools `meeting_discover_week`, `meeting_download_media`,
+  `meeting_list_programs`, `meeting_open_presenter` registradas en
+  `_EXPECTED_TOOLS`.
+- ✅ Tests: 7 (models) + 6 (program_client) + 2 (media_resolver) + 4
+  (downloader) + 4 (storage) + 2 (thumbnailer) + 6 (presenter_state) +
+  2 (cli) + 3 (rest_presenter, skipped sin fastapi) = **36 tests**.
+- ✅ Docs: `docs/conceptos/programa-semanal-mwb-w.md` (análisis
+  arquitectónico clean-room), `docs/guias/meeting-media.md` (guía
+  operativa con atribución explícita).
+- ⬜ Monitor externo automático (MVP+1).
+- ⬜ Drag-and-drop UI para añadir media extra (MVP+1).
+- ⬜ Multi-congregación (MVP+1).
+- ⬜ Catálogo Memorial / eventos especiales (MVP+1).
+- ⬜ Zoom screen sharing (futuro).
+- ⬜ OBS Studio scene switching (futuro).
+- ⬜ Sync cloud (Dropbox/OneDrive) (futuro).
+- ⬜ Background music con auto-stop (futuro).

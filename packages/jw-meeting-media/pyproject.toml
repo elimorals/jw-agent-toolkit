@@ -1,0 +1,32 @@
+[project]
+name = "jw-meeting-media"
+version = "0.1.0"
+description = "Descubrimiento, descarga y presentación de medios para reuniones congregacionales JW. Clean-room implementation."
+requires-python = ">=3.13"
+license = "GPL-3.0-only"
+authors = [{ name = "jw-agent-toolkit" }]
+dependencies = [
+    "jw-core",
+    "pydantic>=2.0",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.0",
+    "httpx>=0.27",
+    "typer>=0.12",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+thumbnails = ["Pillow>=10.0"]
+video-thumbnails = ["Pillow>=10.0"]  # plus ffmpeg en PATH (system dep)
+audio-tags = ["mutagen>=1.47"]
+all = ["jw-meeting-media[thumbnails,audio-tags]"]
+
+[tool.uv.sources]
+jw-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/jw_meeting_media"]

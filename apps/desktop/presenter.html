@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Presenter</title>
+    <link rel="stylesheet" href="/src/presenter.css" />
+  </head>
+  <body>
+    <div id="stage">
+      <img id="media-image" hidden />
+      <video id="media-video" hidden controls></video>
+      <div id="placeholder">Carga una sesión para empezar.</div>
+    </div>
+    <div id="controls">
+      <button id="prev" title="Anterior">&#9198;</button>
+      <button id="play-pause" title="Reproducir/Pausar">&#9205;</button>
+      <button id="next" title="Siguiente">&#9197;</button>
+      <button id="stop" title="Detener">&#9209;</button>
+      <span id="position">— / —</span>
+      <span id="title-display"></span>
+    </div>
+    <script type="module" src="/src/presenter.js"></script>
+  </body>
+</html>

@@ -131,6 +131,14 @@ from jw_cli.commands.audio import audio_app
 
 app.add_typer(audio_app, name="audio", help="Audio: transcripción + diarización (Fase 64).")
 
+# F57 — `jw meeting` (descubrimiento + descarga de media de reunión)
+try:
+    from jw_meeting_media.cli import app as meeting_app
+
+    app.add_typer(meeting_app, name="meeting", help="Reunión-en-vivo (Fase 57).")
+except ImportError:
+    pass
+
 
 def main() -> None:
     app()
