@@ -3846,6 +3846,53 @@ async def memory_forget_session(session_id: str) -> dict[str, Any]:
         return {"error": f"{type(exc).__name__}: {exc}"}
 
 
+@mcp.tool
+async def recap_previous_session(
+    current_session_id: str,
+    limit: int = 5,
+    max_excerpts_per_kind: int = 3,
+) -> dict[str, Any]:
+    """Genera un recap de sesiones previas del usuario (Phase 61.8).
+
+    Útil al iniciar una nueva conversación: el agente puede preguntar
+    "¿continuamos con la sesión X de ayer?" basado en este recap.
+
+    Es procedural — NO usa LLM en el camino crítico. Agrupa records por
+    session_id, ordena por timestamp desc y emite un finding por sesión
+    previa con counts por kind + excerpts.
+
+    Args:
+        current_session_id: la sesión actual (se excluye).
+        limit: cuántas sesiones previas recapitular.
+        max_excerpts_per_kind: máx contenidos por kind en cada recap.
+
+    Returns:
+        Dict con `findings: [{summary, session_id, excerpts_by_kind, ...}]`
+        y `metadata.sessions_scanned/recapped`.
+    """
+    try:
+        from jw_agents.recap_session import (
+            recap_previous_session as _impl,
+        )
+        store = _get_memory_store()
+        result = await _impl(
+            memory=store,
+            current_session_id=current_session_id,
+            limit=limit,
+            max_excerpts_per_kind=max_excerpts_per_kind,
+        )
+        return result.to_dict() if hasattr(result, "to_dict") else {
+            "agent_name": result.agent_name,
+            "findings": [
+                {"summary": f.summary, "excerpt": f.excerpt, "metadata": f.metadata}
+                for f in result.findings
+            ],
+            "metadata": result.metadata,
+        }
+    except Exception as exc:
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
 # ────────────────────────────────────────────────────────────────────────
 # F57 — jw-meeting-media tools
 # ────────────────────────────────────────────────────────────────────────
