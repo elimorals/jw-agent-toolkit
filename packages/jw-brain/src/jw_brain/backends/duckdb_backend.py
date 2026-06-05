@@ -274,3 +274,32 @@ class DuckDBBackend:
                 }
             )
         return out
+
+    # ── F58.10 query helpers — Cypher-style queries traducidas a SQL.
+    # Como `list_nodes` / `list_edges`, son helpers concretos del backend
+    # DuckDB y NO forman parte del Protocol (cada backend traduce a su
+    # dialecto: Neo4j directo en Cypher, DuckDB en SQL con json_extract).
+    def query_persons_in_book(self, book_num: int) -> list[dict[str, Any]]:
+        """Lista personas con `MENTIONED_IN_PASSAGE → Passage` en `book_num`.
+
+        Equivalente Cypher:
+            MATCH (p:Person)-[:MENTIONED_IN_PASSAGE]->(pa:Passage)
+            WHERE pa.book_num = $book_num
+            RETURN DISTINCT p.canonical_id, p.name
+        """
+        sql = """
+        SELECT DISTINCT
+            person.canonical_id AS canonical_id,
+            json_extract_string(person.properties, '$.name') AS name
+        FROM nodes AS person
+        JOIN edges AS e
+            ON e.from_node = person.canonical_id
+        JOIN nodes AS passage
+            ON passage.canonical_id = e.to_node
+        WHERE person.node_type = 'Person'
+          AND e.edge_type = 'MENTIONED_IN_PASSAGE'
+          AND passage.node_type = 'Passage'
+          AND CAST(json_extract_string(passage.properties, '$.book_num') AS INTEGER) = ?
+        """
+        rows = self._conn.execute(sql, [book_num]).fetchall()
+        return [{"canonical_id": canonical_id, "name": name} for canonical_id, name in rows]
