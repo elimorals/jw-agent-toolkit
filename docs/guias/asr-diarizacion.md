@@ -129,9 +129,37 @@ Modelo configurable: `WhisperXProvider(model_size="medium")`.
 - **Modelos solo descargan con conexión**: el primer `transcribe_diarized`
   baja ~2 GB (`pyannote/speaker-diarization-3.1`). Luego corre offline.
 - **Diferenciación de hermanos**: la diarización NO sabe NOMBRES; etiqueta
-  `SPEAKER_00`, `SPEAKER_01`, etc. Para mapear a nombres reales necesitas
-  un pass adicional (no incluido en F64; futuro: voiceprint del
-  organized-app schedule, F51).
+  `SPEAKER_00`, `SPEAKER_01`, etc. Para mapear a nombres reales usa el
+  voiceprint store opt-in (sección siguiente).
+
+## Identificación de hermanos (F64.7 — voiceprint opt-in)
+
+WhisperX etiqueta segmentos como `SPEAKER_00`, `SPEAKER_01`. Para
+resolverlos a nombres reales se usa un store local de voiceprints
+(`jw_core.audio.speakers`):
+
+```python
+from jw_core.audio.speakers import SpeakerNameMapper, Voiceprint, VoiceprintStore
+
+# 1) Enrollment (una vez por hermano)
+store = VoiceprintStore()  # default ~/.jw-agent-toolkit/voiceprints.db
+store.save(Voiceprint(name="Hno Pablo", embedding=pablo_emb, enrolled_at_iso="2026-06-05T10:00:00Z"))
+
+# 2) Identificación durante transcripción (F64.8 integrará whisperx)
+mapper = SpeakerNameMapper(store=store, similarity_threshold=0.75)
+nombre = mapper.identify(query_embedding)  # str | None
+```
+
+Privacy-first (mismo patrón que F61 memory):
+
+- Storage local (sqlite); nunca sube a red.
+- Cifrado **opt-in** con Fernet: `export JW_VOICEPRINT_KEY=$(python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())")`.
+- DB path override: `JW_VOICEPRINT_DB=/ruta/custom.db`.
+- Borrado granular: `store.delete("Hno Pablo")` quita todos los prints.
+
+La extracción del embedding desde el audio diarizado se integra en F64.8
+(siguiente fase). En F64.7 el mapper trabaja sobre `np.ndarray` agnóstico
+al provider — útil para tests reproducibles y para pipelines custom.
 
 ## Manejo de errores
 

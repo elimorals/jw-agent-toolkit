@@ -243,6 +243,10 @@ class DiarizedSegment(TranscriptionSegment):
     # de jw_core.audio en el futuro, mover este import dentro del provider.
     speaker_id: str | None = None
     bible_refs: tuple[BibleRef, ...] = field(default_factory=tuple)
+    # F64.7: nombre real resuelto por `SpeakerNameMapper` (opt-in).
+    # `None` cuando no hay voiceprint enrolado o la similitud cae bajo
+    # el umbral — el consumidor debe caer a `speaker_id` en ese caso.
+    speaker_name: str | None = None
 
 
 @dataclass
