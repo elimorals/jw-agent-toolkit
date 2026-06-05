@@ -10,7 +10,6 @@ pytest.importorskip("fastapi")
 pytest.importorskip("starlette")
 
 from httpx import ASGITransport, AsyncClient  # noqa: E402
-
 from jw_meeting_media.models import (  # noqa: E402
     MeetingItem,
     MeetingKind,

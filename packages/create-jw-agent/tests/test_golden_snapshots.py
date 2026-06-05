@@ -19,9 +19,7 @@ import os
 from pathlib import Path
 
 import pytest
-
 from create_jw_agent.render import RenderContext, render_template
-
 
 GOLDEN_DIR = Path(__file__).parent / "golden"
 PLUGIN_TYPES = ("agent", "parser", "embedder", "vlm", "gen")

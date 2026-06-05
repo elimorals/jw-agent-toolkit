@@ -6,7 +6,7 @@ Exposed via FastMCP from server.py. Accepts a serialized AgentResult
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from jw_agents.base import Citation, Finding
@@ -75,7 +75,7 @@ async def verify_provenance(
     else:
         cutoff = datetime.fromisoformat(since)
         if cutoff.tzinfo is None:
-            cutoff = cutoff.replace(tzinfo=timezone.utc)
+            cutoff = cutoff.replace(tzinfo=UTC)
         report = await validator.check_since(wrapped, since=cutoff)
 
     return report.model_dump(mode="json")

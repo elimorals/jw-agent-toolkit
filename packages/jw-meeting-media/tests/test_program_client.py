@@ -6,7 +6,6 @@ from datetime import date
 from pathlib import Path
 
 import pytest
-
 from jw_meeting_media.models import MeetingKind
 from jw_meeting_media.program_client import MeetingProgramClient
 

@@ -242,7 +242,7 @@ class DiarizedSegment(TranscriptionSegment):
     # (que sólo depende de jw_core.types/data). Si BibleRef llega a depender
     # de jw_core.audio en el futuro, mover este import dentro del provider.
     speaker_id: str | None = None
-    bible_refs: tuple["BibleRef", ...] = field(default_factory=tuple)
+    bible_refs: tuple[BibleRef, ...] = field(default_factory=tuple)
 
 
 @dataclass

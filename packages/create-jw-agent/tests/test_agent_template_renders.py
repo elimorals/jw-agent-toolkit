@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from create_jw_agent.render import RenderContext, TargetExistsError, render_template
 
 

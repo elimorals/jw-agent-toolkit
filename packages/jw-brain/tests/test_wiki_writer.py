@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_brain.wiki.obsidian_writer import ObsidianWikiWriter, WriteOutsideNamespaceError
 
 

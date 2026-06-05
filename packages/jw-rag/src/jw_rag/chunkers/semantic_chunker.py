@@ -193,9 +193,7 @@ class SemanticChunker:
 
             open_chunk.append(paragraph, idx)
             open_chunk.continuation_merges_in_a_row = 0
-            if open_chunk.total_len >= self.max_chars:
-                flush()
-            elif (
+            if open_chunk.total_len >= self.max_chars or (
                 open_chunk.total_len >= self.min_chars
                 and paragraph.endswith((".", "!", "?"))
                 and not _next_is_continuation(idx)

@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from typer.testing import CliRunner
-
 from jw_meeting_media.cli import app
+from typer.testing import CliRunner
 
 
 def test_help_lists_subcommands():

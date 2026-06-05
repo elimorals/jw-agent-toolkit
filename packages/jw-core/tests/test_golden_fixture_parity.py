@@ -12,7 +12,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from jw_core.parsers.reference import parse_reference
 
 FIXTURE = (

@@ -44,9 +44,11 @@ from jw_core.models_organized.person import (
 )
 from jw_core.models_organized.schedule import (
     AssignmentAYFType,
-    AssignmentCongregation as AssignmentCongregationSched,
     PublicTalkType,
     SchedWeekType,
+)
+from jw_core.models_organized.schedule import (
+    AssignmentCongregation as AssignmentCongregationSched,
 )
 from jw_core.models_organized.week import Week, WeekType
 

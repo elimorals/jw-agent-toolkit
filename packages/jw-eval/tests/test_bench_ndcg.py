@@ -5,7 +5,6 @@ from __future__ import annotations
 import math
 
 import pytest
-
 from jw_eval.bench.ndcg import bootstrap_ci_95, dcg_at_k, ndcg_at_k
 
 

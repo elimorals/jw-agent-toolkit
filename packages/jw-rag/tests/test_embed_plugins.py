@@ -6,7 +6,6 @@ from typing import Any
 
 import numpy as np
 import pytest
-
 from jw_core.plugins import clear_plugin_cache
 from jw_core.plugins.contracts import EntryPointSpec
 from jw_rag.embed_providers.factory import _instantiate_registry

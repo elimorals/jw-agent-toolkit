@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
-
-import pytest
 
 from jw_agents.base import Citation, Finding
 from jw_core.provenance.hashing import content_sha256
@@ -176,7 +174,7 @@ async def test_check_since_filters_by_accessed_at_threshold() -> None:
     validator = ProvenanceValidator(fetcher=fetcher)
     report = await validator.check_since(
         _R(),
-        since=datetime(2026, 3, 1, tzinfo=timezone.utc),
+        since=datetime(2026, 3, 1, tzinfo=UTC),
     )
 
     skipped = [v for v in report.verdicts if v.status == "skipped"]

@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from typer.testing import CliRunner
-
 from jw_cli.commands.jwpub import jwpub_app
+from typer.testing import CliRunner
 
 
 def test_jwpub_build_round_trips(tmp_path: Path) -> None:

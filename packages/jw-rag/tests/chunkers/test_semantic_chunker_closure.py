@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_rag.chunkers.semantic_chunker import SemanticChunker
 
 FIXTURE = Path(__file__).parent / "fixtures" / "article_with_closure_es.txt"

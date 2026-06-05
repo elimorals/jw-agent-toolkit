@@ -36,7 +36,6 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from jw_core.jwpub_crypto import XOR_KEY as _XOR_KEY
 from jw_core.jwpub_crypto import compute_key_iv as _compute_key_iv
 from jw_core.jwpub_crypto import decrypt_blob as _decrypt_blob
 from jw_core.models import JwpubDocument, JwpubMetadata

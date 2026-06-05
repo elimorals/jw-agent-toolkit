@@ -5,7 +5,6 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 from jw_meeting_media.media_resolver import MediaResolver
 from jw_meeting_media.models import MediaKind, MediaRef
 

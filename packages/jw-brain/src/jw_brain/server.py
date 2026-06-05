@@ -8,7 +8,6 @@ so we deliberately accept str rather than Path).
 
 from __future__ import annotations
 
-import asyncio
 import os
 from pathlib import Path
 from typing import Any
@@ -162,7 +161,7 @@ async def second_brain_snapshot(brain_path: str, *, label: str | None = None) ->
     backend = get_backend(cfg.graph_backend, path=Path(cfg.graph_path))
     snap_dir = bp / "snapshots"
     snap_dir.mkdir(parents=True, exist_ok=True)
-    ts = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    ts = dt.datetime.now(dt.UTC).strftime("%Y%m%dT%H%M%SZ")
     name = f"{ts}-{label}.tar" if label else f"{ts}.tar"
     snap_path = snap_dir / name
     backend.snapshot(snap_path)

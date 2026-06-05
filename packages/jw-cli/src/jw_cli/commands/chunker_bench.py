@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any
 
 import typer
-
 from jw_eval.bench.chunker_bench import BenchConfig, run_chunker_bench
 
 

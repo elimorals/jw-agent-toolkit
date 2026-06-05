@@ -18,6 +18,7 @@ Sin memory, comportamiento idéntico al legacy.
 
 from __future__ import annotations
 
+from datetime import UTC
 from typing import TYPE_CHECKING
 
 from jw_core.clients.cdn import CDNClient
@@ -44,7 +45,7 @@ async def conversation_assistant(
     cdn: CDNClient | None = None,
     wol: WOLClient | None = None,
     max_subheadings: int = 6,
-    memory: "MemoryStore | None" = None,
+    memory: MemoryStore | None = None,
     session_id: str | None = None,
 ) -> AgentResult:
     """Match `text` to a known objection and harvest authoritative answers."""
@@ -108,14 +109,14 @@ async def conversation_assistant(
 
     # F61 memory: record question + answer post-process
     if memory is not None and session_id is not None:
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         from jw_agents.memory import MemoryRecord
 
         try:
             memory.record(MemoryRecord(
                 session_id=session_id,
-                timestamp=datetime.now(timezone.utc),
+                timestamp=datetime.now(UTC),
                 kind="question",
                 content=text,
                 metadata={"language": language},
@@ -123,7 +124,7 @@ async def conversation_assistant(
             if result.findings:
                 memory.record(MemoryRecord(
                     session_id=session_id,
-                    timestamp=datetime.now(timezone.utc),
+                    timestamp=datetime.now(UTC),
                     kind="answer",
                     content="; ".join(f.summary for f in result.findings[:3]),
                     metadata={"finding_count": len(result.findings)},

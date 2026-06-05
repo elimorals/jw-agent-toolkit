@@ -1,10 +1,9 @@
 """F61 — conversation_assistant respeta memory: MemoryStore | None."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
-
 from jw_agents.conversation_assistant import conversation_assistant
 from jw_agents.memory import FakeMemoryStore, MemoryRecord
 
@@ -43,7 +42,7 @@ async def test_conversation_assistant_recalls_past_objection():
     memory = FakeMemoryStore()
     memory.record(MemoryRecord(
         session_id="s1",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         kind="objection",
         content="El usuario antes dijo: 'la Biblia se contradice sobre Jesús'",
         metadata={},

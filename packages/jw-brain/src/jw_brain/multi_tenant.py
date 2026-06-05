@@ -10,7 +10,6 @@ from __future__ import annotations
 import tomllib
 from pathlib import Path
 
-
 DEFAULT_REGISTRY = Path.home() / ".jw-brain" / "registry.toml"
 
 

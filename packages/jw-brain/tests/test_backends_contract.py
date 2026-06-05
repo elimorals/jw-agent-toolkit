@@ -9,7 +9,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_brain.backends import GraphBackend, get_backend
 
 

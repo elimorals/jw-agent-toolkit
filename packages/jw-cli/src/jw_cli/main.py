@@ -12,6 +12,7 @@ Usage:
 from __future__ import annotations
 
 import typer
+from jw_brain.cli import brain_app
 
 from jw_cli.commands import (
     apologetics as apologetics_module,
@@ -54,7 +55,6 @@ from jw_cli.commands import (
 from jw_cli.commands import (
     report as report_module,
 )
-from jw_brain.cli import brain_app
 from jw_cli.commands.chunker_bench import chunker_bench_cmd
 from jw_cli.commands.constrained import constrained_app
 from jw_cli.commands.create_agent import create_agent_cmd

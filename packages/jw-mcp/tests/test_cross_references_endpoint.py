@@ -8,7 +8,6 @@ optional error string). The endpoint must never 5xx for shape errors.
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
-
 from jw_mcp.rest_api import app
 
 

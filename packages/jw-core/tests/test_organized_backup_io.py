@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from jw_core.integrations.organized_app import (
     OrganizedBackup,
     OrganizedBackupError,
@@ -151,7 +150,7 @@ def test_parse_invalid_file_raises(tmp_path: Path) -> None:
         parse_organized_backup(bad)
 
 
-def _build_typed_person(uid: str) -> "PersonType":  # type: ignore[name-defined]
+def _build_typed_person(uid: str) -> PersonType:  # type: ignore[name-defined]
     from jw_core.models_organized.person import PersonType
 
     return PersonType.model_validate(_person_payload(uid, "Ana"))

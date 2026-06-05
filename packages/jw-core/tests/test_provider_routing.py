@@ -8,7 +8,6 @@ from __future__ import annotations
 from unittest.mock import patch
 
 import pytest
-
 from jw_core.audio.transcription import (
     DEFAULT_ASR_CHAIN,
     TranscriptionError,
@@ -20,7 +19,6 @@ from jw_core.translation_providers import (
     get_translation_provider,
     list_translation_providers,
 )
-
 
 # ── ASR router ──────────────────────────────────────────────────────────
 

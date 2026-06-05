@@ -7,7 +7,7 @@ imports `stamp_finding_text` at module load time.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from jw_core.provenance.hashing import content_sha256
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 def _utcnow_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def stamp_citation(

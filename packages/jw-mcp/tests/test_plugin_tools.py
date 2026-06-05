@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-
 from jw_core.plugins import clear_plugin_cache
 from jw_core.plugins.contracts import EntryPointSpec
 from jw_mcp.server import register_plugin_tools

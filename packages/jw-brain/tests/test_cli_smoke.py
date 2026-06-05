@@ -6,9 +6,8 @@ import json
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
-
 from jw_brain.cli import brain_app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

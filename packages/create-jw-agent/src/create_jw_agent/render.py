@@ -19,7 +19,6 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from create_jw_agent.validate import python_module_name, validate_name
 
-
 _UNSAFE_FILENAME_CHARS = frozenset(("/", "\\"))
 
 
@@ -43,7 +42,7 @@ class RenderContext:
         lang: str = "en",
         jw_core_version: str = ">=2.3,<3.0",
         license: str = "GPL-3.0",
-    ) -> "RenderContext":
+    ) -> RenderContext:
         # Security: enforce the validate_name allowlist at construction time so
         # there is no path through which a malicious caller (CLI flag, library
         # use) gets to filename interpolation with a name that could contain

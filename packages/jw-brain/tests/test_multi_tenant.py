@@ -6,8 +6,6 @@ import json
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
-
 from jw_brain.cli import brain_app
 from jw_brain.multi_tenant import (
     load_registry,
@@ -15,6 +13,7 @@ from jw_brain.multi_tenant import (
     resolve_alias,
     save_registry,
 )
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

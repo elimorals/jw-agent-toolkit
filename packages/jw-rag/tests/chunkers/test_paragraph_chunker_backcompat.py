@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_rag.chunker import Chunk as ChunkLegacy
 from jw_rag.chunker import chunk_paragraphs as chunk_legacy
 from jw_rag.chunkers import Chunk, ParagraphChunker, get_chunker

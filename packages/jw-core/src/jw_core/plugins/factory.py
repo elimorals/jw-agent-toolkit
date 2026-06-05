@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from functools import lru_cache
+from functools import cache
 
 from jw_core.plugins.contracts import EntryPointSpec
 from jw_core.plugins.errors import PluginError
 from jw_core.plugins.registry import GROUPS, _discover
 
 
-@lru_cache(maxsize=None)
+@cache
 def _cached_discover(group: str) -> tuple[tuple[str, EntryPointSpec], ...]:
     """Internal cached layer. Returns sorted-tuple form so `lru_cache` is happy."""
 

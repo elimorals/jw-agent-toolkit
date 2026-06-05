@@ -12,7 +12,6 @@ from functools import lru_cache
 from importlib.resources import files
 from typing import Any
 
-
 SUPPORTED = ("en", "es", "pt")
 DEFAULT_LANG = "en"
 
@@ -40,7 +39,7 @@ def _load(lang: str) -> dict[str, str]:
     return json.loads(raw)
 
 
-def translator(lang: str | None = None) -> "Translator":
+def translator(lang: str | None = None) -> Translator:
     """Build a callable translator. None → auto-detect."""
 
     resolved = lang or detect_lang()

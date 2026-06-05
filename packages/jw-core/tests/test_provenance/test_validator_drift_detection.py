@@ -10,7 +10,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from jw_agents.base import Citation
 from jw_core.provenance.hashing import content_sha256
 from jw_core.provenance.validator import FetcherResponse, ProvenanceValidator

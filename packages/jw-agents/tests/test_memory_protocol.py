@@ -1,10 +1,9 @@
 """F61 — Protocol y FakeMemoryStore."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
-
 from jw_agents.memory import FakeMemoryStore, MemoryRecord, MemoryStore
 
 
@@ -16,7 +15,7 @@ def test_fake_record_then_recall():
     store = FakeMemoryStore()
     record = MemoryRecord(
         session_id="s1",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         kind="question",
         content="¿Es la Trinidad doctrina bíblica?",
         metadata={"language": "es"},
@@ -29,7 +28,7 @@ def test_fake_record_then_recall():
 
 def test_fake_recall_filters_by_kind():
     store = FakeMemoryStore()
-    base_ts = datetime.now(timezone.utc)
+    base_ts = datetime.now(UTC)
     store.record(MemoryRecord("s1", base_ts, "question", "q1", {}))
     store.record(MemoryRecord("s1", base_ts, "objection", "o1", {}))
     questions = store.recall(session_id="s1", kind="question")
@@ -40,7 +39,7 @@ def test_fake_recall_filters_by_kind():
 
 def test_fake_list_sessions():
     store = FakeMemoryStore()
-    base_ts = datetime.now(timezone.utc)
+    base_ts = datetime.now(UTC)
     store.record(MemoryRecord("s1", base_ts, "question", "q1", {}))
     store.record(MemoryRecord("s2", base_ts, "question", "q2", {}))
     sessions = store.list_sessions()
@@ -49,7 +48,7 @@ def test_fake_list_sessions():
 
 def test_fake_forget_session():
     store = FakeMemoryStore()
-    base_ts = datetime.now(timezone.utc)
+    base_ts = datetime.now(UTC)
     store.record(MemoryRecord("s1", base_ts, "question", "q1", {}))
     store.record(MemoryRecord("s2", base_ts, "question", "q2", {}))
     n = store.forget(session_id="s1")
@@ -63,6 +62,6 @@ def test_fake_recall_unknown_session_returns_empty():
 
 
 def test_memory_record_immutable():
-    record = MemoryRecord("s1", datetime.now(timezone.utc), "question", "q", {})
+    record = MemoryRecord("s1", datetime.now(UTC), "question", "q", {})
     with pytest.raises(AttributeError):
         record.content = "modified"  # frozen dataclass

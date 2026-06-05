@@ -91,7 +91,7 @@ def search_visual(
 # --- Fase 62: marker + markitdown ingest commands ------------------------
 
 
-def _open_text_store(store_path: Path) -> "object":
+def _open_text_store(store_path: Path) -> object:
     """Load (or create) the text VectorStore using a deterministic
     FakeEmbedder so the CLI never reaches for a heavyweight model
     just to write chunks. Tests + CI rely on this — production users

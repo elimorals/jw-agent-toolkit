@@ -5,7 +5,6 @@ from __future__ import annotations
 from importlib.metadata import EntryPoint
 
 import pytest
-
 from jw_core.plugins import clear_plugin_cache, get_plugins
 from jw_core.plugins.errors import PluginError
 

@@ -20,7 +20,7 @@ from typing import Any
 import typer
 
 from jw_brain.backends import get_backend
-from jw_brain.config import default_config, load_brain_config, write_default_config
+from jw_brain.config import load_brain_config, write_default_config
 from jw_brain.multi_tenant import (
     load_registry,
     register_brain,
@@ -359,7 +359,7 @@ def snapshot_cmd(
     backend = get_backend(cfg.graph_backend, path=Path(cfg.graph_path))
     snap_dir = brain_path / "snapshots"
     snap_dir.mkdir(parents=True, exist_ok=True)
-    ts = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    ts = dt.datetime.now(dt.UTC).strftime("%Y%m%dT%H%M%SZ")
     name = f"{ts}-{label}.tar" if label else f"{ts}.tar"
     snap_path = snap_dir / name
     backend.snapshot(snap_path)

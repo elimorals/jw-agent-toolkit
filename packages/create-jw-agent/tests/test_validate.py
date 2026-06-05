@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from create_jw_agent.validate import (
     RESERVED_NAMES,
     python_module_name,

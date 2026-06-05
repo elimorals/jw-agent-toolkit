@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import json
 import tarfile
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 
 class Neo4jBackend:

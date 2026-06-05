@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from create_jw_agent.i18n import (
     DEFAULT_LANG,
     SUPPORTED,
