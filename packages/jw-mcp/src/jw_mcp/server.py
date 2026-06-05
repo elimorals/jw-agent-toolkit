@@ -1871,6 +1871,81 @@ def transcribe_audio(
     }
 
 
+@mcp.tool
+def transcribe_audio_diarized(
+    audio_path: str,
+    language: str = "",
+    enrich_with_bible_refs: bool = False,
+    min_speakers: int | None = None,
+    max_speakers: int | None = None,
+) -> dict[str, Any]:
+    """Transcribe audio identifying speakers (Fase 64 — whisperX).
+
+    Requires the `[asr-whisperx]` extra and an `HF_TOKEN` env var with
+    access to `pyannote/speaker-diarization-3.1` for the diarization
+    model. The token is used only to download the model the first time;
+    subsequent runs are 100% local.
+
+    Args:
+        audio_path: absolute path to the audio file.
+        language: ISO code (en/es/pt/...); empty string = autodetect.
+        enrich_with_bible_refs: when True, segments whose text mentions
+            a reference like "Genesis 1:1" get `bible_refs: [...]`.
+        min_speakers / max_speakers: hints to constrain diarization.
+
+    Returns:
+        dict with `text`, `language`, `duration`, `speaker_count`, and
+        `segments: [{start, end, text, speaker_id, bible_refs}]`. On
+        error returns `{"error": "..."}` (whisperx missing, HF token
+        missing, audio not found, etc.).
+    """
+    from pathlib import Path as _Path
+
+    path = _Path(audio_path).expanduser()
+    if not path.is_file():
+        return {"error": f"audio file not found: {audio_path}"}
+    try:
+        from jw_core.audio.asr_providers.whisperx import (
+            WhisperXDiarizationError,
+            WhisperXProvider,
+        )
+    except ImportError as exc:
+        return {"error": f"asr-whisperx extra not installed: {exc}"}
+    p = WhisperXProvider()
+    if not p.is_available():
+        return {
+            "error": "whisperx package not available; install jw-core[asr-whisperx]"
+        }
+    try:
+        result = p.transcribe_diarized(
+            path,
+            language=language or None,
+            enrich_with_bible_refs=enrich_with_bible_refs,
+            min_speakers=min_speakers,
+            max_speakers=max_speakers,
+        )
+    except WhisperXDiarizationError as exc:
+        return {"error": f"diarization unavailable: {exc}"}
+    except Exception as exc:  # noqa: BLE001  — surface a JSON error to MCP
+        return {"error": f"{type(exc).__name__}: {exc}"}
+    return {
+        "text": result.text,
+        "language": result.language,
+        "duration": result.duration,
+        "speaker_count": result.speaker_count,
+        "segments": [
+            {
+                "start": s.start,
+                "end": s.end,
+                "text": s.text,
+                "speaker_id": s.speaker_id,
+                "bible_refs": [r.display() for r in s.bible_refs],
+            }
+            for s in result.segments
+        ],
+    }
+
+
 # ────────────────────────────────────────────────────────────────────────
 # Tools: JW Library backup parsing (Phase 19 — integrations)
 # ────────────────────────────────────────────────────────────────────────

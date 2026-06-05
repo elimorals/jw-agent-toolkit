@@ -89,6 +89,8 @@ _EXPECTED_TOOLS = {
     # Phase 34 — audio premium
     "synthesize_speech",
     "transcribe_audio",
+    # Phase 64 — whisperX diarization
+    "transcribe_audio_diarized",
     # Phase 19 — JW Library integrations
     "open_in_jw_library",
     "import_jw_library_backup",
