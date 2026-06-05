@@ -140,7 +140,7 @@ Si algún día se reconsidera, abrir nuevo análisis (`docs/conceptos/integracio
 | Sub-plan | Redactado | Ejecutado | PR |
 |---|---|---|---|
 | F58 — bible-knowledge-graph | ✅ 2026-06-04 | ⬜ | — |
-| F66 — mcp-jw-brain | ✅ 2026-06-04 | ⬜ | — |
+| F66 — mcp-jw-brain | ✅ 2026-06-04 | ✅ 2026-06-04 | — |
 | F62 — marker-markitdown | ✅ 2026-06-04 | ⬜ | — |
 | F64 — whisperx-asr | ✅ 2026-06-04 | ⬜ | — |
 | F61 — letta-memory | ✅ 2026-06-04 | ⬜ | — |
