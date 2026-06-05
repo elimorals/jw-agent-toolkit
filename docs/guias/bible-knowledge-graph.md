@@ -72,6 +72,8 @@ sobre el mismo JWPUB no duplica nodos ni edges.
 - Conceptos teológicos (Trinidad, Reino, Espíritu Santo) **no** se importan
   como nodos — son artículos del Insight, pero no encajan en el schema
   `Person`/`Place`/`Period`/`Passage` y van a otro flujo (RAG semántico).
-- Las geocoordenadas (`latitude`/`longitude`) están en el schema pero no
-  se rellenan en F58. Se hidratarán en un sprint futuro desde otro
-  catálogo curado.
+- ✅ Geocoordenadas de 16 lugares principales (Jerusalem, Babylon, Rome,
+  Athens, Ephesus, Antioch, etc.) hidratadas desde `place_catalog.py`.
+  Los lugares fuera del catálogo se upsertan sin coordenadas. La
+  expansión a la cobertura completa del Insight queda para sprints
+  posteriores.

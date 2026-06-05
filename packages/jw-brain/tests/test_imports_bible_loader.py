@@ -85,6 +85,31 @@ def test_loader_creates_mentioned_in_passage_edges(backend: DuckDBBackend) -> No
     assert ("place:jerusalem", "passage:10:5:6") in located_pairs
 
 
+def test_loader_enriches_place_with_geocoords(backend: DuckDBBackend) -> None:
+    """F58.13 — al upsertar un Place cuyo slug está en `place_catalog`,
+    el loader hidrata latitude/longitude/region/modern_name/eras_active."""
+    import json
+
+    loader = BibleLoader(backend=backend)
+    loader.import_periods()
+    loader.import_insight(FIXTURE, symbol="it", meps_language=0)
+
+    places = backend.list_nodes(node_type="Place")
+    jerusalem = next((p for p in places if p["canonical_id"] == "place:jerusalem"), None)
+    assert jerusalem is not None
+
+    props = jerusalem.get("properties", {})
+    if isinstance(props, str):
+        props = json.loads(props)
+
+    assert props.get("latitude") is not None
+    assert 31.0 < props["latitude"] < 32.0
+    assert props.get("longitude") is not None
+    assert 35.0 < props["longitude"] < 36.0
+    assert props.get("region") == "Judea"
+    assert "Jerusalem" in props.get("modern_name", "")
+
+
 def test_loader_is_idempotent(backend: DuckDBBackend) -> None:
     loader = BibleLoader(backend=backend)
     loader.import_periods()

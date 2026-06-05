@@ -1275,7 +1275,7 @@ no de un módulo grande.
 - ✅ Fixture sintético `insight_mini/it_mini.jwpub` (3 entradas) generado por script reusando `jw_core.writers.jwpub.JwpubBuilder`.
 - ✅ Guía `docs/guias/bible-knowledge-graph.md`.
 - ⬜ Catálogo ampliado a las miles de entradas del Insight (sprint siguiente).
-- ⬜ Geocoordenadas de Place (otro catálogo curado).
+- ✅ Geocoordenadas curadas de 16 lugares principales (jerusalem, babylon, rome, athens, etc.).
 - ⬜ Import desde NWT cross-references (más Passage).
 
 ## Fase 61 — Memoria persistente opt-in ✅
