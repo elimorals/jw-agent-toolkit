@@ -20,6 +20,7 @@ members = [
     "packages/jw-eval",
     "packages/jw-gen",
     "packages/jw-brain",
+    "packages/jw-meeting-media",
     "packages/create-jw-agent",
     "tools/pytest-cookbook",
 ]
@@ -34,6 +35,7 @@ jw-finetune = { workspace = true }
 jw-eval = { workspace = true }
 jw-gen = { workspace = true }
 jw-brain = { workspace = true }
+jw-meeting-media = { workspace = true }
 create-jw-agent = { workspace = true }
 pytest-cookbook = { workspace = true }
 

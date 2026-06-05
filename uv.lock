@@ -31,6 +31,7 @@ members = [
     "jw-finetune",
     "jw-gen",
     "jw-mcp",
+    "jw-meeting-media",
     "jw-rag",
     "pytest-cookbook",
 ]
@@ -2885,6 +2886,9 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+memory-letta = [
+    { name = "letta-client" },
+]
 otel = [
     { name = "opentelemetry-exporter-otlp-proto-grpc" },
     { name = "opentelemetry-sdk" },
@@ -2895,10 +2899,11 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.27.0" },
     { name = "jw-core", editable = "packages/jw-core" },
     { name = "jw-rag", editable = "packages/jw-rag" },
+    { name = "letta-client", marker = "extra == 'memory-letta'", specifier = ">=0.3" },
     { name = "opentelemetry-exporter-otlp-proto-grpc", marker = "extra == 'otel'", specifier = ">=1.27.0" },
     { name = "opentelemetry-sdk", marker = "extra == 'otel'", specifier = ">=1.27.0" },
 ]
-provides-extras = ["otel"]
+provides-extras = ["otel", "memory-letta"]
 
 [[package]]
 name = "jw-brain"
@@ -3353,6 +3358,51 @@ requires-dist = [
 ]
 
 [[package]]
+name = "jw-meeting-media"
+version = "0.1.0"
+source = { editable = "packages/jw-meeting-media" }
+dependencies = [
+    { name = "beautifulsoup4" },
+    { name = "httpx" },
+    { name = "jw-core" },
+    { name = "lxml" },
+    { name = "pydantic" },
+    { name = "rich" },
+    { name = "typer" },
+]
+
+[package.optional-dependencies]
+all = [
+    { name = "mutagen" },
+    { name = "pillow" },
+]
+audio-tags = [
+    { name = "mutagen" },
+]
+thumbnails = [
+    { name = "pillow" },
+]
+video-thumbnails = [
+    { name = "pillow" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "beautifulsoup4", specifier = ">=4.12" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "jw-core", editable = "packages/jw-core" },
+    { name = "jw-meeting-media", extras = ["thumbnails", "audio-tags"], marker = "extra == 'all'", editable = "packages/jw-meeting-media" },
+    { name = "lxml", specifier = ">=5.0" },
+    { name = "mutagen", marker = "extra == 'audio-tags'", specifier = ">=1.47" },
+    { name = "pillow", marker = "extra == 'thumbnails'", specifier = ">=10.0" },
+    { name = "pillow", marker = "extra == 'video-thumbnails'", specifier = ">=10.0" },
+    { name = "pydantic", specifier = ">=2.0" },
+    { name = "rich", specifier = ">=13.0" },
+    { name = "typer", specifier = ">=0.12" },
+]
+provides-extras = ["thumbnails", "video-thumbnails", "audio-tags", "all"]
+
+[[package]]
 name = "jw-rag"
 version = "0.1.0"
 source = { editable = "packages/jw-rag" }
@@ -3625,6 +3675,23 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/49/ac/21a1f8aa3777f5658576777ea76bfb124b702c520bbe90edf4ae9915eafa/lazy_loader-0.5.tar.gz", hash = "sha256:717f9179a0dbed357012ddad50a5ad3d5e4d9a0b8712680d4e687f5e6e6ed9b3", size = 15294, upload-time = "2026-03-06T15:45:09.054Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8a/a1/8d812e53a5da1687abb10445275d41a8b13adb781bbf7196ddbcf8d88505/lazy_loader-0.5-py3-none-any.whl", hash = "sha256:ab0ea149e9c554d4ffeeb21105ac60bed7f3b4fd69b1d2360a4add51b170b005", size = 8044, upload-time = "2026-03-06T15:45:07.668Z" },
+]
+
+[[package]]
+name = "letta-client"
+version = "1.12.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8e/55/34a347fb443f5797045cde591c34ee2926650e99f1f0d5f565dcefa99120/letta_client-1.12.1.tar.gz", hash = "sha256:3073adb6cc1ce3b906a40d8ce3b2b77a77ac1887ca2135770590cfe3cef6eba9", size = 396805, upload-time = "2026-06-02T00:31:12.848Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/73/af/b140a7117b4385b3e1b060df97d9d39703f0c54e156a4d889de8bb8dd48f/letta_client-1.12.1-py3-none-any.whl", hash = "sha256:6f554569a684d57e7f4e4513f8ce6792129b305df37393c650e50776f61baf99", size = 418856, upload-time = "2026-06-02T00:31:14.475Z" },
 ]
 
 [[package]]
@@ -4507,6 +4574,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/0a/7d/a988f258104dcd2ccf1ed40fdc97e26c4ac351eeaf81d76e266c52d84e2f/multiprocess-0.70.16-py312-none-any.whl", hash = "sha256:fc0544c531920dde3b00c29863377f87e1632601092ea2daca74e4beb40faa2e", size = 146741, upload-time = "2024-01-28T18:52:29.395Z" },
     { url = "https://files.pythonhosted.org/packages/ea/89/38df130f2c799090c978b366cfdf5b96d08de5b29a4a293df7f7429fa50b/multiprocess-0.70.16-py38-none-any.whl", hash = "sha256:a71d82033454891091a226dfc319d0cfa8019a4e888ef9ca910372a446de4435", size = 132628, upload-time = "2024-01-28T18:52:30.853Z" },
     { url = "https://files.pythonhosted.org/packages/da/d9/f7f9379981e39b8c2511c9e0326d212accacb82f12fbfdc1aa2ce2a7b2b6/multiprocess-0.70.16-py39-none-any.whl", hash = "sha256:a0bafd3ae1b732eac64be2e72038231c1ba97724b60b09400d68f229fcc2fbf3", size = 133351, upload-time = "2024-01-28T18:52:31.981Z" },
+]
+
+[[package]]
+name = "mutagen"
+version = "1.47.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/81/e6/64bc71b74eef4b68e61eb921dcf72dabd9e4ec4af1e11891bbd312ccbb77/mutagen-1.47.0.tar.gz", hash = "sha256:719fadef0a978c31b4cf3c956261b3c58b6948b32023078a2117b1de09f0fc99", size = 1274186, upload-time = "2023-09-03T16:33:33.411Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b0/7a/620f945b96be1f6ee357d211d5bf74ab1b7fe72a9f1525aafbfe3aee6875/mutagen-1.47.0-py3-none-any.whl", hash = "sha256:edd96f50c5907a9539d8e5bba7245f62c9f520aef333d13392a79a4f70aca719", size = 194391, upload-time = "2023-09-03T16:33:29.955Z" },
 ]
 
 [[package]]
