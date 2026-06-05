@@ -113,6 +113,34 @@ def test_asr_env_var_picks_provider(monkeypatch: pytest.MonkeyPatch) -> None:
     assert provider.name == "omnilingual"
 
 
+# ── F64: whisperX registration ─────────────────────────────────────────
+
+
+def test_list_asr_providers_includes_whisperx() -> None:
+    """`whisperx` aparece en el registry (independiente de si está instalado)."""
+    names = {p["name"] for p in list_asr_providers()}
+    # El módulo `jw_core.audio.asr_providers.whisperx` no importa `whisperx`
+    # al cargar — solo en `is_available()`. Por eso siempre aparece en el
+    # registry. `is_available` puede ser True o False según el entorno.
+    assert "whisperx" in names
+
+
+def test_get_asr_provider_by_name_whisperx_when_available() -> None:
+    """Cuando se piden por nombre, `whisperx` se devuelve si is_available()."""
+    with patch(
+        "jw_core.audio.asr_providers.whisperx.WhisperXProvider.is_available",
+        return_value=True,
+    ):
+        p = get_asr_provider(name="whisperx")
+    assert p.name == "whisperx"
+
+
+def test_whisperx_not_in_default_chain() -> None:
+    """Decisión F64: NO se añade a `DEFAULT_ASR_CHAIN` para no forzar la
+    descarga del modelo pyannote (~2 GB) en usuarios que no lo piden."""
+    assert "whisperx" not in DEFAULT_ASR_CHAIN
+
+
 # ── Translation router ─────────────────────────────────────────────────
 
 

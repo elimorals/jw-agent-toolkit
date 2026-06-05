@@ -1290,3 +1290,18 @@ no de un módulo grande.
 - ✅ Extras `[pdf-marker]`, `[doc-markitdown]`, `[loaders-all]` en `packages/jw-rag/pyproject.toml`.
 - ✅ Guía operativa `docs/guias/historical-pdf-ingest.md`.
 - ⬜ Imagen-only PDF (escaneo puro sin texto extraíble): pendiente integración Tesseract fallback.
+
+## Fase 64 — whisperX ASR provider con diarización ✅
+
+- ✅ `WhisperXProvider` (`jw_core.audio.asr_providers.whisperx`) con `transcribe()` (compat con Protocol) y `transcribe_diarized()`.
+- ✅ `DiarizedSegment(TranscriptionSegment)` y `DiarizedResult(TranscriptionResult)` — extiende dataclasses sin breaking.
+- ✅ Enrichment opcional con `BibleRef` vía `parse_all_references()` (`enrich_with_bible_refs=True`).
+- ✅ Detección runtime `cuda`/`cpu` sin import top-level de `torch`.
+- ✅ CLI `jw audio transcribe --diarize --bible-refs` (sub-app `audio` nuevo; `jw transcribe` legacy intacto).
+- ✅ MCP tool `transcribe_audio_diarized(audio_path, language, enrich_with_bible_refs, min_speakers, max_speakers)`.
+- ✅ `WhisperXDiarizationError(RuntimeError)` gate explícito si falta `HF_TOKEN` / `HUGGING_FACE_HUB_TOKEN`.
+- ✅ Extra `[asr-whisperx]` + agrupado en `[asr-premium]`.
+- ✅ Decisión re-confirmada: NO se añade a `DEFAULT_ASR_CHAIN` (modelo pyannote ~2 GB no se descarga hasta selección explícita).
+- ✅ Fixtures audio reproducibles vía `gtts`+`ffmpeg` con fallback stdlib sine (`build_audio_fixtures.py`).
+- ✅ Guía operativa `docs/guias/asr-diarizacion.md`.
+- ⬜ Mapeo `speaker_id` → nombre real (futuro: integración con voiceprint del schedule organized-app, F51).

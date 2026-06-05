@@ -126,6 +126,11 @@ app.command(
 )(create_agent_cmd)
 app.command(name="apologetics")(apologetics_module.apologetics_cmd)
 
+# F64 — `jw audio transcribe` (diarización + bible-refs)
+from jw_cli.commands.audio import audio_app
+
+app.add_typer(audio_app, name="audio", help="Audio: transcripción + diarización (Fase 64).")
+
 
 def main() -> None:
     app()

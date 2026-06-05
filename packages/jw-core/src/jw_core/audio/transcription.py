@@ -98,13 +98,41 @@ def transcribe_file(
 
 
 def _all_providers() -> list[type]:
-    """Lazy import to avoid loading optional deps at module-level."""
-    from jw_core.audio.asr_providers import ASRProvider  # noqa: F401
-    from jw_core.audio.asr_providers.deepgram import DeepgramProvider
-    from jw_core.audio.asr_providers.omnilingual import OmnilingualProvider
-    from jw_core.audio.asr_providers.whisper_turbo import WhisperTurboProvider
+    """Lazy import to avoid loading optional deps at module-level.
 
-    return [DeepgramProvider, WhisperTurboProvider, OmnilingualProvider]
+    Cada provider se importa con try/except aislado para que un import
+    error no tumbe el registry entero.
+    """
+    from jw_core.audio.asr_providers import ASRProvider  # noqa: F401
+
+    out: list[type] = []
+    try:
+        from jw_core.audio.asr_providers.deepgram import DeepgramProvider
+
+        out.append(DeepgramProvider)
+    except ImportError:
+        pass
+    try:
+        from jw_core.audio.asr_providers.whisper_turbo import WhisperTurboProvider
+
+        out.append(WhisperTurboProvider)
+    except ImportError:
+        pass
+    try:
+        # F64: whisperX provider (lazy: la dep `whisperx` se valida en is_available()).
+        # El módulo en sí no importa `whisperx` al cargar — sólo a la hora de transcribir.
+        from jw_core.audio.asr_providers.whisperx import WhisperXProvider
+
+        out.append(WhisperXProvider)
+    except ImportError:
+        pass
+    try:
+        from jw_core.audio.asr_providers.omnilingual import OmnilingualProvider
+
+        out.append(OmnilingualProvider)
+    except ImportError:
+        pass
+    return out
 
 
 DEFAULT_ASR_CHAIN: list[str] = ["deepgram", "whisper-turbo", "omnilingual"]
@@ -195,3 +223,42 @@ def estimate_real_time_factor(model_size: str) -> float:
         "medium": 0.9,
         "large-v3": 2.0,
     }.get(model_size, 1.0)
+
+
+# ── F64: diarization (whisperX) — extiende sin modificar ─────────────────
+
+
+@dataclass
+class DiarizedSegment(TranscriptionSegment):
+    """Segmento con identificación de orador y refs bíblicas opcionales.
+
+    Subclase backwards-compatible de `TranscriptionSegment`: el código
+    que recibe la base sigue funcionando. La importación de `BibleRef`
+    se hace lazy en `field(default_factory=tuple)` para evitar ciclos.
+    """
+
+    # IMPORTANTE: la importación de BibleRef se hace en el módulo (top-level)
+    # debajo de esta clase para no introducir ciclos con jw_core.models
+    # (que sólo depende de jw_core.types/data). Si BibleRef llega a depender
+    # de jw_core.audio en el futuro, mover este import dentro del provider.
+    speaker_id: str | None = None
+    bible_refs: tuple["BibleRef", ...] = field(default_factory=tuple)
+
+
+@dataclass
+class DiarizedResult(TranscriptionResult):
+    """Result de transcripción con diarización.
+
+    Subclase backwards-compatible de `TranscriptionResult`: código que
+    espera la base sigue funcionando. `segments` se redeclara con tipo
+    más estrecho `list[DiarizedSegment]`; dataclass tolera el override
+    porque ambos campos tienen `default_factory`.
+    """
+
+    segments: list[DiarizedSegment] = field(default_factory=list)  # type: ignore[assignment]
+    speaker_count: int = 0
+
+
+# Lazy import para resolver el forward-ref `"BibleRef"` en DiarizedSegment.
+# Se hace al final para evitar cualquier ciclo durante la carga del módulo.
+from jw_core.models import BibleRef  # noqa: E402  (intentional late import)
