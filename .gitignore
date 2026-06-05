@@ -47,6 +47,9 @@ data/
 !packages/jw-brain/tests/fixtures/insight_mini/it_mini.jwpub
 *.epub
 *.pdf
+# F62: whitelist synthetic PDF/docx fixtures (Lorem ipsum, no copyright).
+!packages/jw-rag/tests/fixtures/pdf/*.pdf
+!packages/jw-rag/tests/fixtures/docs/*.docx
 *.mp3
 *.db
 *.db-shm
