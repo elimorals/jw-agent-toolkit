@@ -1278,6 +1278,17 @@ no de un módulo grande.
 - ⬜ Geocoordenadas de Place (otro catálogo curado).
 - ⬜ Import desde NWT cross-references (más Passage).
 
+## Fase 61 — Memoria persistente opt-in ✅
+
+- ✅ `MemoryStore` Protocol + `MemoryRecord` dataclass.
+- ✅ `FakeMemoryStore` (default in-memory), `SqliteMemoryStore` (default disk), `LettaMemoryStore` (opt-in).
+- ✅ Fernet opt-in via `JW_MEMORY_KEY` (precedente F25).
+- ✅ Factory `build_memory_store()` env-driven.
+- ✅ Wire-up en `conversation_assistant` con compatibility preservada (memory=None).
+- ✅ MCP tools `memory_record/recall/forget_session`.
+- ⬜ Auto-recap entre sesiones (futuro): agente que resuma sesión previa al iniciar nueva.
+- ⬜ Voz reconocida → speaker_id de F64 alimenta automáticamente `preference` records.
+
 ## Fase 62 — marker plus markitdown loaders ✅
 
 - ✅ `jw_rag.loaders.pdf_marker.ingest_pdf()` con marker (CPU default, GPU/LLM opt-in via `JW_MARKER_USE_GPU` / `JW_MARKER_USE_LLM`).
