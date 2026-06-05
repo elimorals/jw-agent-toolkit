@@ -641,6 +641,77 @@ try:
         _presenter.destroy(sid)
         return {"ok": True}
 
+    # ── F57.14 drag-and-drop endpoints ──────────────────────────────────
+
+    class _ReorderBody(BaseModel):
+        from_index: int
+        to_index: int
+
+    class _AddItemBody(BaseModel):
+        title: str
+        local_path: str
+        kind: str = "image"
+
+    @app.post("/presenter/sessions/{sid}/reorder")
+    async def presenter_reorder(sid: str, body: _ReorderBody) -> Any:
+        try:
+            _presenter.reorder(
+                sid, from_index=body.from_index, to_index=body.to_index
+            )
+            return {"ok": True}
+        except KeyError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=404)
+        except IndexError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=400)
+
+    @app.post("/presenter/sessions/{sid}/add")
+    async def presenter_add(sid: str, body: _AddItemBody) -> Any:
+        from jw_meeting_media.models import (
+            MediaKind as _MediaKind,
+        )
+        from jw_meeting_media.models import (
+            MediaRef as _MediaRef,
+        )
+        from jw_meeting_media.models import (
+            MeetingItem as _MeetingItem,
+        )
+
+        try:
+            kind = _MediaKind(body.kind)
+        except ValueError:
+            return JSONResponse(
+                {"error": f"unknown kind: {body.kind}"}, status_code=400
+            )
+        try:
+            state = _presenter.get_state(sid)
+        except KeyError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=404)
+        ref = _MediaRef(
+            kind=kind,
+            title=body.title,
+            url=f"file://{body.local_path}",
+            local_path=body.local_path,
+        )
+        item = _MeetingItem(
+            item_id=f"custom-{len(state.queue) + 1}",
+            title=body.title,
+            position=len(state.queue) + 1,
+            bible_refs=[],
+            media_refs=[ref],
+        )
+        _presenter.add_item(sid, item)
+        return {"ok": True, "queue_size": len(state.queue)}
+
+    @app.post("/presenter/sessions/{sid}/jump")
+    async def presenter_jump(sid: str, index: int) -> Any:
+        try:
+            _presenter.jump_to(sid, index)
+            return {"ok": True}
+        except KeyError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=404)
+        except IndexError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=400)
+
 except ImportError:
     pass
 

@@ -8,6 +8,11 @@ const $placeholder = document.getElementById("placeholder");
 const $position = document.getElementById("position");
 const $title = document.getElementById("title-display");
 const $playPause = document.getElementById("play-pause");
+const $queueList = document.getElementById("queue-list");
+const $dropzone = document.getElementById("dropzone");
+
+// Hash used to skip full DOM rebuild when only the cursor moves.
+let lastQueueHash = "";
 
 function startSession(language, year, week, kind) {
   return fetch(
@@ -33,6 +38,7 @@ async function refreshState() {
   const state = await resp.json();
   if (state.error) return;
   render(state);
+  renderQueue(state);
 }
 
 function render(state) {
@@ -54,7 +60,7 @@ function render(state) {
     $video.hidden = true;
     return;
   }
-  if (firstMedia.kind === "image") {
+  if (firstMedia.kind === "image" || firstMedia.kind === "external_file") {
     $image.src = firstMedia.local_path
       ? `file://${firstMedia.local_path}`
       : firstMedia.url;
@@ -71,6 +77,121 @@ function render(state) {
   }
 }
 
+// ── Queue sidebar rendering + drag-and-drop ────────────────────────────
+
+function renderQueue(state) {
+  const items = state.queue || [];
+  const hash =
+    JSON.stringify(items.map((i) => i.item_id)) + "#" + state.cursor;
+  if (hash === lastQueueHash) {
+    // Items + cursor identical → nothing to redraw.
+    return;
+  }
+  // If only the cursor moved (same items list), just retoggle .active.
+  const prevIdsPart = lastQueueHash.split("#")[0];
+  const newIdsPart = JSON.stringify(items.map((i) => i.item_id));
+  if (prevIdsPart === newIdsPart) {
+    [...$queueList.children].forEach((li, i) => {
+      li.classList.toggle("active", i === state.cursor);
+    });
+    lastQueueHash = hash;
+    return;
+  }
+
+  lastQueueHash = hash;
+  $queueList.innerHTML = "";
+  items.forEach((item, i) => {
+    const li = document.createElement("li");
+    li.textContent = `${i + 1}. ${item.title}`;
+    li.draggable = true;
+    li.dataset.index = String(i);
+    if (i === state.cursor) li.classList.add("active");
+
+    li.addEventListener("click", () => jumpTo(i));
+    li.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", String(i));
+      e.dataTransfer.effectAllowed = "move";
+    });
+    li.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      li.classList.add("drag-over");
+    });
+    li.addEventListener("dragleave", () => li.classList.remove("drag-over"));
+    li.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      li.classList.remove("drag-over");
+      const fromIdx = parseInt(e.dataTransfer.getData("text/plain"), 10);
+      const toIdx = parseInt(li.dataset.index, 10);
+      if (Number.isFinite(fromIdx) && Number.isFinite(toIdx) && fromIdx !== toIdx) {
+        await reorderQueue(fromIdx, toIdx);
+        await refreshState();
+      }
+    });
+    $queueList.appendChild(li);
+  });
+}
+
+async function jumpTo(index) {
+  if (!sessionId) return;
+  await fetch(`${API}/presenter/sessions/${sessionId}/jump?index=${index}`, {
+    method: "POST",
+  });
+  await refreshState();
+}
+
+async function reorderQueue(from, to) {
+  if (!sessionId) return;
+  await fetch(`${API}/presenter/sessions/${sessionId}/reorder`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ from_index: from, to_index: to }),
+  });
+}
+
+function inferKind(file) {
+  if (file.type.startsWith("image/")) return "image";
+  if (file.type.startsWith("video/")) return "video";
+  if (file.type.startsWith("audio/")) return "audio";
+  return "external_file";
+}
+
+async function addLocalFile(file) {
+  if (!sessionId) return;
+  const kind = inferKind(file);
+  // Tauri 2 fills File.path with the absolute FS path on drag-drop.
+  // In a plain browser, fall back to file.name (best effort).
+  const localPath = file.path || file.name;
+  await fetch(`${API}/presenter/sessions/${sessionId}/add`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      title: file.name,
+      local_path: localPath,
+      kind,
+    }),
+  });
+}
+
+// Dropzone — external files (drag-drop from OS file manager).
+$dropzone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = "copy";
+  $dropzone.classList.add("drag-over");
+});
+$dropzone.addEventListener("dragleave", () => {
+  $dropzone.classList.remove("drag-over");
+});
+$dropzone.addEventListener("drop", async (e) => {
+  e.preventDefault();
+  $dropzone.classList.remove("drag-over");
+  const files = Array.from(e.dataTransfer.files || []);
+  for (const file of files) {
+    await addLocalFile(file);
+  }
+  if (files.length) await refreshState();
+});
+
 document.getElementById("prev").onclick = () =>
   fetch(`${API}/presenter/sessions/${sessionId}/prev`, { method: "POST" });
 document.getElementById("next").onclick = () =>
@@ -84,6 +205,10 @@ document.getElementById("stop").onclick = () =>
 
 document.addEventListener("keydown", (e) => {
   if (!sessionId) return;
+  // Don't hijack space/arrows when typing in inputs (none today, but futureproof).
+  if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
+    return;
+  }
   if (e.key === " ") document.getElementById("play-pause").click();
   if (e.key === "ArrowRight") document.getElementById("next").click();
   if (e.key === "ArrowLeft") document.getElementById("prev").click();

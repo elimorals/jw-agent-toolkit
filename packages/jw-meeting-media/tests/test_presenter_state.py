@@ -95,3 +95,58 @@ def test_unknown_session_raises():
     mgr = PresenterManager()
     with pytest.raises(KeyError):
         mgr.get_state("does-not-exist")
+
+
+# ── F57.14: drag-drop reorder / add / jump ─────────────────────────────
+
+
+def test_reorder_moves_item():
+    mgr = PresenterManager()
+    sid = mgr.create_session(program=make_program())
+    state = mgr.get_state(sid)
+    item1_title = state.queue[1].title
+    mgr.reorder(sid, from_index=1, to_index=0)
+    state = mgr.get_state(sid)
+    assert state.queue[0].title == item1_title
+
+
+def test_reorder_out_of_bounds_raises():
+    mgr = PresenterManager()
+    sid = mgr.create_session(program=make_program())
+    with pytest.raises(IndexError):
+        mgr.reorder(sid, from_index=99, to_index=0)
+
+
+def test_add_item_appends_to_queue():
+    mgr = PresenterManager()
+    sid = mgr.create_session(program=make_program())
+    initial_len = len(mgr.get_state(sid).queue)
+    custom_ref = MediaRef(
+        kind=MediaKind.EXTERNAL_FILE,
+        title="ad-hoc",
+        url="file:///tmp/foo.jpg",
+    )
+    custom_item = MeetingItem(
+        item_id="custom-1",
+        title="Ad-hoc media",
+        position=initial_len + 1,
+        bible_refs=[],
+        media_refs=[custom_ref],
+    )
+    mgr.add_item(sid, custom_item)
+    assert len(mgr.get_state(sid).queue) == initial_len + 1
+    assert mgr.get_state(sid).queue[-1].title == "Ad-hoc media"
+
+
+def test_jump_to_index_sets_cursor():
+    mgr = PresenterManager()
+    sid = mgr.create_session(program=make_program())
+    mgr.jump_to(sid, 2)
+    assert mgr.get_state(sid).cursor == 2
+
+
+def test_jump_to_out_of_bounds_raises():
+    mgr = PresenterManager()
+    sid = mgr.create_session(program=make_program())
+    with pytest.raises(IndexError):
+        mgr.jump_to(sid, 99)
