@@ -9,6 +9,18 @@
     <div id="layout">
       <aside id="queue-panel">
         <h2>Cola</h2>
+        <div id="monitor-selector">
+          <button id="open-monitor-menu" title="Mover a otro monitor">
+            🖥 Monitor
+          </button>
+          <div id="monitor-menu" hidden>
+            <ul id="monitor-list"></ul>
+            <label>
+              <input type="checkbox" id="fullscreen-checkbox" checked />
+              Fullscreen
+            </label>
+          </div>
+        </div>
         <ul id="queue-list"></ul>
         <div id="dropzone">Arrastra archivos aquí</div>
       </aside>
