@@ -1374,7 +1374,18 @@ no de un módulo grande.
   presenter. Backend: `PresenterManager.reorder/add_item/jump_to`
   + endpoints REST `/presenter/sessions/{sid}/reorder|add|jump`.
   Tests: 5 nuevos (presenter_state) + 3 nuevos (rest_presenter).
-- ⬜ Multi-congregación (MVP+1).
+- ✅ Multi-congregación con registry TOML plus CLI plus MCP tools
+  (F57.16): cada congregación tiene su propio cache aislado en
+  `~/.jw-agent-toolkit/meetings/<name>/`, registry en
+  `congregations.toml`, subcomandos `jw meeting congregation
+  {add,list,remove,default}`, flag `--congregation` en
+  `discover/download/list`, tools MCP `meeting_list_congregations` +
+  `meeting_add_congregation` plus parámetro opcional `congregation` en
+  los tools `meeting_*` existentes. Backwards compat: sin registry,
+  comportamiento legacy = una sola congregación implícita `"default"`
+  con el cache path pre-F57.16. Tests: 9 (congregation) + 11 nuevos
+  (cli) + 2 nuevos (mcp protocol) = **22 nuevos tests, 81 total
+  meeting-media+protocol**.
 - ⬜ Catálogo Memorial / eventos especiales (MVP+1).
 - ⬜ Zoom screen sharing (futuro).
 - ⬜ OBS Studio scene switching (futuro).

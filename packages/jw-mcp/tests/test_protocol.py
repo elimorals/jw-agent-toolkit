@@ -178,6 +178,9 @@ _EXPECTED_TOOLS = {
     "meeting_download_media",
     "meeting_list_programs",
     "meeting_open_presenter",
+    # F57.16 — multi-congregation
+    "meeting_list_congregations",
+    "meeting_add_congregation",
 }
 
 
@@ -299,6 +302,37 @@ async def test_mcp_get_daily_text_schema_includes_date() -> None:
 
 
 # ── Content shape (raw MCP wire format) ───────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_mcp_call_meeting_list_congregations_returns_shape(
+    tmp_path, monkeypatch
+) -> None:
+    """F57.16: meeting_list_congregations returns the expected shape."""
+    monkeypatch.setenv("JW_MEETING_HOME", str(tmp_path))
+    async with Client(mcp) as client:
+        result = await client.call_tool("meeting_list_congregations", {})
+    assert "congregations" in result.data
+    assert "count" in result.data
+    assert result.data["count"] == 0
+
+
+@pytest.mark.asyncio
+async def test_mcp_call_meeting_add_congregation_roundtrips(
+    tmp_path, monkeypatch
+) -> None:
+    """F57.16: add then list shows the new congregation."""
+    monkeypatch.setenv("JW_MEETING_HOME", str(tmp_path))
+    async with Client(mcp) as client:
+        r1 = await client.call_tool(
+            "meeting_add_congregation",
+            {"name": "norte", "language": "es", "notes": "Sala Norte"},
+        )
+        assert r1.data.get("ok") is True
+        r2 = await client.call_tool("meeting_list_congregations", {})
+    assert r2.data["count"] == 1
+    names = {c["name"] for c in r2.data["congregations"]}
+    assert "norte" in names
 
 
 @pytest.mark.asyncio
