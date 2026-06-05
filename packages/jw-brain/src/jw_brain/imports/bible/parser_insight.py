@@ -25,9 +25,9 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 
 from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
+from jw_core.models import JwpubDocument, JwpubMetadata
 
 from jw_brain.imports.bible.models import InsightEntry, InsightKind
-from jw_core.models import JwpubDocument, JwpubMetadata
 
 # ── Catálogos de clasificación ──────────────────────────────────────────
 #

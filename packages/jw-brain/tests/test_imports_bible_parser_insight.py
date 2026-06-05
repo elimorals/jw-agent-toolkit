@@ -13,22 +13,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
+from jw_brain.imports.bible.models import InsightEntry
 from jw_brain.imports.bible.parser_insight import (
     PERSON_HEADWORDS,
     PLACE_HEADWORDS,
     InsightParser,
     classify_entry_kind,
 )
-from jw_brain.imports.bible.models import InsightEntry
 from jw_core.parsers.jwpub import parse_jwpub
 
-FIXTURE = (
-    Path(__file__).parent
-    / "fixtures"
-    / "insight_mini"
-    / "it_mini.jwpub"
-)
+FIXTURE = Path(__file__).parent / "fixtures" / "insight_mini" / "it_mini.jwpub"
 
 
 # ── classify_entry_kind ─────────────────────────────────────────────────

@@ -14,13 +14,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from jw_brain.cli import brain_app
 from typer.testing import CliRunner
 
-from jw_brain.cli import brain_app
-
-FIXTURE = (
-    Path(__file__).parent / "fixtures" / "insight_mini" / "it_mini.jwpub"
-)
+FIXTURE = Path(__file__).parent / "fixtures" / "insight_mini" / "it_mini.jwpub"
 
 
 @pytest.fixture()
@@ -31,10 +28,7 @@ def runner() -> CliRunner:
 def test_import_bible_help(runner: CliRunner) -> None:
     result = runner.invoke(brain_app, ["import-bible", "--help"])
     assert result.exit_code == 0
-    assert (
-        "insight" in result.stdout.lower()
-        or "periods" in result.stdout.lower()
-    )
+    assert "insight" in result.stdout.lower() or "periods" in result.stdout.lower()
 
 
 def test_import_bible_periods_only(
@@ -49,9 +43,7 @@ def test_import_bible_periods_only(
     reg = tmp_path / "registry.toml"
     monkeypatch.setattr(
         "jw_brain.cli.register_brain",
-        lambda alias, path: save_registry(
-            {**load_registry(reg), alias: path}, reg
-        ),
+        lambda alias, path: save_registry({**load_registry(reg), alias: path}, reg),
     )
     monkeypatch.setattr("jw_brain.cli.load_registry", lambda: load_registry(reg))
 
@@ -78,9 +70,7 @@ def test_import_bible_with_insight_jwpub(
     reg = tmp_path / "registry.toml"
     monkeypatch.setattr(
         "jw_brain.cli.register_brain",
-        lambda alias, path: save_registry(
-            {**load_registry(reg), alias: path}, reg
-        ),
+        lambda alias, path: save_registry({**load_registry(reg), alias: path}, reg),
     )
     monkeypatch.setattr("jw_brain.cli.load_registry", lambda: load_registry(reg))
 
@@ -92,10 +82,14 @@ def test_import_bible_with_insight_jwpub(
         brain_app,
         [
             "import-bible",
-            "--brain", str(brain_home),
-            "--insight", str(FIXTURE),
-            "--symbol", "it",
-            "--meps-language", "0",
+            "--brain",
+            str(brain_home),
+            "--insight",
+            str(FIXTURE),
+            "--symbol",
+            "it",
+            "--meps-language",
+            "0",
         ],
     )
     assert result.exit_code == 0, result.stdout

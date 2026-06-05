@@ -13,6 +13,7 @@ puntos clave del consenso académico:
 Si la Watch Tower publica una revisión cronológica, actualizar esta
 constante; el resto del pipeline no requiere cambios.
 """
+
 from __future__ import annotations
 
 from jw_brain.imports.bible.models import BibleKgPeriod
@@ -34,10 +35,7 @@ ALL_PERIODS: tuple[BibleKgPeriod, ...] = (
         name="Cautiverio Egipcio",
         start_year_bce=1728,
         end_year_bce=1513,
-        description=(
-            "Periodo desde la inmigración de Jacob a Egipto hasta el éxodo "
-            "bajo Moisés en 1513 a.E.C."
-        ),
+        description=("Periodo desde la inmigración de Jacob a Egipto hasta el éxodo bajo Moisés en 1513 a.E.C."),
     ),
     BibleKgPeriod(
         slug="judges",

@@ -1,5 +1,6 @@
 """El catálogo de periodos es estático y refleja la cronología JW
 (p.ej. 607 a.E.C. como año de destrucción de Jerusalén)."""
+
 from jw_brain.imports.bible.period_catalog import ALL_PERIODS, get_period
 
 

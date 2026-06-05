@@ -13,7 +13,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_brain.backends.duckdb_backend import DuckDBBackend
 from jw_brain.imports.bible.loader import BibleLoader
 

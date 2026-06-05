@@ -23,6 +23,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from jw_core.models import BibleRef
+from jw_core.parsers.jwpub import parse_jwpub
+
 from jw_brain.backends.protocol import GraphBackend
 from jw_brain.imports.bible.models import (
     BibleKgPassage,
@@ -32,9 +35,6 @@ from jw_brain.imports.bible.models import (
 )
 from jw_brain.imports.bible.parser_insight import InsightParser
 from jw_brain.imports.bible.period_catalog import ALL_PERIODS
-from jw_core.models import BibleRef
-from jw_core.parsers.jwpub import parse_jwpub
-
 
 _PROVENANCE: dict[str, Any] = {
     "source_kind": "bible_kg",
