@@ -35,6 +35,7 @@ from jw_brain.imports.bible.models import (
 )
 from jw_brain.imports.bible.parser_insight import InsightParser
 from jw_brain.imports.bible.period_catalog import ALL_PERIODS
+from jw_brain.imports.bible.place_catalog import get_place_geodata
 
 _PROVENANCE: dict[str, Any] = {
     "source_kind": "bible_kg",
@@ -176,9 +177,20 @@ class BibleLoader:
             return
 
         if entry.kind == "place":
+            geodata = get_place_geodata(slug)
             place = BibleKgPlace(
                 slug=slug,
                 name=entry.headword,
+                region=geodata.region if geodata else "",
+                modern_name=geodata.modern_name if geodata else "",
+                latitude=geodata.latitude if geodata else None,
+                longitude=geodata.longitude if geodata else None,
+                eras_active=geodata.eras_active if geodata else (),
+                source_url=(
+                    f"https://wol.jw.org{entry.first_mention_href}"
+                    if entry.first_mention_href
+                    else ""
+                ),
             )
             self.backend.upsert_node(
                 node_type="Place",
