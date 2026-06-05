@@ -43,6 +43,7 @@ tts-f5 = ["f5-tts>=0.4.0"]
 tts-elevenlabs = ["elevenlabs>=1.5.0"]
 asr-deepgram = ["deepgram-sdk>=3.7.0"]
 asr-turbo = ["faster-whisper>=1.1.0"]
+asr-whisperx = ["whisperx>=3.4.0"]
 # NLLB-200 translation (F53). CC-BY-NC-4.0 — non-commercial only.
 # CTranslate2 4.7+ has cp313 wheels so this lives in-process (no separate venv).
 translation-nllb = [
@@ -52,7 +53,7 @@ translation-nllb = [
     "huggingface_hub>=0.24.0",
 ]
 tts-premium = ["jw-core[tts-kokoro,tts-elevenlabs]"]
-asr-premium = ["jw-core[asr-turbo,asr-deepgram]"]
+asr-premium = ["jw-core[asr-turbo,asr-deepgram,asr-whisperx]"]
 audio-premium = ["jw-core[tts-kokoro,asr-turbo]"]
 grammar-claude = [
     "anthropic>=0.34.0,<1.0",
