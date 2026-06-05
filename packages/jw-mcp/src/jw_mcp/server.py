@@ -3773,7 +3773,7 @@ async def memory_record(
         content: text payload of the record.
         metadata: free-form dict (BibleRefs, source URLs, language, etc.).
     """
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     from jw_agents.memory import MemoryRecord
 
@@ -3784,7 +3784,7 @@ async def memory_record(
         store = _get_memory_store()
         store.record(MemoryRecord(
             session_id=session_id,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             kind=kind,  # type: ignore[arg-type]
             content=content,
             metadata=metadata or {},

@@ -49,6 +49,11 @@ dev = [
     "hypothesis>=6.100.0",
     "ruff>=0.7.0",
     "mypy>=1.13.0",
+    # Optional runtime deps several test suites import unconditionally
+    # (graceful skip via importorskip is brittle when monorepo tests collect
+    # together). Keeping these in dev makes a fresh uv sync run all suites.
+    "fastapi>=0.115.0",
+    "duckdb>=1.0.0",
 ]
 
 [tool.ruff]

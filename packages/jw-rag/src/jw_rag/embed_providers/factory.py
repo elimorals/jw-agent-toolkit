@@ -12,7 +12,6 @@ import os
 from typing import Literal, Protocol, runtime_checkable
 
 import numpy as np
-
 from jw_core.plugins import get_plugins
 
 logger = logging.getLogger(__name__)

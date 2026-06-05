@@ -1,7 +1,7 @@
 """F61 — LettaMemoryStore. Tests con mock del cliente Letta."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
 import pytest
@@ -16,7 +16,7 @@ def test_letta_record_calls_client():
     store = LettaMemoryStore(client=mock_client, agent_id="agent-123")
     record = MemoryRecord(
         session_id="s1",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         kind="answer",
         content="La Trinidad no es bíblica",
         metadata={},

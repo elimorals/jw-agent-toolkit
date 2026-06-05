@@ -74,7 +74,7 @@ class ObsidianWikiWriter:
         if target.exists() and _is_human_edited(target):
             return target
         target.parent.mkdir(parents=True, exist_ok=True)
-        fm = {**frontmatter, "last_compiled_at": dt.datetime.now(dt.timezone.utc).isoformat()}
+        fm = {**frontmatter, "last_compiled_at": dt.datetime.now(dt.UTC).isoformat()}
         rendered = f"---\n{yaml.safe_dump(fm, default_flow_style=False, sort_keys=False)}---\n\n{body}\n"
         target.write_text(rendered, encoding="utf-8")
         return target
@@ -82,7 +82,7 @@ class ObsidianWikiWriter:
     def append_log(self, operation: str, payload: dict[str, Any]) -> None:
         log_path = self.root / "log.md"
         log_path.parent.mkdir(parents=True, exist_ok=True)
-        ts = dt.datetime.now(dt.timezone.utc).isoformat()
+        ts = dt.datetime.now(dt.UTC).isoformat()
         lines = [f"\n## {ts} — {operation}\n"]
         for k, v in payload.items():
             lines.append(f"- {k}: {v}\n")

@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 import typer
-
 from jw_core.plugins import get_plugins, verify_plugin
 from jw_core.plugins.errors import PluginError
 from jw_core.plugins.registry import GROUPS

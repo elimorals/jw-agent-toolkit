@@ -10,7 +10,6 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, patch
 
 import pytest
-
 from jw_agents.base import AgentResult, Citation, Finding
 from jw_agents.cross_lingual_research import cross_lingual_research
 from jw_core.translation_providers import TranslationProvider

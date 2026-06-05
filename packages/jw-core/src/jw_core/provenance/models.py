@@ -34,7 +34,7 @@ class ProvenanceRecord(BaseModel):
     revision: str | None = None
 
     @classmethod
-    def from_citation_metadata(cls, meta: dict[str, Any]) -> "ProvenanceRecord | None":
+    def from_citation_metadata(cls, meta: dict[str, Any]) -> ProvenanceRecord | None:
         """Project a Citation.metadata dict into a typed record.
 
         Returns None when either anchor field is missing — backwards-compat

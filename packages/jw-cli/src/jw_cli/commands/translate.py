@@ -9,10 +9,9 @@ from __future__ import annotations
 import sys
 
 import typer
-from rich.console import Console
-
 from jw_core.translation import translate_preserving_references
 from jw_core.translation_providers import TranslationError, get_translation_provider
+from rich.console import Console
 
 console = Console()
 

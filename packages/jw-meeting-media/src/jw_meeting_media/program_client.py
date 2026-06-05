@@ -13,7 +13,7 @@ Resource y lp_tag por idioma vienen del registry de F1.
 
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING
 
 import httpx
@@ -105,7 +105,7 @@ class MeetingProgramClient:
                 kind=kind,
                 sections=[],
                 source_url=source_url,
-                detected_at=datetime.now(timezone.utc).isoformat(),
+                detected_at=datetime.now(UTC).isoformat(),
             )
 
         body = article.find("div", class_="bodyTxt") or article
@@ -117,7 +117,7 @@ class MeetingProgramClient:
             kind=kind,
             sections=sections,
             source_url=source_url,
-            detected_at=datetime.now(timezone.utc).isoformat(),
+            detected_at=datetime.now(UTC).isoformat(),
         )
 
     def _walk_body(self, body: Tag, *, language: str) -> list[MeetingSection]:

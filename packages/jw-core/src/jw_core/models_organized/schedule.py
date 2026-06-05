@@ -51,9 +51,9 @@ class AssignmentAYFType(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True)
 
-    main_hall: "AYFMainHall"
-    aux_class_1: "AYFAuxClass"
-    aux_class_2: "AYFAuxClass"
+    main_hall: AYFMainHall
+    aux_class_1: AYFAuxClass
+    aux_class_2: AYFAuxClass
 
 
 class AYFMainHall(BaseModel):

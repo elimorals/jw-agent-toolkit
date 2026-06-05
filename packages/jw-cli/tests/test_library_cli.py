@@ -5,9 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from typer.testing import CliRunner
-
 from jw_cli.commands.library import library_app
+from typer.testing import CliRunner
 
 
 def test_from_notes_builds_parseable_backup(tmp_path: Path) -> None:

@@ -11,10 +11,11 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Protocol
 
 from jw_agents.base import Citation
+
 from jw_core.provenance.hashing import canonicalize_text, content_sha256
 from jw_core.provenance.models import (
     ProvenanceRecord,
@@ -46,7 +47,7 @@ def _default_extractor(body: str) -> str:
 
 
 def _utcnow_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def _parse_iso(value: str | None) -> datetime | None:
@@ -217,10 +218,10 @@ class ProvenanceValidator:
     async def check_agent_output(self, agent_output: Any) -> ProvenanceReport:
         """Iterate the result's findings, dedup by URL, parallelize fetches."""
 
-        started = datetime.now(timezone.utc)
+        started = datetime.now(UTC)
         citations = self._collect_citations(agent_output)
         verdicts = await self._check_many(citations)
-        finished = datetime.now(timezone.utc)
+        finished = datetime.now(UTC)
         return ProvenanceReport(
             started_at=started,
             finished_at=finished,
@@ -236,7 +237,7 @@ class ProvenanceValidator:
     ) -> ProvenanceReport:
         """Like check_agent_output but skips citations younger than `since`."""
 
-        started = datetime.now(timezone.utc)
+        started = datetime.now(UTC)
         all_citations = self._collect_citations(agent_output)
         to_check: list[Citation] = []
         skipped_verdicts: list[ProvenanceVerdict] = []
@@ -260,7 +261,7 @@ class ProvenanceValidator:
                 to_check.append(cit)
         fetched = await self._check_many(to_check)
         verdicts = fetched + skipped_verdicts
-        finished = datetime.now(timezone.utc)
+        finished = datetime.now(UTC)
         return ProvenanceReport(
             started_at=started,
             finished_at=finished,

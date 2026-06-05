@@ -8,7 +8,7 @@ soportadas (ej. para multi-congregación).
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from jw_meeting_media.models import MeetingProgram, PresenterSession
 
@@ -26,7 +26,7 @@ class PresenterManager:
             queue=queue,
             cursor=0,
             playing=False,
-            started_at=datetime.now(timezone.utc).isoformat(),
+            started_at=datetime.now(UTC).isoformat(),
         )
         return sid
 

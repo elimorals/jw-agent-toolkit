@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_rag.chunkers import ParagraphChunker, get_chunker
 from jw_rag.chunkers.llm_chunker import LLMChunker
 from jw_rag.chunkers.semantic_chunker import SemanticChunker

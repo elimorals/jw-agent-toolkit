@@ -2853,6 +2853,8 @@ source = { virtual = "." }
 
 [package.dev-dependencies]
 dev = [
+    { name = "duckdb" },
+    { name = "fastapi" },
     { name = "hypothesis" },
     { name = "mypy" },
     { name = "pytest" },
@@ -2867,6 +2869,8 @@ dev = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "duckdb", specifier = ">=1.0.0" },
+    { name = "fastapi", specifier = ">=0.115.0" },
     { name = "hypothesis", specifier = ">=6.100.0" },
     { name = "mypy", specifier = ">=1.13.0" },
     { name = "pytest", specifier = ">=8.3.0" },

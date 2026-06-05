@@ -18,7 +18,6 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-
 _VALID_NAME = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 
 RESERVED_NAMES = frozenset({

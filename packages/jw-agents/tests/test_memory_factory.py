@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_agents.memory import FakeMemoryStore, build_memory_store
 
 

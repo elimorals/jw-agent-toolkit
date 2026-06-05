@@ -2,13 +2,8 @@
 
 from __future__ import annotations
 
-import shutil
-import subprocess
-import sys
-
 import pytest
 from typer.testing import CliRunner
-
 
 runner = CliRunner()
 

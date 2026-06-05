@@ -6,7 +6,6 @@ import hashlib
 from pathlib import Path
 
 import pytest
-
 from jw_meeting_media.downloader import Downloader
 from jw_meeting_media.models import MediaKind, MediaRef
 

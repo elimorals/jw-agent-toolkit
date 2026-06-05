@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from jw_core.plugins import get_plugins
+
 from jw_eval.models import LayerName, SuiteReport
 from jw_eval.suite import Suite
 

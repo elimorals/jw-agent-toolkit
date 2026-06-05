@@ -7,7 +7,6 @@ import shutil
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 from jw_brain.backends.protocol import GraphBackend
 from jw_brain.compiler.cache import ExtractionCache, cache_key_for

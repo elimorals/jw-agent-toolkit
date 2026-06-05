@@ -27,7 +27,7 @@ class LettaMemoryStore:
         self._agent_id = agent_id
 
     @classmethod
-    def from_env(cls) -> "LettaMemoryStore":
+    def from_env(cls) -> LettaMemoryStore:
         agent_id = os.environ.get("LETTA_AGENT_ID")
         if not agent_id:
             raise RuntimeError(

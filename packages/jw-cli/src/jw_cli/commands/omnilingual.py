@@ -9,11 +9,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import typer
-from rich.console import Console
-from rich.table import Table
-
 from jw_core.audio.asr_providers.omnilingual import OmnilingualProvider
 from jw_core.audio.transcription import TranscriptionError
+from rich.console import Console
+from rich.table import Table
 
 omnilingual_app = typer.Typer(help="Manage the Omnilingual ASR worker venv.")
 console = Console()

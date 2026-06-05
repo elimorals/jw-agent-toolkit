@@ -14,12 +14,11 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import typer
-
 from jw_agents.base import Citation, Finding
 from jw_core.provenance.validator import FetcherResponse, ProvenanceValidator
 
@@ -154,7 +153,7 @@ def check_cmd(
         try:
             cutoff = datetime.fromisoformat(since)
             if cutoff.tzinfo is None:
-                cutoff = cutoff.replace(tzinfo=timezone.utc)
+                cutoff = cutoff.replace(tzinfo=UTC)
         except ValueError as exc:
             raise typer.BadParameter(f"--since must be ISO 8601: {exc}") from exc
         return await validator.check_since(wrapped, since=cutoff)

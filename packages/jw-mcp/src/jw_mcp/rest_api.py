@@ -573,7 +573,6 @@ async def post_vault_append(req: VaultAppendRequest) -> dict[str, Any]:
 
 try:
     from fastapi.responses import JSONResponse
-
     from jw_meeting_media.models import MeetingKind
     from jw_meeting_media.presenter_state import PresenterManager
     from jw_meeting_media.storage import MeetingStorage

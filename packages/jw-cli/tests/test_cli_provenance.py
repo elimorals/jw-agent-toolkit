@@ -6,10 +6,9 @@ import json
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
-
 from jw_cli.main import app
 from jw_core.provenance.hashing import content_sha256
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

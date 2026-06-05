@@ -6,7 +6,6 @@ from importlib.metadata import EntryPoint
 from typing import Any
 
 import pytest
-
 from jw_core.plugins.registry import _discover, _entry_points_for_group
 
 

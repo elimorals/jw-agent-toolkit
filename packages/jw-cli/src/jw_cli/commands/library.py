@@ -18,10 +18,9 @@ import sqlite3
 from pathlib import Path
 
 import typer
-from rich.console import Console
-
 from jw_core.parsers.jw_library_backup import parse_jw_library_backup
 from jw_core.writers.jw_library_backup import BackupWriteError, update_backup, write_backup
+from rich.console import Console
 
 library_app = typer.Typer(help="Export/import JW Library backups (.jwlibrary).")
 console = Console()

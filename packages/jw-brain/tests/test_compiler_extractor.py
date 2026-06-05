@@ -4,10 +4,8 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import Any
 
 import pytest
-
 from jw_brain.compiler.cache import ExtractionCache, cache_key_for
 from jw_brain.compiler.llm_extractor import (
     ExtractionRequest,

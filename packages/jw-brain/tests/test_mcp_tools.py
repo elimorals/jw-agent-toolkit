@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
-
-import pytest
 
 from jw_brain.config import write_default_config
 from jw_brain.server import (

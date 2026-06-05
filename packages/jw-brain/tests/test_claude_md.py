@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
-
-from typer.testing import CliRunner
 
 from jw_brain.cli import brain_app
 from jw_brain.schema.builtins import tj_edge_specs, tj_node_specs
 from jw_brain.wiki.claude_md import render_claude_md, write_claude_md
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

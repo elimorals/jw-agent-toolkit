@@ -13,7 +13,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from jw_core.audio.asr_providers.omnilingual import (
     DEFAULT_MODEL_CARD,
     OmnilingualProvider,

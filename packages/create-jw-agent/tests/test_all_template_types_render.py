@@ -5,9 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from create_jw_agent.render import RenderContext, render_template
-
 
 TYPES_TO_GROUPS = {
     "agent": "jw_agent_toolkit.agents",

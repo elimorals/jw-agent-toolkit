@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import Any
 
 import pytest
-
 from jw_agents.base import Citation
 from jw_core.provenance.hashing import content_sha256
 from jw_core.provenance.validator import (

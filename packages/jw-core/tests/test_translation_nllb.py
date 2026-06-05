@@ -15,7 +15,6 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-
 from jw_core.translation import translate_preserving_references
 from jw_core.translation_providers import TranslationProvider
 from jw_core.translation_providers.nllb import (
@@ -92,7 +91,7 @@ def test_model_id_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("JW_NLLB_MODEL", "OpenNMT/nllb-200-1.3B-ct2-int8")
     p = NLLBProvider()
     assert p.model_id == "OpenNMT/nllb-200-1.3B-ct2-int8"
-    assert DEFAULT_MODEL != p.model_id
+    assert p.model_id != DEFAULT_MODEL
 
 
 def test_translate_preserving_references_with_stub_provider() -> None:

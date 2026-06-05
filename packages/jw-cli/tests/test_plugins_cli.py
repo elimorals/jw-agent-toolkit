@@ -7,12 +7,10 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from typer.testing import CliRunner
-
 from jw_cli.main import app
 from jw_core.plugins import clear_plugin_cache
 from jw_core.plugins.contracts import EntryPointSpec, VerifyReport
-
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

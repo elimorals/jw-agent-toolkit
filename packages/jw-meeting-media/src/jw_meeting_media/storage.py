@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import sqlite3
 from contextlib import closing
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from jw_meeting_media.models import MediaRef, MeetingKind, MeetingProgram
@@ -68,7 +68,7 @@ class MeetingStorage:
                     week,
                     prog.kind.value,
                     payload,
-                    datetime.now(timezone.utc).isoformat(),
+                    datetime.now(UTC).isoformat(),
                 ),
             )
             conn.commit()
@@ -102,7 +102,7 @@ class MeetingStorage:
                     ref.url,
                     str(local_path),
                     ref.sha256,
-                    datetime.now(timezone.utc).isoformat(),
+                    datetime.now(UTC).isoformat(),
                 ),
             )
             conn.commit()

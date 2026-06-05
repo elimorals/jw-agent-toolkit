@@ -11,7 +11,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_core.jwpub_crypto import compute_key_iv, decrypt_blob, encrypt_blob
 from jw_core.parsers.jwpub import parse_jwpub, parse_jwpub_metadata
 from jw_core.writers.jwpub import JwpubBuilder

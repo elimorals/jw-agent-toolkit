@@ -8,7 +8,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from jw_rag.chunkers.fakes import FakeChunkerProvider
 from jw_rag.chunkers.llm_chunker import LLMChunker
 

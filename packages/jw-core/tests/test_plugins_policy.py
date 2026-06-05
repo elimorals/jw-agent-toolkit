@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from jw_core.plugins.contracts import EntryPointSpec
 from jw_core.plugins.errors import PluginConflictError
 from jw_core.plugins.policy import (

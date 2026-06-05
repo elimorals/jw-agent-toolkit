@@ -8,7 +8,6 @@ own can call the local REST API.
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
-
 from jw_mcp.rest_api import app
 
 
