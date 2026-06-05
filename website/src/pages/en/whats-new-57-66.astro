@@ -1,0 +1,409 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+interface Phase {
+  number: number;
+  tier: 1 | 2 | 3 | 4;
+  title: string;
+  tagline: string;
+  description: string;
+  tests?: number;
+  commits?: number;
+  whatWasDone: string[];
+  guideHref?: string;
+}
+
+const phases: Phase[] = [
+  {
+    number: 57,
+    tier: 1,
+    title: "jw-meeting-media (clean-room)",
+    tagline: "Live-meeting layer with a WOL HTML parser designed from DevTools",
+    description:
+      "New subpackage that delivers the missing 'live-meeting' layer: automatic weekly mwb/w program discovery + media downloads + Tauri presenter. Strict clean-room implementation: zero AGPL-3.0 M³ .ts/.vue files opened. HTML parser designed by inspecting real WOL DOM.",
+    tests: 48,
+    commits: 13,
+    whatWasDone: [
+      "MeetingProgramClient + BeautifulSoup parser over semantic WOL HTML.",
+      "MediaResolver wraps PubMediaClient for video/audio refs.",
+      "Idempotent Downloader by sha256 with <root>/<lang>/<year>/<week>/ cache.",
+      "MeetingStorage sqlite + Thumbnailer (Pillow + ffmpeg).",
+      "PresenterManager FSM with multi-session in-memory.",
+      "CLI: jw meeting {discover, download, list}.",
+      "REST: /presenter/sessions/{sid}/{state, play, pause, next, prev, stop}.",
+      "Tauri 2.x window 'presenter' vanilla JS with keyboard shortcuts.",
+      "4 MCP tools meeting_*.",
+    ],
+    guideHref: "/docs/guias/meeting-media",
+  },
+  {
+    number: 58,
+    tier: 1,
+    title: "bible-knowledge-graph (JW-pure)",
+    tagline: "Biblical KG from Insight + NWT, NOT academic theographic",
+    description:
+      "Builds a biblical knowledge graph in jw-brain from pure JW sources (Insight on the Scriptures + NWT/NWTsty). Schema extended with Period and Passage. Strict JW chronology: 607 B.C.E. for the destruction of Jerusalem triple-anchored in code, comments and guide. Watch Tower attribution visible in the guide.",
+    tests: 39,
+    commits: 12,
+    whatWasDone: [
+      "Extended TJ schema: Period + Passage nodes + 5 temporal edges.",
+      "10 JW chronology periods (607 B.C.E. for Jerusalem, NOT 587/586).",
+      "Procedural BibleLoader (NO LLM): import_periods + import_insight(jwpub).",
+      "Initial MVP PERSON_HEADWORDS (28) + PLACE_HEADWORDS (16).",
+      "Port BibleRef.from_wol_url to Python (parity with jw-core-js F56.5).",
+      "Synthetic fixture it_mini.jwpub reusing JwpubBuilder (F50).",
+      "CLI: jw brain import-bible --insight <jwpub> --symbol it --meps-language.",
+      "Helper DuckDBBackend.query_persons_in_book (E2E: Abraham in Genesis ✓).",
+      "Watch Tower Bible and Tract Society of Pennsylvania attribution.",
+    ],
+    guideHref: "/docs/guias/bible-knowledge-graph",
+  },
+  {
+    number: 61,
+    tier: 2,
+    title: "letta-memory (opt-in)",
+    tagline: "Persistent conversational memory with opt-in Fernet",
+    description:
+      "Module jw_agents.memory with MemoryStore Protocol + 3 backends (FakeMemoryStore, default SqliteMemoryStore with opt-in Fernet via JW_MEMORY_KEY, opt-in LettaMemoryStore for multi-device). Wire-up in conversation_assistant preserves compatibility (memory=None → legacy behavior). Pattern inherited from F25 RevisitStore.",
+    tests: 31,
+    commits: 7,
+    whatWasDone: [
+      "MemoryStore Protocol + MemoryRecord frozen dataclass.",
+      "FakeMemoryStore in-memory (default tests).",
+      "SqliteMemoryStore at ~/.jw-agent-toolkit/memory.db.",
+      "Opt-in Fernet via env JW_MEMORY_KEY (F25 precedent).",
+      "Opt-in LettaMemoryStore with letta-client (memory-letta extra).",
+      "build_memory_store() env-driven factory.",
+      "Wire-up conversation_assistant with memory: MemoryStore | None.",
+      "MCP tools: memory_record, memory_recall, memory_forget_session.",
+    ],
+    guideHref: "/docs/guias/memoria-asistente",
+  },
+  {
+    number: 62,
+    tier: 2,
+    title: "marker-markitdown (loaders)",
+    tagline: "OCR historical Watchtowers + brotherhood Office docs",
+    description:
+      "Two new loaders in jw-rag: marker for historical PDFs (scanned pre-EPUB Watchtowers/Awake) and markitdown for Office docs shared in the brotherhood (.docx/.pptx/.xlsx). Both opt-in via extras. sha256 idempotency + automatic JW signature detection (Watch Tower, jw.org, Watchtower).",
+    tests: 9,
+    commits: 8,
+    whatWasDone: [
+      "pdf_marker.ingest_pdf with marker-pdf (Apache-2.0).",
+      "docs_markitdown.ingest_office_doc for .docx/.pptx/.xlsx (MIT).",
+      "sha256 idempotency: source_id pdf:<hash8> and doc:<ext>:<hash8>.",
+      "JW signature regex: watch tower|jw.org|atalaya|kingdom hall|...",
+      "metadata.is_jw=True when signature matches.",
+      "GPU/LLM opt-in: env JW_MARKER_USE_GPU + JW_MARKER_USE_LLM.",
+      "pyproject extras: [pdf-marker], [doc-markitdown], [loaders-all].",
+      "MCP tools ingest_pdf + ingest_office_doc; CLI jw rag ingest-pdf|ingest-office.",
+    ],
+    guideHref: "/docs/guias/historical-pdf-ingest",
+  },
+  {
+    number: 64,
+    tier: 2,
+    title: "whisperX-asr (diarization)",
+    tagline: "Word-level timestamps + speaker diarization",
+    description:
+      "WhisperX provider (BSD-4) opt-in via [asr-whisperx] extras. NOT added to DEFAULT_ASR_CHAIN (3 GB models), explicitly selectable via JW_ASR_PROVIDER=whisperx or name='whisperx'. transcribe_diarized returns DiarizedResult (extends TranscriptionResult) with per-segment speaker_id + optional enrich_with_bible_refs using parse_reference. Requires HF_TOKEN for the pyannote diarization model.",
+    tests: 16,
+    commits: 6,
+    whatWasDone: [
+      "DiarizedSegment(speaker_id, bible_refs) extends TranscriptionSegment.",
+      "DiarizedResult(speaker_count) extends TranscriptionResult.",
+      "WhisperXProvider with is_available + transcribe + transcribe_diarized.",
+      "Per-segment BibleRef enrichment via parse_all_references.",
+      "WhisperXDiarizationError when HF_TOKEN is missing.",
+      "Lazy model cache (_asr_model, _align_model, _diarize_model).",
+      "CLI: jw audio transcribe --diarize --bible-refs.",
+      "MCP tool: transcribe_audio_diarized.",
+    ],
+    guideHref: "/docs/guias/asr-diarizacion",
+  },
+  {
+    number: 66,
+    tier: 3,
+    title: "mcp-jw-brain",
+    tagline: "Brain exposed via MCP + _EXPECTED_TOOLS drift fix",
+    description:
+      "Exposes second-brain operations as MCP tools. F49 had already landed the wrappers (second_brain_status/compile/query/lint/snapshot with brain_path: str signature); F66 only covers Task 4 (E2E tests) and Task 5 (docs). Plus a fix of the pre-existing _EXPECTED_TOOLS drift (missing get_trace from F43 + translate_preserving_refs from F54).",
+    tests: 5,
+    commits: 5,
+    whatWasDone: [
+      "Audit: the 5 second_brain_* tools were already registered (F49).",
+      "E2E tests with DuckDB temp brain + monkeypatched sandbox registry.",
+      "Fix _EXPECTED_TOOLS drift: get_trace + translate_preserving_refs.",
+      "Doc 'Phase 66 — Second Brain tools' in docs/referencia/jw-mcp.md.",
+      "Degraded mode: dict {'error': '...'} if brain not configured.",
+    ],
+    guideHref: "/docs/referencia/jw-mcp",
+  },
+  // MVP+1 follow-ups
+  {
+    number: 57.14,
+    tier: 4,
+    title: "F57.14 · drag-and-drop UI",
+    tagline: "Sidebar with queue + reorder + dropzone",
+    description:
+      "Tauri presenter window with side UI: sidebar lists all queue items with thumbnails. Native HTML5 drag-drop for reordering (smart cursor follow: if you drag the active item, the cursor follows it; if you shift the range, it adjusts). Dropzone to add external files from the system. Vanilla JS without libraries.",
+    tests: 17,
+    commits: 4,
+    whatWasDone: [
+      "PresenterManager: reorder(from, to), add_item(item), jump_to(index).",
+      "REST endpoints /presenter/sessions/{sid}/{reorder, add, jump}.",
+      "Sidebar HTML/CSS: queue-panel with draggable queue-list + dropzone.",
+      "JS handlers: dragstart/dragover/drop + cursor follow logic.",
+      "renderQueue() with hash to avoid DOM rebuild on each poll.",
+    ],
+    guideHref: "/docs/guias/meeting-media",
+  },
+  {
+    number: 57.15,
+    tier: 4,
+    title: "F57.15 · automatic external monitor",
+    tagline: "Tauri commands list_monitors + move_presenter_to_monitor",
+    description:
+      "External monitor detection and move-to-monitor + fullscreen via Tauri 2.x Windows API. UI dropdown selector (🖥 icon) in sidebar; fullscreen checkbox; click outside closes menu. Graceful fallback: with only 1 monitor or if detection fails, the buttons stay greyed out without crashing.",
+    tests: 0,
+    commits: 3,
+    whatWasDone: [
+      "Rust: list_monitors() → Vec<MonitorInfo> with name/width/height/x/y/scale/is_primary.",
+      "Rust: move_presenter_to_monitor(name, fullscreen) repositions + fullscreen + focus.",
+      "JS: refreshMonitorList() invokes tauri.core.invoke('list_monitors').",
+      "UI: dropdown #monitor-menu with #monitor-list + #fullscreen-checkbox.",
+      "Hide selector when !window.__TAURI__ (vite dev mode).",
+    ],
+    guideHref: "/docs/guias/meeting-media",
+  },
+  {
+    number: 57.16,
+    tier: 4,
+    title: "F57.16 · multi-congregation",
+    tagline: "TOML registry + CLI subcommands + --congregation flag",
+    description:
+      "Support for multiple simultaneous congregations. Registry ~/.jw-agent-toolkit/meetings/congregations.toml. Each cong has its own storage namespaced under <root>/<name>/. Resolution rules: name → lookup; no name + 1 entry → auto; no name + multiple → ValueError. Backwards-compat: no registry → Congregation('default') uses legacy cache root with no migration needed.",
+    tests: 22,
+    commits: 4,
+    whatWasDone: [
+      "Congregation dataclass + load_registry + save_congregation + remove.",
+      "resolve_congregation with 4 rules including backwards-compat.",
+      "CLI: jw meeting congregation {add, list, remove}.",
+      "Flag --congregation/-c in discover/download/list.",
+      "Factored _cache_root_for(name).",
+      "MCP tools meeting_list_congregations + meeting_add_congregation.",
+      "Optional congregation param in existing meeting_* tools.",
+    ],
+    guideHref: "/docs/guias/meeting-media",
+  },
+  {
+    number: 58.13,
+    tier: 4,
+    title: "F58.13 · place geocoords",
+    tagline: "16 curated places with lat/lon + region + modern_name + eras",
+    description:
+      "Curated catalog analogous to period_catalog. PlaceGeoData with slug/region/modern_name/latitude/longitude/eras_active. 16 main places: Jerusalem (31.78N, 35.24E, Judea, modern='Jerusalem/Al-Quds'), Babylon (32.54N, 44.42E, modern='Hillah, Iraq'), Rome, Athens, Ephesus, Bethlehem, Nazareth, etc. BibleLoader.import_insight enriches automatically.",
+    tests: 7,
+    commits: 2,
+    whatWasDone: [
+      "PlaceGeoData frozen dataclass.",
+      "ALL_PLACES tuple with 16 entries.",
+      "get_place_geodata(slug) → PlaceGeoData | None.",
+      "BibleLoader._process_entry place branch enriches with geodata.",
+    ],
+    guideHref: "/docs/guias/bible-knowledge-graph",
+  },
+  {
+    number: 58.14,
+    tier: 4,
+    title: "F58.14 · headwords expansion",
+    tagline: "250 persons + 150 places canon × ES+EN + audit CLI",
+    description:
+      "Built-in catalog expanded to 475 person entries (~250 canon figures × ES+EN variants) and 259 place entries (~150 places × ES+EN). headword_extractor for audit-only: jw brain learn-headwords --insight <jwpub> extracts headwords from the user's JWPUB and persists them LOCALLY in <brain>/extracted_headwords.json — NOT redistributed. Reports % coverage of the built-in catalog.",
+    tests: 27,
+    commits: 3,
+    whatWasDone: [
+      "EXPANDED_PERSON_HEADWORDS frozenset 475 entries.",
+      "EXPANDED_PLACE_HEADWORDS frozenset 259 entries.",
+      "Zero person/place overlap verified (amón king vs ammon land).",
+      "classify_entry_kind: union built-in + expanded.",
+      "extract_headwords_from_jwpub + persist_to_brain + load_extracted_headwords.",
+      "CLI jw brain learn-headwords with coverage stats.",
+      "Legal catalog: only factual public names of the biblical canon.",
+    ],
+    guideHref: "/docs/guias/bible-knowledge-graph",
+  },
+  {
+    number: 61.8,
+    tier: 4,
+    title: "F61.8 · auto-recap",
+    tagline: "Procedural cross-session memory summarization",
+    description:
+      "New agent recap_previous_session does NOT use an LLM (architectural decision). Groups MemoryStore records by session_id, sorts by timestamp desc, returns findings with short summary + excerpts_by_kind in metadata. Useful when starting a new conversation: 'let's continue with yesterday's session X'.",
+    tests: 5,
+    commits: 3,
+    whatWasDone: [
+      "Procedural agent recap_session.recap_previous_session().",
+      "Filters out the current session; sorts by last_timestamp desc.",
+      "Configurable max_excerpts_per_kind.",
+      "MCP tool recap_previous_session.",
+    ],
+    guideHref: "/docs/guias/memoria-asistente",
+  },
+  {
+    number: 64.7,
+    tier: 4,
+    title: "F64.7 · speaker names mapping",
+    tagline: "Voiceprint sqlite + opt-in Fernet + cosine similarity",
+    description:
+      "Opt-in speaker_id → real name mapping. VoiceprintStore sqlite with voice embeddings (numpy float32 typically 192-dim). Opt-in Fernet via JW_VOICEPRINT_KEY (F61 precedent). SpeakerNameMapper with cosine similarity and similarity_threshold default 0.75. DiarizedSegment extended with optional speaker_name without breaking. whisperx pyannote integration is deferred to F64.8.",
+    tests: 11,
+    commits: 2,
+    whatWasDone: [
+      "VoiceprintStore at ~/.jw-agent-toolkit/voiceprints.db.",
+      "Opt-in Fernet via env JW_VOICEPRINT_KEY.",
+      "Voiceprint(name, embedding, enrolled_at_iso).",
+      "SpeakerNameMapper.identify(embedding) → name | None.",
+      "Backward-compatible DiarizedSegment.speaker_name.",
+    ],
+    guideHref: "/docs/guias/asr-diarizacion",
+  },
+];
+
+const tierMeta: Record<1 | 2 | 3 | 4, { label: string; color: string }> = {
+  1: { label: "T1 New layer + biblical KG", color: "text-[var(--color-accent)]" },
+  2: { label: "T2 Memory, loaders, diarized ASR", color: "text-[#f0b97a]" },
+  3: { label: "T3 Brain MCP + drift fix", color: "text-[#c4a7e7]" },
+  4: { label: "T4 MVP+1 follow-ups", color: "text-[#7ab0e3]" },
+};
+
+const totalTests = phases.reduce((sum, p) => sum + (p.tests ?? 0), 0);
+const totalCommits = phases.reduce((sum, p) => sum + (p.commits ?? 0), 0);
+---
+
+<BaseLayout
+  title="What's new F57-F66 — 13 phases shipped in a single continuous session"
+  description="6 major phases (F57 meeting-media, F58 JW-pure bible KG, F61 letta-memory, F62 marker+markitdown, F64 whisperX, F66 mcp-jw-brain) + 7 MVP+1 follow-ups. 2 new packages (jw-brain, jw-meeting-media), 16 new MCP tools, ~280 new tests."
+>
+  <!-- ───────── Hero ───────── -->
+  <section class="grid-noise relative overflow-hidden border-b border-[var(--color-line-subtle)]">
+    <div class="mx-auto max-w-7xl px-4 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20">
+      <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        <span class="inline-block h-px w-8 bg-[var(--color-accent)] align-middle"></span>
+        <span class="ml-2">Release F57-F66 · 13 phases in a single continuous session</span>
+      </p>
+      <h1 class="mt-6 max-w-3xl text-balance font-display text-[clamp(1.85rem,5vw,3.4rem)] leading-[1.05]">
+        <span class="text-[var(--color-ink-primary)]">Ten packages,</span>
+        <span class="text-[var(--color-accent)]">2.6k tests, 110 MCP tools</span>
+      </h1>
+      <p class="mt-6 max-w-3xl text-[16px] leading-relaxed text-[var(--color-ink-secondary)]">
+        Thirteen phases that move from <strong class="text-[var(--color-ink-primary)]">"jw-core multilingual complete"</strong> to
+        <strong class="text-[var(--color-ink-primary)]">"toolkit with two new packages and live-meeting shipped"</strong>.
+        F57 ships clean-room jw-meeting-media (WOL HTML parser from DevTools + Tauri presenter).
+        F58 adds the JW-pure Bible Knowledge Graph (607 B.C.E., NOT 587/586) in jw-brain.
+        F61 lands opt-in persistent memory with Fernet. F62 external loaders (historical Watchtowers with marker, Office docs with markitdown).
+        F64 whisperX with diarization + opt-in speaker name mapping.
+        F66 exposes the brain via MCP + drift fix. Plus 7 MVP+1 follow-ups (drag-drop, external monitor, multi-congregation, geocoords, headwords, auto-recap).
+      </p>
+
+      <div class="mt-10 grid grid-cols-3 gap-4">
+        <div class="rounded-sm border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-accent)]">Phases</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{phases.length}</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">New tests</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{totalTests}+</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Commits</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{totalCommits}+</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── Phases ───────── -->
+  {phases.map((phase) => (
+    <section class="border-b border-[var(--color-line-subtle)]">
+      <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+        <article class="grid gap-8 lg:grid-cols-[280px_1fr]">
+          <header class="space-y-3">
+            <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">
+              Phase {phase.number}
+            </p>
+            <h4 class="font-display text-[26px] leading-tight text-[var(--color-ink-primary)]">
+              {phase.title}
+            </h4>
+            <p class={`text-[14px] italic ${tierMeta[phase.tier].color}`}>{phase.tagline}</p>
+            <div class="flex flex-wrap gap-3 pt-2 font-mono text-[11px] text-[var(--color-ink-tertiary)]">
+              <span class="rounded-sm border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 px-2 py-1 text-[var(--color-accent)]">
+                ✅ Shipped
+              </span>
+              {phase.tests !== undefined && phase.tests > 0 && (
+                <span class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] px-2 py-1">
+                  🧪 {phase.tests} tests
+                </span>
+              )}
+              {phase.commits && (
+                <span class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] px-2 py-1">
+                  ⊜ {phase.commits} commit{phase.commits === 1 ? "" : "s"}
+                </span>
+              )}
+              <span class={`rounded-sm border ${tierMeta[phase.tier].color.replace("text-", "border-")}/40 px-2 py-1 ${tierMeta[phase.tier].color}`}>
+                {tierMeta[phase.tier].label}
+              </span>
+            </div>
+            {phase.guideHref && (
+              <a
+                href={phase.guideHref}
+                class="inline-flex items-center gap-1.5 pt-2 font-mono text-[11px] text-[var(--color-accent)] no-underline hover:underline"
+              >
+                Technical guide →
+              </a>
+            )}
+          </header>
+          <div class="space-y-6">
+            <p class="text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">{phase.description}</p>
+            <div>
+              <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+                What shipped
+              </p>
+              <ul class="mt-3 space-y-1.5 text-[14px] leading-relaxed text-[var(--color-ink-primary)]">
+                {phase.whatWasDone.map((item) => (
+                  <li class="flex gap-2">
+                    <span class="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-[var(--color-accent)]"></span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  ))}
+
+  <!-- ───────── Footer CTA ───────── -->
+  <section>
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ More
+      </h2>
+      <div class="mt-12 flex flex-wrap gap-4">
+        <a
+          href="/en/whats-new-49-56"
+          class="inline-flex items-center gap-2 rounded-sm border border-[var(--color-line)] bg-transparent px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-ink-primary)] no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+        >
+          ← Phases 49-56
+        </a>
+        <a
+          href="/en/roadmap"
+          class="inline-flex items-center gap-2 rounded-sm bg-[var(--color-accent)] px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-surface-base)] no-underline transition-opacity hover:opacity-90"
+        >
+          Master roadmap 22-66 →
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

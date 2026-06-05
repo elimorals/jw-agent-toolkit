@@ -6,7 +6,7 @@ interface PhaseRow {
   title: string;
   tier: string;
   status: "shipped" | "planned";
-  release: "22-32" | "33-38" | "39-48" | "49-56";
+  release: "22-32" | "33-38" | "39-48" | "49-56" | "57-66";
 }
 
 const phases: PhaseRow[] = [
@@ -49,6 +49,20 @@ const phases: PhaseRow[] = [
   { number: 54, title: "nllb-translation", tier: "T1 Multilingual SOTA", status: "shipped", release: "49-56" },
   { number: 55, title: "multilingual wire-up", tier: "T1 Integration", status: "shipped", release: "49-56" },
   { number: 56, title: "jw-core-js close-out", tier: "T4 JS surface", status: "shipped", release: "49-56" },
+  // 57-66 shipped — 2 new packages + live-meeting + biblical KG
+  { number: 57, title: "jw-meeting-media (clean-room)", tier: "T1 New layer", status: "shipped", release: "57-66" },
+  { number: 58, title: "bible-knowledge-graph", tier: "T1 JW-pure biblical KG", status: "shipped", release: "57-66" },
+  { number: 61, title: "letta-memory (opt-in)", tier: "T2 Persistent memory", status: "shipped", release: "57-66" },
+  { number: 62, title: "marker-markitdown (loaders)", tier: "T2 External loaders", status: "shipped", release: "57-66" },
+  { number: 64, title: "whisperX-asr (diarization)", tier: "T2 Diarized ASR", status: "shipped", release: "57-66" },
+  { number: 66, title: "mcp-jw-brain", tier: "T3 Brain exposed via MCP", status: "shipped", release: "57-66" },
+  { number: 57.14, title: "drag-and-drop UI", tier: "T4 MVP+1 follow-up", status: "shipped", release: "57-66" },
+  { number: 57.15, title: "automatic external monitor", tier: "T4 MVP+1 follow-up", status: "shipped", release: "57-66" },
+  { number: 57.16, title: "multi-congregation", tier: "T4 MVP+1 follow-up", status: "shipped", release: "57-66" },
+  { number: 58.13, title: "place geocoords", tier: "T4 MVP+1 follow-up", status: "shipped", release: "57-66" },
+  { number: 58.14, title: "headwords expansion", tier: "T4 MVP+1 follow-up", status: "shipped", release: "57-66" },
+  { number: 61.8, title: "auto-recap", tier: "T4 MVP+1 follow-up", status: "shipped", release: "57-66" },
+  { number: 64.7, title: "speaker names mapping", tier: "T4 MVP+1 follow-up", status: "shipped", release: "57-66" },
 ];
 
 const shippedCount = phases.filter((p) => p.status === "shipped").length;
@@ -87,28 +101,37 @@ const releases = [
     href: "/en/whats-new-49-56",
     color: "text-[#7ab0e3]",
   },
+  {
+    id: "57-66",
+    title: "Release 57-66 · 2 new packages + live-meeting + biblical KG",
+    description:
+      "13 phases in a single continuous session: clean-room jw-meeting-media (WOL parser from DevTools + Tauri presenter), JW-pure bible-knowledge-graph (607 B.C.E.), opt-in letta-memory with Fernet, marker+markitdown loaders, diarized whisperX + speaker mapping, brain exposed via MCP. Plus 7 MVP+1 follow-ups.",
+    href: "/en/whats-new-57-66",
+    color: "text-[#5fc7dd]",
+  },
 ];
 ---
 
 <BaseLayout
-  title="Master roadmap — Phases 22 through 56"
-  description="Consolidated view of 35 jw-agent-toolkit phases organised by release (22-32 + 33-38 + 39-48 + 49-56) and by technical tier. All 35 shipped: discipleship ecosystem, core at SOTA, runtime trust + community + JS frontier, multilingual SOTA with 1672 languages via Omnilingual ASR."
+  title="Master roadmap — Phases 22 through 66 + follow-ups"
+  description="Consolidated view of 48 jw-agent-toolkit phases organised by release (22-32 + 33-38 + 39-48 + 49-56 + 57-66) and by technical tier. All shipped: discipleship ecosystem, core at SOTA, runtime trust + community + JS frontier, multilingual SOTA (1672 languages via Omnilingual ASR), and 2 new packages (jw-brain, jw-meeting-media) with live-meeting + JW-pure biblical KG."
 >
   <section class="grid-noise relative overflow-hidden border-b border-[var(--color-line-subtle)]">
     <div class="mx-auto max-w-7xl px-4 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20">
       <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
         <span class="inline-block h-px w-8 bg-[var(--color-accent)] align-middle"></span>
-        <span class="ml-2">Master roadmap · 35 phases</span>
+        <span class="ml-2">Master roadmap · {phases.length} phases</span>
       </p>
       <h1 class="mt-6 max-w-3xl text-balance font-display text-[clamp(1.85rem,5vw,3.4rem)] leading-[1.05]">
         <span class="text-[var(--color-ink-primary)]">De librería técnica a </span>
         <span class="text-[var(--color-accent)]">plataforma adoptable</span>
       </h1>
       <p class="mt-6 max-w-2xl text-[16px] leading-relaxed text-[var(--color-ink-secondary)]">
-        Four consecutive releases covering <strong class="text-[var(--color-ink-primary)]">complete discipleship</strong>,
+        Five consecutive releases covering <strong class="text-[var(--color-ink-primary)]">complete discipleship</strong>,
         <strong class="text-[var(--color-ink-primary)]">technical core at SOTA</strong>,
-        <strong class="text-[var(--color-ink-primary)]">runtime trust + community + JS frontier</strong> and
-        <strong class="text-[var(--color-ink-primary)]">multilingual SOTA with 1672 languages via Omnilingual ASR</strong>.
+        <strong class="text-[var(--color-ink-primary)]">runtime trust + community + JS frontier</strong>,
+        <strong class="text-[var(--color-ink-primary)]">multilingual SOTA with 1672 languages via Omnilingual ASR</strong> and
+        <strong class="text-[var(--color-ink-primary)]">2 new packages with live-meeting + JW-pure biblical KG</strong>.
         Same flow on every phase: brainstorming → approved spec → bite-sized TDD plan → red-green-commit implementation → audit.
       </p>
 
@@ -135,9 +158,9 @@ const releases = [
   <section class="border-b border-[var(--color-line-subtle)]">
     <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
       <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
-        ▌ 4 releases
+        ▌ 5 releases
       </h2>
-      <div class="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div class="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-5">
         {releases.map((r) => (
           <a
             href={r.href}
@@ -161,7 +184,7 @@ const releases = [
   <section>
     <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
       <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
-        ▌ Master table · 35 phases (22 → 56)
+        ▌ Master table · {phases.length} phases (22 → 66 + follow-ups)
       </h2>
 
       <div class="mt-6 overflow-x-auto">
@@ -214,7 +237,7 @@ const releases = [
   <section class="border-t border-[var(--color-line-subtle)] bg-[var(--color-surface-1)]">
     <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
       <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
-        ▌ Hard rules that 35 phases respect
+        ▌ Hard rules that {phases.length} phases respect
       </h2>
       <ul class="mt-6 grid gap-x-10 gap-y-3 text-[14px] text-[var(--color-ink-secondary)] sm:grid-cols-2">
         <li><span class="text-[var(--color-accent)]">→</span> Sin LLM en el camino crítico — parsers/agentes/stores determinísticos.</li>
