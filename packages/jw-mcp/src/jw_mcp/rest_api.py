@@ -569,6 +569,83 @@ async def post_vault_append(req: VaultAppendRequest) -> dict[str, Any]:
     }
 
 
+# ── F57 Presenter endpoints ─────────────────────────────────────────────
+
+try:
+    from fastapi.responses import JSONResponse
+
+    from jw_meeting_media.models import MeetingKind
+    from jw_meeting_media.presenter_state import PresenterManager
+    from jw_meeting_media.storage import MeetingStorage
+
+    _presenter = PresenterManager()
+    _storage_singleton: MeetingStorage | None = None
+
+    def _meetings_root() -> _Path:
+        """Root path for meetings storage. Override via test monkeypatch."""
+        return _Path("~/.jw-agent-toolkit/meetings").expanduser()
+
+    def _storage() -> MeetingStorage:
+        global _storage_singleton
+        if _storage_singleton is None:
+            _storage_singleton = MeetingStorage(_meetings_root() / "meetings.db")
+        return _storage_singleton
+
+    @app.post("/presenter/sessions")
+    async def presenter_create_session(
+        language: str, year: int, week: int, kind: str = "midweek"
+    ) -> Any:
+        program = _storage().load_program(
+            language=language, year=year, week=week, kind=MeetingKind(kind)
+        )
+        if program is None:
+            return JSONResponse(
+                {"error": "program not found; discover first"}, status_code=404
+            )
+        sid = _presenter.create_session(program=program)
+        return {"session_id": sid}
+
+    @app.get("/presenter/sessions/{sid}/state")
+    async def presenter_state(sid: str) -> Any:
+        try:
+            return _presenter.get_state(sid).model_dump()
+        except KeyError:
+            return JSONResponse({"error": "unknown session"}, status_code=404)
+
+    @app.post("/presenter/sessions/{sid}/play")
+    async def presenter_play(sid: str) -> dict[str, bool]:
+        _presenter.play(sid)
+        return {"ok": True}
+
+    @app.post("/presenter/sessions/{sid}/pause")
+    async def presenter_pause(sid: str) -> dict[str, bool]:
+        _presenter.pause(sid)
+        return {"ok": True}
+
+    @app.post("/presenter/sessions/{sid}/next")
+    async def presenter_next(sid: str) -> dict[str, bool]:
+        _presenter.next_(sid)
+        return {"ok": True}
+
+    @app.post("/presenter/sessions/{sid}/prev")
+    async def presenter_prev(sid: str) -> dict[str, bool]:
+        _presenter.prev(sid)
+        return {"ok": True}
+
+    @app.post("/presenter/sessions/{sid}/stop")
+    async def presenter_stop(sid: str) -> dict[str, bool]:
+        _presenter.stop(sid)
+        return {"ok": True}
+
+    @app.delete("/presenter/sessions/{sid}")
+    async def presenter_destroy(sid: str) -> dict[str, bool]:
+        _presenter.destroy(sid)
+        return {"ok": True}
+
+except ImportError:
+    pass
+
+
 @app.on_event("shutdown")
 async def shutdown() -> None:
     if _wol is not None:

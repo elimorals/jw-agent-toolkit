@@ -3346,6 +3346,7 @@ dependencies = [
     { name = "jw-core" },
     { name = "jw-eval" },
     { name = "jw-gen" },
+    { name = "jw-meeting-media" },
     { name = "jw-rag" },
 ]
 
@@ -3356,6 +3357,7 @@ requires-dist = [
     { name = "jw-core", editable = "packages/jw-core" },
     { name = "jw-eval", editable = "packages/jw-eval" },
     { name = "jw-gen", editable = "packages/jw-gen" },
+    { name = "jw-meeting-media", editable = "packages/jw-meeting-media" },
     { name = "jw-rag", editable = "packages/jw-rag" },
 ]
 
