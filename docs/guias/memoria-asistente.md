@@ -80,6 +80,41 @@ result = await conversation_assistant(
   query: transfusiones
 ```
 
+## Auto-recap de sesiones previas (F61.8)
+
+Al iniciar una nueva sesión, el agente `recap_previous_session` genera un
+resumen procedural (sin LLM en el camino crítico) de las sesiones previas
+del usuario. Útil para preguntar "¿continuamos con la sesión de ayer?".
+
+```python
+from jw_agents import recap_previous_session
+from jw_agents.memory import build_memory_store
+
+memory = build_memory_store()
+result = await recap_previous_session(
+    memory=memory,
+    current_session_id="conversation-2026-06-05",
+    limit=5,                   # hasta 5 sesiones previas
+    max_excerpts_per_kind=3,   # 3 excerpts por kind
+)
+for finding in result.findings:
+    print(finding.summary)
+    print(finding.metadata["excerpts_by_kind"])
+```
+
+Vía MCP:
+
+```
+@jw-agent-toolkit recap_previous_session
+  current_session_id: conversation-2026-06-05
+  limit: 5
+```
+
+El output es un `AgentResult` con un `Finding` por sesión previa (ordenadas
+por timestamp desc) — cada `Finding` lleva `summary`, `excerpt` y
+`metadata.excerpts_by_kind` para que un LLM downstream pueda generar
+narrativa rica si lo desea.
+
 ## Privacy first
 
 - TODO el storage es local (sqlite) por default.
