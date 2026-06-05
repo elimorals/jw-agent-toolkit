@@ -65,15 +65,35 @@ Con el grafo poblado, queries antes imposibles ahora funcionan:
 `place:jerusalem`, `period:patriarchal`, `passage:1:11:26`). Re-correr
 sobre el mismo JWPUB no duplica nodos ni edges.
 
+## Auditar cobertura sobre el Insight completo (F58.14)
+
+El catálogo built-in expandido (`EXPANDED_PERSON_HEADWORDS` +
+`EXPANDED_PLACE_HEADWORDS`) cubre ~250 personas y ~150 lugares del canon
+bíblico común (ES + EN). Para auditar qué fracción del Insight del usuario
+cubre el built-in, usa:
+
+```bash
+jw brain learn-headwords --brain personal --insight ~/jwpubs/it_S.jwpub
+```
+
+Esto extrae los cabezales (`title`) de cada documento del JWPUB y los
+persiste localmente en `<brain>/extracted_headwords.json`. La salida JSON
+incluye `coverage_pct` — la fracción del Insight cubierta por el built-in.
+
+**Privacidad/copyright**: la extracción se queda en la máquina del
+usuario. El toolkit no redistribuye ni sincroniza este archivo. El JWPUB
+debe haberse descargado oficialmente de jw.org.
+
 ## Limitaciones
 
-- El catálogo `PERSON_HEADWORDS`/`PLACE_HEADWORDS` cubre solo las entradas
-  bíblicas más comunes (26 inicial). Se expande iterativamente.
+- Catálogo built-in cubre ~250 personas y ~150 lugares del canon bíblico
+  común (figuras y geografías mencionadas en NWT, formas ES + EN). No
+  pretende ser exhaustivo de las miles de entradas del Insight. Para
+  auditar tu cobertura ejecuta `jw brain learn-headwords --insight <jwpub>`
+  (no redistribuye contenido).
 - Conceptos teológicos (Trinidad, Reino, Espíritu Santo) **no** se importan
   como nodos — son artículos del Insight, pero no encajan en el schema
   `Person`/`Place`/`Period`/`Passage` y van a otro flujo (RAG semántico).
 - ✅ Geocoordenadas de 16 lugares principales (Jerusalem, Babylon, Rome,
   Athens, Ephesus, Antioch, etc.) hidratadas desde `place_catalog.py`.
-  Los lugares fuera del catálogo se upsertan sin coordenadas. La
-  expansión a la cobertura completa del Insight queda para sprints
-  posteriores.
+  Los lugares fuera del catálogo se upsertan sin coordenadas.
