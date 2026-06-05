@@ -17,6 +17,17 @@
         "minWidth": 800,
         "minHeight": 600,
         "resizable": true
+      },
+      {
+        "label": "presenter",
+        "title": "Presenter — jw-agent-toolkit",
+        "width": 1280,
+        "height": 720,
+        "url": "presenter.html",
+        "visible": false,
+        "fullscreen": false,
+        "resizable": true,
+        "decorations": true
       }
     ],
     "security": {
