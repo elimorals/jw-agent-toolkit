@@ -1286,7 +1286,7 @@ no de un módulo grande.
 - ✅ Factory `build_memory_store()` env-driven.
 - ✅ Wire-up en `conversation_assistant` con compatibility preservada (memory=None).
 - ✅ MCP tools `memory_record/recall/forget_session`.
-- ⬜ Auto-recap entre sesiones (futuro): agente que resuma sesión previa al iniciar nueva.
+- ✅ Auto-recap procedural (`recap_previous_session` agente + MCP tool).
 - ⬜ Voz reconocida → speaker_id de F64 alimenta automáticamente `preference` records.
 
 ## Fase 62 — marker plus markitdown loaders ✅
