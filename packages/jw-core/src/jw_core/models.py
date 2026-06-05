@@ -271,3 +271,14 @@ class BibleRef(BaseModel):
         if self.verse_start is not None:
             base += f"#study=discover&v={self.book_num}:{self.chapter}:{self.verse_start}"
         return base
+
+    @classmethod
+    def from_wol_url(cls, href: str) -> BibleRef | None:
+        """Construye una BibleRef desde una URL WOL bíblica.
+
+        Delega a `jw_core.parsers.wol_url.parse_wol_bible_url`.
+        Port a Python del `BibleRef.fromWolUrl` del paquete jw-core-js (F56.5).
+        """
+        from jw_core.parsers.wol_url import parse_wol_bible_url
+
+        return parse_wol_bible_url(href)
