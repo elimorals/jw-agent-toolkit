@@ -1391,3 +1391,206 @@ no de un módulo grande.
 - ⬜ OBS Studio scene switching (futuro).
 - ⬜ Sync cloud (Dropbox/OneDrive) (futuro).
 - ⬜ Background music con auto-stop (futuro).
+
+## Fases 65-76 — IA agéntica / multimodal / ML / voz ⬜ planeadas (2026-06-11)
+
+> Familia de 9 fases agrupadas por capa técnica. Documento overview:
+> [`docs/superpowers/specs/2026-06-11-fases-65-76-overview.md`](superpowers/specs/2026-06-11-fases-65-76-overview.md).
+>
+> **Nota de numeración**: el slot "Fase 66" aparece dos veces — arriba
+> como wire-up MCP del Second Brain (F49) ya hecho, y abajo como
+> `conversation-sparring` planeado. El autor puede renumerar al
+> implementar; por ahora se mantiene F65-F76 según el overview.
+
+### Capa A — Agéntica
+
+- ✅ **Fase 65 — `meta-orchestrator`** (MVP + post-MVP entregados
+  2026-06-11): orquestador agéntico sobre los 12 agentes existentes con
+  plan/replan/critique. Reusa Plugin SDK F41. Spec:
+  [`fase-65-meta-orchestrator-design.md`](superpowers/specs/2026-06-11-fase-65-meta-orchestrator-design.md).
+  Plan: [`fase-65-meta-orchestrator-plan.md`](superpowers/plans/2026-06-11-fase-65-meta-orchestrator-plan.md).
+  Guía: [`meta-orchestrator.md`](guias/meta-orchestrator.md). **55 tests
+  passing**. 3 MCP tools nuevas. CLI `jw meta {tools,plan,run}` + `jw
+  plan-sunday` con flags `--trace`, `--save-plan`, `--save-result`.
+
+  Post-MVP cerrado:
+  - ✅ 12 adapters reales (no más placeholders) en `builtin_tools.py`.
+  - ✅ LLM provider factory env-driven (Anthropic + Ollama + Fake)
+    en `jw_agents.meta.llm_factory` con degradación grácil.
+  - ✅ NLI provider factory en `jw_agents.meta.nli_factory` que envuelve
+    `get_default_nli_provider()` de F39.
+  - ✅ Tracing F43 via `MetaOrchestrator.tracer=` opt-in, emite
+    `CustomEvent` `meta_plan` / `meta_step` / `meta_critique`.
+  - ✅ Persistencia opt-in con `--save-plan` / `--save-result` JSON.
+  - ✅ **Export Mermaid del DAG**: `jw_agents.meta.mermaid`
+    (`plan_to_mermaid()` + `result_to_mermaid()`); flag `jw meta plan --mermaid`.
+  - ✅ **Plan load/replay**: `MetaOrchestrator.run_plan(plan)` + CLI
+    `jw meta replay path.json`.
+
+  Pendiente futuro: streaming de resultados.
+- ✅ **Fase 66 — `conversation-sparring`** (MVP + post-MVP entregados
+  2026-06-11): simulador de interlocutor para predicación con 6
+  personas + memoria F61 + NLI F39 opt-in. Spec:
+  [`fase-66-conversation-sparring-design.md`](superpowers/specs/2026-06-11-fase-66-conversation-sparring-design.md).
+  Guía: [`conversation-sparring.md`](guias/conversation-sparring.md).
+  **56 tests passing**. 4 MCP tools. CLI
+  `jw spar {personas,start,turn,show,close,voice-turn}`.
+
+  Post-MVP cerrado:
+  - ✅ Voice mode: `jw spar voice-turn` ASR F34 → LLM → TTS F34, audio
+    nunca sale del disco. Inyección `transcribe_fn`/`synthesize_fn` para
+    tests sin deps.
+  - ✅ Golden conversations en `tests/spar/fixtures/conversations/*.jsonl`
+    con FakeSparLLM determinista (3 escenarios).
+  - ✅ Tool `spar.session` en `jw_agents.meta.builtin_tools` para uso
+    desde el meta-orchestrator F65.
+  - ✅ Markdown export del transcript via `jw spar show/close --export`.
+  - ✅ Personas en/pt completas: 18 TOMLs (`<key>_<lang>.toml`) con
+    resolución multi-idioma en `get_persona(key, language=)` y fallback
+    a default.
+
+  - ✅ **SQLite cross-process** para `SparSession`:
+    `jw_agents.spar.persistence` con `save_session`/`load_session` y
+    autosave opt-in vía `JW_SPAR_PERSIST=1`.
+
+  Pendiente futuro: persona moderation suite con review periódico de los TOMLs.
+- ✅ **Fase 67 — `doctrinal-reasoner`** (MVP entregado 2026-06-11):
+  chain-of-thought verificable con ReAct + NLI F39 + árbol de pruebas
+  exportable. Spec:
+  [`fase-67-doctrinal-reasoner-design.md`](superpowers/specs/2026-06-11-fase-67-doctrinal-reasoner-design.md).
+  Guía: [`doctrinal-reasoner.md`](guias/doctrinal-reasoner.md). **41
+  tests passing**. CLI `jw reason {ask,languages}` + MCP
+  `doctrinal_reason`. Reformulator de framing tóxico (12 patrones
+  es/en/pt). Planner con Jinja2 (es/en/pt) + JSON schema validation.
+  ReAct executor con NLI F39 (modes off/warn/reject) y truncation.
+  Summary prose deterministic. Integrado en F65 meta-orchestrator
+  como tool `reason.doctrinal`.
+
+  Post-MVP cerrado:
+  - ✅ **Tool dispatcher real** en `jw_agents.reasoner.dispatchers`
+    enrutando por hint a `verse_explainer`/`research_topic`/`apologetics`/`life_topics`;
+    opt-in vía `use_real_dispatcher=True`.
+  - ✅ **Golden set de 10 preguntas** multi-paso en
+    `tests/reasoner/fixtures/golden.jsonl` + suite parametrizada
+    determinista con `_CannedLLM`.
+
+  Pendiente futuro: LLM-driven summary, F31 PDF export del razonamiento.
+
+### Capa B — Multimodal
+
+- ✅ **Fase 68 — `talk-lab`** (MVP entregado 2026-06-11): coach de
+  oratoria multimodal con WhisperX F64 + prosodia (librosa opt + numpy
+  fallback) + 6 counsel points pedagógicos. Local-first, audio nunca
+  sale del disco. Spec:
+  [`fase-68-talk-lab-design.md`](superpowers/specs/2026-06-11-fase-68-talk-lab-design.md).
+  Plan: [`fase-68-talk-lab-plan.md`](superpowers/plans/2026-06-11-fase-68-talk-lab-plan.md).
+  Guía: [`talk-lab.md`](guias/talk-lab.md). **61 tests passing**. 3 MCP
+  tools nuevas. CLI `jw talklab {analyze,history,compare,counsel-points}`.
+  Catálogo TOML en es/en/pt con `applies_by_kind`.
+
+  Post-MVP cerrado:
+  - ✅ **SVG timeline** del `TalkLabReport`: `jw_core.talk_lab.svg.report_to_svg`
+    + flag `jw talklab analyze --svg`.
+  - ✅ **F31 PDF export wrapper**: `jw_core.talk_lab.pdf_export`
+    (`talklab_to_studysheet` + `export_talk_lab_pdf`) + flag
+    `jw talklab analyze --pdf`.
+
+  Pendiente futuro: expansión 6 → 50 counsel points, cifrado Fernet del
+  history.sqlite, wire-up al meta-orchestrator F65.
+- ✅ **Fase 69 — `broadcasting-visual-index`** (MVP entregado 2026-06-11):
+  búsqueda multimodal frame-level con VLM + CLIP + RRF sobre videos
+  de JW Broadcasting.
+  Spec: [`fase-69-broadcasting-visual-index-design.md`](superpowers/specs/2026-06-11-fase-69-broadcasting-visual-index-design.md).
+
+  Post-MVP cerrado:
+  - ✅ **OCR de frames reusando F70**: `jw_core.broadcasting.visual.ocr_frame`
+    (`enrich_frames_with_ocr`) que delega en el adapter pytesseract de F70.
+- ✅ **Fase 70 — `image-quote-verifier`** (MVP entregado 2026-06-11):
+  defensa visual contra citas falsas en memes / screenshots. VLM + OCR
+  + RAG + NLI F39.
+  Spec: [`fase-70-image-quote-verifier-design.md`](superpowers/specs/2026-06-11-fase-70-image-quote-verifier-design.md).
+
+  Post-MVP cerrado:
+  - ✅ **Wire-up RAG F33 + NLI F39 reales**:
+    `jw_core.verification.image_quote.factories` con
+    `default_rag_retriever()` (env `JW_IMAGE_QUOTE_STORE_PATH`) y
+    `default_nli()`; engine acepta `use_real_defaults=True` con
+    degradación grácil cuando faltan.
+- ✅ **Fase 71 — `book-camera`** (MVP backend entregado 2026-06-11):
+  cámara para libros físicos con OCR + clasificación + acciones
+  contextuales (read_aloud / open_in_jw_library / open_in_wol /
+  show_answer). Spec:
+  [`fase-71-book-camera-design.md`](superpowers/specs/2026-06-11-fase-71-book-camera-design.md).
+  Guía: [`book-camera.md`](guias/book-camera.md). **30 tests passing**.
+  CLI `jw book-camera {analyze,kinds}` + MCP `book_camera_analyze`.
+  Integrado en F65 como `book_camera.analyze`.
+
+  Post-MVP cerrado:
+  - ✅ **REST endpoints book-camera**: `jw_mcp.rest.book_camera.router`
+    expone `POST /api/v1/book_camera/{analyze,tts,rag_answer}` (FastAPI
+    `APIRouter` opt-in). `/tts` aplica el license gate F76.
+
+  Pendiente futuro: app PWA/Capacitor en `apps/book-camera/`, VLM
+  real-time on-device, accesibilidad ≥95 lighthouse, streaming TTS.
+
+### Capa C — ML clásico / predictivo
+
+- ✅ **Fase 72 — `doctrinal-drift`** (MVP entregado 2026-06-11):
+  analizador de evolución diacrónica con embeddings temporales +
+  DBSCAN-style clustering (numpy puro). Spec:
+  [`fase-72-doctrinal-drift-design.md`](superpowers/specs/2026-06-11-fase-72-doctrinal-drift-design.md).
+  Guía: [`doctrinal-drift.md`](guias/doctrinal-drift.md). **31 tests
+  passing**. CLI `jw drift {analyze,note,eras}` + MCP `drift_analyze`.
+  Pipeline: partition_by_era + dbscan_cluster cosine + cluster
+  alignment + significance (minor/moderate/major) + nota Prov 4:18
+  trilingüe SIEMPRE inyectada. Integrado en F65 como `drift.analyze`.
+  Embedding-agnóstico (cualquier provider compatible).
+
+  Post-MVP cerrado:
+  - ✅ **Wire-up F49 Second Brain**: `jw_core.drift.brain_source`
+    (`chunks_from_brain`) extrae `Publication` nodes con
+    text/year/embedding parametrizable.
+  - ✅ **SVG drift timeline**: `jw_core.drift.svg.drift_to_svg` con
+    eras coloreadas + arrows por significance + nota Prov 4:18;
+    flag `jw drift analyze --svg`.
+
+  Pendiente futuro: F33 embedder default para generación interactiva
+  del JSONL, comparación pairwise no-consecutiva.
+
+### Capa D — Voz / accesibilidad
+
+- ✅ **Fase 76 — `family-voice-clone`** (MVP entregado 2026-06-11):
+  TTS con voz familiar consentida + license gate de 3 capas + audit
+  trail F43-ready. Spec:
+  [`fase-76-family-voice-clone-design.md`](superpowers/specs/2026-06-11-fase-76-family-voice-clone-design.md).
+  Guía: [`family-voice-clone.md`](guias/family-voice-clone.md). **40
+  tests passing**. CLI `jw voiceclone
+  {register-from-consent,list,show,say,revoke,delete}` + MCP
+  `voice_clone_{list,synthesize,audit}`. License gate: deny list de
+  nombres (branch/broadcasting/president/governing_body/warwick),
+  consent activo (no revoked + no expirado), texto no comercial
+  (5 patrones regex). Registry JSON por perfil con env override
+  `JW_VOICECLONE_ROOT`. `FakeVoiceProvider` determinista para tests.
+  Audit hook opt-in via `emit_trace=fn` (F43-compatible). MCP devuelve
+  `{ok, error}` en lugar de levantar excepción.
+
+  Post-MVP cerrado:
+  - ✅ **Cifrado opt-in Fernet** de pesos:
+    `jw_core.audio.voice_clone.encryption` con
+    `encrypt_weights`/`decrypt_to_tempfile`/`generate_key`; activado
+    por `JW_VOICE_KEY` (patrón F61). Sin clave → `EncryptionDisabledError`.
+
+  Pendiente futuro: wizard interactivo, providers F5-TTS + XTTSv2
+  reales via Plugin SDK F41 + polyglot venv F53, validation sample
+  WAV automático.
+
+### Pre-requisitos comunes
+
+- F39 NLI runtime (hecho)
+- F41 Plugin SDK con 5 entry-points (hecho)
+- F43 agent tracing (hecho)
+- F49 Second Brain (hecho)
+- F53 polyglot Python venv-per-feature (hecho)
+- F61 memoria persistente (hecho)
+- F62 historical PDF ingest (hecho)
+- F64 WhisperX diarización (hecho)

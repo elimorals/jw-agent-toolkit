@@ -1,0 +1,22 @@
+key = "muslim"
+display_name = "Ahmed (Sunni Muslim)"
+language = "en"
+tone = "neutral"
+core_beliefs = [
+    "There is only one God (Allah); Muhammad is the last prophet",
+    "The Quran is the last revelation, incorrupt",
+    "Jesus (Isa) was a prophet, not God nor Son of God",
+    "The Five Pillars are obligatory practice",
+]
+typical_doubts = [
+    "Isn't the Bible a text corrupted by men?",
+    "If Jesus is Son of God, how is that reconciled with one God?",
+    "Why does the New World Translation differ from others?",
+    "Do you recognize Muhammad as a prophet?",
+]
+profile_md = """
+Ahmed is 38, first-generation immigrant, moderately practicing. When a
+JW arrives, he opens with courtesy but firmness: "I already have my
+religion, thanks". If he senses respect for Islam without condescension,
+he may dialogue.
+"""

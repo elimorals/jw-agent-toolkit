@@ -4132,6 +4132,517 @@ async def meeting_open_presenter(
 
 
 # ────────────────────────────────────────────────────────────────────────
+# F65 — meta-orchestrator over the 12+ existing agents
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def meta_list_tools() -> dict:
+    """List all tools available to the meta-orchestrator (Fase 65)."""
+
+    from jw_agents.meta.builtin_tools import register_builtin_tools
+    from jw_agents.meta.registry import discover_plugin_tools, list_tools
+
+    register_builtin_tools()
+    discover_plugin_tools()
+    tools_out = []
+    for t in list_tools():
+        tools_out.append(
+            {
+                "name": t.name,
+                "description": t.description,
+                "args_schema": t.args_schema,
+            }
+        )
+    return {"tools": tools_out}
+
+
+@mcp.tool
+async def meta_plan_goal(
+    goal: str,
+    language: str = "es",
+    congregation: str | None = None,
+    max_steps: int = 8,
+) -> dict:
+    """Produce an orchestration plan WITHOUT executing it (Fase 65)."""
+
+    from jw_agents.meta.builtin_tools import register_builtin_tools
+    from jw_agents.meta.llm_factory import build_llm_from_env
+    from jw_agents.meta.orchestrator import MetaOrchestrator
+    from jw_agents.meta.registry import discover_plugin_tools
+
+    register_builtin_tools()
+    discover_plugin_tools()
+    orch = MetaOrchestrator(
+        llm=build_llm_from_env(),
+        nli=None,
+        max_steps=max_steps,
+        max_replans=0,
+    )
+    plan = await orch.plan_only(
+        goal=goal, language=language, congregation=congregation
+    )
+    return plan.model_dump()
+
+
+@mcp.tool
+async def meta_run_plan(
+    goal: str,
+    language: str = "es",
+    congregation: str | None = None,
+    max_steps: int = 8,
+    max_replans: int = 2,
+    timeout_s: float = 120.0,
+) -> dict:
+    """Plan + execute + critique (Fase 65)."""
+
+    from jw_agents.meta.builtin_tools import register_builtin_tools
+    from jw_agents.meta.llm_factory import build_llm_from_env
+    from jw_agents.meta.nli_factory import build_nli_from_env
+    from jw_agents.meta.orchestrator import MetaOrchestrator
+    from jw_agents.meta.registry import discover_plugin_tools
+
+    register_builtin_tools()
+    discover_plugin_tools()
+    orch = MetaOrchestrator(
+        llm=build_llm_from_env(),
+        nli=build_nli_from_env(language=language),
+        max_steps=max_steps,
+        max_replans=max_replans,
+        timeout_s=timeout_s,
+    )
+    result = await orch.run(
+        goal=goal, language=language, congregation=congregation
+    )
+    return result.model_dump()
+
+
+# ────────────────────────────────────────────────────────────────────────
+# F68 — talk-lab (coach of public speaking)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def talklab_analyze(
+    recording_path: str,
+    part_kind: str = "bible_reading",
+    language: str = "es",
+    llm_judge: bool = False,
+) -> dict:
+    """Analyze a recording with talk-lab (Fase 68)."""
+
+    from jw_core.talk_lab.engine import TalkLabConfig, analyze_recording
+
+    rpt = await analyze_recording(
+        recording_path=recording_path,
+        config=TalkLabConfig(
+            part_kind=part_kind,  # type: ignore[arg-type]
+            language=language,
+            llm_judge=llm_judge,
+        ),
+    )
+    return rpt.model_dump()
+
+
+@mcp.tool
+async def talklab_list_counsel_points(
+    part_kind: str | None = None,
+    language: str = "es",
+) -> dict:
+    """List counsel points for a language and optional part_kind (Fase 68)."""
+
+    from jw_core.talk_lab.counsel_points.loader import applies_to, load_catalog
+
+    catalog = load_catalog(language)
+    applicable = (
+        applies_to(part_kind) if part_kind else {p.id for p in catalog}
+    )
+    return {
+        "points": [
+            {**p.model_dump(), "applies": p.id in applicable}
+            for p in catalog
+        ]
+    }
+
+
+@mcp.tool
+async def talklab_compare(report_id_a: str, report_id_b: str) -> dict:
+    """Compare two tracked reports (Fase 68)."""
+
+    from pathlib import Path
+
+    from jw_core.talk_lab.history import SessionHistory
+
+    h = SessionHistory(
+        Path("~/.jw-agent-toolkit/talklab/history.sqlite").expanduser()
+    )
+    return {"deltas": h.compare(report_id_a, report_id_b)}
+
+
+# ────────────────────────────────────────────────────────────────────────
+# F66 — conversation sparring with simulated interlocutors
+# ────────────────────────────────────────────────────────────────────────
+
+
+def _spar_build_llm() -> Any:
+    """Resolve spar LLM via F65 factory, falling back to FakeSparLLM."""
+
+    import os
+
+    from jw_agents.spar.simulator import FakeSparLLM
+
+    backend = os.environ.get("JW_SPAR_LLM", "fake").lower()
+    if backend in ("", "fake"):
+        return FakeSparLLM()
+    try:
+        from jw_agents.meta.llm_factory import build_llm_from_env
+
+        os.environ.setdefault("JW_META_LLM", backend)
+        return build_llm_from_env()
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(
+            "spar MCP: LLM backend %r unavailable (%s); using fake.",
+            backend,
+            exc,
+        )
+        return FakeSparLLM()
+
+
+@mcp.tool
+async def spar_list_personas() -> dict:
+    """List the 6 builtin sparring personas (Fase 66)."""
+
+    from jw_agents.spar.personas import list_personas
+
+    return {"personas": [p.model_dump() for p in list_personas()]}
+
+
+@mcp.tool
+async def spar_start(
+    persona: str,
+    language: str = "es",
+) -> dict:
+    """Start a new sparring session and return its initial state (Fase 66)."""
+
+    from jw_agents.spar.session import start_session
+
+    session = start_session(persona_key=persona, language=language)
+    return session.model_dump()
+
+
+@mcp.tool
+async def spar_turn(
+    session_id: str,
+    text: str,
+) -> dict:
+    """Send one user turn and return the persona's reply (Fase 66)."""
+
+    from jw_agents.spar.session import take_turn
+
+    response = await take_turn(
+        session_id=session_id, user_text=text, llm=_spar_build_llm()
+    )
+    return response.model_dump()
+
+
+@mcp.tool
+async def spar_close(
+    session_id: str,
+    no_feedback: bool = False,
+) -> dict:
+    """Close a sparring session and optionally compute feedback (Fase 66)."""
+
+    from jw_agents.spar.feedback import score_session
+    from jw_agents.spar.session import close_session
+
+    session = close_session(session_id=session_id)
+    if not no_feedback:
+        score_session(session)
+    return session.model_dump()
+
+
+# ────────────────────────────────────────────────────────────────────────
+# F67 — doctrinal reasoner
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def doctrinal_reason(
+    question: str,
+    language: str = "es",
+    max_steps: int = 12,
+    nli_mode: str = "reject",
+    include_summary_prose: bool = True,
+) -> dict:
+    """Run the doctrinal reasoner and return the verifiable tree (Fase 67)."""
+
+    from jw_agents.reasoner.engine import doctrinal_reasoner
+    from jw_agents.reasoner.models import ReasonerConfig
+
+    try:
+        from jw_agents.meta.llm_factory import build_llm_from_env
+
+        llm = build_llm_from_env()
+    except Exception:
+        import json as _json
+
+        class _FakeLLM:
+            name = "fake"
+
+            async def acomplete(self, prompt: str) -> str:  # noqa: ARG002
+                return _json.dumps({"steps": []})
+
+        llm = _FakeLLM()
+
+    try:
+        from jw_agents.meta.nli_factory import build_nli_from_env
+
+        nli = build_nli_from_env(language=language)
+    except Exception:
+        nli = None
+
+    cfg = ReasonerConfig(
+        language=language,  # type: ignore[arg-type]
+        max_steps=max_steps,
+        nli_mode=nli_mode,  # type: ignore[arg-type]
+        include_summary_prose=include_summary_prose,
+    )
+    tree = await doctrinal_reasoner(
+        question=question, llm=llm, config=cfg, nli=nli
+    )
+    return tree.model_dump()
+
+
+# ────────────────────────────────────────────────────────────────────────
+# F69 — broadcasting visual frame-level index
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def broadcasting_visual_index(
+    video_path: str,
+    interval_s: float = 5.0,
+    video_id: str | None = None,
+    no_ffmpeg: bool = False,
+) -> dict:
+    """Index a local video frame-level into the visual store (Fase 69)."""
+
+    from jw_core.broadcasting.visual.engine import index_video
+
+    stats = index_video(
+        video_path,
+        interval_s=interval_s,
+        use_real_ffmpeg=not no_ffmpeg,
+        video_id=video_id,
+    )
+    return stats.model_dump()
+
+
+@mcp.tool
+async def broadcasting_visual_search(
+    query: str,
+    top_k: int = 10,
+    min_score: float = 0.0,
+) -> dict:
+    """Hybrid search (FTS5 + CLIP cosine + RRF) over the visual index (Fase 69)."""
+
+    from jw_core.broadcasting.visual.engine import search_index
+
+    hits = search_index(query, top_k=top_k, min_score=min_score)
+    return {"hits": [h.model_dump() for h in hits]}
+
+
+@mcp.tool
+async def broadcasting_visual_stats() -> dict:
+    """Inspection: storage stats of the visual index (Fase 69)."""
+
+    from jw_core.broadcasting.visual.engine import stats_index
+
+    return stats_index().model_dump()
+
+
+# ────────────────────────────────────────────────────────────────────────
+# F70 — image-quote verifier
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def verify_image_quote_tool(
+    image_path: str,
+    language: str = "es",
+    ocr_text_override: str | None = None,
+    vlm_description: str = "",
+) -> dict:
+    """Verify an image-quote and return the verdict (Fase 70).
+
+    Default: no RAG retrieval / no NLI wired in MCP -> UNVERIFIABLE unless
+    the visual fingerprint flags anomalies (then FABRICATED). To wire RAG,
+    callers can extend this tool with a custom retriever.
+    """
+
+    from jw_core.verification.image_quote.engine import (
+        verify_image_quote,
+    )
+
+    verdict = await verify_image_quote(
+        image_path,
+        language=language,
+        retriever=None,
+        nli=None,
+        ocr_text_override=ocr_text_override,
+        vlm_description=vlm_description,
+    )
+    return verdict.model_dump()
+
+
+# ────────────────────────────────────────────────────────────────────────
+# F71 — book-camera live capture
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def book_camera_analyze(
+    image_path: str | None = None,
+    ocr_text: str | None = None,
+    language: str = "es",
+) -> dict:
+    """Analyze a physical-book capture and return suggested actions (Fase 71)."""
+
+    from jw_core.book_camera.engine import analyze_capture
+
+    result = analyze_capture(
+        image_path=image_path,
+        ocr_text=ocr_text,
+        language=language,
+    )
+    return result.model_dump()
+
+
+# ────────────────────────────────────────────────────────────────────────
+# F72 — doctrinal drift analyzer
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def drift_analyze(
+    query: str,
+    chunks_path: str,
+    language: str = "es",
+    min_chunks_per_era: int = 3,
+    min_delta: float = 0.05,
+) -> dict:
+    """Analyze diachronic doctrinal drift over a local chunks JSONL (Fase 72).
+
+    Each line in `chunks_path` must be a JSON object with `text`, `year`,
+    and `embedding` (list[float]).
+    """
+
+    import json as _json
+    from pathlib import Path
+
+    import numpy as np
+
+    from jw_core.drift.cluster import Chunk
+    from jw_core.drift.engine import analyze_doctrinal_drift
+
+    chunks: list[Chunk] = []
+    for line in Path(chunks_path).expanduser().read_text().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        d = _json.loads(line)
+        emb = np.asarray(d["embedding"], dtype=np.float32)
+        norm = float(np.linalg.norm(emb))
+        if norm > 0:
+            emb = emb / norm
+        chunks.append(
+            Chunk(
+                text=str(d.get("text", "")),
+                year=int(d["year"]),
+                embedding=emb.astype(np.float32),
+            )
+        )
+    report = analyze_doctrinal_drift(
+        query=query,
+        chunks=chunks,
+        language=language,
+        min_chunks_per_era=min_chunks_per_era,
+        min_delta=min_delta,
+    )
+    return report.model_dump()
+
+
+# ────────────────────────────────────────────────────────────────────────
+# F76 — family-voice TTS (consent-guarded)
+# ────────────────────────────────────────────────────────────────────────
+
+
+@mcp.tool
+async def voice_clone_list() -> dict:
+    """List registered voice profiles (Fase 76)."""
+
+    from jw_core.audio.voice_clone.registry import list_voices
+
+    return {"voices": [v.model_dump() for v in list_voices()]}
+
+
+@mcp.tool
+async def voice_clone_synthesize(
+    voice_name: str,
+    text: str,
+    output_path: str,
+) -> dict:
+    """Synthesize `text` with voice `voice_name` into `output_path` (Fase 76).
+
+    Enforces the license + consent + commercial-use gates. Returns
+    `{ok: true, path}` on success, `{ok: false, error}` on policy failure
+    (no exception is surfaced to the MCP transport).
+    """
+
+    from jw_core.audio.voice_clone.license_gate import LicenseGateError
+    from jw_core.audio.voice_clone.registry import VoiceNotFoundError
+    from jw_core.audio.voice_clone.synthesizer import (
+        synthesize_with_voice,
+    )
+
+    try:
+        out = synthesize_with_voice(voice_name, text, output_path)
+    except VoiceNotFoundError as exc:
+        return {"ok": False, "error": f"voice not found: {exc}"}
+    except LicenseGateError as exc:
+        return {"ok": False, "error": str(exc)}
+    return {"ok": True, "path": str(out)}
+
+
+@mcp.tool
+async def voice_clone_audit(voice_name: str) -> dict:
+    """Surface basic audit info: usage counter + last_used_at (Fase 76)."""
+
+    from jw_core.audio.voice_clone.registry import (
+        VoiceNotFoundError,
+        get_voice,
+    )
+
+    try:
+        profile = get_voice(voice_name)
+    except VoiceNotFoundError as exc:
+        return {"ok": False, "error": f"voice not found: {exc}"}
+    return {
+        "ok": True,
+        "voice_name": profile.name,
+        "provider": profile.provider,
+        "license": profile.license,
+        "use_count": profile.use_count,
+        "last_used_at": (
+            profile.last_used_at.isoformat()
+            if profile.last_used_at
+            else None
+        ),
+        "consent_revoked": profile.consent.revoked,
+    }
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Entry point
 # ────────────────────────────────────────────────────────────────────────
 

@@ -6,7 +6,7 @@ interface PhaseRow {
   title: string;
   tier: string;
   status: "shipped" | "planned";
-  release: "22-32" | "33-38" | "39-48" | "49-56" | "57-66";
+  release: "22-32" | "33-38" | "39-48" | "49-56" | "57-66" | "65-76";
 }
 
 const phases: PhaseRow[] = [
@@ -63,6 +63,16 @@ const phases: PhaseRow[] = [
   { number: 58.14, title: "headwords expansion", tier: "T4 MVP+1 follow-up", status: "shipped", release: "57-66" },
   { number: 61.8, title: "auto-recap", tier: "T4 MVP+1 follow-up", status: "shipped", release: "57-66" },
   { number: 64.7, title: "speaker names mapping", tier: "T4 MVP+1 follow-up", status: "shipped", release: "57-66" },
+  // 65-76 shipped — agentic + multimodal + predictive + family voice
+  { number: 65, title: "meta-orchestrator", tier: "T1 Agentic", status: "shipped", release: "65-76" },
+  { number: 66, title: "conversation-sparring", tier: "T1 Agentic", status: "shipped", release: "65-76" },
+  { number: 67, title: "doctrinal-reasoner", tier: "T1 Agentic", status: "shipped", release: "65-76" },
+  { number: 68, title: "talk-lab", tier: "T2 Multimodal", status: "shipped", release: "65-76" },
+  { number: 69, title: "broadcasting-visual-index", tier: "T2 Multimodal", status: "shipped", release: "65-76" },
+  { number: 70, title: "image-quote-verifier", tier: "T2 Multimodal", status: "shipped", release: "65-76" },
+  { number: 71, title: "book-camera", tier: "T2 Multimodal", status: "shipped", release: "65-76" },
+  { number: 72, title: "doctrinal-drift", tier: "T3 Predictive ML", status: "shipped", release: "65-76" },
+  { number: 76, title: "family-voice-clone", tier: "T4 Voice / accessibility", status: "shipped", release: "65-76" },
 ];
 
 const shippedCount = phases.filter((p) => p.status === "shipped").length;
@@ -109,12 +119,20 @@ const releases = [
     href: "/en/whats-new-57-66",
     color: "text-[#5fc7dd]",
   },
+  {
+    id: "65-76",
+    title: "Release 65-76 · Agentic + multimodal + predictive + voice",
+    description:
+      "9 phases that open four new layers: verifiable agentic orchestration with NLI critic (F65-F67), end-to-end multimodal with a physical book camera and a visual quote verifier (F68-F71), diachronic analysis with temporal embeddings (F72) and consented family voice with a 3-layer license gate + Fernet encryption (F76). +480 tests, +15 new MCP tools.",
+    href: "/en/whats-new-65-76",
+    color: "text-[#a4d96c]",
+  },
 ];
 ---
 
 <BaseLayout
-  title="Master roadmap — Phases 22 through 66 + follow-ups"
-  description="Consolidated view of 48 jw-agent-toolkit phases organised by release (22-32 + 33-38 + 39-48 + 49-56 + 57-66) and by technical tier. All shipped: discipleship ecosystem, core at SOTA, runtime trust + community + JS frontier, multilingual SOTA (1672 languages via Omnilingual ASR), and 2 new packages (jw-brain, jw-meeting-media) with live-meeting + JW-pure biblical KG."
+  title="Master roadmap — Phases 22 through 76 + follow-ups"
+  description="Consolidated view of 57 jw-agent-toolkit phases organised by release (22-32 + 33-38 + 39-48 + 49-56 + 57-66 + 65-76) and by technical tier. All shipped: discipleship ecosystem, core at SOTA, runtime trust + community + JS frontier, multilingual SOTA (1672 languages via Omnilingual ASR), 2 new packages (jw-brain, jw-meeting-media) with live-meeting + JW-pure biblical KG, and verifiable agentic + multimodal + predictive + consented family voice."
 >
   <section class="grid-noise relative overflow-hidden border-b border-[var(--color-line-subtle)]">
     <div class="mx-auto max-w-7xl px-4 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20">
@@ -127,11 +145,12 @@ const releases = [
         <span class="text-[var(--color-accent)]">plataforma adoptable</span>
       </h1>
       <p class="mt-6 max-w-2xl text-[16px] leading-relaxed text-[var(--color-ink-secondary)]">
-        Five consecutive releases covering <strong class="text-[var(--color-ink-primary)]">complete discipleship</strong>,
+        Six consecutive releases covering <strong class="text-[var(--color-ink-primary)]">complete discipleship</strong>,
         <strong class="text-[var(--color-ink-primary)]">technical core at SOTA</strong>,
         <strong class="text-[var(--color-ink-primary)]">runtime trust + community + JS frontier</strong>,
-        <strong class="text-[var(--color-ink-primary)]">multilingual SOTA with 1672 languages via Omnilingual ASR</strong> and
-        <strong class="text-[var(--color-ink-primary)]">2 new packages with live-meeting + JW-pure biblical KG</strong>.
+        <strong class="text-[var(--color-ink-primary)]">multilingual SOTA with 1672 languages via Omnilingual ASR</strong>,
+        <strong class="text-[var(--color-ink-primary)]">2 new packages with live-meeting + JW-pure biblical KG</strong> and
+        <strong class="text-[var(--color-ink-primary)]">verifiable agentic + multimodal + predictive + consented family voice</strong>.
         Same flow on every phase: brainstorming → approved spec → bite-sized TDD plan → red-green-commit implementation → audit.
       </p>
 
@@ -158,9 +177,9 @@ const releases = [
   <section class="border-b border-[var(--color-line-subtle)]">
     <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
       <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
-        ▌ 5 releases
+        ▌ 6 releases
       </h2>
-      <div class="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+      <div class="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {releases.map((r) => (
           <a
             href={r.href}
@@ -184,7 +203,7 @@ const releases = [
   <section>
     <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
       <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
-        ▌ Master table · {phases.length} phases (22 → 66 + follow-ups)
+        ▌ Master table · {phases.length} phases (22 → 76 + follow-ups)
       </h2>
 
       <div class="mt-6 overflow-x-auto">

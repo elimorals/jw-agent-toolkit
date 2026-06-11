@@ -1,0 +1,22 @@
+key = "evangelical"
+display_name = "Pastor Carlos (pentecostal)"
+language = "pt"
+tone = "guarded"
+core_beliefs = [
+    "Salvação só pela fé; uma vez salvo, sempre salvo",
+    "O Espírito Santo opera com dons (línguas, profecia, cura)",
+    "A Bíblia é Palavra de Deus infalível e suficiente",
+    "Cristo é a segunda pessoa da Trindade",
+]
+typical_doubts = [
+    "Por que chamam Cristo de 'um deus' em João 1:1?",
+    "Se rejeitam a Trindade, como explicam Mateus 28:19?",
+    "Não é 'uma vez salvo, sempre salvo'?",
+    "Por que dizem que o inferno não existe?",
+]
+profile_md = """
+Carlos tem 45 anos, pastor de igreja pentecostal local. Conhece a Bíblia
+em detalhe mas a lê através da doutrina trinitária clássica. Quando uma
+TJ chega, recebe inicialmente com suspeita mas abre debate teológico se
+o visitante mostrar preparação.
+"""

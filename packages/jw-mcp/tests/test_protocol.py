@@ -181,6 +181,35 @@ _EXPECTED_TOOLS = {
     # F57.16 — multi-congregation
     "meeting_list_congregations",
     "meeting_add_congregation",
+    # F65 — meta-orchestrator
+    "meta_list_tools",
+    "meta_plan_goal",
+    "meta_run_plan",
+    # F68 — talk-lab
+    "talklab_analyze",
+    "talklab_list_counsel_points",
+    "talklab_compare",
+    # F66 — conversation sparring
+    "spar_list_personas",
+    "spar_start",
+    "spar_turn",
+    "spar_close",
+    # F67 — doctrinal reasoner
+    "doctrinal_reason",
+    # F69 — broadcasting visual
+    "broadcasting_visual_index",
+    "broadcasting_visual_search",
+    "broadcasting_visual_stats",
+    # F70 — image-quote verifier
+    "verify_image_quote_tool",
+    # F71 — book-camera live capture
+    "book_camera_analyze",
+    # F72 — doctrinal drift analyzer
+    "drift_analyze",
+    # F76 — family-voice TTS (consent-guarded)
+    "voice_clone_list",
+    "voice_clone_synthesize",
+    "voice_clone_audit",
 }
 
 

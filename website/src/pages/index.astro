@@ -41,26 +41,29 @@ const recommended = [
 
 const stats = [
   { value: "10", label: "Paquetes Python", suffix: "" },
-  { value: "2.6k", label: "Tests passing", suffix: "+" },
-  { value: "110", label: "Herramientas MCP", suffix: "+" },
+  { value: "2.99k", label: "Tests passing", suffix: "+" },
+  { value: "135", label: "Herramientas MCP", suffix: "+" },
   { value: "1672", label: "Idiomas ASR", suffix: "" },
 ];
 
 const visionCategories: { label: string; status: "done" | "partial" | "pending"; phase?: string }[] = [
   { label: "Reunión semanal", status: "done", phase: "F57" },
-  { label: "Ministerio", status: "partial", phase: "F12" },
+  { label: "Ministerio", status: "partial", phase: "F12+F66" },
   { label: "Audio · TTS · Diarización", status: "done", phase: "F34+F64" },
-  { label: "Multimodal · OCR", status: "partial", phase: "F36+F62" },
+  { label: "Multimodal · OCR", status: "done", phase: "F69+F70+F71" },
   { label: "Idiomas · LSM", status: "partial", phase: "F53+F8" },
-  { label: "Apologética", status: "done", phase: "F32" },
+  { label: "Apologética", status: "done", phase: "F32+F67" },
   { label: "Infra operacional", status: "done", phase: "F9+F10" },
-  { label: "Privacidad local", status: "done", phase: "F61" },
+  { label: "Privacidad local", status: "done", phase: "F61+F76" },
   { label: "Memoria · perfil", status: "done", phase: "F61.8" },
-  { label: "Familia · niños", status: "pending" },
+  { label: "Familia · niños", status: "partial", phase: "F76" },
   { label: "Calendario", status: "done", phase: "F51" },
-  { label: "Accesibilidad", status: "pending" },
+  { label: "Accesibilidad", status: "partial", phase: "F68+F76" },
   { label: "Personalización", status: "done", phase: "F57.16" },
-  { label: "Bible Knowledge Graph", status: "done", phase: "F58" },
+  { label: "Bible Knowledge Graph", status: "done", phase: "F58+F72" },
+  { label: "Razonamiento verificable", status: "done", phase: "F65+F67" },
+  { label: "Análisis diacrónico", status: "done", phase: "F72" },
+  { label: "Verificación visual", status: "done", phase: "F70" },
   { label: "Sync E2E", status: "pending" },
 ];
 ---
@@ -383,10 +386,11 @@ const visionCategories: { label: string; status: "done" | "partial" | "pending";
             Hacia un ecosistema completo de IA local.
           </h2>
           <p class="mt-4 text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">
-            De las 15 categorías originales, 10 ya están entregadas (F57-F66
-            cerraron 5 nuevas: reunión semanal, audio diarización, privacidad
-            local, KG bíblico, personalización). Los gaps restantes (3) son
-            Familia/niños, Accesibilidad y Sync E2E.
+            De las 18 categorías actuales, 13 ya están entregadas. F65-F76
+            cerraron 4 nuevas (multimodal·OCR, razonamiento verificable,
+            análisis diacrónico, verificación visual) y movieron Familia/niños
+            y Accesibilidad a parciales (F76 voz familiar consentida). El único
+            gap restante es Sync E2E.
           </p>
           <a
             href="/docs/vision"

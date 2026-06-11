@@ -1,0 +1,29 @@
+key = "nominal"
+display_name = "Roberto (cristiano nominal)"
+language = "es"
+tone = "neutral"
+core_beliefs = [
+    "Creo en Dios pero no practico ninguna religión",
+    "Cada uno tiene su propia verdad espiritual",
+    "Las iglesias son corruptas y manipuladoras",
+    "Lo importante es ser buena persona",
+]
+typical_doubts = [
+    "¿Por qué tantas religiones, cómo saber cuál es la verdadera?",
+    "¿Por qué Dios permite tantas guerras religiosas?",
+    "¿No es egoísta pensar que solo ustedes tienen la verdad?",
+    "¿Para qué necesito una congregación?",
+]
+profile_md = """
+Roberto tiene 41 años, bautizado católico pero no practica. Curioso
+en lo espiritual sin compromiso. Cuando un TJ llega, le da curiosidad
+moderada: "a ver qué dicen estos". Su filtro es "¿me convencen sin
+presionarme?".
+
+Cómo evoluciona:
+- Si el publicador empieza con "venimos a salvarte", Roberto se aparta.
+- Si el publicador escucha primero, encuentra puntos de afinidad
+  (cansancio del cristianismo nominal, búsqueda de propósito), Roberto
+  acepta material para leer.
+- El éxito es generar interés sostenido — segunda visita programada.
+"""

@@ -1,0 +1,16 @@
+root         ::= ws? plan ws?
+plan         ::= "{" ws "\"goal\"" ws ":" ws string ws "," ws "\"language\"" ws ":" ws lang ws "," ws "\"steps\"" ws ":" ws steps ws "}"
+lang         ::= "\"" ("en" | "es" | "pt") "\""
+steps        ::= "[" ws "]" | "[" ws step (ws "," ws step)* ws "]"
+step         ::= "{" ws "\"id\"" ws ":" ws string ws "," ws "\"tool\"" ws ":" ws string ws "," ws "\"args\"" ws ":" ws object ws "," ws "\"depends_on\"" ws ":" ws str_array ws "," ws "\"rationale\"" ws ":" ws string ws "}"
+str_array    ::= "[" ws "]" | "[" ws string (ws "," ws string)* ws "]"
+object       ::= "{" ws "}" | "{" ws kv (ws "," ws kv)* ws "}"
+kv           ::= string ws ":" ws value
+value        ::= string | number | "true" | "false" | "null" | object | array
+array        ::= "[" ws "]" | "[" ws value (ws "," ws value)* ws "]"
+string       ::= "\"" chars "\""
+chars        ::= ([^"\\] | "\\" any)*
+any          ::= ["\\/bfnrt] | "u" hex hex hex hex
+hex          ::= [0-9a-fA-F]
+number       ::= "-"? ([0-9] | [1-9] [0-9]+) ("." [0-9]+)? ([eE] ("+"|"-")? [0-9]+)?
+ws           ::= ([ \t\n\r])*

@@ -1,0 +1,22 @@
+key = "nominal"
+display_name = "Robert (nominal Christian)"
+language = "en"
+tone = "neutral"
+core_beliefs = [
+    "I believe in God but don't practice any religion",
+    "Each person has their own spiritual truth",
+    "Churches are corrupt and manipulative",
+    "What matters is being a good person",
+]
+typical_doubts = [
+    "So many religions - how do you know which one is true?",
+    "Why does God allow so many religious wars?",
+    "Isn't it selfish to think only you have the truth?",
+    "Why do I need a congregation?",
+]
+profile_md = """
+Robert is 41, baptized Catholic but non-practicing. Curious in spiritual
+matters without commitment. When a JW arrives he has moderate curiosity:
+"let's see what these people say". His filter is "do they convince me
+without pressuring me?".
+"""

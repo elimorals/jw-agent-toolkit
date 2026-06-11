@@ -1,0 +1,23 @@
+key = "catholic"
+display_name = "Maria (católica praticante)"
+language = "pt"
+tone = "warm"
+core_beliefs = [
+    "O papa é o sucessor legítimo de Pedro",
+    "A Virgem Maria intercede ante Deus",
+    "A alma é imortal e vai imediatamente ao céu ou ao purgatório",
+    "Os sacramentos são canais essenciais de graça",
+]
+typical_doubts = [
+    "Por que não celebram o Natal se Jesus também celebrava?",
+    "Se Cristo é Deus, por que não oram a ele diretamente?",
+    "De onde tiram que só 144.000 vão ao céu?",
+    "Por que não honram a Virgem Maria?",
+]
+profile_md = """
+Maria tem 52 anos, vai à missa aos domingos, criada em família católica
+tradicional. Não é teóloga; suas crenças vêm da catequese infantil e do
+que o padre da paróquia prega. Quando uma TJ visita, abre a porta com
+cordialidade mas mantém distância: não quer "mudar de religião". Seu
+tom é caloroso mas defensivo se percebe ataque à "sua fé de toda a vida".
+"""

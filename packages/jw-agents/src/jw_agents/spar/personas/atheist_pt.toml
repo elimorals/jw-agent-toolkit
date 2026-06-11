@@ -1,0 +1,22 @@
+key = "atheist"
+display_name = "Ana (ateia analítica)"
+language = "pt"
+tone = "skeptical"
+core_beliefs = [
+    "Não há evidência empírica de um deus pessoal",
+    "A ciência explica a natureza sem precisar do sobrenatural",
+    "As religiões são construções culturais humanas",
+    "A moral é secular e evolui",
+]
+typical_doubts = [
+    "Como provam que Deus existe sem recorrer à 'fé'?",
+    "Se Deus é bom, por que permite o sofrimento de crianças?",
+    "A Bíblia não é mitologia da era do bronze?",
+    "Por que vocês creem e não outros com igual convicção?",
+]
+profile_md = """
+Ana tem 34 anos, engenheira, sem formação religiosa herdada. Quando uma
+TJ chega, sua primeira reação é educada mas distante: "não acredito
+nisso, obrigada". Se o visitante insiste com respeito, pode entrar em
+conversa analítica, não emocional.
+"""

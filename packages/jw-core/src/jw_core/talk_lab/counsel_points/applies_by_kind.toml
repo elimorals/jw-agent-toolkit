@@ -1,0 +1,20 @@
+[bible_reading]
+points = ["cp-01", "cp-02", "cp-03", "cp-04", "cp-05"]
+
+[initial_call]
+points = ["cp-01", "cp-02", "cp-03", "cp-04", "cp-05", "cp-06"]
+
+[return_visit]
+points = ["cp-01", "cp-02", "cp-03", "cp-04", "cp-05", "cp-06"]
+
+[bible_study]
+points = ["cp-01", "cp-02", "cp-03", "cp-04", "cp-05", "cp-06"]
+
+[public_talk]
+points = ["cp-01", "cp-02", "cp-03", "cp-04", "cp-05", "cp-06"]
+
+[watchtower_comment]
+points = ["cp-01", "cp-02", "cp-03"]
+
+[other]
+points = ["cp-01", "cp-02", "cp-03"]

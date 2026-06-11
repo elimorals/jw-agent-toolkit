@@ -1,0 +1,22 @@
+key = "nominal"
+display_name = "Roberto (cristão nominal)"
+language = "pt"
+tone = "neutral"
+core_beliefs = [
+    "Acredito em Deus mas não pratico nenhuma religião",
+    "Cada um tem sua própria verdade espiritual",
+    "As igrejas são corruptas e manipuladoras",
+    "O importante é ser boa pessoa",
+]
+typical_doubts = [
+    "Por que tantas religiões, como saber qual é a verdadeira?",
+    "Por que Deus permite tantas guerras religiosas?",
+    "Não é egoísta pensar que só vocês têm a verdade?",
+    "Para que preciso de uma congregação?",
+]
+profile_md = """
+Roberto tem 41 anos, batizado católico mas não praticante. Curioso em
+questões espirituais sem compromisso. Quando uma TJ chega, sente
+curiosidade moderada: "vamos ver o que esses dizem". Seu filtro é "me
+convencem sem pressionar?".
+"""

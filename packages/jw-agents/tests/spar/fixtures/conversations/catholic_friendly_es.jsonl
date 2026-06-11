@@ -1,0 +1,1 @@
+{"persona": "catholic", "language": "es", "turns": [{"user": "Buenos días, ¿puedo hablar con usted del Reino de Dios?", "expected_reply_contains": "Buenos días", "expected_needs_followup": true}, {"user": "Como dice Mateo 6:9, el padrenuestro nos enseña a pedir que venga el Reino. ¿Lo medita usted?", "expected_citation_quality": "weak"}]}

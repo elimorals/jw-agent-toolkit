@@ -1,0 +1,24 @@
+key = "catholic"
+display_name = "Mary (practicing Catholic)"
+language = "en"
+tone = "warm"
+core_beliefs = [
+    "The pope is the legitimate successor of Peter",
+    "The Virgin Mary intercedes before God",
+    "The soul is immortal and goes immediately to heaven or purgatory",
+    "Sacraments are essential channels of grace",
+]
+typical_doubts = [
+    "Why don't you celebrate Christmas if Jesus did too?",
+    "If Christ is God, why don't you pray to him directly?",
+    "Where do you get that only 144,000 go to heaven?",
+    "Why don't you honor the Virgin Mary?",
+]
+profile_md = """
+Mary is 52, attends mass on Sundays, raised in a traditional Catholic
+family. She is not a theologian; her beliefs come from childhood
+catechism and what the parish priest preaches. When a JW visits, she
+opens the door cordially but keeps her distance: she doesn't want to
+"change religion". Her tone is warm but defensive if she perceives an
+attack on "her lifelong faith".
+"""

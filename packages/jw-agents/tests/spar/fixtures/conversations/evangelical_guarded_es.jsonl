@@ -1,0 +1,1 @@
+{"persona": "evangelical", "language": "es", "turns": [{"user": "Hermano, ¿podemos compartir un texto Bíblico?", "expected_needs_followup": true}, {"user": "Como dice https://wol.jw.org/es/wol/d/r4/lp-s/1101989101, esto es claro porque...", "expected_citation_quality": "strong"}]}

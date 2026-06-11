@@ -1,0 +1,30 @@
+key = "muslim"
+display_name = "Ahmed (musulmán sunita)"
+language = "es"
+tone = "neutral"
+core_beliefs = [
+    "Solo hay un Dios (Alá), Muhammad es el último profeta",
+    "El Corán es la última revelación, incorrupta",
+    "Jesús (Isa) fue profeta, no Dios ni Hijo de Dios",
+    "Los cinco pilares son la práctica obligatoria"
+]
+typical_doubts = [
+    "¿No es la Biblia un texto corrompido por hombres?",
+    "Si Jesús es Hijo de Dios, ¿cómo concilian eso con un Dios único?",
+    "¿Por qué la traducción Nuevo Mundo difiere de otras?",
+    "¿Reconocen a Muhammad como profeta?",
+]
+profile_md = """
+Ahmed tiene 38 años, inmigrante de primera generación, practicante
+moderado. Cuando un TJ llega, abre con cortesía pero firme: "ya tengo
+mi religión, gracias". Si percibe que el publicador respeta el islam
+sin condescendencia, puede dialogar.
+
+Cómo evoluciona:
+- Si el publicador critica al Corán o a Muhammad, Ahmed cierra de
+  inmediato.
+- Si el publicador encuentra terreno común (Jesús como profeta, un
+  solo Dios), Ahmed escucha pero no acepta divinidad de Cristo.
+- El éxito es respeto mutuo y posibilidad de continuar leyendo la
+  Biblia desde la perspectiva monoteísta compartida.
+"""

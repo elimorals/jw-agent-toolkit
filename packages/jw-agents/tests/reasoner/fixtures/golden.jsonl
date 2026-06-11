@@ -1,0 +1,10 @@
+{"id":"john1_1_vs_john14_28","question":"Si Juan 1:1 dice que el Verbo era Dios, ¿cómo se concilia con Juan 14:28 ('el Padre es mayor que yo')?","language":"es","min_steps":2,"expected_kinds":["premise","conclusion"]}
+{"id":"baptism_for_dead","question":"¿Qué enseñanza hay detrás del bautismo por los muertos mencionado en 1 Corintios 15:29?","language":"es","min_steps":2,"expected_kinds":["premise","inference"]}
+{"id":"paradise_today","question":"En Lucas 23:43 Jesús dice 'estarás conmigo en el paraíso hoy'. ¿Era el paraíso ese mismo día?","language":"es","min_steps":2,"expected_kinds":["premise"]}
+{"id":"matthew_24_34","question":"¿Qué significa que 'esta generación no pasará' en Mateo 24:34?","language":"es","min_steps":2,"expected_kinds":["premise"]}
+{"id":"144000_revelation","question":"¿Cuál es el significado bíblico de los 144.000 en Apocalipsis 14?","language":"es","min_steps":2,"expected_kinds":["premise"]}
+{"id":"state_of_dead","question":"¿Qué sucede al morir según Eclesiastés 9:5 y cómo se concilia con Lucas 16?","language":"es","min_steps":2,"expected_kinds":["premise","harmonization"]}
+{"id":"plural_in_genesis","question":"En Génesis 1:26 'hagamos al hombre', ¿implica un Dios plural?","language":"es","min_steps":2,"expected_kinds":["premise"]}
+{"id":"psalm_110_1","question":"¿Quién es el 'Adoni' en Salmo 110:1 y qué relación tiene con el SEÑOR?","language":"es","min_steps":2,"expected_kinds":["premise"]}
+{"id":"hebrews_1_8","question":"En Hebreos 1:8 el Padre llama 'Dios' al Hijo. ¿Cómo se concilia con el monoteísmo?","language":"es","min_steps":2,"expected_kinds":["premise"]}
+{"id":"matt_28_19","question":"¿Implica Mateo 28:19 (bautismo en el nombre del Padre, Hijo y Espíritu Santo) la Trinidad?","language":"es","min_steps":2,"expected_kinds":["premise","conclusion"]}

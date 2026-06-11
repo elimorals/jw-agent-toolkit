@@ -1,0 +1,1 @@
+{"persona": "atheist", "language": "es", "turns": [{"user": "Hola, ¿podría hablar con usted un momento?", "expected_reply_contains": "No creo", "expected_needs_followup": false}, {"user": "Según w23.06 p. 5, hay argumentos racionales para creer en un Diseñador.", "expected_citation_quality": "strong"}]}

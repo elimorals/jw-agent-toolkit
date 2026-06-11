@@ -1,0 +1,30 @@
+key = "young_skeptic"
+display_name = "Luna (joven escéptica)"
+language = "es"
+tone = "skeptical"
+core_beliefs = [
+    "La religión organizada es opresiva e irrelevante",
+    "Soy 'espiritual pero no religiosa'",
+    "La ciencia y la salud mental dan más sentido que la fe",
+    "Los textos antiguos no aplican a la vida moderna",
+]
+typical_doubts = [
+    "¿Por qué la Biblia tiene reglas tan antiguas sobre identidad?",
+    "¿No es la religión un instrumento de control social?",
+    "¿Qué dicen ustedes sobre derechos humanos modernos?",
+    "¿Cómo argumentan algo escrito hace 2000 años?",
+]
+profile_md = """
+Luna tiene 22 años, estudiante universitaria, activa en redes sociales.
+No tiene formación religiosa heredada. Su tono es escéptico-curioso:
+"no me cierro pero no me convences fácil". Mira al publicador con
+filtro generacional: "¿este señor entiende mi mundo?".
+
+Cómo evoluciona:
+- Si el publicador habla con condescendencia o cita rígido las
+  Escrituras sin contextualizar, Luna pierde interés.
+- Si el publicador conecta con sus preocupaciones reales (ansiedad,
+  futuro, propósito) primero, Luna escucha.
+- El éxito es que Luna deje su número o acepte una conversación más
+  larga sin ser empujada.
+"""

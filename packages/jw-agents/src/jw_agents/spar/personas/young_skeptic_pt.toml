@@ -1,0 +1,22 @@
+key = "young_skeptic"
+display_name = "Luna (jovem cética)"
+language = "pt"
+tone = "skeptical"
+core_beliefs = [
+    "A religião organizada é opressiva e irrelevante",
+    "Sou 'espiritual mas não religiosa'",
+    "A ciência e a saúde mental dão mais sentido que a fé",
+    "Textos antigos não se aplicam à vida moderna",
+]
+typical_doubts = [
+    "Por que a Bíblia tem regras tão antigas sobre identidade?",
+    "A religião não é instrumento de controle social?",
+    "O que vocês dizem sobre direitos humanos modernos?",
+    "Como argumentam algo escrito há 2000 anos?",
+]
+profile_md = """
+Luna tem 22 anos, estudante universitária, ativa em redes sociais. Sem
+formação religiosa herdada. Seu tom é cético-curioso: "não me fecho mas
+você não me convence fácil". Filtra o visitante com lente geracional:
+"essa pessoa entende meu mundo?".
+"""

@@ -56,6 +56,25 @@ const titleFor = (id: string) => {
     .replace(/-/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
 };
+
+// F65-F76 featured guides — destacar las 9 nuevas capas
+interface FeaturedGuide {
+  slug: string;
+  phase: string;
+  title: string;
+  blurb: string;
+}
+const featuredF65 = [
+  { slug: "meta-orchestrator", phase: "F65", title: "Meta-orchestrator", blurb: "Planner LLM + executor topológico + critique NLI sobre 12 agentes." },
+  { slug: "conversation-sparring", phase: "F66", title: "Conversation sparring", blurb: "6 personas × 3 idiomas + voice mode + SQLite cross-process." },
+  { slug: "doctrinal-reasoner", phase: "F67", title: "Doctrinal reasoner", blurb: "ReAct con NLI F39 + tool dispatcher real + golden 10 preguntas." },
+  { slug: "talk-lab", phase: "F68", title: "Talk lab", blurb: "Coach de oratoria con WhisperX + prosodia + 6 counsel points + SVG/PDF." },
+  { slug: "broadcasting-visual-search", phase: "F69", title: "Broadcasting visual", blurb: "VLM + CLIP + RRF + OCR de frames sobre videos JW Broadcasting." },
+  { slug: "image-quote-verifier", phase: "F70", title: "Image quote verifier", blurb: "Defensa visual: VLM + OCR + RAG + NLI sobre memes y screenshots." },
+  { slug: "book-camera", phase: "F71", title: "Book camera", blurb: "OCR + clasificación + acciones contextuales + REST endpoints." },
+  { slug: "doctrinal-drift", phase: "F72", title: "Doctrinal drift", blurb: "Análisis diacrónico DBSCAN cosine + SVG + wire-up Second Brain." },
+  { slug: "family-voice-clone", phase: "F76", title: "Family voice clone", blurb: "TTS familiar consentida + license gate 3 capas + Fernet opt-in." },
+] satisfies FeaturedGuide[];
 ---
 
 <BaseLayout
@@ -84,6 +103,43 @@ const titleFor = (id: string) => {
         del repositorio. Cuatro secciones, {entries.length} documentos.
       </p>
     </header>
+
+    <!-- ─── F65-F76 featured ─────────────────────────────────────────── -->
+    <section id="f65-f76" class="scroll-mt-24 border-b border-[var(--color-line-subtle)] py-16">
+      <div class="mb-8 flex flex-col gap-2">
+        <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
+          Release F65-F76 · agéntica + multimodal + predictivo + voz
+        </p>
+        <h2 class="font-display text-[clamp(1.6rem,3vw,2.4rem)] leading-tight text-[var(--color-ink-primary)]">
+          Las nueve guías recién entregadas
+        </h2>
+        <p class="max-w-3xl text-[14px] leading-relaxed text-[var(--color-ink-secondary)]">
+          Empieza por aquí si quieres entender la última capa de capacidades
+          agénticas verificables, multimodal end-to-end, análisis diacrónico
+          y voz familiar consentida.
+        </p>
+      </div>
+      <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {featuredF65.map((g) => (
+          <li>
+            <a
+              href={`/docs/guias/${g.slug}`}
+              class="group block rounded-[2px] border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] px-4 py-3 no-underline transition-colors hover:border-[var(--color-accent)] hover:bg-[var(--color-surface-2)]"
+            >
+              <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">
+                {g.phase}
+              </p>
+              <p class="mt-1 font-display text-[16px] text-[var(--color-ink-primary)] group-hover:text-[var(--color-accent-hover)]">
+                {g.title}
+              </p>
+              <p class="mt-1.5 text-[12.5px] leading-snug text-[var(--color-ink-secondary)]">
+                {g.blurb}
+              </p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
 
     <div class="grid gap-16 py-20">
       {

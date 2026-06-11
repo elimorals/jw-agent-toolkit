@@ -1,0 +1,47 @@
+[[points]]
+id = "cp-01"
+title = "Clear Pronunciation"
+title_localized = "Clear Pronunciation"
+category = "prosodic"
+scorer = "score_pronunciation"
+short_description = "Each word should be intelligible."
+
+[[points]]
+id = "cp-02"
+title = "Speech Rate"
+title_localized = "Speech Rate"
+category = "prosodic"
+scorer = "score_speech_rate"
+short_description = "120-150 wpm for teaching."
+
+[[points]]
+id = "cp-03"
+title = "Use of Pauses"
+title_localized = "Use of Pauses"
+category = "prosodic"
+scorer = "score_pause_use"
+short_description = "Pauses between thoughts to let ideas land."
+
+[[points]]
+id = "cp-04"
+title = "Filler Words"
+title_localized = "Filler Words"
+category = "prosodic"
+scorer = "score_filler_use"
+short_description = "Minimize um/uh/like."
+
+[[points]]
+id = "cp-05"
+title = "Use of Scripture"
+title_localized = "Use of Scripture"
+category = "linguistic"
+scorer = "score_scripture_use"
+short_description = "Cite Scripture and tie it to the point."
+
+[[points]]
+id = "cp-06"
+title = "Audience Warmth"
+title_localized = "Audience Warmth"
+category = "audience"
+scorer = "score_audience_warmth"
+short_description = "Warmth shown to listeners."

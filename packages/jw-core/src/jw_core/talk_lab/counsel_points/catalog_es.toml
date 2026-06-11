@@ -1,0 +1,47 @@
+[[points]]
+id = "cp-01"
+title = "Clear Pronunciation"
+title_localized = "Pronunciación clara"
+category = "prosodic"
+scorer = "score_pronunciation"
+short_description = "Cada palabra debe ser entendible."
+
+[[points]]
+id = "cp-02"
+title = "Speech Rate"
+title_localized = "Velocidad del habla"
+category = "prosodic"
+scorer = "score_speech_rate"
+short_description = "120-150 ppm para enseñar."
+
+[[points]]
+id = "cp-03"
+title = "Use of Pauses"
+title_localized = "Uso de pausas"
+category = "prosodic"
+scorer = "score_pause_use"
+short_description = "Pausas entre ideas para que se asienten."
+
+[[points]]
+id = "cp-04"
+title = "Filler Words"
+title_localized = "Muletillas"
+category = "prosodic"
+scorer = "score_filler_use"
+short_description = "Reduce este/o sea/pues."
+
+[[points]]
+id = "cp-05"
+title = "Use of Scripture"
+title_localized = "Uso de la Escritura"
+category = "linguistic"
+scorer = "score_scripture_use"
+short_description = "Cita la Biblia y conéctala al punto."
+
+[[points]]
+id = "cp-06"
+title = "Audience Warmth"
+title_localized = "Calidez hacia el auditorio"
+category = "audience"
+scorer = "score_audience_warmth"
+short_description = "Calidez hacia los oyentes."

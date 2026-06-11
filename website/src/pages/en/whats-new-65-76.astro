@@ -1,0 +1,328 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+interface Phase {
+  number: number;
+  tier: 1 | 2 | 3 | 4;
+  title: string;
+  tagline: string;
+  description: string;
+  tests?: number;
+  whatWasDone: string[];
+  guideHref?: string;
+}
+
+const phases: Phase[] = [
+  {
+    number: 65,
+    tier: 1,
+    title: "meta-orchestrator",
+    tagline: "Planner → executor → critic over the 12 existing agents",
+    description:
+      "Agentic orchestrator that decomposes a goal into a tool DAG, runs it in topological order and critiques the result with F39 NLI before returning. Reuses Plugin SDK F41 + env-driven LLM/NLI factories (Anthropic + Ollama + Fake). Post-MVP shipped: Mermaid DAG export and deterministic replay of saved plans.",
+    tests: 65,
+    whatWasDone: [
+      "LLM planner with JSON-schema validation + critique loop + opt-in replan.",
+      "12 real adapters in builtin_tools.py (no more placeholders).",
+      "LLM factory: Anthropic + Ollama + Fake with graceful degradation.",
+      "NLI factory wrapping get_default_nli_provider() from F39.",
+      "F43 tracing via opt-in MetaOrchestrator.tracer=.",
+      "Opt-in persistence with --save-plan / --save-result JSON.",
+      "Mermaid export: plan_to_mermaid() + result_to_mermaid() (post-MVP).",
+      "Plan replay: MetaOrchestrator.run_plan(plan) + CLI jw meta replay (post-MVP).",
+      "CLI jw meta {tools,plan,run,replay} + flag --mermaid + jw plan-sunday.",
+      "3 new MCP tools.",
+    ],
+    guideHref: "/docs/guias/meta-orchestrator",
+  },
+  {
+    number: 66,
+    tier: 1,
+    title: "conversation-sparring",
+    tagline: "Conversational sparring partner for ministry practice",
+    description:
+      "6 personas (atheist, jw_student, biblical_scholar, evangelical, agnostic, returning) in 3 languages (es/en/pt) with F61 memory and opt-in F39 NLI to verify answer coherence. Full voice mode via F34 ASR/TTS. Post-MVP shipped: cross-process SQLite persistence.",
+    tests: 65,
+    whatWasDone: [
+      "6 personas × 3 languages in TOML (18 files) with multi-language resolution.",
+      "Voice mode: jw spar voice-turn — ASR → LLM → TTS, audio never leaves disk.",
+      "Golden conversations in fixtures/conversations/*.jsonl + deterministic FakeSparLLM.",
+      "spar.session tool in builtin_tools for use from the F65 meta-orchestrator.",
+      "Markdown export of transcripts via jw spar show/close --export.",
+      "Cross-process SQLite in jw_agents/spar/persistence.py (post-MVP).",
+      "Opt-in autosave via JW_SPAR_PERSIST=1 (post-MVP).",
+      "CLI jw spar {personas,start,turn,show,close,voice-turn}.",
+      "4 MCP tools.",
+    ],
+    guideHref: "/docs/guias/conversation-sparring",
+  },
+  {
+    number: 67,
+    tier: 1,
+    title: "doctrinal-reasoner",
+    tagline: "Verifiable chain-of-thought with ReAct + F39 NLI",
+    description:
+      "Structured reasoner that runs ReAct (Reason → Act → Observe) with an exportable proof tree. Toxic framing reformulator (12 patterns es/en/pt). Jinja2 planner with JSON-schema validation. NLI modes off/warn/reject. Post-MVP shipped: real tool dispatcher + 10-question golden set.",
+    tests: 59,
+    whatWasDone: [
+      "Toxic-framing reformulator (12 patterns es/en/pt).",
+      "Multi-language Jinja2 planner + JSON-schema validation.",
+      "ReAct executor with F39 NLI (off/warn/reject) and truncation.",
+      "Deterministic prose summary in three languages.",
+      "Real tool dispatcher: verse_explainer/research_topic/apologetics/life_topics (post-MVP).",
+      "Opt-in activation via use_real_dispatcher=True.",
+      "10-question multi-step golden set in tests/reasoner/fixtures/golden.jsonl (post-MVP).",
+      "CLI jw reason {ask,languages} + MCP doctrinal_reason.",
+      "Wired into F65 as reason.doctrinal tool.",
+    ],
+    guideHref: "/docs/guias/doctrinal-reasoner",
+  },
+  {
+    number: 68,
+    tier: 2,
+    title: "talk-lab",
+    tagline: "Multimodal speech coach, local-first",
+    description:
+      "End-to-end analysis of Theocratic Ministry School parts: WhisperX F64 for transcription + diarization + prosody (librosa opt + numpy fallback) + 6 pedagogical counsel points. Audio never leaves disk. Post-MVP shipped: SVG timeline and F31 PDF export.",
+    tests: 70,
+    whatWasDone: [
+      "WhisperX F64 diarized ASR + prosody features (speech_rate, pitch, pauses, fillers).",
+      "TOML catalog es/en/pt with applies_by_kind for the 6 initial counsel points.",
+      "Local SQLite history with cross-session compare.",
+      "Horizontal SVG timeline report_to_svg with score-colored bars (post-MVP).",
+      "F31 PDF export wrapper talklab_to_studysheet + export_talk_lab_pdf (post-MVP).",
+      "CLI jw talklab {analyze,history,compare,counsel-points} + --svg --pdf flags.",
+      "3 new MCP tools.",
+    ],
+    guideHref: "/docs/guias/talk-lab",
+  },
+  {
+    number: 69,
+    tier: 2,
+    title: "broadcasting-visual-index",
+    tagline: "Frame-level multimodal search over JW Broadcasting videos",
+    description:
+      "Frame sampler + VLM captioning + CLIP embedding + RRF fusion to locate visual moments inside Broadcasting videos. Hybrid FTS + vector + RRF retrieval. Post-MVP shipped: OCR on frames reusing the F70 pytesseract adapter.",
+    tests: 43,
+    whatWasDone: [
+      "Pydantic VisualFrame with caption + ocr_text + embedding_id + transcript_concurrent.",
+      "Deterministic frame sampler by interval + change detection.",
+      "VLM captioning via provider Protocol + CLIP encoder Protocol.",
+      "Hybrid FTS + vector + RRF search with thumb_path + deep_link.",
+      "Frame OCR: enrich_frames_with_ocr() reuses F70 (post-MVP).",
+      "Language routing español → spa, etc.",
+      "CLI jw broadcasting visual {index,search} + MCP tools.",
+    ],
+    guideHref: "/docs/guias/broadcasting-visual-search",
+  },
+  {
+    number: 70,
+    tier: 2,
+    title: "image-quote-verifier",
+    tagline: "Visual defense against fake quotes in memes/screenshots",
+    description:
+      "VLM + OCR + RAG + F39 NLI pipeline that extracts the quote attributed to a JW publication, searches the original text in the corpus and emits an entails/neutral/contradicts verdict with a visual fingerprint (apparent era, layout consistency, anomalies). Post-MVP shipped: real F33 RAG + F39 NLI wire-up.",
+    tests: 58,
+    whatWasDone: [
+      "Pipeline load_image → ocr → cleanup → extract_quote → fingerprint → retrieve → NLI.",
+      "VisualFingerprint with apparent_era + apparent_publication + layout_consistency + anomalies.",
+      "Verdict synthesis (entails/neutral/contradicts/unverifiable) with reasoning.",
+      "default_rag_retriever() via env JW_IMAGE_QUOTE_STORE_PATH (post-MVP).",
+      "default_nli() adapter over F39 get_default_nli_provider() (post-MVP).",
+      "Engine accepts use_real_defaults=True with graceful degradation.",
+      "Robust Tier 1 paragraph classifier (paragraph wins over question).",
+    ],
+    guideHref: "/docs/guias/image-quote-verifier",
+  },
+  {
+    number: 71,
+    tier: 2,
+    title: "book-camera",
+    tagline: "Camera for physical books: OCR + classification + actions",
+    description:
+      "Point the phone at a physical book (Watchtower, Insight on the Scriptures, Bible) and the toolkit OCRs, classifies (bible verse / study question / Watchtower paragraph / plain text) and proposes contextual actions: read_aloud (F76), open_in_jw_library, open_in_wol, show_answer. Post-MVP shipped: REST endpoints for mobile apps.",
+    tests: 30,
+    whatWasDone: [
+      "Procedural classifier over OCR cleanup (no LLM in the critical path).",
+      "Suggested actions: read_aloud · open_in_jw_library · open_in_wol · show_answer.",
+      "Integrates with F76 voice-clone for read_aloud with consented family voice.",
+      "REST endpoints jw_mcp/rest/book_camera.py: POST /api/v1/book_camera/{analyze,tts,rag_answer} (post-MVP).",
+      "/tts enforces the F76 license gate (consent + license + non-commercial).",
+      "/rag_answer delegates to jw_agents.research_topic when available.",
+      "CLI jw book-camera {analyze,kinds} + MCP book_camera_analyze.",
+      "Wired into F65 as book_camera.analyze.",
+    ],
+    guideHref: "/docs/guias/book-camera",
+  },
+  {
+    number: 72,
+    tier: 3,
+    title: "doctrinal-drift",
+    tagline: "Diachronic analysis with temporal embeddings + DBSCAN cosine",
+    description:
+      "Detects doctrinal-understanding evolution across the 20th-21st century by partitioning text by era (13 decades) and DBSCAN-style clustering with cosine distance (pure numpy). Significance minor/moderate/major. The Prov 4:18 trilingual note is ALWAYS injected. Post-MVP shipped: F49 Second Brain wire-up + SVG timeline.",
+    tests: 43,
+    whatWasDone: [
+      "partition_by_era + dbscan_cluster cosine + cluster_alignment + significance.",
+      "Explanatory Prov 4:18 trilingual note ALWAYS injected into the report.",
+      "Embedding-agnostic (any compatible provider).",
+      "chunks_from_brain() adapter: reads Publication nodes from F49 Second Brain (post-MVP).",
+      "Year extraction: explicit (year/pub_year) or derived from published_date (post-MVP).",
+      "SVG drift timeline with era-colored markers + significance arrows + Prov 4:18 footer (post-MVP).",
+      "CLI jw drift {analyze,note,eras} + --svg flag + MCP drift_analyze.",
+      "Wired into F65 as drift.analyze.",
+    ],
+    guideHref: "/docs/guias/doctrinal-drift",
+  },
+  {
+    number: 76,
+    tier: 4,
+    title: "family-voice-clone",
+    tagline: "TTS with consented family voice + 3-layer license gate",
+    description:
+      "Lets you clone a family member's voice (with signed consent) for personal non-commercial uses — like reading a bedtime story to a child with grandpa's voice. 3-layer license gate: forbidden-names deny list (branch/broadcasting/president/governing_body/warwick), active consent (not revoked + not expired), non-commercial text (5 regex patterns). Post-MVP shipped: opt-in Fernet weights encryption.",
+    tests: 48,
+    whatWasDone: [
+      "Pydantic models: VoiceProfile + ConsentRecord + TrainingSample + TrainResult.",
+      "3-layer license gate: name deny list + active consent + non-commercial regex.",
+      "Per-profile JSON registry with JW_VOICECLONE_ROOT env override.",
+      "Deterministic FakeVoiceProvider for tests (no heavy models).",
+      "Opt-in audit hook emit_trace=fn F43-compatible.",
+      "Opt-in Fernet encryption in encryption.py + JW_VOICE_KEY (post-MVP).",
+      "encrypt_weights / decrypt_to_tempfile / generate_key (post-MVP).",
+      "CLI jw voiceclone {register-from-consent,list,show,say,revoke,delete}.",
+      "3 MCP tools voice_clone_{list,synthesize,audit}.",
+    ],
+    guideHref: "/docs/guias/family-voice-clone",
+  },
+];
+
+const tierMeta: Record<1 | 2 | 3 | 4, { label: string; color: string }> = {
+  1: { label: "T1 Agentic", color: "text-[var(--color-accent)]" },
+  2: { label: "T2 Multimodal", color: "text-[#f0b97a]" },
+  3: { label: "T3 Classical / predictive ML", color: "text-[#c4a7e7]" },
+  4: { label: "T4 Voice / accessibility", color: "text-[#7ab0e3]" },
+};
+
+const totalTests = phases.reduce((sum, p) => sum + (p.tests ?? 0), 0);
+---
+
+<BaseLayout
+  title="What's new F65-F76 — 9 new phases: agentic, multimodal, predictive and voice"
+  description="9 phases shipped: F65 meta-orchestrator (planner+critic), F66 conversation-sparring (6 personas), F67 doctrinal-reasoner (ReAct+NLI), F68 talk-lab (speech coach + SVG + PDF), F69 broadcasting-visual-index (CLIP+OCR), F70 image-quote-verifier (visual defense), F71 book-camera (REST), F72 doctrinal-drift (SVG + Second Brain), F76 family-voice-clone (Fernet opt-in). +480 tests, +15 MCP tools."
+>
+  <section class="grid-noise relative overflow-hidden border-b border-[var(--color-line-subtle)]">
+    <div class="mx-auto max-w-7xl px-4 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20">
+      <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        <span class="inline-block h-px w-8 bg-[var(--color-accent)] align-middle"></span>
+        <span class="ml-2">Release F65-F76 · 9 new phases + post-MVPs closed</span>
+      </p>
+      <h1 class="mt-6 max-w-3xl text-balance font-display text-[clamp(1.85rem,5vw,3.4rem)] leading-[1.05]">
+        <span class="text-[var(--color-ink-primary)]">Agentic · multimodal · </span>
+        <span class="text-[var(--color-accent)]">predictive · family voice</span>
+      </h1>
+      <p class="mt-6 max-w-3xl text-[16px] leading-relaxed text-[var(--color-ink-secondary)]">
+        Nine phases opening four new layers on top of an already stable toolkit:
+        <strong class="text-[var(--color-ink-primary)]">verifiable agentic orchestration</strong> (F65-F67),
+        <strong class="text-[var(--color-ink-primary)]">end-to-end multimodal</strong> (F68-F71),
+        <strong class="text-[var(--color-ink-primary)]">diachronic analysis</strong> (F72) and
+        <strong class="text-[var(--color-ink-primary)]">consented family voice</strong> (F76).
+        All critical decisions stay deterministic. The LLM only enters when a
+        NLI critic is verifying its output. Every verdict carries its canonical
+        URL to wol.jw.org.
+      </p>
+
+      <div class="mt-10 grid grid-cols-3 gap-4">
+        <div class="rounded-sm border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-accent)]">Phases</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{phases.length}</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">New tests</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{totalTests}+</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">New MCP tools</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">15+</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {phases.map((phase) => (
+    <section class="border-b border-[var(--color-line-subtle)]">
+      <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+        <article class="grid gap-8 lg:grid-cols-[280px_1fr]">
+          <header class="space-y-3">
+            <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">
+              Phase {phase.number}
+            </p>
+            <h4 class="font-display text-[26px] leading-tight text-[var(--color-ink-primary)]">
+              {phase.title}
+            </h4>
+            <p class={`text-[14px] italic ${tierMeta[phase.tier].color}`}>{phase.tagline}</p>
+            <div class="flex flex-wrap gap-3 pt-2 font-mono text-[11px] text-[var(--color-ink-tertiary)]">
+              <span class="rounded-sm border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 px-2 py-1 text-[var(--color-accent)]">
+                ✅ Shipped
+              </span>
+              {phase.tests !== undefined && phase.tests > 0 && (
+                <span class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] px-2 py-1">
+                  🧪 ~{phase.tests} tests
+                </span>
+              )}
+              <span class={`rounded-sm border ${tierMeta[phase.tier].color.replace("text-", "border-")}/40 px-2 py-1 ${tierMeta[phase.tier].color}`}>
+                {tierMeta[phase.tier].label}
+              </span>
+            </div>
+            {phase.guideHref && (
+              <a
+                href={phase.guideHref}
+                class="inline-flex items-center gap-1.5 pt-2 font-mono text-[11px] text-[var(--color-accent)] no-underline hover:underline"
+              >
+                Technical guide →
+              </a>
+            )}
+          </header>
+          <div class="space-y-6">
+            <p class="text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">{phase.description}</p>
+            <div>
+              <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+                What was delivered
+              </p>
+              <ul class="mt-3 space-y-1.5 text-[14px] leading-relaxed text-[var(--color-ink-primary)]">
+                {phase.whatWasDone.map((item) => (
+                  <li class="flex gap-2">
+                    <span class="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-[var(--color-accent)]"></span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  ))}
+
+  <section>
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ More
+      </h2>
+      <div class="mt-12 flex flex-wrap gap-4">
+        <a
+          href="/en/whats-new-57-66"
+          class="inline-flex items-center gap-2 rounded-sm border border-[var(--color-line)] bg-transparent px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-ink-primary)] no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+        >
+          ← Phases 57-66
+        </a>
+        <a
+          href="/en/roadmap"
+          class="inline-flex items-center gap-2 rounded-sm bg-[var(--color-accent)] px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-surface-base)] no-underline transition-opacity hover:opacity-90"
+        >
+          Master roadmap 22-76 →
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

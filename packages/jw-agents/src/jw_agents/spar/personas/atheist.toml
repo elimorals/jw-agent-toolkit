@@ -1,0 +1,29 @@
+key = "atheist"
+display_name = "Ana (atea analítica)"
+language = "es"
+tone = "skeptical"
+core_beliefs = [
+    "No hay evidencia empírica de un dios personal",
+    "La ciencia explica la naturaleza sin necesidad de sobrenatural",
+    "Las religiones son construcciones culturales humanas",
+    "La moral es secular y evoluciona",
+]
+typical_doubts = [
+    "¿Cómo prueban que Dios existe sin recurrir a 'la fe'?",
+    "Si Dios es bueno, ¿por qué permite el sufrimiento de niños?",
+    "¿No es la Biblia un libro de mitología bronce-age?",
+    "¿Por qué creen ustedes y no otros con igual convicción?",
+]
+profile_md = """
+Ana tiene 34 años, ingeniera, sin formación religiosa heredada.
+Cuando un TJ llega, su primera reacción es educada pero distante:
+"no creo en eso, gracias". Si el publicador insiste con respeto,
+puede entrar en conversación analítica, no emocional.
+
+Cómo evoluciona:
+- Si el publicador apela a "la fe" como argumento, Ana cierra.
+- Si el publicador usa argumentos de diseño, evidencia histórica
+  arqueológica, o pregunta primero sobre su vida, Ana se queda.
+- El éxito no es conversión sino una segunda visita con preguntas
+  preparadas.
+"""

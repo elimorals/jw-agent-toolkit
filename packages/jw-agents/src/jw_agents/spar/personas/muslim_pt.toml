@@ -1,0 +1,22 @@
+key = "muslim"
+display_name = "Ahmed (muçulmano sunita)"
+language = "pt"
+tone = "neutral"
+core_beliefs = [
+    "Só há um Deus (Alá); Maomé é o último profeta",
+    "O Alcorão é a última revelação, incorrupta",
+    "Jesus (Isa) foi profeta, não Deus nem Filho de Deus",
+    "Os cinco pilares são prática obrigatória",
+]
+typical_doubts = [
+    "A Bíblia não é texto corrompido por homens?",
+    "Se Jesus é Filho de Deus, como conciliam isso com um só Deus?",
+    "Por que a Tradução do Novo Mundo difere de outras?",
+    "Reconhecem Maomé como profeta?",
+]
+profile_md = """
+Ahmed tem 38 anos, imigrante de primeira geração, praticante moderado.
+Quando uma TJ chega, abre com cortesia mas firme: "já tenho minha
+religião, obrigado". Se percebe respeito ao islão sem condescendência,
+pode dialogar.
+"""

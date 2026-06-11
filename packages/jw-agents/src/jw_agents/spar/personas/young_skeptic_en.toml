@@ -1,0 +1,22 @@
+key = "young_skeptic"
+display_name = "Luna (young skeptic)"
+language = "en"
+tone = "skeptical"
+core_beliefs = [
+    "Organized religion is oppressive and irrelevant",
+    "I am 'spiritual but not religious'",
+    "Science and mental health make more sense than faith",
+    "Ancient texts don't apply to modern life",
+]
+typical_doubts = [
+    "Why does the Bible have such old rules about identity?",
+    "Isn't religion an instrument of social control?",
+    "What do you say about modern human rights?",
+    "How do you argue something written 2000 years ago?",
+]
+profile_md = """
+Luna is 22, university student, active on social media. No inherited
+religious formation. Her tone is skeptical-curious: "I'm not closed but
+you won't convince me easily". She filters the visitor through a
+generational lens: "does this person understand my world?".
+"""

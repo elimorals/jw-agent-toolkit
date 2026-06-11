@@ -24,14 +24,14 @@ export const packages: PackageInfo[] = [
     tagline: "El núcleo determinístico",
     color: "cyan",
     short:
-      "Librería principal: 6 clientes HTTP, 10 parsers (incluye wol_url BibleRef.from_wol_url F58.4), writers JWPUB/.jwlibrary, 6 providers ASR (Omnilingual 1672 idiomas + whisperX diarizado F64) + NLLB-200, schemas organized-app, speakers/voiceprints (F64.7) e infra F9.",
+      "Librería principal: 6 clientes HTTP, 10 parsers, writers JWPUB/.jwlibrary, 6 providers ASR (Omnilingual 1672 idiomas + whisperX diarizado), NLLB-200, schemas organized-app, voiceprints, infra F9 + multimodal end-to-end (talk-lab F68, broadcasting/visual F69, image-quote F70, book-camera F71), drift diacrónico F72 y voz familiar consentida F76.",
     about:
       "El corazón del toolkit. Todo lo demás depende de jw-core, y jw-core no depende de nada del workspace. Aquí viven los clientes HTTP que hablan con jw.org, los parsers determinísticos que convierten HTML/JSON/EPUB/JWPUB en modelos Pydantic, los writers que generan .jwpub y .jwlibrary nativos para JW Library, los providers de ASR (Deepgram, Whisper, Omnilingual 1672 idiomas via venv Python 3.12, whisperX diarizado F64) y traducción (NLLB-200 CC-BY-NC con preservación de refs), los schemas Pydantic de sws2apps/organized-app, el voiceprint store opt-in (F64.7) y la infraestructura compartida: cache SQLite con TTL, throttle por host, telemetría opt-in y autenticación JWT.",
     highlights: [
       "6 clientes · 10 parsers · 3 writers · 17 locales",
       "ASR 1672 idiomas + whisperX diarizado",
-      "VoiceprintStore + SpeakerNameMapper opt-in",
-      "Crypto JWPUB AES-128-CBC ↔ writer simétrico",
+      "Multimodal: talk-lab · visual index · image-quote · book-camera",
+      "Voz familiar consentida + Fernet opt-in",
     ],
     features: [
       {
@@ -58,6 +58,14 @@ export const packages: PackageInfo[] = [
         title: "Infraestructura Fase 9 + crypto compartido",
         body: "DiskCache (SQLite + TTL + WAL) · TokenBucket throttle · Telemetry opt-in · JWTManager · factory unificado de clientes. F50 añadió jwpub_crypto: XOR_KEY, compute_key_iv, encrypt_blob (nuevo), decrypt_blob — una sola fuente de verdad compartida por parser y writer JWPUB.",
       },
+      {
+        title: "Multimodal end-to-end (F68 talk-lab · F69 broadcasting/visual · F70 image-quote · F71 book-camera)",
+        body: "talk_lab/: coach de oratoria local-first con WhisperX F64 + prosodia + 6 counsel points TOML es/en/pt, SVG timeline (report_to_svg) y F31 PDF export (talklab_to_studysheet + export_talk_lab_pdf). broadcasting/visual/: sampler de frames + VLM captioning + CLIP + RRF + OCR de frames vía F70 (enrich_frames_with_ocr). verification/image_quote/: VLM + OCR + RAG + NLI F39 con default_rag_retriever (env JW_IMAGE_QUOTE_STORE_PATH) y default_nli adapter sobre F39; engine.use_real_defaults=True. book_camera/: classifier procedural (verse / question / Watchtower paragraph / plain) + suggested_actions (read_aloud/open_in_jw_library/open_in_wol/show_answer).",
+      },
+      {
+        title: "ML predictivo + voz familiar (F72 doctrinal-drift · F76 family-voice-clone)",
+        body: "drift/: análisis diacrónico con partition_by_era + DBSCAN cosine en numpy puro + cluster_alignment + significance (minor/moderate/major). Nota Prov 4:18 trilingüe SIEMPRE inyectada. Wire-up F49 Second Brain con chunks_from_brain() y SVG drift timeline (drift_to_svg). audio/voice_clone/: TTS con voz familiar consentida + license gate 3 capas (deny list nombres + consent activo + non-commercial 5 regex) + FakeVoiceProvider determinista. Cifrado opt-in Fernet en encryption.py (JW_VOICE_KEY): encrypt_weights / decrypt_to_tempfile / generate_key. Audit hook emit_trace=fn compatible F43.",
+      },
     ],
     install: "uv sync --package jw-core",
     usage: {
@@ -80,6 +88,12 @@ ref.chapter, ref.verses   # (3, [16])`,
       "writers.jwpub.JwpubBuilder · writers.jw_library_backup.write_backup",
       "audio.transcription.get_asr_provider · OmnilingualProvider · WhisperXProvider",
       "audio.speakers.VoiceprintStore · SpeakerNameMapper · DiarizedSegment",
+      "audio.voice_clone.{synthesize_with_voice, registry, encryption.{encrypt_weights, decrypt_to_tempfile}}",
+      "talk_lab.{analyze_recording, svg.report_to_svg, pdf_export.export_talk_lab_pdf}",
+      "broadcasting.visual.{indexer, search.hybrid_search, ocr_frame.enrich_frames_with_ocr}",
+      "verification.image_quote.{verify_image_quote, factories.{default_rag_retriever, default_nli}}",
+      "book_camera.{analyze_capture, classify_content}",
+      "drift.{analyze_doctrinal_drift, brain_source.chunks_from_brain, svg.drift_to_svg}",
       "translation_providers.get_translation_provider · NLLBProvider",
       "models_organized.PersonType · SchedWeekType · WeekType",
       "DiskCache · Throttler · Telemetry · JWTManager",
@@ -154,23 +168,27 @@ jw search "fe" --json | jq '.results[].title'`,
     tagline: "Puente con tu agente",
     color: "violet",
     short:
-      "Servidor Model Context Protocol que expone 100+ herramientas a Claude Desktop, Claude Code o cualquier cliente MCP. Cubre F57-F66: meeting_* (6), second_brain_* (5), ingest_pdf/office_doc, transcribe_audio_diarized, memory_record/recall/forget_session + recap_previous_session.",
+      "Servidor Model Context Protocol que expone ~135 herramientas a Claude Desktop, Claude Code o cualquier cliente MCP. Cubre F57-F76: meeting, brain, ingest, ASR diarizado, memoria, meta-orchestrator, sparring, reasoner, talk-lab, broadcasting visual, book-camera (con REST endpoints), drift, voice-clone.",
     about:
-      "El componente que convierte el toolkit en algo que tu agente de IA puede usar. Implementado con FastMCP, expone cada parser y cliente de jw-core (más el RAG, los agentes, el second-brain F49+F66, los loaders externos F62, la memoria persistente F61, el ASR diarizado F64 y la reunión-en-vivo F57) como tools accesibles vía el protocolo MCP estándar. Funciona sobre stdio para Claude Desktop/Code o sobre SSE para otros clientes.",
+      "El componente que convierte el toolkit en algo que tu agente de IA puede usar. Implementado con FastMCP, expone cada parser y cliente de jw-core (más el RAG, los agentes, el second-brain F49+F66, los loaders externos F62, la memoria persistente F61, el ASR diarizado F64, la reunión-en-vivo F57 y toda la capa F65-F76 agéntica + multimodal + predictivo + voz familiar consentida) como tools accesibles vía el protocolo MCP estándar. Funciona sobre stdio para Claude Desktop/Code o sobre SSE para otros clientes. F71 añade además REST endpoints opt-in mountables sobre FastAPI: jw_mcp.rest.book_camera.router expone POST /api/v1/book_camera/{analyze, tts, rag_answer}.",
     highlights: [
-      "100+ tools sobre stdio MCP",
+      "~135 tools sobre stdio MCP",
       "FastMCP · Claude/IDE compatible",
-      "RAG + agentes + brain + meeting",
-      "Cache + throttle compartido",
+      "RAG + agentes + brain + meeting + agéntica F65-F76",
+      "REST opt-in book-camera (/analyze /tts /rag_answer)",
     ],
     features: [
       {
-        title: "100+ herramientas registradas",
+        title: "~135 herramientas registradas",
         body: "resolve_reference · get_chapter · get_daily_text · search_content · get_article · get_verse · get_study_notes · get_cross_references · compare_translations · list_languages · download_publication · jwpub_extract · topic_subjects · ... más 5 finetune tools.",
       },
       {
         title: "F57-F66 tools (16 nuevas)",
         body: "second_brain_status/query/compile/lint/snapshot (F49+F66) · ingest_pdf + ingest_office_doc (F62) · transcribe_audio_diarized (F64) · memory_record/recall/forget_session + recap_previous_session (F61+F61.8) · meeting_discover_week/download_media/list_programs/open_presenter/list_congregations/add_congregation (F57+F57.16). Plus drift fix _EXPECTED_TOOLS (get_trace F43 + translate_preserving_refs F54).",
+      },
+      {
+        title: "F65-F76 tools (15+ nuevas) + REST endpoints",
+        body: "Meta-orchestrator F65: meta_plan/run/replay. Sparring F66: spar_personas/start/turn/close (memoria SQLite cross-process opt-in). Reasoner F67: doctrinal_reason. Talk-lab F68: talklab_analyze + history/compare. Broadcasting visual F69: visual_index + visual_search. Image-quote F70: verify_image_quote. Book-camera F71: book_camera_analyze + REST jw_mcp.rest.book_camera.router (POST /api/v1/book_camera/{analyze,tts,rag_answer} — opt-in via APIRouter.include_router). Drift F72: drift_analyze. Voice-clone F76: voice_clone_list/synthesize/audit (license gate 3 capas + Fernet opt-in via JW_VOICE_KEY).",
       },
       {
         title: "Agentes high-level",
@@ -205,12 +223,16 @@ jw search "fe" --json | jq '.results[].title'`,
     },
     dependsOn: ["jw-core", "jw-rag", "jw-agents"],
     exports: [
-      "100+ MCP tools sobre stdio",
+      "~135 MCP tools sobre stdio",
       "Resources: file://jw/...",
       "Agentes: verse_explainer · research_topic · ...",
       "RAG: search_corpus con BM25 + vector + RRF",
       "Brain: second_brain_* · Meeting: meeting_*",
       "Memory: memory_record/recall + recap_previous_session",
+      "Meta F65: meta_plan/run/replay · Sparring F66: spar_*",
+      "Reasoner F67 · Talk-lab F68 · Visual F69 · Image-quote F70",
+      "Book-camera F71 + REST jw_mcp.rest.book_camera.router",
+      "Drift F72 · Voice-clone F76 (license gate + Fernet opt-in)",
     ],
     referenceHref: "/docs/referencia/jw-mcp",
     guideHref: "/docs/guias/conectar-mcp-a-claude-desktop",
@@ -287,17 +309,17 @@ for r in results:
   {
     slug: "jw-agents",
     name: "jw-agents",
-    tagline: "Orquestación multipaso",
+    tagline: "Orquestación multipaso + agéntica verificable",
     color: "amber",
     short:
-      "Agentes procedurales determinísticos: verse_explainer, research_topic, meeting_helper, apologetics. Sin LLM en el camino crítico.",
+      "Agentes procedurales determinísticos + meta-orchestrator F65 con planner+critic NLI, conversation-sparring F66 con 6 personas y doctrinal-reasoner F67 con ReAct + golden set. Sin LLM en el camino crítico.",
     about:
-      "Agentes hechos a mano, no LLM-orchestrated. Cada uno orquesta múltiples llamadas a jw-core + jw-rag para producir findings estructurados con citas verificables a wol.jw.org. La síntesis del lenguaje natural ocurre fuera del toolkit (Claude Desktop, Claude Code, tu propio cliente).",
+      "Agentes hechos a mano, no LLM-orchestrated. Cada uno orquesta múltiples llamadas a jw-core + jw-rag para producir findings estructurados con citas verificables a wol.jw.org. La síntesis del lenguaje natural ocurre fuera del toolkit (Claude Desktop, Claude Code, tu propio cliente). F65-F67 añaden una capa agéntica verificable: el meta-orchestrator decompone objetivos en DAGs de tools, ejecuta en orden topológico y crítica con NLI F39 antes de devolver; conversation-sparring simula 6 personas para práctica de predicación; doctrinal-reasoner emite chain-of-thought con árbol de pruebas exportable.",
     highlights: [
-      "4 agentes procedurales",
-      "Findings citables · wol.jw.org",
+      "4 agentes procedurales + meta-orchestrator",
+      "Conversation sparring · 6 personas",
+      "Reasoner ReAct con NLI crítico",
       "Sin LLM en camino crítico",
-      "Composición con fine-tuned",
     ],
     features: [
       {
@@ -324,6 +346,18 @@ for r in results:
         title: "Auto-recap entre sesiones (F61.8)",
         body: "Agente nuevo recap_session.recap_previous_session() NO usa LLM (decisión arquitectónica: procedural y determinístico). Agrupa records de MemoryStore por session_id, filtra la sesión actual, ordena por last_timestamp desc, devuelve findings con summary corto + excerpts_by_kind en metadata. Útil al arrancar nueva sesión: 'continuemos con la sesión X de ayer'.",
       },
+      {
+        title: "Meta-orchestrator (F65)",
+        body: "Planner LLM con JSON-schema validation + executor topológico + critique NLI F39 con replan opt-in. Reusa Plugin SDK F41 y los 12 adapters reales en builtin_tools.py. Factories LLM (Anthropic + Ollama + Fake) y NLI env-driven con degradación grácil. Tracing F43 via tracer= opt-in. Persistencia --save-plan/--save-result JSON + replay determinista con MetaOrchestrator.run_plan(plan). Export Mermaid del DAG (plan_to_mermaid + result_to_mermaid). CLI jw meta {tools,plan,run,replay} + --mermaid + jw plan-sunday.",
+      },
+      {
+        title: "Conversation sparring (F66)",
+        body: "Simulador de interlocutor para predicación: 6 personas (atheist · jw_student · biblical_scholar · evangelical · agnostic · returning) × 3 idiomas en 18 TOMLs con resolución multi-idioma. Voice mode jw spar voice-turn (ASR → LLM → TTS, audio nunca sale del disco). Persistencia SQLite cross-process en spar/persistence.py + autosave opt-in JW_SPAR_PERSIST=1. Markdown export del transcript. Golden conversations con FakeSparLLM determinista. Tool spar.session para uso desde el meta-orchestrator F65.",
+      },
+      {
+        title: "Doctrinal reasoner (F67)",
+        body: "Chain-of-thought verificable: reformulator de framing tóxico (12 patrones es/en/pt) + planner Jinja2 multi-idioma + ReAct executor con NLI F39 (modes off/warn/reject). Tool dispatcher real wireado a verse_explainer/research_topic/apologetics/life_topics (use_real_dispatcher=True). Golden set 10 preguntas multi-paso en fixtures/golden.jsonl. Summary prose determinista trilingüe. CLI jw reason {ask,languages} + MCP doctrinal_reason. Integrado en F65 como reason.doctrinal.",
+      },
     ],
     install: "uv sync --package jw-agents",
     usage: {
@@ -349,6 +383,9 @@ for f in result.findings:
       "Finding · AgentResult",
       "memory.MemoryStore · SqliteMemoryStore · LettaMemoryStore",
       "build_memory_store · recap_session.recap_previous_session",
+      "meta.MetaOrchestrator · meta.mermaid (plan_to_mermaid / result_to_mermaid)",
+      "spar.{SparSession, FakeSparLLM, persistence.save_session/load_session}",
+      "reasoner.{Engine, dispatchers.real_tool_dispatcher}",
       "Composición con agent_pipeline",
     ],
     referenceHref: "/docs/referencia/jw-agents",
@@ -593,6 +630,10 @@ jw gen image \\
       {
         title: "MCP tools expuestas (F66)",
         body: "second_brain_status, second_brain_query, second_brain_compile, second_brain_lint, second_brain_snapshot — exponen el knowledge graph del jw-brain a Claude/Cursor/cualquier cliente MCP. Firma usa brain_path: str (path absoluto). Modo 'degraded' cuando jw-brain no instalado o no hay brain configurado.",
+      },
+      {
+        title: "Consumer F72 doctrinal-drift",
+        body: "El módulo jw_core.drift.brain_source.chunks_from_brain() lee los Publication nodes de cualquier backend que implemente list_nodes(node_type=...) y los convierte en Chunks aptos para analyze_doctrinal_drift — sin que jw-core dependa de jw-brain. Year extraction prioriza props year/published_year/pub_year y si falta cae a published_date[:4]. Language filter opt-in. Embedding inyectable (cualquier provider compatible F33). Cierra el loop write-read entre el grafo y el análisis diacrónico.",
       },
       {
         title: "Cobertura legal y atribución",

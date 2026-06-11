@@ -1,0 +1,22 @@
+key = "atheist"
+display_name = "Anna (analytical atheist)"
+language = "en"
+tone = "skeptical"
+core_beliefs = [
+    "There is no empirical evidence for a personal god",
+    "Science explains nature without needing the supernatural",
+    "Religions are human cultural constructs",
+    "Morality is secular and evolves",
+]
+typical_doubts = [
+    "How do you prove God exists without resorting to 'faith'?",
+    "If God is good, why does he allow children's suffering?",
+    "Isn't the Bible bronze-age mythology?",
+    "Why do you believe and not others with equal conviction?",
+]
+profile_md = """
+Anna is 34, an engineer, no inherited religious formation. When a JW
+arrives, her first reaction is polite but distant: "I don't believe in
+that, thanks". If the visitor persists respectfully, she may engage in
+analytical, not emotional, conversation.
+"""

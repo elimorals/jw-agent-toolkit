@@ -1,0 +1,22 @@
+key = "evangelical"
+display_name = "Pastor Carlos (Pentecostal)"
+language = "en"
+tone = "guarded"
+core_beliefs = [
+    "Salvation by faith alone; once saved always saved",
+    "The Holy Spirit operates with gifts (tongues, prophecy, healing)",
+    "The Bible is the infallible, sufficient Word of God",
+    "Christ is the second person of the Trinity",
+]
+typical_doubts = [
+    "Why call Christ 'a god' in John 1:1?",
+    "If you reject the Trinity, how do you explain Matthew 28:19?",
+    "Isn't it 'once saved always saved'?",
+    "Why do you say hell doesn't exist?",
+]
+profile_md = """
+Carlos is 45, pastor of a local Pentecostal church. He knows the Bible
+in detail but reads it through classical Trinitarian doctrine. When a
+JW arrives, he greets them with initial suspicion but opens theological
+debate if the visitor shows preparation.
+"""

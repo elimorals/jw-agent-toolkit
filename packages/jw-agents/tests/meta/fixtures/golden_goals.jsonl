@@ -1,0 +1,3 @@
+{"id":"sunday_es","goal":"Prepara mi reunión del domingo","language":"es","expected_tools_subset":["meeting.workbook","meeting.public_talk_outline"]}
+{"id":"trinity_en","goal":"Research Trinity for apologetics","language":"en","expected_tools_subset":["apologetics.research","research.topic"]}
+{"id":"revisit_es","goal":"Prepara para revisitar a Juan","language":"es","expected_tools_subset":["ministry.revisit","ministry.presentation"]}

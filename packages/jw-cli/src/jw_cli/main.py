@@ -139,6 +139,76 @@ try:
 except ImportError:
     pass
 
+# F65 — `jw meta` (meta-orchestrator over the 12 agents)
+from jw_cli.commands.meta import meta_app, plan_sunday_cmd
+
+app.add_typer(meta_app, name="meta", help="Meta-orquestador agéntico (Fase 65).")
+app.command("plan-sunday", help="Prepara la reunión del domingo (alias F65).")(
+    plan_sunday_cmd
+)
+
+# F68 — `jw talklab` (coach of public speaking)
+from jw_cli.commands.talklab import talklab_app
+
+app.add_typer(talklab_app, name="talklab", help="Coach de oratoria (Fase 68).")
+
+# F66 — `jw spar` (conversation sparring with simulated interlocutors)
+from jw_cli.commands.spar import spar_app
+
+app.add_typer(spar_app, name="spar", help="Sparring conversacional (Fase 66).")
+
+# F67 — `jw reason` (doctrinal chain-of-thought reasoner)
+from jw_cli.commands.reason import reason_app
+
+app.add_typer(
+    reason_app, name="reason", help="Razonador doctrinal verificable (Fase 67)."
+)
+
+# F69 — `jw broadcasting-visual` (frame-level video index)
+from jw_cli.commands.broadcasting_visual import broadcasting_visual_app
+
+app.add_typer(
+    broadcasting_visual_app,
+    name="broadcasting-visual",
+    help="Búsqueda visual frame-level en videos (Fase 69).",
+)
+
+# F70 — `jw verify-image` (defensive image-quote verifier)
+from jw_cli.commands.verify_image import verify_image_app
+
+app.add_typer(
+    verify_image_app,
+    name="verify-image",
+    help="Verificador de citas en imágenes (Fase 70).",
+)
+
+# F71 — `jw book-camera` (live camera for physical books)
+from jw_cli.commands.book_camera import book_camera_app
+
+app.add_typer(
+    book_camera_app,
+    name="book-camera",
+    help="Cámara para libros físicos (Fase 71).",
+)
+
+# F72 — `jw drift` (doctrinal drift analyzer)
+from jw_cli.commands.drift import drift_app
+
+app.add_typer(
+    drift_app,
+    name="drift",
+    help="Drift doctrinal diacrónico (Fase 72).",
+)
+
+# F76 — `jw voiceclone` (consented family-voice TTS)
+from jw_cli.commands.voiceclone import voiceclone_app
+
+app.add_typer(
+    voiceclone_app,
+    name="voiceclone",
+    help="TTS con voz familiar consentida (Fase 76).",
+)
+
 
 def main() -> None:
     app()

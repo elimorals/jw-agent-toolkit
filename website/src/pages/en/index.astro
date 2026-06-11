@@ -41,26 +41,29 @@ const recommended = [
 
 const stats = [
   { value: "10", label: "Python Packages", suffix: "" },
-  { value: "2.6k", label: "Tests passing", suffix: "+" },
-  { value: "110", label: "MCP Tools", suffix: "+" },
+  { value: "2.99k", label: "Tests passing", suffix: "+" },
+  { value: "135", label: "MCP Tools", suffix: "+" },
   { value: "1672", label: "ASR languages", suffix: "" },
 ];
 
 const visionCategories: { label: string; status: "done" | "partial" | "pending"; phase?: string }[] = [
   { label: "Weekly meeting", status: "done", phase: "F57" },
-  { label: "Ministry", status: "partial", phase: "F12" },
+  { label: "Ministry", status: "partial", phase: "F12+F66" },
   { label: "Audio · TTS · Diarization", status: "done", phase: "F34+F64" },
-  { label: "Multimodal · OCR", status: "partial", phase: "F36+F62" },
+  { label: "Multimodal · OCR", status: "done", phase: "F69+F70+F71" },
   { label: "Languages · ASL", status: "partial", phase: "F53+F8" },
-  { label: "Apologetics", status: "done", phase: "F32" },
+  { label: "Apologetics", status: "done", phase: "F32+F67" },
   { label: "Operational infra", status: "done", phase: "F9+F10" },
-  { label: "Local privacy", status: "done", phase: "F61" },
+  { label: "Local privacy", status: "done", phase: "F61+F76" },
   { label: "Memory · profile", status: "done", phase: "F61.8" },
-  { label: "Family · kids", status: "pending" },
+  { label: "Family · kids", status: "partial", phase: "F76" },
   { label: "Calendar", status: "done", phase: "F51" },
-  { label: "Accessibility", status: "pending" },
+  { label: "Accessibility", status: "partial", phase: "F68+F76" },
   { label: "Personalization", status: "done", phase: "F57.16" },
-  { label: "Bible Knowledge Graph", status: "done", phase: "F58" },
+  { label: "Bible Knowledge Graph", status: "done", phase: "F58+F72" },
+  { label: "Verifiable reasoning", status: "done", phase: "F65+F67" },
+  { label: "Diachronic analysis", status: "done", phase: "F72" },
+  { label: "Visual verification", status: "done", phase: "F70" },
   { label: "E2E sync", status: "pending" },
 ];
 ---
@@ -382,10 +385,11 @@ const visionCategories: { label: string; status: "done" | "partial" | "pending";
             Towards a complete local AI ecosystem.
           </h2>
           <p class="mt-4 text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">
-            Of the original 15 categories, 10 are already shipped (F57-F66
-            closed 5 new ones: weekly meeting, audio diarization, local
-            privacy, biblical KG, personalization). The remaining gaps (3)
-            are Family/kids, Accessibility and E2E sync.
+            Of the 18 current categories, 13 are already shipped. F65-F76
+            closed 4 new ones (multimodal·OCR, verifiable reasoning,
+            diachronic analysis, visual verification) and moved Family/kids
+            and Accessibility to partial (F76 consented family voice). The
+            only remaining gap is E2E sync.
           </p>
           <a
             href="/en/docs/vision"
