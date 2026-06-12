@@ -27,6 +27,11 @@ from jw_interp.patching import (
     patch_batch,
     patch_one,
 )
+from jw_interp.qwen_scope import (
+    FeatureActivationSummary,
+    QwenScopeSAE,
+    summarize_feature_activations,
+)
 from jw_interp.probing import (
     LinearProbe,
     train_probe,
@@ -52,6 +57,9 @@ def __getattr__(name: str):
         )
         return {"TorchActivationCapturer": TorchActivationCapturer,
                 "TorchCaptureConfig": TorchCaptureConfig}[name]
+    if name == "load_qwen_scope_sae":
+        from jw_interp.qwen_scope import load_qwen_scope_sae
+        return load_qwen_scope_sae
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
@@ -59,12 +67,14 @@ __all__ = [
     "ActivationBatch",
     "ContrastivePair",
     "ContrastiveSpec",
+    "FeatureActivationSummary",
     "LinearProbe",
     "PatchedActivation",
     "PatchingEffect",
     "PrincipleContrastiveBuilder",
     "ProbeResult",
     "ProbingDataset",
+    "QwenScopeSAE",
     "SteeringEffect",
     "SteeringVector",
     "TorchActivationCapturer",
@@ -75,9 +85,11 @@ __all__ = [
     "compute_steering_vectors_for_principle",
     "evaluate_patching_effect",
     "evaluate_steering_effect",
+    "load_qwen_scope_sae",
     "patch_batch",
     "patch_one",
     "project_out",
+    "summarize_feature_activations",
     "train_probe",
     "train_probes_for_principle",
 ]
