@@ -26,6 +26,19 @@ from jw_interp.probing import (
     train_probes_for_principle,
 )
 
+
+def __getattr__(name: str):
+    """Lazy import of torch-extra symbols so the package imports without torch."""
+    if name in ("TorchActivationCapturer", "TorchCaptureConfig"):
+        from jw_interp.torch_capture import (
+            TorchActivationCapturer,
+            TorchCaptureConfig,
+        )
+        return {"TorchActivationCapturer": TorchActivationCapturer,
+                "TorchCaptureConfig": TorchCaptureConfig}[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 __all__ = [
     "ActivationBatch",
     "ContrastivePair",
@@ -34,6 +47,8 @@ __all__ = [
     "PrincipleContrastiveBuilder",
     "ProbeResult",
     "ProbingDataset",
+    "TorchActivationCapturer",
+    "TorchCaptureConfig",
     "build_default_contrastive_specs",
     "train_probe",
     "train_probes_for_principle",
