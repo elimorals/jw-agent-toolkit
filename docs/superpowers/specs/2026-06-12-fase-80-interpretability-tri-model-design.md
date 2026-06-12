@@ -332,20 +332,40 @@ Aunque producción es Qwen, **Gemma Scope es el instrumento SAE de mayor calidad
 
 ## Stack técnico
 
-- **SAELens** (`pip install sae-lens`) — load Gemma Scope nativo, training de SAEs custom si se decide después.
-- **nnsight** (`pip install nnsight`) — intervenciones causales sobre cualquier modelo HF sin port a TransformerLens. Único stack viable para Qwen3.5 fine-tuneado.
-- **torch nativo** para Qwen Scope (los `.pt` se cargan directo con `torch.load`).
+### Análisis y SAE
+- **SAELens** (`pip install sae-lens`) — load Gemma Scope nativo. Soporta CUDA y MPS (Apple Silicon) en modo inferencia. Training de SAEs custom requiere CUDA si se hace después.
+- **nnsight** (`pip install nnsight`) — intervenciones causales sobre cualquier modelo HF sin port a TransformerLens. Funciona en CUDA y MPS. Único stack viable para Qwen3.5 fine-tuneado en este lab.
+- **torch nativo** para Qwen Scope (los `.pt` se cargan directo con `torch.load`). Funciona idéntico en CUDA, MPS y CPU.
 - **TransformerLens** opcional, solo si necesitas circuits-level analysis (no en el plan).
 - **Neuronpedia API** para Gemma Scope auto-interp y exploración interactiva.
-- **Claude Opus** como judge de auto-interp (re-uso del proveedor existente).
-- **Existente del monorepo**: jw-eval principios, jw-finetune judge, jw-agents fidelity_wrap. Todo se integra, nada se reemplaza.
+
+### Training (CUDA-only)
+- **Unsloth + trl** — pila existente F77–F79. Solo CUDA. Se usa para SFT/DPO/ORPO en RTX 5090 o H100 fallback.
+- Alternativa Mac para SFT pequeño: **MLX-LM** (`pip install mlx-lm`) con `mlx_lm.lora` — nativo Apple Silicon, aprovecha unified memory. Útil para iterar fine-tunes rápidos del 0.8B en M4 Max sin pasar por cloud.
+
+### Inferencia y latencia de producción
+- **torch MPS** para inferencia y probing en M4 Max — el target real de producción es Mac, así que los benchmarks de latencia de Fase 5 se hacen aquí, no en CUDA.
+- **MLX** para inferencia optimizada del modelo de producción en M4 Max — kernel nativo Metal, mejor throughput que torch MPS para inferencia.
+- **llama.cpp con backend Metal** — alternativa GGUF si se exporta el adapter.
+
+### Judge auto-interp y proveedor LLM
+- **Claude Opus** como judge de auto-interp (re-uso del proveedor existente del monorepo).
+
+### Existente del monorepo (no se duplica)
+- `jw-eval` principios, `jw-finetune` judge, `jw-agents` fidelity_wrap. Todo se integra, nada se reemplaza.
 
 ## Hardware por fase
 
-- Fase 0–2: RTX 5090 local (probes y steering son baratos).
-- Fase 3: RTX 5090 (Qwen-Scope son TopK simples, no requieren training).
-- Fase 4: RTX 5090 para análisis; H100 fallback para fine-tune Gemma-2-2B (~12 horas A100 estimado, $25–40).
-- Fase 5: RTX 5090 + medición de latencia en Mac Metal (target real de producción).
+El usuario opera tres entornos: **M4 Max** (Mac, unified memory, target real de producción), **RTX 5090** (workstation CUDA, 32GB VRAM), y **H100/B200 fallback** (cloud, training pesado).
+
+| Fase | Hardware primario | Notas |
+|---|---|---|
+| F0 SL-CAI | M4 Max o 5090 | Es generación + judge, sin training. Cualquier hardware sirve. MLX-LM optional para draft generation local. |
+| F1 probing lineal | M4 Max o 5090 | Activaciones residuales del 0.8B caben en cualquiera. M4 Max es elegante por unified memory para corpus grande. |
+| F2 steering + activation patching | M4 Max o 5090 | Hooks sobre forward pass; nnsight soporta ambos. |
+| F3 Qwen-Scope sobre 2B | 5090 preferido | El 2B fine-tuneado + SAE 32k features encaja mejor en 32GB VRAM dedicada. Posible en M4 Max 64GB+ pero más lento. |
+| F4 Gemma Scope sobre 2B | 5090 análisis + H100 fallback fine-tune | Fine-tune Gemma-2-2B-PT con Unsloth requiere CUDA (~12h A100 estimado, $25–40). Análisis SAE post-train cabe en 5090 o M4 Max 64GB+. |
+| F5 transfer + fidelity_wrap v2 | **M4 Max OBLIGATORIO** para latencia | Benchmarks de producción se miden en el hardware real de target. <50ms p95 se valida en M4 Max con MLX backend. |
 
 ## Métricas de éxito globales
 
@@ -381,6 +401,12 @@ Aunque producción es Qwen, **Gemma Scope es el instrumento SAE de mayor calidad
 
 7. **Drift entre 0.8B producción y 2B lab**: al re-entrenar producción cambian los features.
    - *Mitigación*: protocolo de re-validación: cada nueva versión del 0.8B debe pasar el suite de probes antes de publicarse.
+
+8. **Apple Silicon limita training serio**: Unsloth, bitsandbytes y muchos kernels CUDA no corren en MPS. El M4 Max no puede ser el único hardware.
+   - *Mitigación*: training (SFT/DPO/ORPO) siempre en 5090/H100. M4 Max se reserva para inferencia, probing, análisis SAE en modo eval, y medición de latencia de producción. MLX-LM existe como escape hatch para iteraciones rápidas pequeñas en Mac.
+
+9. **MLX vs torch divergencia numérica**: el modelo exportado a MLX para producción Mac puede tener pequeñas divergencias vs el modelo torch en CUDA. Las features descubiertas en lab podrían no activarse idénticamente.
+   - *Mitigación*: en Fase 5 validar probes en el modelo MLX-converted, no solo en el torch original. Si hay drift de activaciones medible, ajustar thresholds o quedarse con torch MPS para el binding Tier 4.
 
 ## Gaps y dependencias
 
