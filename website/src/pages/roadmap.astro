@@ -139,12 +139,20 @@ const releases = [
     href: "/novedades-77-79",
     color: "text-[#e898d5]",
   },
+  {
+    id: "80",
+    title: "Release 80 · Interpretabilidad mecanicista tri-modelo",
+    description:
+      "Cierra el loop F77-F79: ¿el modelo internalizó los principios o aprendió un shortcut estilístico? Paquete nuevo jw-interp con probing lineal por principio (F80.1), steering vectors + activation patching (F80.2), Qwen-Scope adapter (F80.3, TopK residual), Gemma Scope wrapper (F80.4, JumpReLU SOTA con MLP + attention) y runtime probe store + fidelity_wrap Tier 4 observacional (F80.5). Arquitectura tri-modelo: producción Qwen 0.8B intocada, lab Qwen 2B y lab Gemma 2B con SAEs públicos. Cross-family validation. +85 tests, 1.411 passing.",
+    href: "/novedades-80",
+    color: "text-[#9bb8ff]",
+  },
 ];
 ---
 
 <BaseLayout
-  title="Roadmap maestro — Fases 22 a 79 + follow-ups"
-  description="Vista consolidada de 60 fases del jw-agent-toolkit organizadas por release (22-32 + 33-38 + 39-48 + 49-56 + 57-66 + 65-76 + 77-79) y por tier técnico. Todas entregadas: ecosistema discipulado, núcleo SOTA, confianza runtime + comunidad, multilingüe SOTA (1672 idiomas Omnilingual ASR), 2 paquetes nuevos (jw-brain, jw-meeting-media), agéntica + multimodal + predictivo + voz familiar consentida y alineamiento doctrinal con Constitutional AI + RLAIF + DPO/ORPO sobre Qwen3.5-0.8B."
+  title="Roadmap maestro — Fases 22 a 80 + follow-ups"
+  description="Vista consolidada de 61 fases del jw-agent-toolkit organizadas por release (22-32 + 33-38 + 39-48 + 49-56 + 57-66 + 65-76 + 77-79 + 80) y por tier técnico. Todas entregadas: ecosistema discipulado, núcleo SOTA, confianza runtime + comunidad, multilingüe SOTA (1672 idiomas Omnilingual ASR), 2 paquetes nuevos (jw-brain, jw-meeting-media), agéntica + multimodal + predictivo + voz familiar consentida, alineamiento doctrinal con Constitutional AI + RLAIF + DPO/ORPO sobre Qwen3.5-0.8B, e interpretabilidad mecanicista tri-modelo con probing + steering + Qwen Scope + Gemma Scope."
 >
   <section class="grid-noise relative overflow-hidden border-b border-[var(--color-line-subtle)]">
     <div class="mx-auto max-w-7xl px-4 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20">
@@ -157,12 +165,14 @@ const releases = [
         <span class="text-[var(--color-accent)]">plataforma adoptable</span>
       </h1>
       <p class="mt-6 max-w-2xl text-[16px] leading-relaxed text-[var(--color-ink-secondary)]">
-        Seis releases consecutivas que cubren <strong class="text-[var(--color-ink-primary)]">discipulado completo</strong>,
+        Ocho releases consecutivas que cubren <strong class="text-[var(--color-ink-primary)]">discipulado completo</strong>,
         <strong class="text-[var(--color-ink-primary)]">núcleo técnico al SOTA</strong>,
         <strong class="text-[var(--color-ink-primary)]">confianza en runtime + comunidad + frontera JS</strong>,
-        <strong class="text-[var(--color-ink-primary)]">multilingüe SOTA con 1672 idiomas vía Omnilingual ASR</strong> y
-        <strong class="text-[var(--color-ink-primary)]">2 paquetes nuevos con reunión-en-vivo + KG bíblico JW-puro</strong> y
-        <strong class="text-[var(--color-ink-primary)]">agéntica verificable + multimodal + predictivo + voz familiar consentida</strong>.
+        <strong class="text-[var(--color-ink-primary)]">multilingüe SOTA con 1672 idiomas vía Omnilingual ASR</strong>,
+        <strong class="text-[var(--color-ink-primary)]">2 paquetes nuevos con reunión-en-vivo + KG bíblico JW-puro</strong>,
+        <strong class="text-[var(--color-ink-primary)]">agéntica verificable + multimodal + predictivo + voz familiar consentida</strong>,
+        <strong class="text-[var(--color-ink-primary)]">alineamiento doctrinal CAI/RLAIF/DPO</strong> y
+        <strong class="text-[var(--color-ink-primary)]">interpretabilidad mecanicista tri-modelo</strong>.
         Mismo flujo en cada fase: brainstorming → spec aprobado → plan TDD bite-sized → implementación red-green-commit → audit.
       </p>
 

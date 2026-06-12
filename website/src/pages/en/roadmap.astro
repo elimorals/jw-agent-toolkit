@@ -139,12 +139,20 @@ const releases = [
     href: "/en/whats-new-77-79",
     color: "text-[#e898d5]",
   },
+  {
+    id: "80",
+    title: "Release 80 · Mechanistic interpretability, tri-model",
+    description:
+      "Closes the F77-F79 loop: did the model internalise the principles or learn a stylistic shortcut? New jw-interp package with per-principle linear probing (F80.1), steering vectors + activation patching (F80.2), Qwen-Scope adapter (F80.3, TopK residual), Gemma Scope wrapper (F80.4, SOTA JumpReLU with MLP + attention) and a runtime probe store + observational fidelity_wrap Tier 4 (F80.5). Tri-model architecture: production Qwen 0.8B left untouched, lab Qwen 2B and lab Gemma 2B with public SAEs. Cross-family validation. +85 tests, 1,411 passing.",
+    href: "/en/whats-new-80",
+    color: "text-[#9bb8ff]",
+  },
 ];
 ---
 
 <BaseLayout
-  title="Master roadmap — Phases 22 through 79 + follow-ups"
-  description="Consolidated view of 60 jw-agent-toolkit phases organised by release (22-32 + 33-38 + 39-48 + 49-56 + 57-66 + 65-76 + 77-79) and by technical tier. All shipped: discipleship ecosystem, core at SOTA, runtime trust + community + JS frontier, multilingual SOTA (1672 languages via Omnilingual ASR), 2 new packages (jw-brain, jw-meeting-media) with live-meeting + JW-pure biblical KG, verifiable agentic + multimodal + predictive + consented family voice, and doctrinal alignment with Constitutional AI + RLAIF + DPO/ORPO on Qwen3.5-0.8B."
+  title="Master roadmap — Phases 22 through 80 + follow-ups"
+  description="Consolidated view of 61 jw-agent-toolkit phases organised by release (22-32 + 33-38 + 39-48 + 49-56 + 57-66 + 65-76 + 77-79 + 80) and by technical tier. All shipped: discipleship ecosystem, core at SOTA, runtime trust + community + JS frontier, multilingual SOTA (1672 languages via Omnilingual ASR), 2 new packages (jw-brain, jw-meeting-media) with live-meeting + JW-pure biblical KG, verifiable agentic + multimodal + predictive + consented family voice, doctrinal alignment with Constitutional AI + RLAIF + DPO/ORPO on Qwen3.5-0.8B, and mechanistic interpretability with linear probing + steering + Qwen Scope + Gemma Scope."
 >
   <section class="grid-noise relative overflow-hidden border-b border-[var(--color-line-subtle)]">
     <div class="mx-auto max-w-7xl px-4 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20">
@@ -157,12 +165,14 @@ const releases = [
         <span class="text-[var(--color-accent)]">plataforma adoptable</span>
       </h1>
       <p class="mt-6 max-w-2xl text-[16px] leading-relaxed text-[var(--color-ink-secondary)]">
-        Six consecutive releases covering <strong class="text-[var(--color-ink-primary)]">complete discipleship</strong>,
+        Eight consecutive releases covering <strong class="text-[var(--color-ink-primary)]">complete discipleship</strong>,
         <strong class="text-[var(--color-ink-primary)]">technical core at SOTA</strong>,
         <strong class="text-[var(--color-ink-primary)]">runtime trust + community + JS frontier</strong>,
         <strong class="text-[var(--color-ink-primary)]">multilingual SOTA with 1672 languages via Omnilingual ASR</strong>,
-        <strong class="text-[var(--color-ink-primary)]">2 new packages with live-meeting + JW-pure biblical KG</strong> and
-        <strong class="text-[var(--color-ink-primary)]">verifiable agentic + multimodal + predictive + consented family voice</strong>.
+        <strong class="text-[var(--color-ink-primary)]">2 new packages with live-meeting + JW-pure biblical KG</strong>,
+        <strong class="text-[var(--color-ink-primary)]">verifiable agentic + multimodal + predictive + consented family voice</strong>,
+        <strong class="text-[var(--color-ink-primary)]">doctrinal alignment via CAI/RLAIF/DPO</strong> and
+        <strong class="text-[var(--color-ink-primary)]">tri-model mechanistic interpretability</strong>.
         Same flow on every phase: brainstorming → approved spec → bite-sized TDD plan → red-green-commit implementation → audit.
       </p>
 

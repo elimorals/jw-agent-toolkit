@@ -1,0 +1,375 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+interface Phase {
+  number: string;
+  tier: 1 | 2 | 3;
+  title: string;
+  tagline: string;
+  description: string;
+  tests: number;
+  whatWasDone: string[];
+  guideHref?: string;
+}
+
+const phases: Phase[] = [
+  {
+    number: "80.0",
+    tier: 1,
+    title: "sl-cai-critique-cli",
+    tagline: "Cerrar el gap aguas arriba: reescribir violaciones antes del SFT",
+    description:
+      "Pipeline ya existía en jw_finetune.synth.critique pero sin CLI, sin tests y sin docs. F80.0 cierra el ciclo: el comando build-critique-dataset toma un dataset SFT (ShareGPT), filtra principios por agent_name, ejecuta el tier regex barato, llama al LLM solo cuando hay hard violation, y produce un dataset paralelo con las respuestas revisadas. La respuesta original queda preservada en metadata.original_answer para auditoría. Reduce hard violations en el dataset de entrenamiento del próximo round SFT.",
+    tests: 14,
+    whatWasDone: [
+      "Comando nuevo jw-finetune build-critique-dataset con flags input/output/provider/model/agent/principles/preserve-original.",
+      "Regex tier short-circuit: si no hay match, ningún LLM call (coste cero en corpus limpio).",
+      "Filtrado por applies_to del principio respecto al agent_name.",
+      "Pipeline programático batch_critique(pairs, principles, llm, agent) → (revised_pairs, num_changed).",
+      "self_critique(pair, principles, llm_provider, agent, preserve_original) devuelve CritiqueResult con changed + violated_principle_ids + original_answer.",
+      "10 tests TDD del módulo + 4 tests CLI dispatch (input missing, output paths, no-principles flag).",
+      "Fallbacks graciosos: LLM error → original intacto, respuesta vacía → original intacto, mismo texto → changed=False.",
+      "Guía docs/guias/sl-cai.md con quickstart y cómo se relaciona con F77 + F78 + F79.",
+    ],
+    guideHref: "/docs/guias/sl-cai",
+  },
+  {
+    number: "80.1",
+    tier: 2,
+    title: "linear-probing-per-principle",
+    tagline: "¿Los principios viven en la representación o son shortcut estilístico?",
+    description:
+      "Paquete nuevo jw-interp con la maquinaria completa: ContrastiveSpec declarativos para los 5 principios builtin, MockActivationCapturer determinístico (offset por principio × capa × hook) que produce datos linealmente separables, LinearProbe sklearn con stratified split y AUC + accuracy, y TorchActivationCapturer HF forward hooks con auto-device (cuda > mps > cpu). Probe accuracy ≥0.80 en alguna capa = principio internalizado; <0.65 todas las capas = shortcut detectado. Diseño honesto: el mock es un contrato matemático — si la probe no separa eso, el pipeline está roto.",
+    tests: 27,
+    whatWasDone: [
+      "ContrastivePair / ContrastiveSpec / PrincipleContrastiveBuilder / ProbingDataset con validación de shape.",
+      "5 specs builtin seed para PF001/002/003/010/012 (extendibles por el usuario).",
+      "MockActivationCapturer determinístico con direction hashing por (principle_id, layer, hook), signal_strength configurable, noise_std bajo.",
+      "TorchActivationCapturer con AutoModelForCausalLM + forward hooks en model.model.layers, last-token / mean pooling, batch_size configurable.",
+      "LinearProbe sklearn.LogisticRegression con stratified test split, accuracy + AUC, coef + bias persistibles para F80.2 steering.",
+      "train_probe + train_probes_for_principle (uno por capa).",
+      "Lazy import torch/transformers — el paquete corre sin GPU para tests y mock.",
+      "Test end-to-end: probe sobre activaciones mock linealmente separables debe ≥ 0.95 accuracy.",
+      "22 tests pure-numpy + 5 tests torch (importorskip).",
+      "Guía docs/guias/probing.md con quickstart real + síntesis + interpretación de resultados.",
+    ],
+    guideHref: "/docs/guias/probing",
+  },
+  {
+    number: "80.2",
+    tier: 2,
+    title: "steering-vectors-activation-patching",
+    tagline: "Validación causal: correlación no es causa",
+    description:
+      "Si un probe encuentra el principio pero la activación correspondiente no causa la conducta, es shortcut. Steering vectors (diferencia de medias entre positivas y negativas), aplicación al residual con broadcasting, proyección ortogonal (ablación) y evaluación monotónica bajo alpha contra el probe. Activation patching pure-numpy: el core del bucle lo deja listo para el wrap en forward real (torch_patching.py viene en F80.6+). Si +alpha sube probe score y -alpha lo baja → causal; si ninguna dirección cambia → spurious.",
+    tests: 15,
+    whatWasDone: [
+      "SteeringVector frozen dataclass con vector, magnitude, n_positive/negative.",
+      "compute_steering_vector(batch, principle_id, normalize=True) usa diferencia de medias, unit-norm por defecto.",
+      "compute_steering_vectors_for_principle(batches) — uno por capa.",
+      "apply_steering_to_residual con broadcasting (residual 1D o 2D batch), inmutable.",
+      "project_out remueve la componente del vector (ablación) — verificado: dot post-proyección ~0.",
+      "evaluate_steering_effect(batch, vector, probe.predict_proba, alpha) — test de monotonicidad bajo alpha (+ sube neg, − baja neg).",
+      "patching.PatchedActivation + patch_one / patch_batch / evaluate_patching_effect (pure-numpy).",
+      "Test: parchear con self → cambio ~0; parchear con flipped labels devuelve effect finito.",
+      "Rechaza shape/layer mismatches con errores claros.",
+      "Diseño honesto: la parte de forward-pass real (torch_patching) queda pendiente — no bloquea F80.5.",
+    ],
+  },
+  {
+    number: "80.3",
+    tier: 3,
+    title: "qwen-scope-adapter",
+    tagline: "Cargar SAE-Res-Qwen3.5-2B-Base-W32K-L0_50 y mapear principios a features",
+    description:
+      "Adapter para los SAEs públicos de Qwen-Scope (TopK k=50 sobre residual stream, 24 capas de Qwen3.5-2B-Base, W32K features). QwenScopeSAE encode con np.argpartition para TopK O(n·d_sae), decode reconstruye residual, reconstruction_error como métrica de fidelidad. Loader usa torch.load(weights_only=True) — sin pickle execution. summarize_feature_activations mapea principios a features candidatas por differential activation rate entre positivos y negativos.",
+    tests: 14,
+    whatWasDone: [
+      "QwenScopeSAE frozen con W_enc / b_enc / W_dec / b_dec + d_model + d_sae + k.",
+      "encode TopK puro numpy con argpartition (O(n·d_sae) sin sort completo).",
+      "decode reconstruye residual; reconstruction_error como MSE.",
+      "load_qwen_scope_sae(path, layer, k) con torch.load(weights_only=True) — seguro contra pickle exploits.",
+      "Verifica file exists ANTES de importar torch — FileNotFoundError fast-path sin la dep.",
+      "summarize_feature_activations devuelve top_n features ordenadas por |rate_pos − rate_neg|.",
+      "FeatureActivationSummary con layer + feature_idx + rate_pos/neg + mean_pos/neg + differential_rate.",
+      "Test: TopK conserva las features con pre-activaciones más altas (verificación matemática).",
+      "11 tests pure-numpy + 3 tests torch (importorskip): round-trip load/save, missing keys, missing file.",
+      "Sin dep hard en sae_lens — el adapter usa solo torch para deserializar y numpy para todo lo demás.",
+    ],
+  },
+  {
+    number: "80.4",
+    tier: 3,
+    title: "gemma-scope-wrapper",
+    tagline: "JumpReLU SAE SOTA + cross-family validation Qwen ⟷ Gemma",
+    description:
+      "Wrapper sobre sae_lens.SAE para los SAEs JumpReLU de Gemma Scope (gemma-2-2b PT y gemma-2-9b PT, sites resid_post + mlp_out + attn_out, todas las capas, widths 16k–262k). Interfaz numpy idéntica a QwenScopeSAE para que F80.3 y F80.4 sean intercambiables aguas abajo. La validación cross-family es el punto importante: una feature moral que emerge en ambas familias arquitectónicamente distintas es evidencia mucho más robusta que en una sola. Si las features no coinciden, ese resultado mismo es informativo.",
+    tests: 7,
+    whatWasDone: [
+      "GemmaScopeSAE frozen con layer + site (resid_post|mlp_out|attn_out) + d_model + d_sae + _inner SAELens object.",
+      "encode / decode atraviesan sae_lens.SAE pero la interfaz pública es numpy in/numpy out.",
+      "_RELEASE_MAP declarativo para gemma-2-2b/-9b × resid/mlp/attn → SAELens release id.",
+      "_resolve_release(model_name, site) con error claro si combinación no registrada.",
+      "load_gemma_scope_sae(model_name, site, layer, width, l0, device) con lazy import de sae_lens.",
+      "summarize_gemma_features reusa el summarizer de QwenScopeSAE (mismo contrato numpy).",
+      "_FakeSAELensSAE en los tests para evitar dep sae_lens en CI; tests usan importorskip torch.",
+      "Test que verifica el error message correcto cuando sae_lens no está instalado.",
+    ],
+  },
+  {
+    number: "80.5",
+    tier: 1,
+    title: "runtime-probe-store-tier4",
+    tagline: "Probes persistidos + fidelity_wrap Tier 4 observacional",
+    description:
+      "Cierre del loop F80 al runtime. probe_store usa np.savez_compressed + JSON sidecar — sin pickle, forward-compat across sklearn versions. RuntimeProbe.predict_proba implementa sigmoid numpy numéricamente estable (matchea sklearn predict_proba a 1e-5). ProbeEvaluator con dos modos: eager (vía TorchActivationCapturer, una forward por finding) y cache-only (acepta activaciones pre-capturadas). El Tier 4 en fidelity_wrap es deliberadamente observacional — NUNCA veta un Finding por sí solo, solo anota probe_scores + probe_misses + probe_coherence (clear|confirms|conflicts|silent). Coupling cero: el tipo ProbeEvaluatorCallable vive en jw-agents, no importa jw-interp.",
+    tests: 21,
+    whatWasDone: [
+      "save_probe / load_probe con np.savez_compressed + JSON sidecar (forward-compat, sin pickle).",
+      "save_probe_set / load_probe_set con manifest.json (model_name + hidden_size + n_layers + version).",
+      "RuntimeProbe.predict_proba con sigmoid numéricamente estable (paths separados para x ≥ 0 y x < 0).",
+      "Test matemático: RuntimeProbe.predict_proba matchea sklearn LogisticRegression.predict_proba a 1e-5.",
+      "ProbeEvaluator con __call__ eager (un forward por finding) y score_cached (activaciones pre-capturadas).",
+      "build_probe_evaluator(probes_dir, capturer, model_name) auto-construye capturer del manifest si torch está.",
+      "mock_evaluator(returns) para tests deterministas sin GPU.",
+      "fidelity_wrap acepta probe_evaluator: Callable[[str], dict[str, float]] + probe_min_score (default 0.5).",
+      "Por Finding: probe_scores (JSON), probe_misses (CSV), probe_min_score, probe_coherence en metadata.",
+      "Coherence categories: clear (nada flag, todo internalizado), confirms (regex + probe coinciden), conflicts (regex flag pero probe alto), silent (regex limpio pero probe miss — shortcut sospechoso).",
+      "Tier 4 errors swallowed → probe_error en metadata (un evaluador roto no puede tumbar producción).",
+      "Test crítico: aún con TODOS los probes en 0, el Finding NO se descarta (on_fail='reject' irrelevante para probes).",
+      "14 tests probe_store + runtime + 7 tests Tier 4 en jw-agents (cero regresión en los 930 existentes).",
+      "Guía docs/guias/interpretabilidad-runtime.md con quickstart eager + cached + integración fidelity_wrap.",
+    ],
+    guideHref: "/docs/guias/interpretabilidad-runtime",
+  },
+];
+
+const tierMeta: Record<1 | 2 | 3, { label: string; color: string }> = {
+  1: { label: "T1 Cierre de loop", color: "text-[var(--color-accent)]" },
+  2: { label: "T2 Análisis", color: "text-[#f0b97a]" },
+  3: { label: "T3 SAE / runtime", color: "text-[#a8c8ff]" },
+};
+
+const totalTests = phases.reduce((sum, p) => sum + p.tests, 0);
+---
+
+<BaseLayout
+  title="Novedades F80 — Interpretabilidad mecanicista tri-modelo (Qwen Scope + Gemma Scope + Tier 4)"
+  description="6 sub-fases entregadas: F80.0 SL-CAI critique CLI, F80.1 probing lineal por principio, F80.2 steering + activation patching, F80.3 Qwen-Scope adapter, F80.4 Gemma Scope wrapper, F80.5 runtime probe store + fidelity_wrap Tier 4 observacional. Paquete nuevo jw-interp. +85 tests, 1.411 passing. Sin acoplamiento jw-agents → jw-interp."
+>
+  <!-- ───────── Hero ───────── -->
+  <section class="grid-noise relative overflow-hidden border-b border-[var(--color-line-subtle)]">
+    <div class="mx-auto max-w-7xl px-4 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20">
+      <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        <span class="inline-block h-px w-8 bg-[var(--color-accent)] align-middle"></span>
+        <span class="ml-2">Release F80 · interpretabilidad mecanicista</span>
+      </p>
+      <h1 class="mt-6 max-w-3xl text-balance font-display text-[clamp(1.85rem,5vw,3.4rem)] leading-[1.05]">
+        <span class="text-[var(--color-ink-primary)]">Probing · Steering · </span>
+        <span class="text-[var(--color-accent)]">Qwen Scope + Gemma Scope</span>
+      </h1>
+      <p class="mt-6 max-w-3xl text-[16px] leading-relaxed text-[var(--color-ink-secondary)]">
+        Cierre del bloque de alineamiento F77–F79 con una pregunta
+        operativa: <strong class="text-[var(--color-ink-primary)]">¿el
+        modelo internalizó los principios o aprendió un shortcut
+        estilístico?</strong> Arquitectura tri-modelo: producción
+        Qwen3.5-0.8B intocada, laboratorio Qwen3.5-2B-Base con Qwen-Scope
+        público y laboratorio Gemma-2-2B-PT con
+        <a class="text-[var(--color-accent)] underline decoration-dotted underline-offset-4" href="https://huggingface.co/google/gemma-scope" target="_blank" rel="noopener">Gemma Scope</a>
+        (JumpReLU SOTA). Cross-family validation: una feature moral que
+        emerge en ambas familias arquitectónicamente distintas es
+        evidencia mucho más robusta que en una sola.
+      </p>
+
+      <div class="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div class="rounded-sm border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-accent)]">Sub-fases</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">{phases.length}</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Tests nuevos</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">+{totalTests}</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Paquete nuevo</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">jw-interp</p>
+        </div>
+        <div class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] p-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">Suite total</p>
+          <p class="mt-2 font-display text-3xl text-[var(--color-ink-primary)]">1411</p>
+          <p class="mt-1 text-[12px] text-[var(--color-ink-secondary)]">passing · 0 acoplamiento jw-interp en jw-agents</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── Decisiones de diseño ───────── -->
+  <section class="border-b border-[var(--color-line-subtle)] bg-[var(--color-surface-1)]">
+    <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ Decisiones de diseño que ataron las 6 sub-fases
+      </h2>
+      <ul class="mt-6 grid gap-x-10 gap-y-3 text-[14px] text-[var(--color-ink-secondary)] sm:grid-cols-2">
+        <li><span class="text-[var(--color-accent)]">→</span> Producción Qwen3.5-0.8B nunca se toca. Los SAEs viven en modelos 2B del lab.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Tier 4 es <strong>observacional</strong>: probe miss nunca veta un Finding solo.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Cross-family validation: Qwen-Scope + Gemma Scope con interfaz numpy idéntica.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Mock capturer como contrato matemático: si no separa eso, el pipeline está roto.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Cero acoplamiento: <code>fidelity_wrap</code> acepta callable, no importa <code>jw-interp</code>.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> <code>torch.load(weights_only=True)</code> siempre — sin pickle exploits desde HF.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Probes persistidos como npz + JSON sidecar — sin pickle, forward-compat across sklearn.</li>
+        <li><span class="text-[var(--color-accent)]">→</span> Extras opt-in: <code>torch</code> para captura real, <code>sae</code> para Gemma Scope.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ───────── Phases ───────── -->
+  {phases.map((phase) => (
+    <section class="border-b border-[var(--color-line-subtle)]">
+      <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+        <article class="grid gap-8 lg:grid-cols-[280px_1fr]">
+          <header class="space-y-3">
+            <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-tertiary)]">
+              Fase {phase.number}
+            </p>
+            <h4 class="font-display text-[26px] leading-tight text-[var(--color-ink-primary)]">
+              {phase.title}
+            </h4>
+            <p class={`text-[14px] italic ${tierMeta[phase.tier].color}`}>{phase.tagline}</p>
+            <div class="flex flex-wrap gap-3 pt-2 font-mono text-[11px] text-[var(--color-ink-tertiary)]">
+              <span class="rounded-sm border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/5 px-2 py-1 text-[var(--color-accent)]">
+                ✅ Entregada
+              </span>
+              <span class="rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-1)] px-2 py-1">
+                🧪 {phase.tests} tests
+              </span>
+              <span class={`rounded-sm border ${tierMeta[phase.tier].color.replace("text-", "border-")}/40 px-2 py-1 ${tierMeta[phase.tier].color}`}>
+                {tierMeta[phase.tier].label}
+              </span>
+            </div>
+            {phase.guideHref && (
+              <a
+                href={phase.guideHref}
+                class="inline-flex items-center gap-1.5 pt-2 font-mono text-[11px] text-[var(--color-accent)] no-underline hover:underline"
+              >
+                Guía técnica →
+              </a>
+            )}
+          </header>
+          <div class="space-y-6">
+            <p class="text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">{phase.description}</p>
+            <div>
+              <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+                Qué se entregó
+              </p>
+              <ul class="mt-3 space-y-1.5 text-[14px] leading-relaxed text-[var(--color-ink-primary)]">
+                {phase.whatWasDone.map((item) => (
+                  <li class="flex gap-2">
+                    <span class="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-[var(--color-accent)]"></span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  ))}
+
+  <!-- ───────── End-to-end usage ───────── -->
+  <section class="border-b border-[var(--color-line-subtle)] bg-[var(--color-surface-1)]">
+    <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ Flujo end-to-end: del entrenamiento a Tier 4 en runtime
+      </h2>
+      <p class="mt-4 max-w-3xl text-[15px] leading-relaxed text-[var(--color-ink-secondary)]">
+        Las 6 sub-fases componen un pipeline coherente sobre Qwen3.5-0.8B
+        + lab Qwen 2B + lab Gemma 2B:
+      </p>
+      <pre class="mt-6 overflow-x-auto rounded-sm border border-[var(--color-line-subtle)] bg-[var(--color-surface-base)] p-5 font-mono text-[13px] leading-relaxed text-[var(--color-ink-primary)]"><code>{`# 1. F80.0 — SL-CAI critique sobre el dataset SFT antes del fine-tune
+uv run jw-finetune build-critique-dataset \\
+    --workspace ws-sft \\
+    --synth-provider anthropic \\
+    --synth-model claude-haiku-4-5-20251001
+
+# 2. F77-F79 — entrenamiento DPO/ORPO sobre dataset revisado (sin cambios)
+uv run jw-finetune train --workspace ws-dpo
+
+# 3. F80.1 — entrenar probes sobre el modelo fine-tuneado
+uv sync --extra torch
+python -c "
+from jw_interp import (
+    PrincipleContrastiveBuilder, TorchActivationCapturer,
+    build_default_contrastive_specs, train_probes_for_principle,
+    save_probe_set, ProbeStoreManifest,
+)
+cap = TorchActivationCapturer('Qwen/Qwen3.5-0.8B')
+builder = PrincipleContrastiveBuilder(build_default_contrastive_specs())
+results = []
+for pid in builder.principle_ids:
+    batches = cap.capture(builder.build(pid), layers=list(range(0, 24, 4)))
+    results.extend(train_probes_for_principle(batches, pid))
+save_probe_set(results, '~/jw-probes/v1', ProbeStoreManifest(
+    model_name='Qwen/Qwen3.5-0.8B',
+    hidden_size=cap.hidden_size,
+    n_layers=cap.n_layers))
+"
+
+# 4. F80.5 — enchufar Tier 4 en producción
+python -c "
+from jw_interp.runtime import build_probe_evaluator
+from jw_agents.fidelity_wrap import fidelity_wrap
+from jw_eval.principles import load_principles
+
+evaluator = build_probe_evaluator(probes_dir='~/jw-probes/v1')
+
+@fidelity_wrap(
+    on_fail='warn',
+    principles=load_principles(),
+    probe_evaluator=evaluator,
+    probe_min_score=0.5,
+)
+async def apologetics(query: str): ...
+"`}</code></pre>
+    </div>
+  </section>
+
+  <!-- ───────── Footer CTA ───────── -->
+  <section>
+    <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <h2 class="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ink-tertiary)]">
+        ▌ Más
+      </h2>
+      <div class="mt-12 flex flex-wrap gap-4">
+        <a
+          href="/novedades-77-79"
+          class="inline-flex items-center gap-2 rounded-sm border border-[var(--color-line)] bg-transparent px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-ink-primary)] no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+        >
+          ← Fases 77-79
+        </a>
+        <a
+          href="/roadmap"
+          class="inline-flex items-center gap-2 rounded-sm bg-[var(--color-accent)] px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-surface-base)] no-underline transition-opacity hover:opacity-90"
+        >
+          Roadmap maestro →
+        </a>
+        <a
+          href="https://huggingface.co/google/gemma-scope"
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center gap-2 rounded-sm border border-[var(--color-line)] bg-transparent px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-ink-primary)] no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+        >
+          Gemma Scope (HuggingFace) ↗
+        </a>
+        <a
+          href="https://huggingface.co/Qwen/SAE-Res-Qwen3.5-2B-Base-W32K-L0_50"
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center gap-2 rounded-sm border border-[var(--color-line)] bg-transparent px-5 py-2.5 font-mono text-[13px] font-medium text-[var(--color-ink-primary)] no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+        >
+          Qwen-Scope (HuggingFace) ↗
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
