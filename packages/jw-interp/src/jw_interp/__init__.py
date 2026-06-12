@@ -20,10 +20,26 @@ from jw_interp.models import (
     ProbeResult,
     ProbingDataset,
 )
+from jw_interp.patching import (
+    PatchedActivation,
+    PatchingEffect,
+    evaluate_patching_effect,
+    patch_batch,
+    patch_one,
+)
 from jw_interp.probing import (
     LinearProbe,
     train_probe,
     train_probes_for_principle,
+)
+from jw_interp.steering import (
+    SteeringEffect,
+    SteeringVector,
+    apply_steering_to_residual,
+    compute_steering_vector,
+    compute_steering_vectors_for_principle,
+    evaluate_steering_effect,
+    project_out,
 )
 
 
@@ -44,12 +60,24 @@ __all__ = [
     "ContrastivePair",
     "ContrastiveSpec",
     "LinearProbe",
+    "PatchedActivation",
+    "PatchingEffect",
     "PrincipleContrastiveBuilder",
     "ProbeResult",
     "ProbingDataset",
+    "SteeringEffect",
+    "SteeringVector",
     "TorchActivationCapturer",
     "TorchCaptureConfig",
+    "apply_steering_to_residual",
     "build_default_contrastive_specs",
+    "compute_steering_vector",
+    "compute_steering_vectors_for_principle",
+    "evaluate_patching_effect",
+    "evaluate_steering_effect",
+    "patch_batch",
+    "patch_one",
+    "project_out",
     "train_probe",
     "train_probes_for_principle",
 ]
