@@ -3151,6 +3151,7 @@ source = { editable = "packages/jw-core" }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "brotli" },
+    { name = "cryptography" },
     { name = "defusedxml" },
     { name = "httpx" },
     { name = "jinja2" },
@@ -3278,6 +3279,7 @@ requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.12.0" },
     { name = "brotli", specifier = ">=1.1.0" },
     { name = "coqui-tts", marker = "extra == 'tts-xtts'", specifier = ">=0.24.0" },
+    { name = "cryptography", specifier = ">=42.0" },
     { name = "ctranslate2", marker = "extra == 'translation-nllb'", specifier = ">=4.7.0" },
     { name = "deepgram-sdk", marker = "extra == 'asr-deepgram'", specifier = ">=3.7.0" },
     { name = "defusedxml", specifier = ">=0.7.1" },
