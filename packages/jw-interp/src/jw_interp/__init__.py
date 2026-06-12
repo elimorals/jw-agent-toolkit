@@ -60,6 +60,17 @@ def __getattr__(name: str):
     if name == "load_qwen_scope_sae":
         from jw_interp.qwen_scope import load_qwen_scope_sae
         return load_qwen_scope_sae
+    if name in ("GemmaScopeSAE", "load_gemma_scope_sae", "summarize_gemma_features"):
+        from jw_interp.gemma_scope import (
+            GemmaScopeSAE,
+            load_gemma_scope_sae,
+            summarize_gemma_features,
+        )
+        return {
+            "GemmaScopeSAE": GemmaScopeSAE,
+            "load_gemma_scope_sae": load_gemma_scope_sae,
+            "summarize_gemma_features": summarize_gemma_features,
+        }[name]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
@@ -68,6 +79,7 @@ __all__ = [
     "ContrastivePair",
     "ContrastiveSpec",
     "FeatureActivationSummary",
+    "GemmaScopeSAE",
     "LinearProbe",
     "PatchedActivation",
     "PatchingEffect",
@@ -85,11 +97,13 @@ __all__ = [
     "compute_steering_vectors_for_principle",
     "evaluate_patching_effect",
     "evaluate_steering_effect",
+    "load_gemma_scope_sae",
     "load_qwen_scope_sae",
     "patch_batch",
     "patch_one",
     "project_out",
     "summarize_feature_activations",
+    "summarize_gemma_features",
     "train_probe",
     "train_probes_for_principle",
 ]
