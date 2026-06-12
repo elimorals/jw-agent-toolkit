@@ -65,6 +65,45 @@ Reglas duras:
 - `jw-agents` puede importar `jw-core` y `jw-rag`.
 - `jw-cli` puede importar `jw-core` (no agentes — los agentes viven detrás del MCP por ahora).
 - `jw-mcp` puede importar todos los anteriores y es el único que liga el RAG global.
+- `jw-interp` (F80) depende solo de `jw-eval` (para principios). NO es importado por `jw-agents`: el Tier 4 de `fidelity_wrap` se enchufa vía callable contract `Callable[[str], dict[str, float]]`, sin acoplamiento de paquete.
+
+### Alineamiento y interpretabilidad (F77–F80)
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│  Pila de alineamiento doctrinal                                        │
+├────────────────────────────────────────────────────────────────────────┤
+│  F77 principios YAML   →   jw_eval/principles/  (5 builtin, versioned) │
+│            │                                                            │
+│            ▼                                                            │
+│  F78 judge oracle      →   jw_finetune/synth/judge/  (3-stage scoring) │
+│  F78 SL-CAI critique   →   jw_finetune/synth/critique.py               │
+│  F78 preference data   →   jw_finetune/synth/preference.py             │
+│            │                                                            │
+│            ▼                                                            │
+│  F79 DPO/ORPO          →   jw_finetune/train/{dpo,orpo}.py  (Unsloth)  │
+│            │                                                            │
+│            ▼                                                            │
+│  F80 SL-CAI CLI        →   jw-finetune build-critique-dataset          │
+│  F80 probing           →   jw_interp/{probing,activations,contrastive} │
+│  F80 steering+patching →   jw_interp/{steering,patching}.py            │
+│  F80 SAE adapters      →   jw_interp/{qwen,gemma}_scope.py             │
+│  F80 runtime probes    →   jw_interp/{probe_store,runtime}.py          │
+│            │                                                            │
+│            ▼                                                            │
+│  Runtime: fidelity_wrap(probe_evaluator=…)                             │
+│    ├─ Tier 1: principios regex (F77)                                   │
+│    ├─ Tier 2: NLI entailment (F39)                                     │
+│    ├─ Tier 3: judge oracle (F78, training-time)                        │
+│    └─ Tier 4: probes lineales (F80.5, observacional)                   │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+Las cuatro fases preservan la regla cardinal: **la fuente de verdad es el
+material vigente publicado por la organización**; este toolkit solo
+*refleja* ese canon. F77–F79 es ingeniería de alineamiento aguas arriba;
+F80 es auditoría interpretable de runtime que **nunca veta un Finding
+por sí sola** — solo anota evidencia para el humano.
 
 ## Inventario de endpoints JW.org
 

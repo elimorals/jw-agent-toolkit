@@ -1594,3 +1594,139 @@ no de un módulo grande.
 - F61 memoria persistente (hecho)
 - F62 historical PDF ingest (hecho)
 - F64 WhisperX diarización (hecho)
+
+## Fases 77-79 — Alineamiento doctrinal: principios YAML + RLAIF + DPO/ORPO ✅ (2026-06-11)
+
+Cierra el loop de alineamiento aguas arriba. La fuente de verdad sigue
+siendo el material vigente publicado por la organización; estas técnicas
+son ingeniería de alineamiento, no doctrina nueva. Cero anotadores
+humanos en el camino crítico — el judge con sus principios actúa como
+anotador IA. Modelo base de ejemplo: **Qwen3.5-0.8B** (Apache-2.0). +41
+tests, 1.326 passing al cierre del bloque.
+
+- ✅ **Fase 77 — `fidelity-principles`** (entregada 2026-06-11):
+  principios de fidelidad versionados en YAML
+  (`packages/jw-eval/src/jw_eval/principles/`). 5 principios builtin
+  (PF001-canon-only, PF002-cite-before-paraphrase, PF003-citation-required,
+  PF010-no-impersonation, PF012-respect-conscience) con `severity:
+  hard|soft`, `applies_to`, `source`, `rationale`, regex tier opcional.
+  Loader Pydantic con override por id. Consumido por `Judge.score_qa_pair`
+  (hard hit → `RejectionCode.principle_hard_violation`) y por
+  `fidelity_wrap` (filtra por `agent_name`, respeta `on_fail`).
+  Lazy import desde `jw-agents` para evitar ciclo.
+
+- ✅ **Fase 78 — `rlaif-pipeline`** (entregada 2026-06-11):
+  el judge promovido a preference model + SL-CAI.
+  `Judge.score_pair(question, answer_a, answer_b, language)` →
+  `PreferenceVerdict(winner, margin, reasons, score_a, score_b)`.
+  Hard-fail asymmetry (`nli_contradicts`, `no_jw_citation`,
+  `principle_hard_violation`), NLI como tiebreak.
+  `build_preference_dataset(items, provider, judge, output_path)` con
+  `n_candidates`, `min_margin`, sweep determinista [0.1, 0.5, 0.8, 1.0];
+  output JSONL formato `{prompt, chosen, rejected}` para
+  `trl.DPOTrainer/ORPOTrainer`. SL-CAI: `synth.critique.self_critique`
+  reescribe respuestas violadoras, `preserve_original` opt-in para audit.
+
+- ✅ **Fase 79 — `dpo-orpo-trainers`** (entregada 2026-06-11):
+  `train_dpo()` con `trl.DPOTrainer` + Unsloth FastLanguageModel
+  (`beta=0.1`, `ref_model=None` con LoRA on frozen base, lr 5e-6,
+  1 epoch). `train_orpo()` con `trl.ORPOTrainer` (una sola fase, sin
+  reference model, lr 8e-6, ideal para MLX/ROCm). `Recipe.task` admite
+  `'dpo'` y `'orpo'`. 3 recetas builtin sobre Qwen3.5-0.8B
+  (`doctrinal-qa-es-sft-qwen35`, `-dpo-qwen35`, `-orpo-qwen35`).
+  CLI dispatch en `train`; nuevo `prepare-preference --judge-mode strict
+  --principles`. Exporters reutilizados (GGUF, MLX, SafeTensors).
+  Lazy import de Unsloth.
+
+## Fase 80 — Interpretabilidad mecanicista tri-modelo ✅ (2026-06-12)
+
+Spec completo:
+[`fase-80-interpretability-tri-model-design.md`](superpowers/specs/2026-06-12-fase-80-interpretability-tri-model-design.md).
+
+Pregunta operativa que cierra: ¿el modelo internalizó los principios o
+aprendió un shortcut estilístico? Arquitectura de tres modelos —
+producción (Qwen3.5-0.8B intocada), lab Qwen (Qwen3.5-2B-Base +
+Qwen-Scope público), lab Gemma (Gemma-2-2B-PT + Gemma Scope público) —
+con transferencia al 0.8B vía probes y steering vectors. Paquete
+nuevo: `packages/jw-interp/` (~2.580 LoC, +86 tests). Total post-bloque:
+**1.411 tests passing**.
+
+- ✅ **F80.0 — SL-CAI critique CLI** (2026-06-12): CLI
+  `jw-finetune build-critique-dataset` que reescribe respuestas
+  violadoras antes del SFT. 14 tests (10 self_critique + 4 CLI
+  dispatch). Guía:
+  [`docs/guias/sl-cai.md`](guias/sl-cai.md). Cierra el gap
+  detectado al revisar F77–F79.
+
+- ✅ **F80.1 — probing lineal por principio** (2026-06-12):
+  paquete `jw-interp` con `ContrastiveSpec` declarativos (5 specs
+  builtin para PF001/002/003/010/012), `MockActivationCapturer`
+  determinístico (offset por principio × capa × hook), `LinearProbe`
+  (sklearn logistic regression con stratified split, AUC + accuracy).
+  `TorchActivationCapturer` HF forward hooks (`AutoModelForCausalLM`,
+  auto-device `cuda > mps > cpu`, last-token / mean pooling) probado
+  con `pytest.importorskip("torch")`. 22 + 5 tests. Guía:
+  [`docs/guias/probing.md`](guias/probing.md).
+
+- ✅ **F80.2 — steering vectors + activation patching** (2026-06-12):
+  `compute_steering_vector` (diferencia de medias, unit-norm),
+  `apply_steering_to_residual` (broadcasting batch), `project_out`
+  (ablación de componente), `evaluate_steering_effect` (probe-aware,
+  test de monotonicidad bajo α). `patching.py` con `patch_one`,
+  `patch_batch`, `evaluate_patching_effect`. 15 tests. Pure numpy →
+  testeable sin GPU. La parte de patching en forward real va en
+  `torch_patching.py` (pendiente, no bloquea F80.5).
+
+- ✅ **F80.3 — Qwen-Scope adapter** (2026-06-12):
+  `QwenScopeSAE` (residual stream, TopK k=50, 24 capas de
+  Qwen3.5-2B-Base). `encode` con `np.argpartition` para TopK O(n·d_sae),
+  `decode` reconstruye residual, `reconstruction_error`. Loader
+  `load_qwen_scope_sae(path, layer, k)` usa
+  `torch.load(weights_only=True)` (seguro contra pickle).
+  `summarize_feature_activations` mapea principios → features
+  candidatas por differential activation rate. 11 + 3 tests.
+
+- ✅ **F80.4 — Gemma Scope wrapper** (2026-06-12):
+  `GemmaScopeSAE` envuelve `sae_lens.SAE` con interfaz numpy
+  idéntica a `QwenScopeSAE` (cross-family compatible). Mapping
+  declarativo `(model, site) → release` para gemma-2-2b y -9b en
+  resid_post / mlp_out / attn_out (JumpReLU SOTA, todas las capas).
+  `summarize_gemma_features` reutiliza el resumidor de Qwen-Scope.
+  7 tests con `_FakeSAELensSAE` para evitar dep `sae_lens` en CI.
+
+- ✅ **F80.5 — runtime probe loader + fidelity_wrap Tier 4**
+  (2026-06-12): `save_probe_set` / `load_probe_set` (npz + JSON
+  sidecar, sin pickle, forward-compat). `RuntimeProbe.predict_proba`
+  con sigmoid numpy numéricamente estable (matchea sklearn a 1e-5).
+  `ProbeEvaluator` con dos modos (eager via `TorchActivationCapturer`,
+  cache-only via `score_cached`). `mock_evaluator(returns)` para tests.
+  **`fidelity_wrap` Tier 4**: nuevo arg `probe_evaluator:
+  Callable[[str], dict[str, float]]` con tipo local en `jw-agents`
+  (cero acoplamiento). Metadata por Finding: `probe_scores` (JSON),
+  `probe_misses` (CSV), `probe_coherence` (`clear` | `confirms` |
+  `conflicts` | `silent`). **Observacional**: probe miss nunca veta
+  un Finding por sí solo. 14 + 7 tests. Guía:
+  [`docs/guias/interpretabilidad-runtime.md`](guias/interpretabilidad-runtime.md).
+
+### Stack técnico y hardware
+
+| Componente | Dep | Hardware |
+|---|---|---|
+| `MockActivationCapturer` | numpy | CPU |
+| `TorchActivationCapturer` | torch + transformers (extra) | CUDA / MPS / CPU |
+| `QwenScopeSAE` | numpy + torch (solo loader) | CPU/GPU |
+| `GemmaScopeSAE` | sae_lens (extra) | MPS / CUDA |
+| Probes | sklearn | CPU |
+| `fidelity_wrap` Tier 4 | jw-agents (sin jw-interp dep) | depende del evaluator |
+
+Training (Unsloth/Tunix) sigue siendo CUDA-only — el lab corre en
+RTX 5090 / H100. Análisis SAE, probing y benchmarks de latencia en
+M4 Max (MPS, unified memory). MLX existe como escape hatch para
+iteraciones rápidas pequeñas en Mac.
+
+### Pre-requisitos cumplidos del bloque F80
+
+- F39 NLI runtime (hecho) — usado por NLI tiebreak del judge.
+- F77 principios YAML (hecho) — fuente única de verdad para probes.
+- F78 judge oracle (hecho) — preference signal para entrenar.
+- F79 DPO/ORPO trainers (hecho) — produce el modelo a auditar.

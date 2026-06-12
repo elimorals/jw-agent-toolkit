@@ -1,8 +1,8 @@
 # jw-agent-toolkit
 
-> Ecosistema agéntico, multimodal y local-first para contenido de **jw.org / wol.jw.org**. Monorepo Python (uv workspace, `>=3.13`) con 11 paquetes que cubren acceso HTTP, parsers offline (JWPUB AES-128-CBC), RAG híbrido, agentes procedurales, fine-tuning local (Unsloth/MLX), generación multimodal con guardrails, second-brain GraphRAG, y un servidor MCP con **58 herramientas**.
+> Ecosistema agéntico, multimodal y local-first para contenido de **jw.org / wol.jw.org**. Monorepo Python (uv workspace, `>=3.13`) con 12 paquetes que cubren acceso HTTP, parsers offline (JWPUB AES-128-CBC), RAG híbrido, agentes procedurales, fine-tuning local con alineamiento doctrinal (Unsloth/MLX + RLAIF + DPO/ORPO + Constitutional AI), **interpretabilidad mecanicista** (probing lineal + steering + Gemma/Qwen Scope), generación multimodal con guardrails, second-brain GraphRAG, y un servidor MCP con **58 herramientas**.
 
-**Stats actuales** — 527 commits · ~129 k LoC Python · **~1.740 tests** passing · **76+ fases** roadmap (F0–F76 cerradas, F77+ en spec). CI: ruff + mypy strict + pytest (con cassettes `pytest-recording`) + bandit.
+**Stats actuales** — 540+ commits · ~131 k LoC Python · **1.411 tests** passing · **80 fases** roadmap (F0–F80 cerradas). CI: ruff + mypy strict + pytest (con cassettes `pytest-recording`) + bandit.
 
 ---
 
@@ -46,6 +46,7 @@ Regla de dependencias: el flujo **solo va hacia abajo**. `jw-core` no depende de
 | `jw-gen` | 1 525 | Generación de imagen/audio/vídeo con guardrails: `policy.py` (watermark XMP+EXIF), `safety.py` (rechaza retratar a personas JW reales, valida contexto de uso personal), factory de providers (Google GenAI, Replicate, ElevenLabs, RunwayML), i18n (en/es/pt). |
 | `jw-brain` | 3 978 | **Second-brain compiler estilo Karpathy** (F49). Backends pluggables (`DuckDB` por defecto, `Neo4j` opt-in). Compilador LLM-driven que extrae triplas (entidad–relación–entidad) con caché por content-hash. Schema GraphRAG (Entity, Relationship, Document, provenance por edge). Registry de dominios (`builtin_tj`, fixture financiero); SDK plugin F41 (`jw_agent_toolkit.brain_domains`). Sync Obsidian (frontmatter YAML strict, fail-closed; autosave opt-in `JW_BRAIN_PERSIST=1`). Linter (contradicciones, huérfanos). Importadores Biblia (65 libros × headwords expandidos F58.14), period/place catalogs. Multi-tenant via `--brain` flag + `JW_BRAIN_HOME`. |
 | `jw-meeting-media` | 1 323 | Descubrimiento, descarga y presentación sincronizada de medios para reuniones congregacionales. Multi-congregación (F57.16). |
+| `jw-interp` | 2 580 | **Interpretabilidad mecanicista (F80)**. Probing lineal por principio (sklearn), steering vectors + activation patching (numpy puro), captura de activaciones HF con forward hooks (`TorchActivationCapturer`, CUDA/MPS/CPU), adaptadores SAE para **Qwen-Scope** (TopK, residual stream) y **Gemma Scope** (JumpReLU, residual + MLP + attention) con interfaz cross-family. Persistencia de probes (`probe_store`: npz + JSON sidecar) y evaluador runtime (`ProbeEvaluator`) que actúa como Tier 4 del `fidelity_wrap`. Sin acoplamiento a `jw-agents` (callable contract). |
 | `create-jw-agent` | — | Scaffolder de nuevas integraciones (F42). |
 
 Además: `skills/` (5 skills Markdown para Claude: `jw-verse-lookup`, `jw-daily-text`, `jw-research`, `jw-meeting-prep`, `jw-apologetics`), `apps/desktop/` (Tauri), `docs/superpowers/specs/` (specs F65–F76), `tools/pytest-cookbook/`, y `scripts/` para reverse-engineering JWPUB y grabación de cassettes.
@@ -156,15 +157,17 @@ Ver [`docs/ROADMAP.md`](docs/ROADMAP.md) y [`docs/VISION.md`](docs/VISION.md). R
 | **Avanzadas (F49–F56)** | ✅ | Second-brain GraphRAG (F49, 81 tests), jwpub-writer (F50, derivado de `html2jwpub`), organized-schemas (F51, port de `sws2apps`), `.jwlibrary` writer (F52, port de `jwlmanager`), Omnilingual ASR (F53, 1.672 idiomas vía venv 3.12), NLLB-200 (F54, 200 idiomas, CC-BY-NC-4.0, CTranslate2 INT8). |
 | **Website + Sync (F57–F66)** | ✅ | Mirror landing/whats-new/roadmap en ES+EN, multi-congregation meeting media (F57.16), conversation-sparring (F66). |
 | **Agentic & Voice (F65–F76)** | ✅ | Meta-orchestrator (F65, plan/replan/critique sobre 12 agentes), Spar simulator (F66, voice mode + personas multiidioma), Doctrinal reasoner (F67, ReAct + NLI), Talk-lab (F68, prosody + SVG timeline + PDF), Predictive + voice + family (F69–F76). |
-| **Visión (F77+)** | 🔭 | Distribución PyPI, bots de mensajería, idiomas adicionales. |
+| **Alineamiento doctrinal (F77–F79)** | ✅ | Principios YAML versionados (F77, 5 builtin), judge como preference model + SL-CAI (F78), trainers DPO/ORPO con Unsloth sobre Qwen3.5-0.8B (F79). |
+| **Interpretabilidad mecanicista (F80)** | ✅ | Probing lineal por principio (F80.1), steering vectors + activation patching (F80.2), Qwen-Scope adapter (F80.3), Gemma Scope wrapper (F80.4), runtime probe store + `fidelity_wrap` Tier 4 (F80.5). Paquete nuevo `jw-interp`. |
+| **Visión (F81+)** | 🔭 | Distribución PyPI, bots de mensajería, idiomas adicionales. |
 
 ---
 
 ## Testing y CI
 
-- **Test runner:** `pytest` con `pytest-recording` (las cassettes hacen que ~1.740 tests corran sin red).
+- **Test runner:** `pytest` con `pytest-recording` (las cassettes hacen que 1.411 tests corran sin red).
 - **CI** (`.github/workflows/ci.yml`): ruff format-check + lint, mypy strict (`continue-on-error` temporal), pytest, bandit, caché uv.
-- **Conteo aproximado por paquete:** jw-core ~780, jw-mcp ~100, jw-rag ~144, jw-agents ~280, jw-cli ~72, jw-finetune ~172, jw-eval ~48, jw-gen ~52, jw-brain ~96.
+- **Conteo aproximado por paquete:** jw-core ~780, jw-mcp ~100, jw-rag ~144, jw-agents ~937 (incluye F77 + F80.5 Tier 4), jw-cli ~72, jw-finetune ~352 (incluye F77–F79 + F80.0 SL-CAI), jw-eval ~58 (principios), jw-gen ~52, jw-brain ~96, jw-interp ~64 (probing + steering + SAE + runtime).
 
 ---
 
@@ -223,7 +226,7 @@ El toolkit sirve contenido doctrinalmente cargado: el riesgo no es que el modelo
 
 ### Implementación en este repo
 
-Las siguientes piezas están implementadas (F77–F79) y se enumeran en orden de dependencia:
+Las siguientes piezas están implementadas (F77–F80) y se enumeran en orden de dependencia:
 
 #### F77 · Criterios de fidelidad versionados (`packages/jw-eval/src/jw_eval/principles/`)
 
@@ -266,10 +269,37 @@ uv run jw-finetune train --recipe doctrinal-qa-es-dpo-qwen35 \
 uv run jw-finetune export --format gguf      # o mlx
 ```
 
+#### F80 · Interpretabilidad mecanicista tri-modelo (`packages/jw-interp/`)
+
+Cierra el loop: F77–F79 entrenan, F80 audita **por qué** el modelo responde como responde. Pregunta operativa: ¿el modelo internalizó los principios o aprendió un *shortcut* estilístico? El spec completo está en [`docs/superpowers/specs/2026-06-12-fase-80-interpretability-tri-model-design.md`](docs/superpowers/specs/2026-06-12-fase-80-interpretability-tri-model-design.md).
+
+- **F80.0 SL-CAI critique pipeline** — CLI `jw-finetune build-critique-dataset` que reescribe respuestas violadoras antes del SFT. Reduce hard violations aguas arriba. Guía: [`docs/guias/sl-cai.md`](docs/guias/sl-cai.md).
+- **F80.1 probing lineal por principio** — `ContrastiveSpec` declarativos → `MockActivationCapturer` o `TorchActivationCapturer` (HF forward hooks, CUDA/MPS/CPU auto) → `LinearProbe` (sklearn) por capa × principio. Accuracy ≥0.80 = principio en la representación; <0.65 = shortcut. Guía: [`docs/guias/probing.md`](docs/guias/probing.md).
+- **F80.2 steering vectors + activation patching** — `compute_steering_vector` (diferencia de medias), `apply_steering_to_residual`, `project_out` (ablación), `evaluate_patching_effect`. Valida causalidad: si la conducta no cambia bajo ±α·v, el probe captura correlación, no causa.
+- **F80.3 Qwen-Scope adapter** — `QwenScopeSAE` carga `SAE-Res-Qwen3.5-2B-Base-W32K-L0_50` (TopK k=50, residual stream, 24 capas) con `torch.load(weights_only=True)`. Encode/decode + `summarize_feature_activations` para mapear principios → features SAE candidatas.
+- **F80.4 Gemma Scope wrapper** — `GemmaScopeSAE` envuelve SAELens nativo (JumpReLU, residual + MLP + attention, todas las capas). Interfaz numpy idéntica a Qwen-Scope para validación cross-family de features morales.
+- **F80.5 runtime probe store + `fidelity_wrap` Tier 4** — `save_probe_set` / `load_probe_set` (npz + JSON sidecar, sin pickle), `RuntimeProbe.predict_proba` (sigmoid numpy estable, igual sklearn). `ProbeEvaluator` se enchufa a `fidelity_wrap(probe_evaluator=…)`. Tier 4 es **observacional**, jamás veta un Finding solo: anota `probe_scores`, `probe_misses` y `probe_coherence` (`clear` / `confirms` / `conflicts` / `silent`). Guía: [`docs/guias/interpretabilidad-runtime.md`](docs/guias/interpretabilidad-runtime.md).
+
+**Arquitectura tri-modelo:**
+
+```
+PRODUCCIÓN              LAB QWEN                    LAB GEMMA
+Qwen3.5-0.8B            Qwen3.5-2B-Base             Gemma-2-2B-PT
+(DPO/ORPO doctrinal)    + Qwen-Scope público        + Gemma Scope público
+  │                       │                           │
+  │                       └──── features SAE ─────────┘
+  │                                  │
+  │                       cross-family agreement matrix
+  │                                  │
+  └────── steering vectors / probes transferidos ──────┘
+```
+
+Producción nunca se toca. Los SAEs nunca corren en el modelo de 0.8B (la literatura indica que a esa escala las features son polisemánticas). En su lugar, los descubrimientos del lab se transfieren al 0.8B como probes lineales y steering vectors. Hardware: training en CUDA (RTX 5090 / H100), inferencia + probing en M4 Max via MPS.
+
 ### Cómo se conecta con lo que ya había
 
 - `jw_core.fidelity.nli` (F39) — sigue siendo el motor de entailment; el judge lo usa como tie-breaker en `score_pair`.
-- `jw_agents.fidelity_wrap` — decorador `@fidelity_wrap(on_fail="reject")` para agentes en producción; ahora puede leer principios cargados y aplicar los `hard` antes de devolver `AgentResult`.
+- `jw_agents.fidelity_wrap` — decorador `@fidelity_wrap(on_fail="reject")` para agentes en producción; ahora puede leer principios cargados y aplicar los `hard` antes de devolver `AgentResult`. **F80.5 añade** un argumento opcional `probe_evaluator: Callable[[str], dict[str, float]]` para Tier 4 interpretable; tipo local, sin import de `jw-interp` (cero acoplamiento).
 - `jw_agents.apocrypha_detector` y `fact_checker` — siguen como checks orientados a *runtime*; los principios YAML duplican y formalizan las reglas que estos agentes implementaban en código.
 - `jw_gen.safety` (`refuse_jw_logo_emulation`, `refuse_voice_cloning_without_double_optin`, `refuse_realistic_faces_without_optin`) — política de generación, ortogonal al alineamiento del modelo.
 
@@ -290,4 +320,4 @@ Niveles de autonomía aplicados al toolkit (no a capacidades de modelo frontera)
 - **Humildad epistémica** — `PF002-cite-before-paraphrase`: ante incertidumbre, devolver fuente literal antes que paráfrasis. Aplicable a `apologetics`, `doctrinal_reasoner`, `finetuned_assistant`.
 - **Citas obligatorias** — `PF003-citation-required` para todo agente que produzca contenido derivado de publicaciones JW; consumido por `fidelity_wrap` en modo `reject`.
 
-Tres fases incrementales que no requieren rediseño: criterios → preference model → trainers. Las recetas Qwen3.5-0.8B son el punto de entrada práctico (modelo pequeño, Apache-2.0, encaja en MLX).
+Cuatro fases incrementales que no requieren rediseño: criterios (F77) → preference model (F78) → trainers (F79) → interpretabilidad mecanicista (F80). Las recetas Qwen3.5-0.8B son el punto de entrada práctico (modelo pequeño, Apache-2.0, encaja en MLX); la interpretabilidad vive en modelos 2B del lab (Qwen3.5-2B-Base y Gemma-2-2B-PT) donde los SAEs públicos ya existen.

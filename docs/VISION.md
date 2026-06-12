@@ -143,17 +143,44 @@ Estas líneas tienen riesgo legal, comunitario o ético sin un mandato claro:
 
 ---
 
+## Alineamiento doctrinal e interpretabilidad mecanicista (F77–F80, ya entregadas)
+
+A 2026-06, el toolkit cubre además el ciclo completo de alineamiento
+para fine-tunes locales:
+
+- **Constitutional AI supervisado (SL-CAI)** — el judge revisa cada par
+  Q&A contra principios YAML versionados y reescribe violaciones antes
+  de que entren al SFT. Cierra el problema de "el dataset enseña al
+  modelo el shortcut".
+- **RLAIF + DPO/ORPO** — preferencias generadas por el judge (no por
+  humanos) alimentan trainers Unsloth sobre Qwen3.5-0.8B (Apache-2.0).
+- **Interpretabilidad mecanicista** — probes lineales por principio
+  responden si el modelo internalizó la doctrina o aprendió un
+  shortcut estilístico. Steering vectors y activation patching validan
+  causalidad. Adapters para Qwen-Scope (TopK SAE en residual) y Gemma
+  Scope (JumpReLU SOTA en residual + MLP + attention) habilitan
+  cross-family validation. El runtime `fidelity_wrap` Tier 4 anota
+  evidencia interpretable por Finding sin vetar producción.
+
+Filosofía de alineamiento: el material vigente publicado por la
+organización es la fuente de verdad; el toolkit lo refleja, no legisla.
+Probes y SAEs son herramientas de auditoría defendible internamente,
+no clasificación de riesgo ni intervención política sobre la doctrina.
+
 ## Cómo se relaciona con el ROADMAP operacional
 
-El [ROADMAP.md](ROADMAP.md) cubre Fases 0-10 (todas completadas a 2026-05). Si en algún momento se decide ejecutar piezas de este documento, irían como Fases 11+:
+El [ROADMAP.md](ROADMAP.md) cubre Fases 0-80 (alineamiento doctrinal e
+interpretabilidad mecanicista incluidos). Si en algún momento se decide
+ejecutar piezas de este documento, irían como Fases 81+:
 
-- **Fase 11 — Reunión semanal** (workbook scraper + agente de discursos).
-- **Fase 12 — Asistente de ministerio** (objeciones, presentaciones, revisitas locales).
-- **Fase 13 — Audio y voz** (TTS, Whisper, transcripciones JW Broadcasting).
-- **Fase 14 — Estudio personal y notas** (RAG sobre notas, flashcards, plan de lectura).
-- **Fase 15 — Distribución** (PyPI, app de escritorio, bots de mensajería, REST API).
-- **Fase 16 — Idiomas** (expansión Tier 1 a 6+ idiomas, traducción preservando refs).
-- **Fase 17 — Multimodalidad** (OCR, análisis visual, generación de slides).
-- **Fase 18 — Local-first / privacidad** (modelo Ollama, cifrado E2E, sync).
+- **Fase 81+ — Distribución y polish** (PyPI, app de escritorio
+  pulida, bots de mensajería, REST API estable).
+- **Fase 81+ — Idiomas adicionales** (expansión a 6+ idiomas Tier 1,
+  traducción preservando refs).
+- **Fase 81+ — Local-first / privacidad** (modelo Ollama, cifrado
+  E2E, sync multi-dispositivo).
+- **Fase 81+ — Web/Web3 / contribución comunitaria** sin recolección
+  de datos sensibles.
 
-Esta numeración es ilustrativa — el orden real lo decide el valor entregado por cada pieza al usuario.
+Esta numeración es ilustrativa — el orden real lo decide el valor
+entregado por cada pieza al usuario.
