@@ -321,6 +321,138 @@ def prepare_preference(
     )
 
 
+@app.command(name="build-critique-dataset")
+def build_critique_dataset(
+    workspace: Annotated[Path, typer.Option("--workspace", "-w")],
+    input_dataset: Annotated[
+        Path | None,
+        typer.Option(
+            "--input",
+            "-i",
+            help="ShareGPT JSONL with Q&A pairs. Defaults to <workspace>/dataset_qa.jsonl.",
+        ),
+    ] = None,
+    output_dataset: Annotated[
+        Path | None,
+        typer.Option(
+            "--output",
+            "-o",
+            help="Output ShareGPT JSONL. Defaults to <workspace>/dataset_qa_critique.jsonl.",
+        ),
+    ] = None,
+    provider: Annotated[str | None, typer.Option("--synth-provider")] = None,
+    model: Annotated[str | None, typer.Option("--synth-model")] = None,
+    agent: Annotated[
+        str | None,
+        typer.Option(
+            "--agent",
+            help="Agent name to filter principles by `applies_to`. Empty = all principles.",
+        ),
+    ] = None,
+    use_principles: Annotated[bool, typer.Option("--principles/--no-principles")] = True,
+    preserve_original: Annotated[bool, typer.Option("--preserve-original/--no-preserve-original")] = True,
+) -> None:
+    """SL-CAI critique pass over an SFT dataset (F80 Phase 0).
+
+    For each Q&A pair, run the regex tier of `jw_eval.principles`. If a
+    `hard` principle is hit, ask the LLM to revise the answer preserving
+    the original teaching but fixing the violation. Outputs a parallel
+    ShareGPT dataset with the revised answers; the original answer is
+    stashed in metadata under ``original_answer`` for audit.
+
+    Reads the workspace's recipe.yaml to default provider/model when not
+    given on the CLI; falls back to ollama llama3.1:8b otherwise.
+    """
+    import json
+
+    from jw_finetune.data.formats import QAPair
+    from jw_finetune.synth.critique import batch_critique
+
+    recipe_path = workspace / "recipe.yaml"
+    rec = recipe_from_yaml(recipe_path) if recipe_path.exists() else None
+
+    src = input_dataset or (workspace / "dataset_qa.jsonl")
+    if not src.exists():
+        console.print(f"[red]✗ input dataset not found: {src}[/red]")
+        raise typer.Exit(2)
+    dst = output_dataset or (workspace / "dataset_qa_critique.jsonl")
+
+    principles: list[object] = []
+    if use_principles:
+        try:
+            from jw_eval.principles import load_principles
+
+            principles = list(load_principles())
+            console.print(f"[dim]Loaded {len(principles)} fidelity principles[/dim]")
+        except ImportError:
+            console.print(
+                "[yellow]jw-eval not installed; nothing to critique against[/yellow]"
+            )
+            raise typer.Exit(2)
+
+    prov = _build_provider(
+        provider or (rec.synth_provider if rec else None),
+        model or (rec.synth_model if rec else None),
+    )
+
+    pairs: list[QAPair] = []
+    for line in src.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        row = json.loads(line)
+        msgs = row.get("messages") or []
+        if len(msgs) < 2:
+            continue
+        question = msgs[0].get("content", "")
+        answer = msgs[1].get("content", "")
+        md = row.get("metadata") or {}
+        pairs.append(
+            QAPair(
+                question=question,
+                answer=answer,
+                source_chunk_id=md.get("source_chunk_id", ""),
+                language=md.get("language", "es"),
+                metadata={k: v for k, v in md.items() if isinstance(v, str)},
+            )
+        )
+
+    if not pairs:
+        console.print("[red]✗ No Q&A pairs found in input[/red]")
+        raise typer.Exit(2)
+
+    revised, changed = batch_critique(
+        pairs,
+        principles=principles,  # type: ignore[arg-type]
+        llm_provider=prov,
+        agent=agent,
+    )
+
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    with dst.open("w", encoding="utf-8") as f:
+        for qa in revised:
+            md_out = {
+                "language": qa.language,
+                "source_chunk_id": qa.source_chunk_id,
+                **qa.metadata,
+            }
+            if not preserve_original and "original_answer" in md_out:
+                md_out.pop("original_answer")
+            rec_out = {
+                "messages": [
+                    {"role": "user", "content": qa.question},
+                    {"role": "assistant", "content": qa.answer},
+                ],
+                "metadata": md_out,
+            }
+            f.write(json.dumps(rec_out, ensure_ascii=False) + "\n")
+
+    console.print(f"[green]✓[/green] Critique dataset: {dst}")
+    console.print(
+        f"[dim]pairs={len(revised)} revised={changed} unchanged={len(revised) - changed}[/dim]"
+    )
+
+
 @app.command()
 def train(
     workspace: Annotated[Path, typer.Option("--workspace", "-w")],
