@@ -231,12 +231,102 @@ def prepare(
     console.print(f"[green]✓[/green] Recipe saved: {run_dir / 'recipe.yaml'}")
 
 
+@app.command(name="prepare-preference")
+def prepare_preference(
+    workspace: Annotated[Path, typer.Option("--workspace", "-w")],
+    prompts: Annotated[
+        Path,
+        typer.Option(
+            "--prompts",
+            "-p",
+            help='JSONL with one row per prompt: {"prompt": str, "source_chunk_id": str, "language": str}.',
+        ),
+    ],
+    provider: Annotated[str | None, typer.Option("--synth-provider")] = None,
+    model: Annotated[str | None, typer.Option("--synth-model")] = None,
+    n_candidates: Annotated[int, typer.Option("--n-candidates")] = 3,
+    min_margin: Annotated[float, typer.Option("--min-margin")] = 0.3,
+    judge_mode: Annotated[str, typer.Option("--judge-mode", help="off | loose | strict")] = "strict",
+    use_principles: Annotated[bool, typer.Option("--principles/--no-principles")] = True,
+) -> None:
+    """Build a DPO/ORPO preference dataset using the SL-CAI judge.
+
+    Writes ``preference_pairs.jsonl`` inside ``workspace`` ready to be
+    consumed by ``train`` when the recipe task is ``dpo`` or ``orpo``.
+    """
+    import json
+
+    from jw_finetune.synth.judge.judge import Judge
+    from jw_finetune.synth.judge.thresholds import JudgeMode
+    from jw_finetune.synth.preference import PreferenceItem, build_preference_dataset
+
+    recipe_path = workspace / "recipe.yaml"
+    if not recipe_path.exists():
+        console.print(f"[red]✗ recipe.yaml not found in {workspace}[/red]")
+        raise typer.Exit(2)
+    rec = recipe_from_yaml(recipe_path)
+    if rec.task not in ("dpo", "orpo"):
+        console.print(
+            f"[yellow]Warning: recipe.task is {rec.task!r}; preference data is only used by dpo/orpo.[/yellow]"
+        )
+
+    if not prompts.exists():
+        console.print(f"[red]✗ prompts file not found: {prompts}[/red]")
+        raise typer.Exit(2)
+    items: list[PreferenceItem] = []
+    for line in prompts.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        row = json.loads(line)
+        items.append(
+            PreferenceItem(
+                prompt=row["prompt"],
+                source_chunk_id=row.get("source_chunk_id", ""),
+                language=row.get("language", rec.languages[0] if rec.languages else "es"),
+            )
+        )
+    if not items:
+        console.print("[red]✗ No prompts to process[/red]")
+        raise typer.Exit(2)
+
+    prov = _build_provider(provider or rec.synth_provider, model or rec.synth_model)
+    mode = JudgeMode(judge_mode.lower())
+
+    principles: list[object] = []
+    if use_principles:
+        try:
+            from jw_eval.principles import load_principles
+
+            principles = list(load_principles())
+            console.print(f"[dim]Loaded {len(principles)} fidelity principles[/dim]")
+        except ImportError:
+            console.print("[yellow]jw-eval not installed; running without principles[/yellow]")
+
+    judge = Judge(mode=mode, llm_provider=prov, principles=principles or None)
+
+    out = workspace / "preference_pairs.jsonl"
+    stats = build_preference_dataset(
+        items,
+        provider=prov,
+        judge=judge,
+        output_path=out,
+        n_candidates=n_candidates,
+        min_margin=min_margin,
+    )
+    console.print(f"[green]✓[/green] Preference dataset: {out}")
+    console.print(
+        f"[dim]items={stats.items_processed} kept={stats.pairs_kept} "
+        f"tied={stats.pairs_tied} low_margin={stats.pairs_low_margin}[/dim]"
+    )
+
+
 @app.command()
 def train(
     workspace: Annotated[Path, typer.Option("--workspace", "-w")],
     resume: Annotated[bool, typer.Option("--resume/--no-resume")] = False,
 ) -> None:
-    """Run training (SFT, CPT, or GRPO depending on recipe.task)."""
+    """Run training (SFT, CPT, GRPO, DPO, or ORPO depending on recipe.task)."""
     recipe_path = workspace / "recipe.yaml"
     if not recipe_path.exists():
         console.print(f"[red]✗ recipe.yaml not found in {workspace}[/red]")
@@ -262,6 +352,27 @@ def train(
             console.print("[red]✗ No dataset found in workspace[/red]")
             raise typer.Exit(2)
         final = train_grpo(rec, dataset, workspace, resume_from_checkpoint=resume or None)
+    elif rec.task in ("dpo", "orpo"):
+        # DPO/ORPO need {prompt, chosen, rejected} JSONL — produced by
+        # `jw_finetune.synth.preference.build_preference_dataset`. We
+        # look for `preference_pairs.jsonl` by convention; users with a
+        # differently named file can symlink or re-run with --workspace
+        # pointing at the run dir that owns the right file.
+        dataset = workspace / "preference_pairs.jsonl"
+        if not dataset.exists():
+            console.print(
+                f"[red]✗ {rec.task.upper()} expects preference_pairs.jsonl in {workspace} "
+                f"(generate it with jw_finetune.synth.preference.build_preference_dataset)[/red]"
+            )
+            raise typer.Exit(2)
+        if rec.task == "dpo":
+            from jw_finetune.train.dpo import train_dpo
+
+            final = train_dpo(rec, dataset, workspace, resume_from_checkpoint=resume or None)
+        else:
+            from jw_finetune.train.orpo import train_orpo
+
+            final = train_orpo(rec, dataset, workspace, resume_from_checkpoint=resume or None)
     else:
         from jw_finetune.train.sft import train_sft
 

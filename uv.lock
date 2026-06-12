@@ -3199,6 +3199,7 @@ source = { editable = "packages/jw-finetune" }
 dependencies = [
     { name = "jinja2" },
     { name = "jw-core" },
+    { name = "jw-eval" },
     { name = "jw-rag" },
     { name = "pydantic" },
     { name = "pyyaml" },
@@ -3256,6 +3257,7 @@ requires-dist = [
     { name = "fastapi", marker = "extra == 'monitor'", specifier = ">=0.115.0" },
     { name = "jinja2", specifier = ">=3.1.0" },
     { name = "jw-core", editable = "packages/jw-core" },
+    { name = "jw-eval", editable = "packages/jw-eval" },
     { name = "jw-rag", editable = "packages/jw-rag" },
     { name = "langdetect", marker = "extra == 'synth'", specifier = ">=1.0.9" },
     { name = "mlx", marker = "extra == 'mlx'", specifier = ">=0.18.0" },

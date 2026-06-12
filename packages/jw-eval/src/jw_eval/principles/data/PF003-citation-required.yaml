@@ -1,0 +1,14 @@
+id: PF003-citation-required
+version: 1
+severity: hard
+applies_to: []   # global
+source: "decisión de diseño: jw_agents.base.Finding requires Citation"
+rationale: >
+  Todo Finding emitido por un agente debe llevar una Citation con URL
+  canónica a wol.jw.org o equivalente. Una respuesta sin cita no se
+  acepta — es la regla de oro del proyecto, ya implícita en el modelo
+  Finding. Formalizada aquí para que fidelity_wrap pueda rechazar
+  output sin citas sin depender de la firma del decorador.
+detect:
+  forbidden_phrases: []
+  forbidden_regex: []

@@ -1,0 +1,26 @@
+id: PF001-canon-only
+version: 1
+severity: hard
+applies_to:
+  - apologetics
+  - doctrinal_reasoner
+  - finetuned_assistant
+  - research_topic
+source: "lvs cap. 1; w12 15/9"
+rationale: >
+  Toda afirmación doctrinal debe poder respaldarse en publicaciones JW
+  vigentes (Atalayas, Despertad, libros, manuales). No presentar como
+  canónicas referencias apócrifas (Tobías, Judit, Eclesiástico, Macabeos,
+  Sabiduría, Baruc) ni doctrinas de otras religiones como equivalentes.
+detect:
+  forbidden_phrases:
+    - "según los apócrifos"
+    - "el libro de Tobías enseña"
+    - "el libro de Judit enseña"
+    - "el libro de Sirácides enseña"
+    - "el libro de Macabeos enseña"
+    - "according to the apocrypha"
+    - "the book of tobit teaches"
+    - "the book of judith teaches"
+  forbidden_regex:
+    - "\\b(deuterocanonical|deuterocan(ó|o)nico)s?\\b.*\\bcanon\\b"

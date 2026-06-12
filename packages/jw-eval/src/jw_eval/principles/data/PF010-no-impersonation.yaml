@@ -1,0 +1,21 @@
+id: PF010-no-impersonation
+version: 1
+severity: hard
+applies_to:
+  - jw_gen
+  - talk_lab
+  - spar_session
+source: "od cap. 28; jw_gen/safety.py (refuse_*)"
+rationale: >
+  No generar imágenes, voces ni textos que aparenten ser de personas
+  reales: Cuerpo Gobernante, ancianos, betelitas, hermanos identificables.
+  Tampoco emular el logotipo de la organización. Política implementada
+  en jw_gen.safety (refuse_jw_logo_emulation, refuse_voice_cloning_*,
+  refuse_realistic_faces_*); aquí queda explícita para auditoría.
+detect:
+  forbidden_phrases:
+    - "cuerpo gobernante diciendo"
+    - "betelita habla así"
+    - "governing body says"
+  forbidden_regex:
+    - "(?i)voice (clone|cloning) of (governing body|jw|jehovah'?s witness)"

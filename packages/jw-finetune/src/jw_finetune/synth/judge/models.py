@@ -24,6 +24,7 @@ RejectionCode = Literal[
     "nli_neutral_low",
     "pedagogical_low",
     "overall_below_threshold",
+    "principle_hard_violation",
 ]
 
 NLIVerdict = Literal["entails", "neutral", "contradicts"]

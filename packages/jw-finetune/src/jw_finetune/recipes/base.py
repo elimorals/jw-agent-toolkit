@@ -13,7 +13,7 @@ from typing import Literal
 
 from jw_finetune.data.models import PublicationKind, SourceSpec
 
-Task = Literal["cpt", "sft", "grpo"]
+Task = Literal["cpt", "sft", "grpo", "dpo", "orpo"]
 QAStyle = Literal["doctrinal", "verse-explain", "objection-handling"]
 SynthProvider = Literal["anthropic", "ollama"]
 
@@ -71,8 +71,8 @@ def validate_recipe(r: Recipe) -> list[str]:
     errors: list[str] = []
     if not r.name or not r.name.strip():
         errors.append("name: must be non-empty")
-    if r.task not in ("cpt", "sft", "grpo"):
-        errors.append(f"task: must be one of cpt/sft/grpo, got {r.task!r}")
+    if r.task not in ("cpt", "sft", "grpo", "dpo", "orpo"):
+        errors.append(f"task: must be one of cpt/sft/grpo/dpo/orpo, got {r.task!r}")
     if r.task == "sft" and r.qa_style is None:
         errors.append("qa_style: required when task='sft'")
     if not r.sources:

@@ -1,70 +1,293 @@
 # jw-agent-toolkit
 
-Toolkit agéntico para contenido de jw.org / wol.jw.org. Monorepo Python multi-paquete: librería principal, CLI, servidor MCP, indexador RAG, agentes de alto nivel y skills para Claude.
+> Ecosistema agéntico, multimodal y local-first para contenido de **jw.org / wol.jw.org**. Monorepo Python (uv workspace, `>=3.13`) con 11 paquetes que cubren acceso HTTP, parsers offline (JWPUB AES-128-CBC), RAG híbrido, agentes procedurales, fine-tuning local (Unsloth/MLX), generación multimodal con guardrails, second-brain GraphRAG, y un servidor MCP con **58 herramientas**.
+
+**Stats actuales** — 527 commits · ~129 k LoC Python · **~1.740 tests** passing · **76+ fases** roadmap (F0–F76 cerradas, F77+ en spec). CI: ruff + mypy strict + pytest (con cassettes `pytest-recording`) + bandit.
+
+---
+
+## Mapa rápido
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│ Skills Markdown (5)   │   Apps (Tauri desktop)   │   Web (Astro docs)  │
+├────────────────────────────────────────────────────────────────────────┤
+│ Superficies                                                            │
+│   jw-cli (Typer+Rich)    jw-mcp (FastMCP, 58 tools)   jw-finetune TUI │
+│                              jw-rag (BM25+vec+RRF)                     │
+├────────────────────────────────────────────────────────────────────────┤
+│ Agentes procedurales (jw-agents) · Second-brain (jw-brain)             │
+│ Generación segura (jw-gen) · Evaluación doctrinal (jw-eval)            │
+│ Meeting media (jw-meeting-media) · Meta-orchestrator (F65)             │
+├────────────────────────────────────────────────────────────────────────┤
+│ jw-core — librería base                                                │
+│   6 clientes HTTP · 9 parsers · modelos Pydantic                       │
+│   Infra Fase 9: cache SQLite · token-bucket throttle · telemetry · JWT │
+├────────────────────────────────────────────────────────────────────────┤
+│ jw.org · wol.jw.org · b.jw-cdn.org · data.jw-api.org · JWPUB offline   │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+Regla de dependencias: el flujo **solo va hacia abajo**. `jw-core` no depende de ningún otro paquete del workspace.
+
+---
 
 ## Paquetes
 
-| Paquete | Propósito |
-|---|---|
-| `jw-core` | Librería principal: 6 clientes HTTP (CDN, mediator, WOL, pub-media, topic-index, weblang), 9 parsers (citas, artículos, texto diario, versículos, notas de estudio, índice temático, EPUB, JWPUB), modelos Pydantic, registro de idiomas, e infraestructura Fase 9 (cache SQLite, throttle, telemetría opt-in, JWT auth). |
-| `jw-cli` | CLI de terminal con 8 comandos (`jw verse`, `jw search`, `jw daily`, `jw download`, `jw languages`, `jw chapter`, `jw jwpub`, `jw topic`) construida con Typer + Rich. |
-| `jw-mcp` | Servidor [Model Context Protocol](https://modelcontextprotocol.io) — expone **29 herramientas** a Claude Desktop, Claude Code o cualquier cliente MCP. |
-| `jw-rag` | Indexación vectorial + recuperación híbrida (BM25 + cosenos + Reciprocal Rank Fusion) sobre el corpus de Biblia + publicaciones + EPUBs + JWPUBs descifrados. |
-| `jw-agents` | Agentes procedurales multipaso: `verse_explainer`, `research_topic`, `meeting_helper`, `apologetics`. |
-| `jw-finetune` | Plataforma local de fine-tuning estilo Unsloth Studio: extrae JWPUB/EPUB → genera Q&A sintéticos → entrena LoRA → exporta GGUF/MLX. Cada usuario entrena su propio modelo con sus publicaciones; los pesos nunca se distribuyen. Ver [guía](docs/guias/fine-tuning-local.md). |
+| Paquete | LoC | Propósito |
+|---|---:|---|
+| `jw-core` | 34 465 | Librería base. 6 clientes (CDN, WOL, PubMedia, Mediator, TopicIndex, Weblang) + 9 parsers (reference, verse, article, daily_text, study_notes, topic_index, EPUB, **JWPUB con descifrado AES-128-CBC**, JW Library backup). Modelos Pydantic (`Verse`, `StudyNote`, `Article`, `Epub`, `Jwpub`, `TopicSubject`…). Infra Fase 9: `DiskCache` (SQLite WAL + TTL), `Throttler` (token bucket por host, backoff con full-jitter), `Telemetry` (drift detector opt-in que hashea la shape estructural), `JWTManager`, `build_clients()` factory. Submódulos extra: `audio/` (ASR Whisper/WhisperX/Deepgram/Omnilingual + TTS Kokoro/XTTS/F5/ElevenLabs), `integrations/` (JW Library deep-links, Obsidian, MEPS), `book_camera/`, `ministry/`, `concordance/`, `fidelity/`, `grammar/`, `talk_lab/`, `news/`, `songs/`. |
+| `jw-cli` | 5 431 | CLI Typer + Rich. Comandos: `jw verse`, `search`, `daily`, `chapter`, `download`, `languages`, `jwpub`, `topic`, **`jw brain {init,compile,query,lint,status}`**, **`jw finetune {train,eval,export}`**, **`jw meta {tools,plan,run}`** (F65), **`jw spar {personas,start,turn,voice-turn}`** (F66), **`jw reason ask`** (F67), **`jw talklab {analyze,history,compare,counsel-points}`** (F68). |
+| `jw-mcp` | 6 157 | Servidor MCP (FastMCP) con **58 tools** agrupadas: Biblia/Referencia (7), Búsqueda (5), Publicaciones (6), Agentes (4), Ingest RAG (7), Audio/Fine-tuning (6), Integración JW Library / Obsidian / Broadcasting (6), Ministry (5), Avanzados F65–F68 (5), Second-brain F49 (5), Misc (2). Clientes lazy-loaded; RAG store configurable vía `JW_RAG_STORE_PATH`. |
+| `jw-rag` | 4 064 | RAG híbrido. `Embedder` protocol (`FakeEmbedder` determinista offline + sentence-transformers / Cohere / VoyageAI opt-in). `VectorStore` con persistencia JSON, BM25 (`rank-bm25`), coseno (numpy) y **Reciprocal Rank Fusion**. Pipelines de ingest para capítulos bíblicos, artículos, EPUBs, JWPUB (descifrado), notas personales, PDF (marker opt-in, F62), Office (markitdown opt-in). Reranking sentence-transformers / Cohere. Visual late-interaction ColPali/ColQwen2 (GPU opt-in, F37). |
+| `jw-agents` | 10 556 | 12+ agentes procedurales (sin LLM en el camino crítico) que devuelven `AgentResult` = `Finding[]` + `Citation[]` verificables: `verse_explainer`, `research_topic`, `meeting_helper`, `apologetics`, `public_talk_outline`, `workbook_helper`, `study_conductor`, `reverse_citation_lookup`, `conversation_assistant`, `news_monitor`, `personal_study`, `life_topics`. Especializados: `cross_lingual_research`, `fidelity_wrap`, `finetuned_assistant`, `apocrypha_detector`, `fact_checker`, `presentation_builder`, `letter_composer`, `convention_discovery`, `broadcasting_ingest`, `student_part_helper`, `revisit_tracker`, `recap_session`. Avanzados: `meta_orchestrator` (F65), `spar_session` (F66), `doctrinal_reasoner` (F67), `talk_lab` (F68). |
+| `jw-finetune` | 7 151 | Plataforma local de fine-tuning estilo Unsloth Studio. Pipeline `extract → synth Q&A → LoRA train → export`. Providers de síntesis: Anthropic (Claude), Ollama; con `judge/` (oracle de calidad). Training: `sft.py`, `grpo.py`, `cpt.py` sobre CUDA (Unsloth+bitsandbytes+trl) / MLX (Apple) / ROCm. Exporters: **GGUF** (llama.cpp/Ollama), **MLX**, SafeTensors. Monitor FastAPI+WS + TUI Textual. Recetas pre-config. Cada usuario entrena su propio modelo; los pesos nunca se distribuyen. Ver [`docs/guias/fine-tuning-local.md`](docs/guias/fine-tuning-local.md). |
+| `jw-eval` | 1 098 | Suite de regresión doctrinal: evaluadores contra cánon JW, fidelity checks, providers Ollama / Claude / OpenAI. |
+| `jw-gen` | 1 525 | Generación de imagen/audio/vídeo con guardrails: `policy.py` (watermark XMP+EXIF), `safety.py` (rechaza retratar a personas JW reales, valida contexto de uso personal), factory de providers (Google GenAI, Replicate, ElevenLabs, RunwayML), i18n (en/es/pt). |
+| `jw-brain` | 3 978 | **Second-brain compiler estilo Karpathy** (F49). Backends pluggables (`DuckDB` por defecto, `Neo4j` opt-in). Compilador LLM-driven que extrae triplas (entidad–relación–entidad) con caché por content-hash. Schema GraphRAG (Entity, Relationship, Document, provenance por edge). Registry de dominios (`builtin_tj`, fixture financiero); SDK plugin F41 (`jw_agent_toolkit.brain_domains`). Sync Obsidian (frontmatter YAML strict, fail-closed; autosave opt-in `JW_BRAIN_PERSIST=1`). Linter (contradicciones, huérfanos). Importadores Biblia (65 libros × headwords expandidos F58.14), period/place catalogs. Multi-tenant via `--brain` flag + `JW_BRAIN_HOME`. |
+| `jw-meeting-media` | 1 323 | Descubrimiento, descarga y presentación sincronizada de medios para reuniones congregacionales. Multi-congregación (F57.16). |
+| `create-jw-agent` | — | Scaffolder de nuevas integraciones (F42). |
 
-Además: `skills/` (5 skills Markdown para Claude: jw-verse-lookup, jw-daily-text, jw-research, jw-meeting-prep, jw-apologetics) y `scripts/` (scripts de exploración + reverse engineering JWPUB).
+Además: `skills/` (5 skills Markdown para Claude: `jw-verse-lookup`, `jw-daily-text`, `jw-research`, `jw-meeting-prep`, `jw-apologetics`), `apps/desktop/` (Tauri), `docs/superpowers/specs/` (specs F65–F76), `tools/pytest-cookbook/`, y `scripts/` para reverse-engineering JWPUB y grabación de cassettes.
+
+---
 
 ## Inicio rápido
 
 ```bash
-# Instalar dependencias de desarrollo (monorepo uv workspace)
+# Instalar dependencias (uv workspace)
 uv sync --all-packages
 
-# Ejecutar el servidor MCP
+# Servidor MCP (Claude Desktop / Code / cualquier cliente MCP)
 uv run jw-mcp
 
-# Usar la CLI
-uv run jw verse "Juan 3:16"
+# CLI
+uv run jw verse "Juan 3:16" --with-notes
 uv run jw daily
-uv run jw search "amor"
+uv run jw search "amor" --lang es
+uv run jw jwpub /ruta/al/archivo.jwpub --extract
+uv run jw topic "fe" --limit 5
+
+# Second-brain
+uv run jw brain init && uv run jw brain compile docs/
+uv run jw brain query "trinidad"
+
+# Fine-tuning local
+uv run jw-finetune init
+uv run jw-finetune prepare --input /ruta/publicaciones/
+uv run jw-finetune train --recipe llama3-8b-lora-qlora
+uv run jw-finetune export --format gguf
 ```
 
-> **macOS bajo `~/Documents` o `~/Desktop`:** sigue la receta de [`docs/guias/setup-macos.md`](docs/guias/setup-macos.md) *antes* del `uv sync`. macOS marca los `.venv/` como `UF_HIDDEN` automáticamente en esas rutas, lo que rompe los imports editables con `ModuleNotFoundError` silencioso. La guía explica el porqué y deja un fix permanente con `venv/` + symlink.
+> **macOS bajo `~/Documents` o `~/Desktop`:** sigue la receta de [`docs/guias/setup-macos.md`](docs/guias/setup-macos.md) *antes* del `uv sync`. macOS marca los `.venv/` como `UF_HIDDEN` en esas rutas, lo que rompe los imports editables con un `ModuleNotFoundError` silencioso. La guía deja un fix permanente con `venv/` + symlink.
 
-## Licencia
+---
+
+## Flujos end-to-end
+
+### 1. Verse lookup
+```
+CLI: jw verse "Juan 3:16" --lang es
+  → parse_reference()                # parsers/reference.py
+  → WOLClient.get_bible_chapter()    # vía Throttler + DiskCache + Telemetry
+  → parse_verse() / parse_study_notes() / parse_cross_references()
+  → AgentResult(Finding[verse], Finding[notes], Finding[refs])
+  → Rich formatted output con URL canónica a wol.jw.org
+```
+
+### 2. RAG híbrido
+```
+MCP: semantic_search("¿qué es la trinidad?")
+  → VectorStore.hybrid_search()
+      ├─ BM25 top-k          (rank-bm25)
+      ├─ cosine top-k        (embeddings: Fake | sentence-transformers | Cohere | VoyageAI)
+      └─ Reciprocal Rank Fusion → ranking unificado
+  → retrieve.dedup_by_source() + filter_by_metadata()
+  → (opcional) cross-encoder rerank
+  → LLM externo (Claude/Ollama) sintetiza prosa con citas verificables
+```
+
+### 3. Fine-tuning local
+```
+JWPUB / EPUB local
+  → jw_finetune.data.extract_jwpub()           # texto estructurado
+  → synth.orchestrator (Anthropic | Ollama) + judge oracle
+      → datasets/qa_pairs.jsonl                 # HF-compatible
+  → train.sft.train_lora() (Unsloth | MLX | ROCm)
+      → adapter weights
+  → export.{gguf,mlx,safetensors}              # llama.cpp / Apple / Meta
+```
+
+### 4. Meta-orchestrator (F65)
+```
+CLI: jw meta plan "preparar reunión del domingo"
+  → meta_orchestrator detecta workbook semanal y tema central
+  → selecciona N de los 12+ agentes aplicables
+  → plan JSON (DAG de tool calls) + diagrama Mermaid
+  → meta_orchestrator.run_plan() ejecuta paso a paso
+      ├─ replan si un paso falla
+      ├─ critique para refinar
+      └─ CustomEvent tracing (F43)
+  → result + export Markdown/PDF
+```
+
+### 5. JWPUB offline
+```
+.jwpub local
+  → parse_jwpub()                              # parsers/jwpub.py
+      ├─ derive key: SHA256(f"{lang}_{symbol}_{year}") XOR _XOR_KEY
+      ├─ AES-128-CBC decrypt (pycryptodome)
+      └─ extract SQLite + docs + paragraphs
+  → JwpubDocument[]
+  → ingest_jwpub() → RAG
+  → second-brain compile
+```
+
+---
+
+## Roadmap
+
+Ver [`docs/ROADMAP.md`](docs/ROADMAP.md) y [`docs/VISION.md`](docs/VISION.md). Resumen:
+
+| Bloque | Fases | Hitos |
+|---|---|---|
+| **Núcleo (F0–F10)** | ✅ | uv workspace, 6 clientes, 9 parsers, JWPUB AES-128-CBC (F5.5), infra Fase 9 (cache+throttle+telemetry+JWT), 29 tools MCP iniciales, CI con cassettes. **Plan original cerrado al 100%**. |
+| **Intermedias (F11–F48)** | ✅ | JW Library integration (F19), Obsidian vault (F20), PDF export (F31), fine-tuning local Unsloth (F32), embeddings/rerank reales (F33), ASR/TTS multimodal (F34), visual RAG ColPali (F37), NLI runtime (F39), Plugin SDK (F41), scaffolding (F42), tracing CustomEvent (F43). |
+| **Avanzadas (F49–F56)** | ✅ | Second-brain GraphRAG (F49, 81 tests), jwpub-writer (F50, derivado de `html2jwpub`), organized-schemas (F51, port de `sws2apps`), `.jwlibrary` writer (F52, port de `jwlmanager`), Omnilingual ASR (F53, 1.672 idiomas vía venv 3.12), NLLB-200 (F54, 200 idiomas, CC-BY-NC-4.0, CTranslate2 INT8). |
+| **Website + Sync (F57–F66)** | ✅ | Mirror landing/whats-new/roadmap en ES+EN, multi-congregation meeting media (F57.16), conversation-sparring (F66). |
+| **Agentic & Voice (F65–F76)** | ✅ | Meta-orchestrator (F65, plan/replan/critique sobre 12 agentes), Spar simulator (F66, voice mode + personas multiidioma), Doctrinal reasoner (F67, ReAct + NLI), Talk-lab (F68, prosody + SVG timeline + PDF), Predictive + voice + family (F69–F76). |
+| **Visión (F77+)** | 🔭 | Distribución PyPI, bots de mensajería, idiomas adicionales. |
+
+---
+
+## Testing y CI
+
+- **Test runner:** `pytest` con `pytest-recording` (las cassettes hacen que ~1.740 tests corran sin red).
+- **CI** (`.github/workflows/ci.yml`): ruff format-check + lint, mypy strict (`continue-on-error` temporal), pytest, bandit, caché uv.
+- **Conteo aproximado por paquete:** jw-core ~780, jw-mcp ~100, jw-rag ~144, jw-agents ~280, jw-cli ~72, jw-finetune ~172, jw-eval ~48, jw-gen ~52, jw-brain ~96.
+
+---
+
+## Decisiones de diseño
+
+1. **Monorepo uv** — Tipos cambian frecuente; un workspace elimina la fricción de PRs cross-repo y permite `uv sync --all-packages` para un dev-loop unificado.
+2. **LLM fuera del camino crítico** — Los agentes son procedurales y devuelven `Finding[] + Citation[]` deterministas. La síntesis en prosa la hace el cliente LLM (Claude Desktop, Claude Code, propio). Esto preserva la **verificabilidad** y permite *swap* de modelos sin tocar la lógica.
+3. **Citas siempre verificables** — toda respuesta enlaza a `wol.jw.org`, jamás se inventa contenido.
+4. **JWPUB descifrado in-process** — el algoritmo redescubierto (AES-128-CBC + key derivation `SHA256 ⊕ const`) permite acceso offline al canon JW sin telemetría de terceros.
+5. **RAG híbrido por defecto** — BM25 captura matchings literales (citas, símbolos, nombres propios); embeddings capturan paráfrasis; RRF combina ambos sin tuning de pesos.
+6. **Infra Fase 9 opt-in pero recomendada** — cache/throttle/telemetry se inyectan a clientes; los tests legacy siguen funcionando sin ella.
+7. **Plugin SDK (F41)** — extensiones de dominio (`brain_domains`) sin fork.
+8. **Local-first multimodal** — ASR y TTS por defecto en disco; el audio no sale del equipo salvo configuración explícita de provider cloud.
+
+---
+
+## Licencia y créditos
 
 GPL-3.0-only. Incorpora código derivado de:
 
-- [`jwlib`](https://github.com/allejok96/jwlib) — allejok96, GPL-3.0 (broadcasting/parser)
-- [`gokusander/jwpub-toolkit`](https://github.com/gokusander/jwpub-toolkit) — MIT (algoritmo de descifrado JWPUB, Fase 5.5)
-- [`darioragusa/html2jwpub`](https://github.com/darioragusa/html2jwpub) — MIT (algoritmo de generación JWPUB + schema SQLite, Fase 50)
-- [`sws2apps/organized-app`](https://github.com/sws2apps/organized-app) — MIT (schemas `src/definition/` portados a Pydantic v2 en `jw_core.models_organized`, Fase 51)
-- [`erykjj/jwlmanager`](https://github.com/erykjj/jwlmanager) — MIT (pipeline de escritura `.jwlibrary` portado a `jw_core.writers.jw_library_backup`, Fase 52; el merge basado en `libjwlCore` queda fuera)
-- [`facebookresearch/omnilingual-asr`](https://github.com/facebookresearch/omnilingual-asr) — Apache-2.0 (ASR Meta para 1672 idiomas, integrado en `jw_core.audio.asr_providers.omnilingual` vía venv Python 3.12 dedicado; bootstrap: `jw omnilingual install`, Fase 53)
-- [`facebook/nllb-200`](https://huggingface.co/facebook/nllb-200-3.3B) — **CC-BY-NC-4.0** (NLLB-200 Meta para 200 idiomas, integrado en `jw_core.translation_providers.nllb` vía CTranslate2 INT8; `is_commercial_safe=False`. Extra: `uv add 'jw-core[translation-nllb]'`, Fase 54)
+- [`allejok96/jwlib`](https://github.com/allejok96/jwlib) — GPL-3.0 (broadcasting/parser).
+- [`gokusander/jwpub-toolkit`](https://github.com/gokusander/jwpub-toolkit) — MIT (algoritmo de descifrado JWPUB, F5.5).
+- [`darioragusa/html2jwpub`](https://github.com/darioragusa/html2jwpub) — MIT (algoritmo de generación JWPUB + schema SQLite, F50).
+- [`sws2apps/organized-app`](https://github.com/sws2apps/organized-app) — MIT (schemas `src/definition/` portados a Pydantic v2 en `jw_core.models_organized`, F51).
+- [`erykjj/jwlmanager`](https://github.com/erykjj/jwlmanager) — MIT (pipeline de escritura `.jwlibrary` portado a `jw_core.writers.jw_library_backup`, F52; el merge basado en `libjwlCore` queda fuera).
+- [`facebookresearch/omnilingual-asr`](https://github.com/facebookresearch/omnilingual-asr) — Apache-2.0 (ASR Meta para 1 672 idiomas, integrado vía venv Python 3.12 dedicado; bootstrap `jw omnilingual install`, F53).
+- [`facebook/nllb-200`](https://huggingface.co/facebook/nllb-200-3.3B) — **CC-BY-NC-4.0** (NLLB-200 Meta para 200 idiomas, CTranslate2 INT8; `is_commercial_safe=False`. Extra: `uv add 'jw-core[translation-nllb]'`, F54).
 
-## Estado
-
-Ver [docs/ROADMAP.md](docs/ROADMAP.md). **Fases 0-10 completadas**, incluyendo:
-
-- Fase 5.5: descifrado completo de JWPUB (AES-128-CBC con derivación de clave de [`gokusander/jwpub-toolkit`](https://github.com/gokusander/jwpub-toolkit)).
-- Fase 9: infraestructura de producción — cache SQLite con TTL, throttle por host (token bucket), telemetría opt-in para detectar drift de la API, JWT auth aislado, factory unificado de clientes.
-- Fase 10: cierre del 100% del plan original (CI con GitHub Actions, cassettes pytest-recording, weblang client, 3 URL patterns nuevos en WOLClient, 6 tools MCP adicionales).
-
-**166 tests passing + 4 skipped** (corren sin red gracias a cassettes).
-
-Después de Fases 50-55 (jwpub-writer plus organized-schemas plus
-jwlibrary-writer plus Omnilingual ASR plus NLLB-200 plus wire-up):
-**1887 tests passing** en jw-core/jw-agents/jw-cli.
+---
 
 ## Documentación
 
-Toda la documentación detallada vive en [`docs/`](docs/):
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — manual de arquitectura.
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — hoja de ruta operacional F0–F76+.
+- [`docs/VISION.md`](docs/VISION.md) — visión a largo plazo.
+- [`docs/conceptos/`](docs/conceptos/) — glosario JW.org, decisiones, estrategia multi-idioma, inventario de endpoints, flujos end-to-end, CI y testing.
+- [`docs/guias/`](docs/guias/) — guías prácticas (resolución de citas, clientes HTTP, agentes, RAG, parsers, MCP, Fase 9, scripts de exploración, fine-tuning local, second-brain, meta-orchestrator, talk-lab).
+- [`docs/referencia/`](docs/referencia/) — referencia exhaustiva módulo por módulo.
 
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Manual de arquitectura: objetivos, capas, inventario de endpoints, decisiones clave.
-- [docs/ROADMAP.md](docs/ROADMAP.md) — Hoja de ruta operacional por fases (0-10, completadas).
-- [docs/VISION.md](docs/VISION.md) — Roadmap de visión a largo plazo: qué falta para un ecosistema LLM/IA completo para TJ.
-- [docs/conceptos/](docs/conceptos/) — Glosario JW.org, decisiones de diseño, estrategia multi-idioma, inventario de endpoints, flujos end-to-end, CI y testing.
-- [docs/guias/](docs/guias/) — Guías prácticas (resolver citas, usar clientes HTTP, construir agentes, RAG, extender parser, conectar MCP, infraestructura Fase 9, scripts de exploración).
-- [docs/referencia/](docs/referencia/) — Referencia exhaustiva módulo por módulo, clase por clase, función por función.
+---
+
+## Fidelidad al canon publicado y supervisión escalable
+
+El toolkit sirve contenido doctrinalmente cargado: el riesgo no es que el modelo *invente nuevas doctrinas*, sino que un fine-tune local o un agente generativo se **aleje del canon publicado** (Atalayas, Estudio de las Escrituras, libros de la organización). La fuente de verdad es el material vigente publicado por la organización; este proyecto solo *refleja* ese canon. Las técnicas siguientes son ingeniería de alineamiento aplicada con ese objetivo.
+
+### Técnicas y fuente
+
+| Técnica | Idea central | Fuente |
+|---|---|---|
+| **RLHF (PPO)** | SFT → reward model con preferencias humanas → PPO sobre la política. Pesado y caro de operar. | Christiano et al., 2017. |
+| **Constitutional AI (CAI)** | Reemplaza la mayoría del feedback humano por **autocrítica del modelo guiada por una lista de principios explícitos**. Fase 1 (SL-CAI): el modelo critica y reescribe sus propias respuestas contra los principios. Fase 2 (RL-CAI): se entrena un preference model con comparaciones generadas por IA. | Bai et al. (Anthropic), arXiv:2212.08073. |
+| **RLAIF** | RL con preferencias generadas por un anotador IA (el judge) en lugar de humanos. Escala sin caer en costes/sesgos de anotación. | Idem. |
+| **DPO** | Re-deriva la relación política↔recompensa y optimiza la política **directamente** sobre pares `(y_w, y_l)` con pérdida log-σ. Sin reward model, más estable que PPO. | Rafailov et al., 2023. |
+| **IPO / KTO** | Variantes. IPO añade regularización cuadrática (mejor control de KL, robusto a ruido). KTO acepta binarios `(deseable, indeseable)` en lugar de pares. | — |
+| **ORPO** | Fusiona SFT y preference learning en **una sola fase** sin modelo de referencia, usando pérdida de *odds-ratio*. Reduce coste y deriva contra el baseline SFT; viable en MLX/ROCm con LoRA. | Hong et al., arXiv:2403.07691. |
+
+### Implementación en este repo
+
+Las siguientes piezas están implementadas (F77–F79) y se enumeran en orden de dependencia:
+
+#### F77 · Criterios de fidelidad versionados (`packages/jw-eval/src/jw_eval/principles/`)
+
+YAML versionado con principios de fidelidad. Cada principio:
+
+```yaml
+id: PF001-canon-only
+version: 1
+severity: hard          # hard → bloqueo · soft → warning anotado
+applies_to: [apologetics, doctrinal_reasoner, finetuned_assistant]
+source: lvs cap. 1
+rationale: >
+  Toda afirmación doctrinal debe poder respaldarse en publicaciones JW
+  vigentes; no presentar como canónicas referencias apócrifas ni
+  doctrinas externas.
+detect:
+  forbidden_phrases: ["según los apócrifos", "el libro de Tobías enseña"]
+```
+
+Loader: `jw_eval.principles.load_principles(root)` devuelve `list[Principle]` Pydantic. Consumido por el judge (sección F78) y por la suite de regresión.
+
+#### F78 · Judge como preference model + SL-CAI
+
+El judge existente (`jw_finetune/synth/judge/`) ya devuelve `QAScore` con heuristics + NLI + LLM pedagogical. Se añade:
+
+- **`Judge.score_pair(question, ans_w, ans_l, language)`** → `PreferenceVerdict(winner: "a"|"b"|"tie", margin: float, reasons: list[str])`. Reutiliza el scoring por sample y compara los `overall`, los flags `hard` violados de los principios, y un tie-breaker NLI.
+- **`jw_finetune.synth.critique.self_critique(qa_pair, principles, llm) -> QAPair`** — pipeline SL-CAI: el LLM revisa la respuesta contra principios; si viola alguno `hard`, reescribe. La versión revisada reemplaza a la original.
+- **`jw_finetune.synth.preference.build_preference_dataset(chunks, providers, judge) -> Path`** — genera N candidatos por chunk con temperaturas distintas, los puntúa por pares con el judge, y exporta un JSONL `{prompt, chosen, rejected}` listo para DPO/ORPO.
+
+#### F79 · Trainers DPO y ORPO con Unsloth
+
+- **`jw_finetune.train.dpo.train_dpo(recipe, dataset_path, workspace)`** — usa `trl.DPOTrainer` + `unsloth.FastLanguageModel`. Reutiliza el mismo `Recipe` (con `task="dpo"`), incluyendo LoRA rank, `chat_template`, `use_rslora`.
+- **`jw_finetune.train.orpo.train_orpo(...)`** — `trl.ORPOTrainer`. Una sola fase, sin modelo de referencia; recomendado en MLX/ROCm o datasets pequeños.
+
+**Receta builtin de ejemplo** — `doctrinal-qa-es-dpo-qwen35` sobre **Qwen3.5-0.8B** (Apache-2.0), `chat_template="qwen-3"`, LoRA rank 16, 1 epoch. Se invoca:
+
+```bash
+uv run jw-finetune train --recipe doctrinal-qa-es-dpo-qwen35 \
+                         --dataset workspace/preference_pairs.jsonl
+uv run jw-finetune export --format gguf      # o mlx
+```
+
+### Cómo se conecta con lo que ya había
+
+- `jw_core.fidelity.nli` (F39) — sigue siendo el motor de entailment; el judge lo usa como tie-breaker en `score_pair`.
+- `jw_agents.fidelity_wrap` — decorador `@fidelity_wrap(on_fail="reject")` para agentes en producción; ahora puede leer principios cargados y aplicar los `hard` antes de devolver `AgentResult`.
+- `jw_agents.apocrypha_detector` y `fact_checker` — siguen como checks orientados a *runtime*; los principios YAML duplican y formalizan las reglas que estos agentes implementaban en código.
+- `jw_gen.safety` (`refuse_jw_logo_emulation`, `refuse_voice_cloning_without_double_optin`, `refuse_realistic_faces_without_optin`) — política de generación, ortogonal al alineamiento del modelo.
+
+### Modos de operación con guardrails
+
+Niveles de autonomía aplicados al toolkit (no a capacidades de modelo frontera). Cuanto más autónomo es el agente, más checks. Es ingeniería defensiva, no clasificación de riesgo.
+
+| Modo | Aplica a | Guardrails mínimos |
+|---|---|---|
+| **Asistido** | `jw verse`, `search`, `daily`, parse JWPUB, RAG read-only. | Citas canónicas obligatorias; cero generación libre. |
+| **Generativo con citas** | `verse_explainer`, `research_topic`, `meeting_helper`, `apologetics`. | `fidelity_wrap` activo, principios `hard` consultados antes de devolver, cada `Finding` con `Citation` verificable. |
+| **Agéntico** | `meta_orchestrator`, `spar_session`, `doctrinal_reasoner`, `talk_lab`. | Plan visible (Mermaid export), tracing F43, judge gate antes de cada efecto externo (descarga, generación, escritura a Obsidian), dry-run por defecto. |
+| **Autónomo** (futuro) | Bots de mensajería, batch scheduled. | Modo anterior + circuit breaker por tasa de violaciones del judge, kill-switch, auditoría humana periódica. |
+
+### Principios anclados en código existente
+
+- **No suplantación** — ya implementado en `jw_gen/safety.py` (`refuse_jw_logo_emulation`, `refuse_voice_cloning_without_double_optin`, `refuse_realistic_faces_without_optin`). Se formaliza como principio `PF010-no-impersonation` (`severity: hard`).
+- **Humildad epistémica** — `PF002-cite-before-paraphrase`: ante incertidumbre, devolver fuente literal antes que paráfrasis. Aplicable a `apologetics`, `doctrinal_reasoner`, `finetuned_assistant`.
+- **Citas obligatorias** — `PF003-citation-required` para todo agente que produzca contenido derivado de publicaciones JW; consumido por `fidelity_wrap` en modo `reject`.
+
+Tres fases incrementales que no requieren rediseño: criterios → preference model → trainers. Las recetas Qwen3.5-0.8B son el punto de entrada práctico (modelo pequeño, Apache-2.0, encaja en MLX).

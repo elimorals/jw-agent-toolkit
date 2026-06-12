@@ -24,6 +24,7 @@ from jw_finetune.synth.judge.heuristics import (
 )
 from jw_finetune.synth.judge.models import QAScore, RejectionReason
 from jw_finetune.synth.judge.nli_bridge import NLIProviderLike, run_nli_check
+from jw_finetune.synth.judge.preference import PreferenceVerdict, compare_scores
 from jw_finetune.synth.judge.scoring import compute_overall
 from jw_finetune.synth.judge.thresholds import (
     JudgeMode,
@@ -127,8 +128,15 @@ def score_qa_pair(
     overrides: JudgeOverrides | None = None,
     llm_provider: LLMProvider | None = None,
     nli_provider: NLIProviderLike | _MaybeNLIProvider | None = None,
+    principles: list[object] | None = None,
 ) -> QAScore:
-    """Score a single Q&A pair. Returns a QAScore including the kept verdict."""
+    """Score a single Q&A pair. Returns a QAScore including the kept verdict.
+
+    When ``principles`` is supplied (a list of `jw_eval.principles.Principle`),
+    deterministic regex/phrase checks run first. A `hard` violation forces
+    ``kept=False`` and adds a ``principle_hard_violation`` rejection reason.
+    Soft violations are recorded but do not block.
+    """
 
     if mode == JudgeMode.OFF:
         cites = cites_jw_publication(answer)
@@ -152,6 +160,28 @@ def score_qa_pair(
     require_entails = resolve_require_nli_entails(mode, ov)
 
     reasons: list[RejectionReason] = []
+
+    # Principle tier — deterministic regex checks first. Imported lazily
+    # to avoid a hard dep on jw-eval at module-import time.
+    principle_hard_hit = False
+    if principles:
+        try:
+            from jw_eval.principles import violations_for  # type: ignore[import-not-found]
+        except ImportError:
+            violations_for = None  # type: ignore[assignment]
+        if violations_for is not None:
+            hit = violations_for(answer, principles)  # type: ignore[arg-type]
+            for principle in hit:
+                detail = f"{getattr(principle, 'id', '?')}"
+                sev = getattr(principle, "severity", "soft")
+                if sev == "hard":
+                    principle_hard_hit = True
+                    reasons.append(
+                        RejectionReason(
+                            code="principle_hard_violation",
+                            detail=detail,
+                        )
+                    )
 
     cites = cites_jw_publication(answer)
     substance = has_minimum_substance(question, answer)
@@ -219,6 +249,8 @@ def score_qa_pair(
         kept = False
     if pedagogical == 0:
         kept = False
+    if principle_hard_hit:
+        kept = False
 
     return QAScore(
         cites_jw_publication=cites,
@@ -233,7 +265,12 @@ def score_qa_pair(
 
 
 class Judge:
-    """Stateful wrapper that holds the configured providers + mode."""
+    """Stateful wrapper that holds the configured providers + mode.
+
+    F78 update: also holds an optional `principles` list (loaded from
+    `jw_eval.principles`) and exposes `score_pair()` for pairwise
+    comparisons used by the RLAIF preference-dataset generator.
+    """
 
     def __init__(
         self,
@@ -242,11 +279,13 @@ class Judge:
         overrides: JudgeOverrides | None = None,
         llm_provider: LLMProvider | None = None,
         nli_provider: NLIProviderLike | None = None,
+        principles: list[object] | None = None,
     ) -> None:
         self.mode = mode
         self.overrides = overrides or JudgeOverrides()
         self.llm_provider = llm_provider
         self.nli_provider = nli_provider
+        self.principles = principles or []
 
     def score(self, *, question: str, answer: str, language: str) -> QAScore:
         return score_qa_pair(
@@ -257,4 +296,26 @@ class Judge:
             overrides=self.overrides,
             llm_provider=self.llm_provider,
             nli_provider=self.nli_provider,
+            principles=self.principles or None,
         )
+
+    def score_pair(
+        self,
+        *,
+        question: str,
+        answer_a: str,
+        answer_b: str,
+        language: str,
+        tie_epsilon: float = 0.05,
+    ) -> PreferenceVerdict:
+        """Compare two candidate answers; return a `PreferenceVerdict`.
+
+        Implementation: score each side with the configured providers,
+        then delegate the comparison to `compare_scores`. This keeps the
+        per-sample logic single-sourced and makes pairwise judging
+        deterministic given identical providers + mode.
+        """
+
+        score_a = self.score(question=question, answer=answer_a, language=language)
+        score_b = self.score(question=question, answer=answer_b, language=language)
+        return compare_scores(score_a, score_b, tie_epsilon=tie_epsilon)

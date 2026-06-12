@@ -6,7 +6,7 @@ interface PhaseRow {
   title: string;
   tier: string;
   status: "shipped" | "planned";
-  release: "22-32" | "33-38" | "39-48" | "49-56" | "57-66" | "65-76";
+  release: "22-32" | "33-38" | "39-48" | "49-56" | "57-66" | "65-76" | "77-79";
 }
 
 const phases: PhaseRow[] = [
@@ -73,6 +73,10 @@ const phases: PhaseRow[] = [
   { number: 71, title: "book-camera", tier: "T2 Multimodal", status: "shipped", release: "65-76" },
   { number: 72, title: "doctrinal-drift", tier: "T3 Predictive ML", status: "shipped", release: "65-76" },
   { number: 76, title: "family-voice-clone", tier: "T4 Voice / accessibility", status: "shipped", release: "65-76" },
+  // 77-79 shipped — doctrinal alignment: YAML principles + RLAIF + DPO/ORPO
+  { number: 77, title: "fidelity-principles", tier: "T1 Alignment", status: "shipped", release: "77-79" },
+  { number: 78, title: "rlaif-pipeline", tier: "T1 Alignment", status: "shipped", release: "77-79" },
+  { number: 79, title: "dpo-orpo-trainers", tier: "T2 Training", status: "shipped", release: "77-79" },
 ];
 
 const shippedCount = phases.filter((p) => p.status === "shipped").length;
@@ -127,12 +131,20 @@ const releases = [
     href: "/en/whats-new-65-76",
     color: "text-[#a4d96c]",
   },
+  {
+    id: "77-79",
+    title: "Release 77-79 · Alignment to the published canon",
+    description:
+      "3 phases applying Constitutional AI, RLAIF, and DPO/ORPO to the local fine-tune's concrete problem: not drifting from the published canon. F77 codifies 5 builtin principles in versioned YAML and exposes them to Judge + fidelity_wrap (lazy import, zero cycle). F78 promotes the Judge to a pairwise annotator and introduces SL-CAI (self-critique). F79 adds DPO and ORPO trainers with Unsloth plus three Qwen3.5-0.8B recipes (Apache-2.0) wired into the CLI with a new prepare-preference command. +41 tests, 1,326 passing.",
+    href: "/en/whats-new-77-79",
+    color: "text-[#e898d5]",
+  },
 ];
 ---
 
 <BaseLayout
-  title="Master roadmap — Phases 22 through 76 + follow-ups"
-  description="Consolidated view of 57 jw-agent-toolkit phases organised by release (22-32 + 33-38 + 39-48 + 49-56 + 57-66 + 65-76) and by technical tier. All shipped: discipleship ecosystem, core at SOTA, runtime trust + community + JS frontier, multilingual SOTA (1672 languages via Omnilingual ASR), 2 new packages (jw-brain, jw-meeting-media) with live-meeting + JW-pure biblical KG, and verifiable agentic + multimodal + predictive + consented family voice."
+  title="Master roadmap — Phases 22 through 79 + follow-ups"
+  description="Consolidated view of 60 jw-agent-toolkit phases organised by release (22-32 + 33-38 + 39-48 + 49-56 + 57-66 + 65-76 + 77-79) and by technical tier. All shipped: discipleship ecosystem, core at SOTA, runtime trust + community + JS frontier, multilingual SOTA (1672 languages via Omnilingual ASR), 2 new packages (jw-brain, jw-meeting-media) with live-meeting + JW-pure biblical KG, verifiable agentic + multimodal + predictive + consented family voice, and doctrinal alignment with Constitutional AI + RLAIF + DPO/ORPO on Qwen3.5-0.8B."
 >
   <section class="grid-noise relative overflow-hidden border-b border-[var(--color-line-subtle)]">
     <div class="mx-auto max-w-7xl px-4 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20">

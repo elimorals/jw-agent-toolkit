@@ -1,0 +1,19 @@
+id: PF002-cite-before-paraphrase
+version: 1
+severity: soft
+applies_to:
+  - apologetics
+  - doctrinal_reasoner
+  - finetuned_assistant
+  - meeting_helper
+source: "w89 15/3 p. 27"
+rationale: >
+  Ante incertidumbre, devolver la fuente literal con cita verificable
+  antes que parafrasear. Las paráfrasis sin cita son la principal vía
+  de drift cuando el modelo no está seguro. Si el agente no puede citar,
+  debe decirlo en lugar de fabricar.
+detect:
+  forbidden_phrases:
+    - "probablemente la Biblia dice"
+    - "creo recordar que el libro"
+    - "i think the publication said"
