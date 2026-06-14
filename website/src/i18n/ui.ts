@@ -25,6 +25,9 @@ export const ui = {
     'stats.tests': 'Tests passing',
     'stats.mcp': 'Herramientas MCP',
     'stats.locales': 'Locales soportados',
+    'meta.title': 'jw-agent-toolkit — Toolkit agéntico para contenido de jw.org',
+    'meta.title.suffix': 'jw-agent-toolkit',
+    'meta.description': 'Toolkit técnico independiente para acceso programático a contenido público de jw.org. Monorepo Python con CLI, MCP, RAG y agentes.',
   },
   en: {
     'nav.home': 'Home',
@@ -45,5 +48,8 @@ export const ui = {
     'stats.tests': 'Tests passing',
     'stats.mcp': 'MCP Tools',
     'stats.locales': 'Supported locales',
+    'meta.title': 'jw-agent-toolkit — Agentic toolkit for jw.org content',
+    'meta.title.suffix': 'jw-agent-toolkit',
+    'meta.description': 'Independent technical toolkit for programmatic access to public jw.org content. Python monorepo with CLI, MCP, RAG, and agents.',
   },
 } as const;

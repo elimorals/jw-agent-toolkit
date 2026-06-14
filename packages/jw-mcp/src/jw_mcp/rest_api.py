@@ -60,6 +60,7 @@ from jw_core.integrations.obsidian_vault import (
 from jw_core.languages import get_language
 from jw_core.parsers.daily_text import parse_daily_text
 from jw_core.parsers.reference import parse_reference
+from jw_core.parsers.study_notes import parse_cross_references
 from jw_core.parsers.verse import get_verse
 
 from jw_mcp.dashboard import router as dashboard_router
@@ -385,10 +386,12 @@ def post_vault_export(req: VaultExportRequest) -> dict[str, Any]:
 
 @app.post("/api/v1/cross_references")
 async def post_cross_references(req: CrossRefRequest) -> dict[str, Any]:
-    """Return up to ``limit`` cross-references for a parsed verse reference.
+    """Return inline cross-reference markers for the parsed verse reference.
 
-    MVP implementation: parse_reference → query the CDN search for the verse
-    string → return matched WOL URLs. Empty list on bad reference or network
+    Fetches the WOL Bible chapter and extracts every `<a class="b">` marker
+    inside `<span class="v">` elements (same flow as the MCP tool
+    ``get_cross_references``). When the reference includes a verse number,
+    results are filtered to that verse. Empty list on bad reference or network
     failure; never raises 5xx for shape errors.
     """
     ref = parse_reference(req.reference)
@@ -398,46 +401,38 @@ async def post_cross_references(req: CrossRefRequest) -> dict[str, Any]:
             "error": f"could not parse reference: {req.reference!r}",
         }
 
-    cdn = _get_cdn()
-    lang = get_language(req.language)
-    query = ref.display()
+    wol = _get_wol()
     try:
-        data = await cdn.search(
-            query,
-            filter_type="bible",
-            language=lang.jw_code,
-            limit=max(1, min(req.limit, 20)),
+        source_url, html = await wol.get_bible_chapter(
+            ref.book_num, ref.chapter, language=req.language
         )
     except Exception as exc:  # noqa: BLE001
-        logger.warning("cross_references search failed: %r", exc)
+        logger.warning("cross_references fetch failed: %r", exc)
         return {"refs": [], "error": str(exc), "reference": ref.display()}
 
-    # CDN returns ``{"results": [...]}``. Each result has title, snippet, links.
+    xrefs = parse_cross_references(
+        html, book_num=ref.book_num, chapter=ref.chapter, language=req.language
+    )
+    if ref.verse_start is not None:
+        xrefs = [x for x in xrefs if x.verse == ref.verse_start]
+
+    cap = max(1, min(req.limit, 50))
     refs: list[dict[str, Any]] = []
-    results = data.get("results", []) if isinstance(data, dict) else []
-    for h in results:
-        if not isinstance(h, dict):
-            continue
-        # Extract URL from links — usually links.canonical or links.publication.
-        url: str | None = None
-        links = h.get("links")
-        if isinstance(links, dict):
-            for k in ("canonical", "publication", "image"):
-                v = links.get(k)
-                if isinstance(v, str) and v.startswith("https://wol.jw.org/"):
-                    url = v
-                    break
-        if not url:
-            continue
+    for x in xrefs[:cap]:
         refs.append(
             {
-                "verse": str(h.get("title") or query),
-                "url": url,
-                "excerpt": str(h.get("snippet") or ""),
+                "verse": f"{ref.display()} ({x.marker})",
+                "url": x.full_url(),
+                "excerpt": "",
             }
         )
 
-    return {"refs": refs, "reference": ref.display(), "language": req.language}
+    return {
+        "refs": refs,
+        "reference": ref.display(),
+        "language": req.language,
+        "source_url": source_url,
+    }
 
 
 def _resolve_safe_vault(vault_path: str, subdir: str) -> tuple[_Path, _Path]:

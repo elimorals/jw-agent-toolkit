@@ -4,6 +4,7 @@ import DisclaimerBar from "../components/DisclaimerBar.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import JsonLd from "../components/seo/JsonLd.astro";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
 
 interface Props {
   title?: string;
@@ -19,9 +20,13 @@ interface Props {
   extraJsonLd?: Array<Record<string, unknown>>;
 }
 
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const isEn = lang === "en";
+
 const {
-  title = "jw-agent-toolkit",
-  description = "Toolkit técnico independiente para acceso programático a contenido público de jw.org. Monorepo Python con CLI, MCP, RAG y agentes.",
+  title,
+  description = t("meta.description"),
   showHeader = true,
   ogImageKey,
   ogType = "website",
@@ -33,10 +38,9 @@ const {
 const SITE_NAME = "jw-agent-toolkit";
 const TWITTER_HANDLE = "@cipreholding";
 
-const fullTitle =
-  title === "jw-agent-toolkit"
-    ? "jw-agent-toolkit — Toolkit agéntico para contenido de jw.org"
-    : `${title} · jw-agent-toolkit`;
+const fullTitle = !title
+  ? t("meta.title")
+  : `${title} · ${t("meta.title.suffix")}`;
 
 function deriveOgKey(pathname: string): string {
   const p = pathname.replace(/\/$/, "") || "/";
@@ -54,10 +58,6 @@ const ogKey = ogImageKey ?? deriveOgKey(Astro.url.pathname);
 const siteUrl = Astro.site ?? new URL("https://jw-agent-toolkit.vercel.app/");
 const ogImageUrl = new URL(`/og/${ogKey}.png`, siteUrl).href;
 const canonical = new URL(Astro.url.pathname, siteUrl).href;
-
-import { getLangFromUrl } from "../i18n/utils";
-const lang = getLangFromUrl(Astro.url);
-const isEn = lang === "en";
 
 // Compute hreflang alternates between the es and en variants of the page.
 const path = Astro.url.pathname.replace(/\/$/, "") || "/";
