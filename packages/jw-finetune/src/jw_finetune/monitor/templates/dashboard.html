@@ -212,7 +212,7 @@
       const kind = String(ev && ev.kind || '?');
       line.className = 'ev ' + kind.replace(/[^a-zA-Z0-9_-]/g, '');
       const t = new Date((ev.ts || Date.now() / 1000) * 1000).toLocaleTimeString();
-      // textContent is XSS-safe; even if a value contains </script> it cannot escape.
+      // textContent is XSS-safe; even if a value contains a closing script tag it cannot escape.
       line.textContent = '[' + t + '] ' + kind + ' ' + JSON.stringify(ev);
       log.appendChild(line);
       while (log.children.length > 200) log.removeChild(log.firstChild);

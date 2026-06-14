@@ -12,11 +12,29 @@ from __future__ import annotations
 
 import json
 import logging
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
 from jw_finetune.monitor.metrics import collect as collect_metrics
 from jw_finetune.monitor.store import EventStore
+
+# Module-level FastAPI imports. They MUST live here (not inside create_app)
+# because the file uses `from __future__ import annotations`: that turns every
+# type hint into a string, and FastAPI resolves `ws: WebSocket` via
+# `get_type_hints()` against the module's globals. With the imports trapped
+# inside the function scope the lookup silently failed and uvicorn rejected
+# every WS handshake with 403.
+try:
+    from fastapi import FastAPI, WebSocket, WebSocketDisconnect  # type: ignore[import-not-found]
+    from fastapi.responses import HTMLResponse, JSONResponse  # type: ignore[import-not-found]
+    from fastapi.staticfiles import StaticFiles  # type: ignore[import-not-found]
+    _FASTAPI_IMPORT_ERROR: ImportError | None = None
+except ImportError as _e:  # pragma: no cover
+    _FASTAPI_IMPORT_ERROR = ImportError(
+        "fastapi required: install with `--extra monitor`"
+    )
+    _FASTAPI_IMPORT_ERROR.__cause__ = _e
 
 logger = logging.getLogger(__name__)
 
@@ -29,16 +47,10 @@ def _static_dir() -> Path:
     return Path(__file__).parent / "static"
 
 
-def create_app(events_path: Path) -> Any:  # FastAPI not type-imported at top
+def create_app(events_path: Path) -> Any:
     """Build a FastAPI app bound to the given events.jsonl path."""
-    try:
-        from contextlib import asynccontextmanager
-
-        from fastapi import FastAPI, WebSocket, WebSocketDisconnect  # type: ignore[import-not-found]
-        from fastapi.responses import HTMLResponse, JSONResponse  # type: ignore[import-not-found]
-        from fastapi.staticfiles import StaticFiles  # type: ignore[import-not-found]
-    except ImportError as e:
-        raise ImportError("fastapi required: install with `--extra monitor`") from e
+    if _FASTAPI_IMPORT_ERROR is not None:
+        raise _FASTAPI_IMPORT_ERROR
 
     store = EventStore(events_path)
 
