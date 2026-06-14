@@ -33,6 +33,9 @@ export default defineConfig({
     "/en/arquitectura": "/en/docs/architecture",
     "/vision": "/docs/vision",
     "/en/vision": "/en/docs/vision",
+    // plugin-sdk has no own index page; overview.md is the canonical landing.
+    "/docs/plugin-sdk": "/docs/plugin-sdk/overview",
+    "/en/docs/plugin-sdk": "/en/docs/plugin-sdk/overview",
   },
   vite: {
     plugins: [tailwindcss()],
